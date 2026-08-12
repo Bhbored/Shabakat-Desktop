@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shabakat.Application.Contracts.Repository;
 using Shabakat.Infrastructure.Persistence;
 using Shabakat.Infrastructure.Persistence.Interceptors;
+using Shabakat.Infrastructure.Repository;
 
 public static class DIContainer
 {
@@ -12,6 +14,8 @@ public static class DIContainer
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite(connectionString)
                 .AddInterceptors(new AuditInterceptor()));
+
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
         return services;
     }

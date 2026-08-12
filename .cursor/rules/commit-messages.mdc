@@ -1,0 +1,40 @@
+---
+description: Commit message pattern — provide in chat only, short conventional commits
+alwaysApply: true
+---
+
+# Commit messages
+
+When the user asks for a commit message (e.g. "provide the commit message", "commit message"):
+
+- **Do not** run `git commit` or stage files unless they explicitly ask to commit
+- **Only** reply with the message in chat (optionally in a fenced code block for easy copy)
+
+## Format
+
+Conventional Commits, **one short line**:
+
+```
+<type>: <concise summary>
+```
+
+Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `ci`
+
+Optional scope: `feat(db): add initial migration`
+
+## Rules
+
+- Imperative mood, lowercase summary after the type (no period at the end)
+- Focus on **why/what changed**, not a file list
+- Keep it short — no paragraphs, no bullet body unless they ask
+- Match the staged/working tree changes when suggesting
+
+## Examples
+
+```
+feat: wire EF SQLite DI and initial migration
+fix: qualify Maui Application base type
+refactor: drop soft delete from Base
+chore: target Windows-only TFM
+ci: add GitHub Actions Windows build
+```
