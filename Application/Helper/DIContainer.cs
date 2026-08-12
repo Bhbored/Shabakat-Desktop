@@ -16,6 +16,18 @@ public static class DIContainer
                 .AddInterceptors(new AuditInterceptor()));
 
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        services.AddScoped<IAreaRepository, AreaRepository>();
+        services.AddScoped<IAmpereScheduleRepository, AmpereScheduleRepository>();
+        services.AddScoped<IDistributionBoxRepository, DistributionBoxRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+        services.AddScoped<IInvoiceSkipRepository, InvoiceSkipRepository>();
+        services.AddScoped<IMeterReadingRepository, MeterReadingRepository>();
+        services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<IExpenseRepository, ExpenseRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<IAppPreferencesRepository, AppPreferencesRepository>();
+        services.AddScoped<IDashboardRepository, DashboardRepository>();
 
         return services;
     }
