@@ -21,7 +21,7 @@
 
             <div class="min-w-0 flex-1">
                 <h1 class="truncate text-base font-semibold text-foreground">@CurrentPageTitle</h1>
-                <p class="hidden text-xs text-muted-foreground sm:block">Welcome back, @_displayName · Shabakat</p>
+                <p class="hidden text-xs text-muted-foreground sm:block">@CurrentPageSubtitle</p>
             </div>
 
             <div class="flex items-center gap-2">
@@ -82,6 +82,7 @@
     }
 
     private string CurrentPageTitle => GetPageTitle();
+    private string CurrentPageSubtitle => GetPageSubtitle();
 
     private string GetPageTitle()
     {
@@ -91,10 +92,18 @@
         if (relative.StartsWith("boxes", StringComparison.OrdinalIgnoreCase)) return "Boxes";
         if (relative.StartsWith("subscribers", StringComparison.OrdinalIgnoreCase)) return "Subscribers";
         if (relative.StartsWith("invoices", StringComparison.OrdinalIgnoreCase)) return "Invoices";
-        if (relative.StartsWith("calculator", StringComparison.OrdinalIgnoreCase)) return "Calculator";
+        if (relative.StartsWith("calculator", StringComparison.OrdinalIgnoreCase)) return "Fixed kW Calculator";
         if (relative.StartsWith("expenses", StringComparison.OrdinalIgnoreCase)) return "Expenses";
         if (relative.StartsWith("settings", StringComparison.OrdinalIgnoreCase)) return "Settings";
         return "Dashboard";
+    }
+
+    private string GetPageSubtitle()
+    {
+        var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Trim('/');
+        if (relative.StartsWith("calculator", StringComparison.OrdinalIgnoreCase))
+            return "Preview a fixed kilowatt price without creating an invoice";
+        return $"Welcome back, {_displayName} · Shabakat";
     }
 
     private void ToggleMobileNav() => _mobileNavOpen = !_mobileNavOpen;

@@ -2,20 +2,36 @@
 
 @if (IsLoading)
 {
-    <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
-        Loading boxes...
-    </section>
-}
-else if (!HasAreas)
-{
-    <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
-        Create an area before adding distribution boxes.
-    </section>
+    <div class="grid gap-4 xl:grid-cols-2">
+        @for (var i = 0; i < 4; i++)
+        {
+            <section class="rounded-2xl border border-border bg-card p-5">
+                <div class="flex items-start gap-4">
+                    <div class="h-10 w-10 animate-pulse rounded-full bg-muted"></div>
+                    <div class="min-w-0 flex-1 space-y-4">
+                        <div>
+                            <div class="h-5 w-40 animate-pulse rounded bg-muted"></div>
+                            <div class="mt-2 h-4 w-28 animate-pulse rounded bg-muted"></div>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="h-7 w-28 animate-pulse rounded-full bg-muted"></div>
+                            <div class="h-7 w-32 animate-pulse rounded-full bg-muted"></div>
+                        </div>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div class="h-16 w-full animate-pulse rounded-xl bg-muted"></div>
+                            <div class="h-16 w-full animate-pulse rounded-xl bg-muted"></div>
+                        </div>
+                    </div>
+                    <div class="h-9 w-9 animate-pulse rounded-lg bg-muted"></div>
+                </div>
+            </section>
+        }
+    </div>
 }
 else if (Boxes.Count == 0)
 {
     <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
-        No boxes found.
+        No distribution boxes matched the current filters.
     </section>
 }
 else
@@ -24,9 +40,10 @@ else
         @foreach (var box in Boxes)
         {
             <BoxCard Box="box"
-                     Saving="Saving"
-                     OnEdit="() => OnEdit.InvokeAsync(box)"
-                     OnDelete="() => OnDelete.InvokeAsync(box)" />
+                     MenuOpen="@(OpenMenuId == box.Id)"
+                     OnToggleMenu="() => OnToggleMenu.InvokeAsync(box.Id)"
+                     OnView="() => OnView.InvokeAsync(box)"
+                     OnEdit="() => OnEdit.InvokeAsync(box)" />
         }
     </div>
 }
@@ -34,8 +51,8 @@ else
 @code {
     [Parameter] public IReadOnlyList<DistributionBoxResponse> Boxes { get; set; } = [];
     [Parameter] public bool IsLoading { get; set; }
-    [Parameter] public bool HasAreas { get; set; }
-    [Parameter] public bool Saving { get; set; }
+    [Parameter] public Guid? OpenMenuId { get; set; }
+    [Parameter] public EventCallback<Guid> OnToggleMenu { get; set; }
+    [Parameter] public EventCallback<DistributionBoxResponse> OnView { get; set; }
     [Parameter] public EventCallback<DistributionBoxResponse> OnEdit { get; set; }
-    [Parameter] public EventCallback<DistributionBoxResponse> OnDelete { get; set; }
 }

@@ -1,63 +1,75 @@
 @namespace Shabakat.Components.Features.Boxes.Components
 
-<section class="rounded-2xl border border-border bg-card/80 p-5 hover:bg-card transition-colors">
+<section class="rounded-2xl border border-border bg-card/80 p-5 transition-colors hover:bg-card">
     <div class="flex items-start gap-4">
-        <div class="flex h-10 w-10 items-center justify-center rounded-full text-white text-sm font-semibold shrink-0"
+        <div class="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white shrink-0"
              style="background-color: @FormatHelper.AvatarColor(Box.Name)">
             @FormatHelper.Initials(Box.Name)
         </div>
-        <div class="min-w-0 flex-1">
+
+        <button type="button" class="min-w-0 flex-1 text-left" @onclick="OnView">
             <p class="truncate text-base font-semibold text-foreground">@Box.Name</p>
             <p class="mt-1 text-sm text-muted-foreground">@Box.AreaName</p>
+
             <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                 <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1">
-                    <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     @Box.CustomerCount subscriber@(Box.CustomerCount != 1 ? "s" : "")
                 </span>
                 <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1">
                     <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    @(string.IsNullOrWhiteSpace(Box.LocationNote) ? "No location" : Box.LocationNote)
+                    @(string.IsNullOrWhiteSpace(Box.LocationNote) ? "Not set" : Box.LocationNote)
                 </span>
             </div>
+
             <div class="mt-4 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
                 <div class="rounded-xl border border-border bg-muted/50 px-3 py-2">
                     <div class="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                        <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
                         Area
                     </div>
                     <p class="truncate text-sm text-foreground">@Box.AreaName</p>
                 </div>
                 <div class="rounded-xl border border-border bg-muted/50 px-3 py-2">
                     <div class="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                        <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
                         Created
                     </div>
                     <p class="text-sm text-foreground">@FormatHelper.Date(Box.CreatedAt)</p>
                 </div>
             </div>
-            @if (!string.IsNullOrWhiteSpace(Box.Notes))
+        </button>
+
+        <div class="relative shrink-0">
+            <button type="button"
+                    class="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    aria-label="Actions"
+                    @onclick="OnToggleMenu"
+                    @onclick:stopPropagation="true">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </button>
+            @if (MenuOpen)
             {
-                <p class="mt-3 line-clamp-2 text-xs text-muted-foreground">@Box.Notes</p>
+                <div class="absolute end-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg"
+                     @onclick:stopPropagation="true">
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted" @onclick="OnView">
+                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View details
+                    </button>
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted" @onclick="OnEdit">
+                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                        Edit
+                    </button>
+                </div>
             }
-        </div>
-        <div class="flex shrink-0 flex-col gap-1">
-            <button type="button"
-                    class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                    @onclick="OnEdit">
-                Edit
-            </button>
-            <button type="button"
-                    class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-500 hover:bg-red-500/10 disabled:opacity-40"
-                    disabled="@(Box.CustomerCount > 0 || Saving)"
-                    title="@(Box.CustomerCount > 0 ? "Cannot delete a box with subscribers" : "Delete box")"
-                    @onclick="OnDelete">
-                Delete
-            </button>
         </div>
     </div>
 </section>
 
 @code {
     [Parameter, EditorRequired] public DistributionBoxResponse Box { get; set; } = null!;
-    [Parameter] public bool Saving { get; set; }
+    [Parameter] public bool MenuOpen { get; set; }
+    [Parameter] public EventCallback OnToggleMenu { get; set; }
+    [Parameter] public EventCallback OnView { get; set; }
     [Parameter] public EventCallback OnEdit { get; set; }
-    [Parameter] public EventCallback OnDelete { get; set; }
 }

@@ -1,0 +1,53 @@
+@namespace Shabakat.Components.Features.Calculator.Components
+
+<section class="rounded-2xl border border-border bg-card p-5 sm:p-8">
+    <div class="mb-6 flex items-center gap-2 text-primary">
+        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        <h2 class="text-sm font-semibold uppercase tracking-[0.16em]">Result</h2>
+    </div>
+    <dl class="divide-y divide-border">
+        <div class="flex items-center justify-between gap-4 py-4 first:pt-0">
+            <dt class="text-muted-foreground">Payment amount</dt>
+            <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.PaymentAmount)</dd>
+        </div>
+        <div class="flex items-center justify-between gap-4 py-4">
+            <dt class="text-muted-foreground">Kilowatt amount (kWh)</dt>
+            <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.KilowattAmount) kWh</dd>
+        </div>
+        <div class="flex items-center justify-between gap-4 py-4">
+            <dt class="text-muted-foreground">Unit price</dt>
+            <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.UnitPrice)</dd>
+        </div>
+        <div class="flex items-center justify-between gap-4 py-4">
+            <dt class="text-muted-foreground">Fixed charge</dt>
+            <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.FixedCharge)</dd>
+        </div>
+        <div class="flex items-center justify-between gap-4 py-4">
+            <dt class="text-muted-foreground">TVA</dt>
+            <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.TVA)%</dd>
+        </div>
+        <div class="flex items-center justify-between gap-4 py-4">
+            <dt class="text-muted-foreground">Plan value</dt>
+            <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.PlanValue)</dd>
+        </div>
+        <div class="flex items-center justify-between gap-4 py-4 last:pb-0">
+            <dt class="text-muted-foreground">Customer type</dt>
+            <dd class="text-right font-semibold tabular-nums text-foreground">@CustomerTypeLabel(Result.CustomerType)</dd>
+        </div>
+    </dl>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public FixedKilowattCalculateResponse Result { get; set; } = null!;
+
+    private static string CustomerTypeLabel(string value) => value.ToLowerInvariant() switch
+    {
+        "residential" => "Residential",
+        "commercial" => "Commercial",
+        "industrial" => "Industrial",
+        _ => value
+    };
+}

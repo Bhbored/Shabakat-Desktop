@@ -2,131 +2,155 @@
 @inject IInvoiceService InvoiceService
 @inject IToastService Toast
 
-<div class="space-y-5">
-    <div>
-        <h1 class="text-xl font-bold text-foreground">Fixed Kilowatt Calculator</h1>
-        <p class="text-xs text-muted-foreground">Estimate payment or kilowatt credits for prepaid plans</p>
-    </div>
+<div class="mx-auto max-w-2xl space-y-5 pb-6">
+    <section class="rounded-2xl border border-border bg-card p-5 sm:p-8">
+        <form class="space-y-7" @onsubmit="CalculateAsync" @onsubmit:preventDefault>
+            <div>
+                <label class="mb-2 block text-base font-semibold text-foreground" for="calculator-customer-type">Customer type</label>
+                <select id="calculator-customer-type"
+                        class="h-14 w-full rounded-2xl border border-border bg-card px-4 text-lg text-foreground outline-none focus:border-primary"
+                        @bind="_customerType">
+                    <option value="@CustomerType.Residential">Residential</option>
+                    <option value="@CustomerType.Commercial">Commercial</option>
+                    <option value="@CustomerType.Industrial">Industrial</option>
+                </select>
+            </div>
 
-    <section class="rounded-2xl border border-border bg-card p-5 space-y-4 max-w-xl">
-        <div>
-            <label class="text-xs font-medium text-muted-foreground">Customer Type</label>
-            <select class="mt-1 w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm text-foreground"
-                    @bind="_customerType">
-                @foreach (var type in Enum.GetValues<CustomerType>())
+            <div>
+                <label class="mb-2 block text-base font-semibold text-foreground" for="calculator-plan-value">Plan value</label>
+                <div class="relative">
+                    <svg class="pointer-events-none absolute start-4 top-1/2 h-6 w-6 -translate-y-1/2 text-foreground"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" />
+                    </svg>
+                    <input id="calculator-plan-value"
+                           type="number"
+                           inputmode="decimal"
+                           min="0"
+                           step="any"
+                           placeholder="Optional"
+                           class="h-14 w-full rounded-2xl border border-border bg-secondary pe-4 ps-14 text-lg text-foreground outline-none focus:border-primary"
+                           @bind="_planValueText"
+                           @bind:event="oninput" />
+                </div>
+            </div>
+
+            <fieldset>
+                <legend class="mb-3 text-base font-semibold text-foreground">Calculate from</legend>
+                <div class="grid grid-cols-2 gap-2 rounded-2xl bg-secondary p-1">
+                    <button type="button"
+                            class="@ModeButtonClass(_mode == CalculatorMode.Payment)"
+                            @onclick="() => _mode = CalculatorMode.Payment">
+                        Payment
+                    </button>
+                    <button type="button"
+                            class="@ModeButtonClass(_mode == CalculatorMode.Kilowatt)"
+                            @onclick="() => _mode = CalculatorMode.Kilowatt">
+                        kWh
+                    </button>
+                </div>
+            </fieldset>
+
+            <div>
+                <label class="mb-2 block text-base font-semibold text-foreground" for="calculator-amount">
+                    @(_mode == CalculatorMode.Payment ? "Payment amount" : "Kilowatt amount (kWh)")
+                </label>
+                <div class="relative">
+                    <svg class="pointer-events-none absolute start-4 top-1/2 h-6 w-6 -translate-y-1/2 text-foreground"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                    <input id="calculator-amount"
+                           type="number"
+                           inputmode="decimal"
+                           min="0.0001"
+                           step="any"
+                           class="h-14 w-full rounded-2xl border border-border bg-secondary pe-4 ps-14 text-lg text-foreground outline-none focus:border-primary"
+                           @bind="_amountText"
+                           @bind:event="oninput" />
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <p class="text-sm text-red-500" role="alert">@_error</p>
+            }
+
+            <button type="submit"
+                    class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-medium text-primary-foreground disabled:opacity-50"
+                    style="box-shadow: 0 0 16px rgba(230,196,58,0.25);"
+                    disabled="@_calculating">
+                @if (_calculating)
                 {
-                    <option value="@type">@type</option>
+                    <svg class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
                 }
-            </select>
-        </div>
-        <div>
-            <label class="text-xs font-medium text-muted-foreground">Plan Value (optional)</label>
-            <input type="number" step="0.01" min="0"
-                   class="mt-1 w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm text-foreground"
-                   @bind="_planValue" />
-        </div>
-        <div>
-            <label class="text-xs font-medium text-muted-foreground">Input Mode</label>
-            <div class="mt-2 flex gap-2">
-                <button type="button"
-                        class="@ModeButtonClass(_inputMode == "payment")"
-                        @onclick='() => _inputMode = "payment"'>
-                    Payment Amount
-                </button>
-                <button type="button"
-                        class="@ModeButtonClass(_inputMode == "kilowatt")"
-                        @onclick='() => _inputMode = "kilowatt"'>
-                    Kilowatt Amount
-                </button>
-            </div>
-        </div>
-        @if (_inputMode == "payment")
-        {
-            <div>
-                <label class="text-xs font-medium text-muted-foreground">Payment Amount</label>
-                <input type="number" step="0.01" min="0.0001"
-                       class="mt-1 w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm text-foreground"
-                       @bind="_paymentAmount" />
-            </div>
-        }
-        else
-        {
-            <div>
-                <label class="text-xs font-medium text-muted-foreground">Kilowatt Amount</label>
-                <input type="number" step="0.01" min="0.0001"
-                       class="mt-1 w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm text-foreground"
-                       @bind="_kilowattAmount" />
-            </div>
-        }
-        <button type="button"
-                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
-                style="box-shadow: 0 0 16px rgba(230,196,58,0.25);"
-                disabled="@_calculating"
-                @onclick="CalculateAsync">
-            @(_calculating ? "Calculating..." : "Calculate")
-        </button>
+                Calculate
+            </button>
+        </form>
     </section>
 
     @if (_result is not null)
     {
-        <section class="rounded-2xl border border-border bg-card p-5 max-w-xl">
-            <h2 class="text-sm font-semibold text-foreground">Results</h2>
-            <p class="mt-1 text-xs text-muted-foreground">@_result.CustomerType · Plan @FormatHelper.Number(_result.PlanValue)</p>
-            <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                <div class="rounded-xl border border-border bg-muted/50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Payment</p>
-                    <p class="mt-1 font-mono text-lg font-semibold text-foreground">@FormatHelper.Currency(_result.PaymentAmount)</p>
-                </div>
-                <div class="rounded-xl border border-border bg-muted/50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Kilowatts</p>
-                    <p class="mt-1 font-mono text-lg font-semibold text-foreground">@FormatHelper.Number(_result.KilowattAmount)</p>
-                </div>
-                <div class="rounded-xl border border-border bg-muted/50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Unit Price</p>
-                    <p class="mt-1 font-mono text-lg font-semibold text-foreground">@FormatHelper.Currency(_result.UnitPrice)</p>
-                </div>
-                <div class="rounded-xl border border-border bg-muted/50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Fixed Charge</p>
-                    <p class="mt-1 font-mono text-lg font-semibold text-foreground">@FormatHelper.Currency(_result.FixedCharge)</p>
-                </div>
-                <div class="rounded-xl border border-border bg-muted/50 px-4 py-3 sm:col-span-2">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">TVA</p>
-                    <p class="mt-1 font-mono text-lg font-semibold text-foreground">@FormatHelper.Number(_result.TVA)%</p>
-                </div>
-            </div>
-        </section>
+        <CalculatorResult Result="_result" />
     }
 </div>
 
 @code {
     private CustomerType _customerType = CustomerType.Residential;
-    private decimal? _planValue;
-    private string _inputMode = "payment";
-    private decimal? _paymentAmount;
-    private decimal? _kilowattAmount;
+    private string _planValueText = "";
+    private string _amountText = "100";
+    private CalculatorMode _mode = CalculatorMode.Kilowatt;
     private bool _calculating;
+    private string _error = "";
     private FixedKilowattCalculateResponse? _result;
 
     private static string ModeButtonClass(bool active) =>
         active
-            ? "flex-1 rounded-xl border-2 border-primary bg-primary/10 px-3 py-2.5 text-sm font-medium text-primary"
-            : "flex-1 rounded-xl border border-border bg-card px-3 py-2.5 text-sm font-medium text-muted-foreground";
+            ? "h-11 rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition-colors"
+            : "h-11 rounded-xl text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground";
 
     private async Task CalculateAsync()
     {
+        if (!decimal.TryParse(_amountText, out var amount) || amount <= 0)
+        {
+            _error = "Enter an amount greater than zero.";
+            _result = null;
+            return;
+        }
+
+        decimal? planValue = null;
+        if (!string.IsNullOrWhiteSpace(_planValueText)
+            && decimal.TryParse(_planValueText, out var parsedPlan)
+            && parsedPlan >= 0)
+        {
+            planValue = parsedPlan;
+        }
+
+        _error = "";
         _calculating = true;
         _result = null;
 
         var request = new FixedKilowattCalculateRequest(
             CustomerType: _customerType,
-            PlanValue: _planValue is > 0 ? _planValue : null,
-            PaymentAmount: _inputMode == "payment" ? _paymentAmount : null,
-            KilowattAmount: _inputMode == "kilowatt" ? _kilowattAmount : null);
+            PlanValue: planValue is > 0 ? planValue : null,
+            PaymentAmount: _mode == CalculatorMode.Payment ? amount : null,
+            KilowattAmount: _mode == CalculatorMode.Kilowatt ? amount : null);
 
         _result = await UiActions.RunAsync(
             Toast,
             () => InvoiceService.CalculateFixedKilowattAsync(request));
 
+        if (_result is null)
+            _error = "Could not calculate the price.";
+
         _calculating = false;
+    }
+
+    private enum CalculatorMode
+    {
+        Payment,
+        Kilowatt
     }
 }
