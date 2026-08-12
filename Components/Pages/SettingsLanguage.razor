@@ -1,21 +1,69 @@
 @page "/settings/language"
+@inject IAppPreferencesService PreferencesService
+@inject IToastService Toast
+@inject NavigationManager Navigation
 
-<div class="space-y-5">
-    <NavLink href="settings" class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-2">
-        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        Back to Settings
-    </NavLink>
-    <h1 class="text-xl font-bold text-foreground">Language</h1>
-    <p class="text-xs text-muted-foreground">Choose your preferred language</p>
+<SettingsScaffold Title="Language">
+    <div class="space-y-3">
+        @if (_loading)
+        {
+            <p class="text-sm text-muted-foreground">Loading company preferences...</p>
+        }
+        else
+        {
+            <button type="button" class="@LangClass("en")" @onclick='() => _language = "en"'>
+                <span class="text-sm font-medium">English</span>
+                @if (string.Equals(_language, "en", StringComparison.OrdinalIgnoreCase))
+                {
+                    <span class="text-xs font-semibold text-primary">Selected</span>
+                }
+            </button>
+            <button type="button" class="@LangClass("ar")" @onclick='() => _language = "ar"'>
+                <span class="text-sm font-medium">Arabic</span>
+                @if (string.Equals(_language, "ar", StringComparison.OrdinalIgnoreCase))
+                {
+                    <span class="text-xs font-semibold text-primary">Selected</span>
+                }
+            </button>
+            <button type="button"
+                    class="mt-6 w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+                    disabled="@_saving"
+                    @onclick="SaveAsync">
+                @(_saving ? "Saving..." : "Save")
+            </button>
+        }
+    </div>
+</SettingsScaffold>
 
-    <section class="rounded-2xl border border-border bg-card p-5">
-        <div class="flex items-center gap-3">
-            <button class="rounded-xl border-2 border-primary bg-primary/10 px-5 py-3 text-sm font-medium text-primary flex-1">
-                English
-            </button>
-            <button class="rounded-xl border border-border bg-card px-5 py-3 text-sm font-medium text-muted-foreground flex-1">
-                العربية
-            </button>
-        </div>
-    </section>
-</div>
+@code {
+    private bool _loading = true;
+    private bool _saving;
+    private GetPreferencesResponse? _existing;
+    private string _language = "en";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _existing = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
+        _language = PreferencesMapper.FromExistingOrDefaults(_existing).Language;
+        _loading = false;
+    }
+
+    private string LangClass(string code) =>
+        string.Equals(_language, code, StringComparison.OrdinalIgnoreCase)
+            ? "flex w-full items-center justify-between rounded-2xl border border-primary bg-primary/10 px-4 py-3 text-left text-foreground"
+            : "flex w-full items-center justify-between rounded-2xl border border-border bg-background px-4 py-3 text-left text-foreground";
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        var request = PreferencesMapper.FromExistingOrDefaults(_existing) with { Language = _language };
+        var ok = false;
+        await UiActions.RunAsync(Toast, async () =>
+        {
+            await PreferencesService.UpsertAsync(request);
+            ok = true;
+        }, "Language saved.");
+        _saving = false;
+        if (ok) Navigation.NavigateTo("settings");
+    }
+}

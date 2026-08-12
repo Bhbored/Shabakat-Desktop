@@ -1,142 +1,919 @@
 @page "/subscribers"
-@using Shabakat.Components.Shared
-@using System.Linq
+@inject ICustomerService CustomerService
+@inject IMeterReadingService MeterReadingService
+@inject IAreaService AreaService
+@inject IDistributionBoxService BoxService
+@inject IAmpereScheduleService AmpereScheduleService
+@inject IToastService Toast
 
 <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-3 xl:flex-nowrap">
         <div class="flex min-w-72 flex-1 gap-2">
-            <select class="w-36 shrink-0 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground" @bind="searchField">
+            <select class="w-36 shrink-0 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                    @bind="_searchField" @bind:after="ReloadFromFiltersAsync">
                 <option value="name">Name</option>
                 <option value="phone">Phone</option>
             </select>
-            <input type="text" class="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none focus:border-primary" placeholder="@(searchField == "name" ? "Search by name..." : "Search by phone...")" @bind="searchTerm" @bind:event="oninput" />
+            <input type="text"
+                   class="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                   placeholder="@(_searchField == "phone" ? "Search by phone..." : "Search by name...")"
+                   @bind="_searchTerm" @bind:event="oninput" @bind:after="ReloadFromFiltersAsync" />
         </div>
-        <select class="min-w-56 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground" @bind="areaFilter">
+        <select class="min-w-56 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                @bind="_areaFilter" @bind:after="ReloadFromFiltersAsync">
             <option value="">All Areas</option>
-            @foreach (var area in areas)
+            @foreach (var area in _areas)
             {
-                <option value="@area">@area</option>
+                <option value="@area.Id">@area.Name</option>
             }
         </select>
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground" @bind="planFilter">
-            <option value="">All Plans</option>
-            <option value="Ampere">Ampere</option>
-            <option value="Kilowatt">Kilowatt</option>
-            <option value="FixedKilowatt">Fixed Kilowatt</option>
-        </select>
-        <button class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" style="box-shadow: 0 0 16px rgba(230,196,58,0.25);">+ Add Subscriber</button>
+        <button type="button"
+                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                style="box-shadow: 0 0 16px rgba(230,196,58,0.25);"
+                @onclick="OpenCreate">+ Add Subscriber</button>
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground" @bind="statusFilter">
-            <option value="">All Statuses</option>
-            <option value="paid">Paid</option>
-            <option value="unpaid">Unpaid</option>
-            <option value="overdue">Overdue</option>
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                @bind="_planFilter" @bind:after="ReloadFromFiltersAsync">
+            <option value="">All Plans</option>
+            <option value="@PlanType.Ampere">Ampere</option>
+            <option value="@PlanType.Kilowatt">Kilowatt</option>
+            <option value="@PlanType.FixedKilowatt">Fixed Kilowatt</option>
         </select>
-        <span class="text-xs text-muted-foreground">@filteredData.Count() subscriber@(filteredData.Count() != 1 ? "s" : "") found</span>
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                @bind="_relationFilter" @bind:after="ReloadFromFiltersAsync">
+            <option value="">All Relations</option>
+            <option value="@CustomerRelation.Friend">Friend</option>
+            <option value="@CustomerRelation.Family">Family</option>
+            <option value="@CustomerRelation.Owner">Owner</option>
+        </select>
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                @bind="_statusFilter" @bind:after="ReloadFromFiltersAsync">
+            <option value="">All Statuses</option>
+            <option value="@CustomerStatus.Active">Active</option>
+            <option value="@CustomerStatus.Suspended">Suspended</option>
+            <option value="@CustomerStatus.Terminated">Terminated</option>
+        </select>
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                @bind="_paymentFilter" @bind:after="ReloadFromFiltersAsync">
+            <option value="">All Payments</option>
+            <option value="Paid">Paid</option>
+            <option value="Unpaid">Unpaid</option>
+        </select>
+        <span class="text-xs text-muted-foreground">@_totalCount subscriber@(_totalCount != 1 ? "s" : "") found</span>
     </div>
 
-    <section class="rounded-2xl border border-border bg-card overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[860px]">
-                <thead>
-                    <tr class="border-b border-border">
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Name</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Phone</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Area</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Plan</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Since</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Status</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount Due</th>
-                        <th class="px-4 py-3.5"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var sub in pagedData)
-                    {
-                        <tr class="border-b border-border hover:bg-muted/30">
-                            <td class="px-4 py-3.5">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-white text-xs font-semibold shrink-0" style="background-color: @GetAvatarColor(sub.Name)">@GetInitials(sub.Name)</div>
-                                    <span class="whitespace-nowrap text-sm font-medium text-foreground">@sub.Name</span>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3.5 font-mono text-sm text-muted-foreground">@(sub.Phone ?? "—")</td>
-                            <td class="px-4 py-3.5 text-sm text-foreground">@(sub.Area ?? "Unassigned")</td>
-                            <td class="px-4 py-3.5">
-                                <span class="font-mono text-sm font-bold text-primary">
-                                    @(sub.Plan == "Ampere" ? $"{sub.PlanValue}A" : sub.Plan == "FixedKilowatt" ? $"{sub.PlanValue}kW prepaid" : $"{sub.PlanValue}kW")
-                                </span>
-                            </td>
-                            <td class="px-4 py-3.5 whitespace-nowrap text-sm text-muted-foreground">@MockData.FormatDate(sub.SubscriptionDate)</td>
-                            <td class="px-4 py-3.5"><StatusBadge Status="@sub.Status" /></td>
-                            <td class="px-4 py-3.5 font-mono text-sm font-semibold text-foreground">@MockData.FormatCurrency(sub.AmountDue)</td>
-                            <td class="px-4 py-3.5">
-                                <button class="rounded-lg p-1 text-muted-foreground hover:text-foreground">
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                                </button>
-                            </td>
+    @if (_loading)
+    {
+        <p class="text-sm text-muted-foreground">Loading subscribers...</p>
+    }
+    else
+    {
+        <section class="rounded-2xl border border-border bg-card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[860px]">
+                    <thead>
+                        <tr class="border-b border-border">
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Name</th>
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Phone</th>
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Area</th>
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Plan</th>
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Since</th>
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Status</th>
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount Due</th>
+                            <th class="px-4 py-3.5"></th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-            <span>Showing @(currentPage * pageSize + 1)–@Math.Min((currentPage + 1) * pageSize, filteredData.Count()) of @filteredData.Count() subscribers</span>
-            <div class="flex items-center gap-2 self-end md:self-auto">
-                <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm" @bind="pageSize" @bind:after="GoToFirstPage">
-                    <option value="10">10 / page</option>
-                    <option value="20">20 / page</option>
-                    <option value="50">50 / page</option>
-                </select>
-                <button class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(currentPage == 0)" @onclick="PrevPage">Previous</button>
-                <span class="min-w-24 text-center">Page @(currentPage + 1) of @totalPages</span>
-                <button class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(currentPage >= totalPages - 1)" @onclick="NextPage">Next</button>
+                    </thead>
+                    <tbody>
+                        @if (_items.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="8" class="px-4 py-8 text-center text-sm text-muted-foreground">No subscribers found.</td>
+                            </tr>
+                        }
+                        @foreach (var sub in _items)
+                        {
+                            <tr class="border-b border-border hover:bg-muted/30">
+                                <td class="px-4 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-8 w-8 items-center justify-center rounded-full text-white text-xs font-semibold shrink-0"
+                                             style="background-color: @FormatHelper.AvatarColor(sub.Name)">@FormatHelper.Initials(sub.Name)</div>
+                                        <span class="whitespace-nowrap text-sm font-medium text-foreground">@sub.Name</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3.5 font-mono text-sm text-muted-foreground">@(sub.Phone ?? "—")</td>
+                                <td class="px-4 py-3.5 text-sm text-foreground">@(sub.AreaName ?? "Unassigned")</td>
+                                <td class="px-4 py-3.5">
+                                    <span class="font-mono text-sm font-bold text-primary">@FormatPlan(sub.Plan, sub.PlanValue)</span>
+                                </td>
+                                <td class="px-4 py-3.5 whitespace-nowrap text-sm text-muted-foreground">@FormatHelper.Date(sub.SubscriptionDate)</td>
+                                <td class="px-4 py-3.5">@CustomerStatusBadge(sub.CustomerStatus)</td>
+                                <td class="px-4 py-3.5 font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(sub.AmountDue)</td>
+                                <td class="px-4 py-3.5">
+                                    <div class="relative flex justify-end">
+                                        <button type="button"
+                                                class="rounded-lg p-1 text-muted-foreground hover:text-foreground"
+                                                @onclick="() => ToggleMenu(sub.Id)">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                                        </button>
+                                        @if (_openMenuId == sub.Id)
+                                        {
+                                            <div class="absolute right-0 top-8 z-20 min-w-44 rounded-xl border border-border bg-card p-1 shadow-lg">
+                                                <button type="button" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-muted" @onclick="() => OpenDetails(sub)">View details</button>
+                                                <button type="button" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-muted" @onclick="() => OpenEdit(sub)">Edit</button>
+                                                @if (sub.CustomerStatus.Equals(nameof(CustomerStatus.Active), StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    <button type="button" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-muted" @onclick="() => OpenSuspend(sub)">Suspend</button>
+                                                }
+                                                <button type="button" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-500 hover:bg-muted" @onclick="() => OpenDelete(sub)">Delete</button>
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-        </div>
-    </section>
+
+            <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+                <span>
+                    @if (_totalCount == 0)
+                    {
+                        <text>0 subscribers</text>
+                    }
+                    else
+                    {
+                        <text>Showing @((_pageNumber - 1) * _pageSize + 1)–@Math.Min(_pageNumber * _pageSize, _totalCount) of @_totalCount subscribers</text>
+                    }
+                </span>
+                <div class="flex items-center gap-2 self-end md:self-auto">
+                    <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm" @bind="_pageSize" @bind:after="ReloadFromFiltersAsync">
+                        <option value="10">10 / page</option>
+                        <option value="20">20 / page</option>
+                        <option value="50">50 / page</option>
+                    </select>
+                    <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!_hasPrevious)" @onclick="PrevPageAsync">Previous</button>
+                    <span class="min-w-24 text-center">Page @_pageNumber of @Math.Max(1, _totalPages)</span>
+                    <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!_hasNext)" @onclick="NextPageAsync">Next</button>
+                </div>
+            </div>
+        </section>
+    }
 </div>
 
-@code {
-    private string searchTerm = "";
-    private string searchField = "name";
-    private string areaFilter = "";
-    private string planFilter = "";
-    private string statusFilter = "";
-    private int currentPage = 0;
-    private int pageSize = 10;
+<SideSheet Open="_showForm"
+           Title="@(_editingId.HasValue ? "Edit Subscriber" : "Add Subscriber")"
+           Description="Customer details, plan, and location"
+           MaxWidthClass="sm:max-w-xl"
+           OnClose="CloseForm">
+    <ChildContent>
+        <div class="space-y-4">
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="md:col-span-2">
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Name</label>
+                    <input class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.Name" />
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Phone</label>
+                    <input class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.Phone" />
+                </div>
+                @if (!_editingId.HasValue)
+                {
+                    <div>
+                        <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Subscription Date</label>
+                        <input type="date" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.SubscriptionDate" @bind:format="yyyy-MM-dd" />
+                    </div>
+                }
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Customer Type</label>
+                    <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.CustomerType">
+                        @foreach (var t in Enum.GetValues<CustomerType>())
+                        {
+                            <option value="@t">@t</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Plan</label>
+                    <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.Plan" @bind:after="OnPlanChanged">
+                        @foreach (var p in Enum.GetValues<PlanType>())
+                        {
+                            <option value="@p">@FormatPlanLabel(p)</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Plan Value</label>
+                    <input type="number" step="0.01" min="0.01" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.PlanValue" />
+                </div>
+                @if (_form.Plan == PlanType.Ampere)
+                {
+                    <div>
+                        <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Ampere Schedule</label>
+                        <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.AmpereScheduleId">
+                            <option value="">Select schedule</option>
+                            @foreach (var s in _schedules)
+                            {
+                                <option value="@s.Id">@s.Name (@s.HoursPerDay h/day)</option>
+                            }
+                        </select>
+                    </div>
+                }
+                @if (_form.Plan is PlanType.Kilowatt or PlanType.FixedKilowatt)
+                {
+                    <div>
+                        <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Initial Meter Reading</label>
+                        <input type="number" step="0.01" min="0" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.InitialMeterReading" />
+                    </div>
+                }
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Area</label>
+                    <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.AreaId" @bind:after="OnAreaChanged">
+                        <option value="">Unassigned</option>
+                        @foreach (var area in _areas)
+                        {
+                            <option value="@area.Id">@area.Name</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Distribution Box</label>
+                    <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.BoxId">
+                        <option value="">None</option>
+                        @foreach (var box in FilteredBoxes)
+                        {
+                            <option value="@box.Id">@box.Name</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Building</label>
+                    <input class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.Building" />
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Floor</label>
+                    <input class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.Floor" />
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Relation</label>
+                    <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.CustomerRelation">
+                        <option value="">None</option>
+                        @foreach (var r in Enum.GetValues<CustomerRelation>())
+                        {
+                            <option value="@r">@r</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Cable Name</label>
+                    <input class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.CableName" />
+                </div>
+                @if (_editingId.HasValue)
+                {
+                    <div>
+                        <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Status</label>
+                        <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_form.CustomerStatus">
+                            @foreach (var s in Enum.GetValues<CustomerStatus>())
+                            {
+                                <option value="@s">@s</option>
+                            }
+                        </select>
+                    </div>
+                }
+                <div class="md:col-span-2">
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Address</label>
+                    <textarea class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" rows="2" @bind="_form.Address"></textarea>
+                </div>
+                <div class="md:col-span-2 rounded-2xl border border-border bg-muted/40 p-4">
+                    <label class="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <input type="checkbox" class="rounded border-border" @bind="_form.UsePricingOverride" />
+                        Pricing override
+                    </label>
+                    @if (_form.UsePricingOverride)
+                    {
+                        <div class="mt-3 grid gap-3 md:grid-cols-3">
+                            <div>
+                                <label class="mb-1 block text-xs text-muted-foreground">Price</label>
+                                <input type="number" step="0.01" class="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm" @bind="_form.OverridePrice" />
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-xs text-muted-foreground">Fixed Charge</label>
+                                <input type="number" step="0.01" class="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm" @bind="_form.OverrideFixedCharge" />
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-xs text-muted-foreground">TVA %</label>
+                                <input type="number" step="0.01" class="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm" @bind="_form.OverrideTva" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 border-t border-border pt-5">
+                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="CloseForm">Cancel</button>
+                <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled="@_saving" @onclick="SaveFormAsync">
+                    @(_saving ? "Saving..." : _editingId.HasValue ? "Save Changes" : "Create Subscriber")
+                </button>
+            </div>
+        </div>
+    </ChildContent>
+</SideSheet>
 
-    private string[] areas = MockData.Subscribers.Select(s => s.Area ?? "").Where(a => !string.IsNullOrEmpty(a)).Distinct().OrderBy(a => a).ToArray();
-
-    private IEnumerable<SubscriberData> filteredData
+<SideSheet Open="_showDetails"
+           Title="@(_details?.Name ?? "Subscriber details")"
+           Description="Subscriber details and billing summary"
+           MaxWidthClass="sm:max-w-xl"
+           OnClose="CloseDetails">
+    @if (_details is not null)
     {
-        get
-        {
-            var query = MockData.Subscribers.AsEnumerable();
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+        <div class="space-y-4">
+            <div class="grid gap-3 md:grid-cols-3">
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Total Billed</p>
+                    <p class="mt-1 font-mono text-sm font-semibold">@FormatHelper.Currency(_details.TotalBilled)</p>
+                </div>
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Total Paid</p>
+                    <p class="mt-1 font-mono text-sm font-semibold text-emerald-600">@FormatHelper.Currency(_details.TotalPaid)</p>
+                </div>
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Outstanding</p>
+                    <p class="mt-1 font-mono text-sm font-semibold text-red-500">@FormatHelper.Currency(_details.TotalOutstanding)</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 rounded-2xl border border-border bg-card p-5 text-sm">
+                @DetailRow("Type", _details.CustomerType)
+                @DetailRow("Plan", FormatPlan(_details.Plan, _details.PlanValue))
+                @DetailRow("Phone", _details.Phone ?? "—")
+                @DetailRow("Area", _details.AreaName ?? "Unassigned")
+                @DetailRow("Box", _details.BoxName ?? "—")
+                @DetailRow("Building", _details.Building ?? "—")
+                @DetailRow("Floor", _details.Floor ?? "—")
+                @DetailRow("Cable", _details.CableName ?? "—")
+                @DetailRow("Relation", _details.CustomerRelation ?? "—")
+                @DetailRow("Status", _details.CustomerStatus)
+                @DetailRow("Since", FormatHelper.Date(_details.SubscriptionDate))
+                @DetailRow("Address", _details.Address ?? "—")
+            </div>
+
+            @if (_details.Plan.Equals(nameof(PlanType.Kilowatt), StringComparison.OrdinalIgnoreCase))
             {
-                var term = searchTerm.Trim().ToLower();
-                query = searchField == "name"
-                    ? query.Where(s => s.Name.ToLower().Contains(term))
-                    : query.Where(s => (s.Phone ?? "").ToLower().Contains(term));
+                <div class="rounded-2xl border border-border bg-card p-5">
+                    <div class="mb-3 flex items-center justify-between gap-2">
+                        <h3 class="text-sm font-semibold text-foreground">Meter Readings</h3>
+                        <button type="button" class="rounded-xl bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground" @onclick="OpenMeterReading">+ Add Reading</button>
+                    </div>
+                    @if (_meterReadings.Count == 0)
+                    {
+                        <p class="text-sm text-muted-foreground">No meter readings yet.</p>
+                    }
+                    else
+                    {
+                        <div class="space-y-2">
+                            @foreach (var reading in _meterReadings)
+                            {
+                                <div class="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2">
+                                    <div>
+                                        <p class="font-mono text-sm font-semibold text-foreground">@FormatHelper.Number(reading.ReadingValue)</p>
+                                        <p class="text-xs text-muted-foreground">
+                                            @FormatHelper.Date(reading.CreatedAt)
+                                            @if (reading.Consumption.HasValue)
+                                            {
+                                                <text> · +@FormatHelper.Number(reading.Consumption.Value)</text>
+                                            }
+                                        </p>
+                                    </div>
+                                    <button type="button" class="rounded-lg px-2 py-1 text-xs text-red-500 hover:bg-muted" @onclick="() => DeleteMeterReadingAsync(reading.Id)">Delete</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             }
-            if (!string.IsNullOrEmpty(areaFilter)) query = query.Where(s => s.Area == areaFilter);
-            if (!string.IsNullOrEmpty(planFilter)) query = query.Where(s => s.Plan == planFilter);
-            if (!string.IsNullOrEmpty(statusFilter)) query = query.Where(s => s.Status == statusFilter);
-            return query;
+
+            <div class="flex justify-end gap-2 border-t border-border pt-5">
+                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="CloseDetails">Close</button>
+                <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" @onclick="() => OpenEditFromDetails()">Edit</button>
+            </div>
+        </div>
+    }
+</SideSheet>
+
+<SideSheet Open="_showMeterDialog"
+           Title="Add Meter Reading"
+           Description="@(_details is null ? "Meter reading" : $"For {_details.Name}")"
+           MaxWidthClass="sm:max-w-md"
+           OnClose="CloseMeterReading">
+    <ChildContent>
+        <div class="space-y-4">
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Reading Value</label>
+                <input type="number" step="0.01" min="0" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_meterValue" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Reading Date</label>
+                <input type="date" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_meterDate" @bind:format="yyyy-MM-dd" />
+            </div>
+            <div class="flex justify-end gap-2 border-t border-border pt-5">
+                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="CloseMeterReading">Cancel</button>
+                <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" @onclick="SaveMeterReadingAsync">Save Reading</button>
+            </div>
+        </div>
+    </ChildContent>
+</SideSheet>
+
+<ConfirmDialog Open="@(_confirmDelete is not null)"
+               Title="Delete Subscriber"
+               OnClose="() => _confirmDelete = null">
+    <ChildContent>
+        @if (_confirmDelete is not null)
+        {
+            <p>Delete <span class="font-medium text-foreground">@_confirmDelete.Name</span>? This cannot be undone.</p>
         }
+    </ChildContent>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="() => _confirmDelete = null">Cancel</button>
+        <button type="button" class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white" @onclick="ConfirmDeleteAsync">Delete</button>
+    </Footer>
+</ConfirmDialog>
+
+<ConfirmDialog Open="@(_confirmSuspend is not null)"
+               Title="Suspend Subscriber"
+               OnClose="() => _confirmSuspend = null">
+    <ChildContent>
+        @if (_confirmSuspend is not null)
+        {
+            <p>Suspend <span class="font-medium text-foreground">@_confirmSuspend.Name</span>? They will no longer be billed as active.</p>
+        }
+    </ChildContent>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="() => _confirmSuspend = null">Cancel</button>
+        <button type="button" class="rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-medium text-white" @onclick="ConfirmSuspendAsync">Suspend</button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    private readonly List<CustomerSummaryResponse> _items = [];
+    private readonly List<AreaResponse> _areas = [];
+    private readonly List<DistributionBoxResponse> _boxes = [];
+    private readonly List<AmpereScheduleResponse> _schedules = [];
+    private readonly List<MeterReadingResponse> _meterReadings = [];
+
+    private bool _loading = true;
+    private bool _saving;
+    private bool _showForm;
+    private bool _showDetails;
+    private bool _showMeterDialog;
+    private Guid? _editingId;
+    private Guid? _openMenuId;
+    private CustomerResponse? _details;
+    private CustomerSummaryResponse? _confirmDelete;
+    private CustomerSummaryResponse? _confirmSuspend;
+
+    private string _searchField = "name";
+    private string _searchTerm = "";
+    private string _areaFilter = "";
+    private string _planFilter = "";
+    private string _relationFilter = "";
+    private string _statusFilter = "";
+    private string _paymentFilter = "";
+    private int _pageNumber = 1;
+    private int _pageSize = 10;
+    private int _totalCount;
+    private int _totalPages;
+    private bool _hasPrevious;
+    private bool _hasNext;
+
+    private SubscriberFormModel _form = new();
+    private decimal _meterValue;
+    private DateTime? _meterDate;
+
+    private IEnumerable<DistributionBoxResponse> FilteredBoxes =>
+        string.IsNullOrEmpty(_form.AreaId)
+            ? _boxes
+            : _boxes.Where(b => b.AreaId.ToString() == _form.AreaId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLookupsAsync();
+        await LoadAsync();
     }
 
-    private SubscriberData[] pagedData => filteredData.Skip(currentPage * pageSize).Take(pageSize).ToArray();
-    private int totalPages => Math.Max(1, (int)Math.Ceiling((double)filteredData.Count() / pageSize));
+    private async Task LoadLookupsAsync()
+    {
+        var areas = await UiActions.RunAsync(Toast, () => AreaService.GetAllAsync()) ?? [];
+        var boxes = await UiActions.RunAsync(Toast, () => BoxService.GetAllUnpagedAsync()) ?? [];
+        var schedules = await UiActions.RunAsync(Toast, () => AmpereScheduleService.GetAllAsync()) ?? [];
+        _areas.Clear();
+        _areas.AddRange(areas);
+        _boxes.Clear();
+        _boxes.AddRange(boxes);
+        _schedules.Clear();
+        _schedules.AddRange(schedules);
+    }
 
-    private void NextPage() { if (currentPage < totalPages - 1) currentPage++; }
-    private void PrevPage() { if (currentPage > 0) currentPage--; }
-    private void GoToFirstPage() { currentPage = 0; }
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _openMenuId = null;
 
-    private static readonly string[] AvatarColors = new[] { "#7c3aed", "#2563eb", "#059669", "#db2777", "#ea580c", "#0891b2", "#d97706" };
-    private string GetAvatarColor(string name) => AvatarColors[Math.Abs(name.GetHashCode()) % AvatarColors.Length];
-    private string GetInitials(string name) => string.Join("", name.Split(' ').Take(2).Select(w => w[0])).ToUpperInvariant();
+        Guid? areaId = Guid.TryParse(_areaFilter, out var a) ? a : null;
+        PlanType? plan = Enum.TryParse<PlanType>(_planFilter, out var p) ? p : null;
+        CustomerRelation? relation = Enum.TryParse<CustomerRelation>(_relationFilter, out var r) ? r : null;
+        CustomerStatus? status = Enum.TryParse<CustomerStatus>(_statusFilter, out var s) ? s : null;
+
+        var name = _searchField == "name" && !string.IsNullOrWhiteSpace(_searchTerm) ? _searchTerm.Trim() : null;
+        var phone = _searchField == "phone" && !string.IsNullOrWhiteSpace(_searchTerm) ? _searchTerm.Trim() : null;
+
+        var filter = new CustomerFilterRequest(
+            Name: name,
+            Phone: phone,
+            AreaId: areaId,
+            PlanType: plan,
+            CustomerRelation: relation,
+            CustomerStatus: status,
+            PaymentFilter: string.IsNullOrWhiteSpace(_paymentFilter) ? null : _paymentFilter,
+            PageNumber: _pageNumber,
+            PageSize: _pageSize);
+
+        var page = await UiActions.RunAsync(Toast, () => CustomerService.GetAllAsync(filter));
+        _items.Clear();
+        if (page is not null)
+        {
+            _items.AddRange(page.Data);
+            _totalCount = page.TotalCount;
+            _totalPages = page.TotalPages;
+            _hasPrevious = page.HasPreviousPage;
+            _hasNext = page.HasNextPage;
+            _pageNumber = page.PageNumber;
+        }
+        else
+        {
+            _totalCount = 0;
+            _totalPages = 0;
+            _hasPrevious = false;
+            _hasNext = false;
+        }
+
+        _loading = false;
+    }
+
+    private async Task ReloadFromFiltersAsync()
+    {
+        _pageNumber = 1;
+        await LoadAsync();
+    }
+
+    private async Task NextPageAsync()
+    {
+        if (!_hasNext) return;
+        _pageNumber++;
+        await LoadAsync();
+    }
+
+    private async Task PrevPageAsync()
+    {
+        if (!_hasPrevious) return;
+        _pageNumber--;
+        await LoadAsync();
+    }
+
+    private void ToggleMenu(Guid id) => _openMenuId = _openMenuId == id ? null : id;
+
+    private void OpenCreate()
+    {
+        _openMenuId = null;
+        _editingId = null;
+        _form = new SubscriberFormModel
+        {
+            CustomerType = CustomerType.Residential,
+            Plan = PlanType.Ampere,
+            PlanValue = 5,
+            SubscriptionDate = DateTime.Today,
+            CustomerStatus = CustomerStatus.Active
+        };
+        _showForm = true;
+    }
+
+    private async Task OpenEdit(CustomerSummaryResponse sub)
+    {
+        _openMenuId = null;
+        var detail = await UiActions.RunAsync(Toast, () => CustomerService.GetByIdAsync(sub.Id));
+        if (detail is null) return;
+        FillForm(detail);
+        _editingId = detail.Id;
+        _showDetails = false;
+        _showForm = true;
+    }
+
+    private async Task OpenEditFromDetails()
+    {
+        if (_details is null) return;
+        FillForm(_details);
+        _editingId = _details.Id;
+        _showDetails = false;
+        _showForm = true;
+        await Task.CompletedTask;
+    }
+
+    private void FillForm(CustomerResponse detail)
+    {
+        var areaId = _areas.FirstOrDefault(a => a.Name == detail.AreaName)?.Id;
+        _form = new SubscriberFormModel
+        {
+            Name = detail.Name,
+            Phone = detail.Phone ?? "",
+            Address = detail.Address ?? "",
+            Building = detail.Building ?? "",
+            Floor = detail.Floor ?? "",
+            CableName = detail.CableName ?? "",
+            AreaId = areaId?.ToString() ?? "",
+            BoxId = detail.BoxId?.ToString() ?? "",
+            AmpereScheduleId = detail.AmpereScheduleId?.ToString() ?? "",
+            CustomerType = Enum.TryParse<CustomerType>(detail.CustomerType, out var ct) ? ct : CustomerType.Residential,
+            Plan = Enum.TryParse<PlanType>(detail.Plan, out var plan) ? plan : PlanType.Ampere,
+            PlanValue = detail.PlanValue,
+            InitialMeterReading = detail.InitialMeterReading,
+            CustomerRelation = Enum.TryParse<CustomerRelation>(detail.CustomerRelation, out var rel) ? rel.ToString() : "",
+            CustomerStatus = Enum.TryParse<CustomerStatus>(detail.CustomerStatus, out var st) ? st : CustomerStatus.Active,
+            UsePricingOverride = detail.HasPricingOverride,
+            OverridePrice = detail.PricingOverride?.Price,
+            OverrideFixedCharge = detail.PricingOverride?.FixedCharge,
+            OverrideTva = detail.PricingOverride?.TVA,
+            HadPricingOverride = detail.HasPricingOverride
+        };
+    }
+
+    private void CloseForm()
+    {
+        _showForm = false;
+        _editingId = null;
+    }
+
+    private void OnPlanChanged()
+    {
+        if (_form.Plan != PlanType.Ampere)
+            _form.AmpereScheduleId = "";
+        if (_form.Plan is not (PlanType.Kilowatt or PlanType.FixedKilowatt))
+            _form.InitialMeterReading = null;
+    }
+
+    private void OnAreaChanged() => _form.BoxId = "";
+
+    private async Task SaveFormAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_form.Name))
+        {
+            Toast.Error("Name is required.");
+            return;
+        }
+        if (_form.PlanValue <= 0)
+        {
+            Toast.Error("Plan value must be greater than zero.");
+            return;
+        }
+
+        _saving = true;
+        Guid? areaId = Guid.TryParse(_form.AreaId, out var a) ? a : null;
+        Guid? boxId = Guid.TryParse(_form.BoxId, out var b) ? b : null;
+        Guid? scheduleId = Guid.TryParse(_form.AmpereScheduleId, out var s) ? s : null;
+        CustomerRelation? relation = Enum.TryParse<CustomerRelation>(_form.CustomerRelation, out var rel) ? rel : null;
+        CustomerPricingOverrideDto? overrideDto = _form.UsePricingOverride
+            ? new CustomerPricingOverrideDto(_form.OverridePrice, _form.OverrideFixedCharge, _form.OverrideTva)
+            : null;
+
+        if (_editingId is null)
+        {
+            DateOnly? subDate = _form.SubscriptionDate.HasValue
+                ? DateOnly.FromDateTime(_form.SubscriptionDate.Value)
+                : null;
+
+            var request = new CreateCustomerRequest(
+                Name: _form.Name.Trim(),
+                Phone: NullIfEmpty(_form.Phone),
+                Address: NullIfEmpty(_form.Address),
+                Building: NullIfEmpty(_form.Building),
+                Floor: NullIfEmpty(_form.Floor),
+                CableName: NullIfEmpty(_form.CableName),
+                BoxId: boxId,
+                AmpereScheduleId: scheduleId,
+                AreaId: areaId,
+                CustomerType: _form.CustomerType,
+                Plan: _form.Plan,
+                PlanValue: _form.PlanValue,
+                SubscriptionDate: subDate,
+                CustomerRelation: relation,
+                PricingOverride: overrideDto,
+                InitialMeterReading: _form.InitialMeterReading);
+
+            var created = await UiActions.RunAsync(Toast, () => CustomerService.CreateAsync(request), "Subscriber created");
+            if (created is not null)
+            {
+                CloseForm();
+                await LoadAsync();
+            }
+        }
+        else
+        {
+            var request = new UpdateCustomerRequest(
+                Name: _form.Name.Trim(),
+                Phone: NullIfEmpty(_form.Phone),
+                AreaId: areaId,
+                Address: NullIfEmpty(_form.Address),
+                Building: NullIfEmpty(_form.Building),
+                Floor: NullIfEmpty(_form.Floor),
+                CableName: NullIfEmpty(_form.CableName),
+                BoxId: boxId,
+                AmpereScheduleId: scheduleId,
+                CustomerType: _form.CustomerType,
+                Plan: _form.Plan,
+                PlanValue: _form.PlanValue,
+                CustomerStatus: _form.CustomerStatus,
+                CustomerRelation: relation,
+                PricingOverride: overrideDto,
+                ClearPricingOverride: _form.HadPricingOverride && !_form.UsePricingOverride,
+                InitialMeterReading: _form.InitialMeterReading);
+
+            var updated = await UiActions.RunAsync(Toast, () => CustomerService.UpdateAsync(_editingId.Value, request), "Subscriber updated");
+            if (updated is not null)
+            {
+                CloseForm();
+                await LoadAsync();
+            }
+        }
+
+        _saving = false;
+    }
+
+    private async Task OpenDetails(CustomerSummaryResponse sub)
+    {
+        _openMenuId = null;
+        var detail = await UiActions.RunAsync(Toast, () => CustomerService.GetByIdAsync(sub.Id));
+        if (detail is null) return;
+        _details = detail;
+        _meterReadings.Clear();
+        if (detail.Plan.Equals(nameof(PlanType.Kilowatt), StringComparison.OrdinalIgnoreCase))
+        {
+            var readings = await UiActions.RunAsync(Toast, () => MeterReadingService.GetAllForCustomerAsync(detail.Id)) ?? [];
+            _meterReadings.AddRange(readings);
+        }
+        _showDetails = true;
+    }
+
+    private void CloseDetails()
+    {
+        _showDetails = false;
+        _details = null;
+        _meterReadings.Clear();
+    }
+
+    private void OpenMeterReading()
+    {
+        _meterValue = 0;
+        _meterDate = DateTime.Today;
+        _showMeterDialog = true;
+    }
+
+    private void CloseMeterReading() => _showMeterDialog = false;
+
+    private async Task SaveMeterReadingAsync()
+    {
+        if (_details is null) return;
+        DateOnly? date = _meterDate.HasValue ? DateOnly.FromDateTime(_meterDate.Value) : null;
+        var created = await UiActions.RunAsync(
+            Toast,
+            () => MeterReadingService.CreateAsync(_details.Id, new CreateMeterReadingRequest(_meterValue, date)),
+            "Meter reading added");
+        if (created is null) return;
+
+        _showMeterDialog = false;
+        var readings = await UiActions.RunAsync(Toast, () => MeterReadingService.GetAllForCustomerAsync(_details.Id)) ?? [];
+        _meterReadings.Clear();
+        _meterReadings.AddRange(readings);
+    }
+
+    private async Task DeleteMeterReadingAsync(Guid readingId)
+    {
+        if (_details is null) return;
+        await UiActions.RunAsync(Toast, () => MeterReadingService.DeleteAsync(_details.Id, readingId), "Meter reading deleted");
+        var readings = await UiActions.RunAsync(Toast, () => MeterReadingService.GetAllForCustomerAsync(_details.Id)) ?? [];
+        _meterReadings.Clear();
+        _meterReadings.AddRange(readings);
+    }
+
+    private void OpenDelete(CustomerSummaryResponse sub)
+    {
+        _openMenuId = null;
+        _confirmDelete = sub;
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (_confirmDelete is null) return;
+        var id = _confirmDelete.Id;
+        var succeeded = false;
+        await UiActions.RunAsync(Toast, async () =>
+        {
+            await CustomerService.DeleteAsync(id);
+            succeeded = true;
+        }, "Subscriber deleted");
+        if (!succeeded) return;
+        _confirmDelete = null;
+        if (_details?.Id == id) CloseDetails();
+        await LoadAsync();
+    }
+
+    private void OpenSuspend(CustomerSummaryResponse sub)
+    {
+        _openMenuId = null;
+        _confirmSuspend = sub;
+    }
+
+    private async Task ConfirmSuspendAsync()
+    {
+        if (_confirmSuspend is null) return;
+        var id = _confirmSuspend.Id;
+        var result = await UiActions.RunAsync(
+            Toast,
+            () => CustomerService.SuspendAsync(new SuspendCustomersRequest([id])),
+            "Subscriber suspended");
+        if (result is null) return;
+        _confirmSuspend = null;
+        await LoadAsync();
+    }
+
+    private static string? NullIfEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static string FormatPlan(string plan, decimal value) =>
+        plan switch
+        {
+            nameof(PlanType.Ampere) => $"{value}A",
+            nameof(PlanType.FixedKilowatt) => $"{value}kW prepaid",
+            _ => $"{value}kW"
+        };
+
+    private static string FormatPlanLabel(PlanType plan) =>
+        plan switch
+        {
+            PlanType.FixedKilowatt => "Fixed Kilowatt",
+            _ => plan.ToString()
+        };
+
+    private static RenderFragment CustomerStatusBadge(string status) => builder =>
+    {
+        var (cls, label) = status.ToLowerInvariant() switch
+        {
+            "active" => ("border-emerald-400/20 bg-emerald-400/10 text-emerald-600", "Active"),
+            "suspended" => ("border-amber-400/20 bg-amber-400/10 text-amber-600", "Suspended"),
+            "terminated" => ("border-red-400/20 bg-red-400/10 text-red-500", "Terminated"),
+            _ => ("border-border bg-muted text-muted-foreground", status)
+        };
+        builder.OpenElement(0, "span");
+        builder.AddAttribute(1, "class", $"inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium {cls}");
+        builder.AddContent(2, label);
+        builder.CloseElement();
+    };
+
+    private sealed class SubscriberFormModel
+    {
+        public string Name { get; set; } = "";
+        public string Phone { get; set; } = "";
+        public string Address { get; set; } = "";
+        public string Building { get; set; } = "";
+        public string Floor { get; set; } = "";
+        public string CableName { get; set; } = "";
+        public string AreaId { get; set; } = "";
+        public string BoxId { get; set; } = "";
+        public string AmpereScheduleId { get; set; } = "";
+        public CustomerType CustomerType { get; set; } = CustomerType.Residential;
+        public PlanType Plan { get; set; } = PlanType.Ampere;
+        public decimal PlanValue { get; set; } = 5;
+        public DateTime? SubscriptionDate { get; set; }
+        public string CustomerRelation { get; set; } = "";
+        public CustomerStatus CustomerStatus { get; set; } = CustomerStatus.Active;
+        public decimal? InitialMeterReading { get; set; }
+        public bool UsePricingOverride { get; set; }
+        public bool HadPricingOverride { get; set; }
+        public decimal? OverridePrice { get; set; }
+        public decimal? OverrideFixedCharge { get; set; }
+        public decimal? OverrideTva { get; set; }
+    }
+
+    private static RenderFragment DetailRow(string Label, string Value) => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "flex items-start justify-between gap-3");
+        builder.OpenElement(2, "span");
+        builder.AddAttribute(3, "class", "text-muted-foreground");
+        builder.AddContent(4, Label);
+        builder.CloseElement();
+        builder.OpenElement(5, "span");
+        builder.AddAttribute(6, "class", "text-right font-medium text-foreground");
+        builder.AddContent(7, Value);
+        builder.CloseElement();
+        builder.CloseElement();
+    };
 }

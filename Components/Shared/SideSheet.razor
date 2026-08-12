@@ -1,0 +1,134 @@
+@implements IDisposable
+
+@* Animated side panel. Timed unmount — WebView2 often skips animationend. *@
+
+@if (_mounted)
+{
+    <div class="fixed inset-0 z-50 @(_openVisual ? null : "pointer-events-none")"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="@_titleId">
+        <div class="ui-sheet-overlay absolute inset-0 bg-black/50"
+             data-state="@StateAttr"
+             @onclick="RequestCloseAsync"></div>
+
+        <div class="@PanelClass"
+             data-side="@Side"
+             data-state="@StateAttr"
+             @onclick:stopPropagation="true">
+            <div class="flex items-start justify-between gap-4 border-b border-border px-6 py-5">
+                <div class="min-w-0">
+                    <h2 id="@_titleId" class="flex items-center gap-2 text-xl font-semibold text-foreground">
+                        @if (TitleIcon is not null)
+                        {
+                            <span class="text-primary shrink-0">@TitleIcon</span>
+                        }
+                        @Title
+                    </h2>
+                    @if (!string.IsNullOrWhiteSpace(Description))
+                    {
+                        <p class="mt-1 text-sm text-muted-foreground">@Description</p>
+                    }
+                </div>
+                <button type="button"
+                        class="rounded-md p-1 text-muted-foreground opacity-70 transition hover:opacity-100 hover:text-foreground"
+                        aria-label="Close"
+                        @onclick="RequestCloseAsync">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-6 py-5">
+                @ChildContent
+            </div>
+
+            @if (Footer is not null)
+            {
+                <div class="border-t border-border px-6 py-5">
+                    @Footer
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private const int ExitMs = 320;
+
+    private readonly string _titleId = $"sheet-title-{Guid.NewGuid():N}";
+    private bool _mounted;
+    private bool _openVisual;
+    private bool _closing;
+    private CancellationTokenSource? _exitCts;
+
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string Side { get; set; } = "left";
+    [Parameter] public string MaxWidthClass { get; set; } = "sm:max-w-xl";
+    [Parameter] public RenderFragment? TitleIcon { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+
+    private string StateAttr => _openVisual ? "open" : "closed";
+
+    private string PanelClass =>
+        $"ui-sheet-panel absolute inset-y-0 {(Side == "right" ? "right-0 border-l" : "left-0 border-r")} " +
+        $"flex h-full w-full flex-col border-border bg-background shadow-lg {MaxWidthClass}";
+
+    protected override void OnParametersSet()
+    {
+        if (Open)
+        {
+            // Don't cancel an in-flight close if parent hasn't flipped Open yet.
+            if (_closing) return;
+
+            _exitCts?.Cancel();
+            _mounted = true;
+            _openVisual = true;
+            return;
+        }
+
+        if (_mounted && !_closing)
+            _ = ExitAsync(notifyParent: false);
+    }
+
+    private Task RequestCloseAsync() => ExitAsync(notifyParent: true);
+
+    private async Task ExitAsync(bool notifyParent)
+    {
+        if (_closing || !_mounted) return;
+
+        _closing = true;
+        _openVisual = false;
+        await InvokeAsync(StateHasChanged);
+
+        // Flip parent Open=false immediately so UI state stays in sync.
+        if (notifyParent && OnClose.HasDelegate)
+            await OnClose.InvokeAsync();
+
+        _exitCts?.Cancel();
+        _exitCts = new CancellationTokenSource();
+        var token = _exitCts.Token;
+
+        try
+        {
+            await Task.Delay(ExitMs, token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        _mounted = false;
+        _closing = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        _exitCts?.Cancel();
+        _exitCts?.Dispose();
+    }
+}

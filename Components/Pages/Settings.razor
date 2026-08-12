@@ -1,96 +1,144 @@
 @page "/settings"
+@inject IAppPreferencesService PreferencesService
+@inject IAppUserService AppUserService
+@inject IToastService Toast
+@inject IThemeService ThemeService
 
-<div class="space-y-5">
-    <div>
-        <h1 class="text-xl font-bold text-foreground">Settings</h1>
-        <p class="text-xs text-muted-foreground">Configure your application preferences</p>
-    </div>
-
-    <section class="rounded-2xl border border-border bg-card p-5">
-        <h2 class="text-sm font-semibold text-foreground">Pricing Configuration</h2>
-        <p class="mt-1 text-xs text-muted-foreground">Manage billing rates and charges</p>
-        <div class="mt-5 space-y-3">
-            <NavLink href="settings/pricing" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                <span class="text-sm text-foreground">Price per Kilowatt</span>
-                <span class="font-mono text-sm text-muted-foreground">$0.12/kWh</span>
-            </NavLink>
-            <NavLink href="settings/pricing" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                <span class="text-sm text-foreground">Price per Amp</span>
-                <span class="font-mono text-sm text-muted-foreground">$17.00/A</span>
-            </NavLink>
-            <NavLink href="settings/pricing" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                <span class="text-sm text-foreground">Fixed Charge</span>
-                <span class="font-mono text-sm text-muted-foreground">$15.00</span>
-            </NavLink>
-            <NavLink href="settings/pricing" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                <span class="text-sm text-foreground">TVA Rate</span>
-                <span class="font-mono text-sm text-muted-foreground">11%</span>
-            </NavLink>
-        </div>
-    </section>
-
-    <section class="rounded-2xl border border-border bg-card p-5">
-        <h2 class="text-sm font-semibold text-foreground">Billing Schedule</h2>
-        <p class="mt-1 text-xs text-muted-foreground">Configure billing cycles and payment triggers</p>
-        <div class="mt-5 space-y-3">
-            <NavLink href="settings/due-date" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                <span class="text-sm text-foreground">Due Date</span>
-                <span class="font-mono text-sm text-muted-foreground">15th of each month</span>
-            </NavLink>
-            <NavLink href="settings/trigger-date" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                <span class="text-sm text-foreground">Trigger Date</span>
-                <span class="font-mono text-sm text-muted-foreground">1st of each month</span>
-            </NavLink>
-            <NavLink href="settings/trigger-message" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                <span class="text-sm text-foreground">Trigger Message</span>
-                <span class="font-mono text-sm text-muted-foreground">Enabled</span>
-            </NavLink>
-            <NavLink href="settings/whatsapp" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                <span class="text-sm text-foreground">WhatsApp Notifications</span>
-                <span class="font-mono text-sm text-muted-foreground">Configured</span>
-            </NavLink>
-        </div>
-    </section>
-
-    <div class="grid gap-4 md:grid-cols-2">
-        <section class="rounded-2xl border border-border bg-card p-5">
-            <h2 class="text-sm font-semibold text-foreground">Company</h2>
-            <p class="mt-1 text-xs text-muted-foreground">Your business information</p>
-            <div class="mt-5 space-y-3">
-                <NavLink href="settings/company-logo" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                    <span class="text-sm text-foreground">Company Logo</span>
-                    <span class="text-sm text-muted-foreground">Shabakat</span>
-                </NavLink>
-                <NavLink href="settings/language" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                    <span class="text-sm text-foreground">Language</span>
-                    <span class="text-sm text-muted-foreground">English</span>
-                </NavLink>
+<div class="mx-auto max-w-2xl space-y-6">
+    <SettingsSection Title="Appearance">
+        <div class="px-4 pb-4 pt-4">
+            <div class="mb-3 flex items-center gap-3">
+                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-foreground">Theme</p>
+                    <p class="text-xs capitalize text-muted-foreground">@ThemeService.Mode · @ThemeService.ResolvedTheme</p>
+                </div>
             </div>
-        </section>
-
-        <section class="rounded-2xl border border-border bg-card p-5">
-            <h2 class="text-sm font-semibold text-foreground">Advanced</h2>
-            <p class="mt-1 text-xs text-muted-foreground">Additional pricing options</p>
-            <div class="mt-5 space-y-3">
-                <NavLink href="settings/ampere-schedule-pricing" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                    <span class="text-sm text-foreground">Schedule-Based Pricing</span>
-                    <span class="font-mono text-sm text-muted-foreground">Enabled</span>
-                </NavLink>
-                <NavLink href="settings/ampere-proration" class="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3 no-underline hover:bg-muted">
-                    <span class="text-sm text-foreground">Proration</span>
-                    <span class="font-mono text-sm text-muted-foreground">Disabled</span>
-                </NavLink>
+            <div class="grid grid-cols-3 gap-3">
+                <button type="button" class="@ThemeButtonClass(AppThemeMode.Light)" @onclick="() => SetTheme(AppThemeMode.Light)">
+                    <svg class="mx-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>
+                    <span class="mt-2 block text-xs font-medium">Light</span>
+                </button>
+                <button type="button" class="@ThemeButtonClass(AppThemeMode.Dark)" @onclick="() => SetTheme(AppThemeMode.Dark)">
+                    <svg class="mx-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <span class="mt-2 block text-xs font-medium">Dark</span>
+                </button>
+                <button type="button" class="@ThemeButtonClass(AppThemeMode.System)" @onclick="() => SetTheme(AppThemeMode.System)">
+                    <svg class="mx-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <span class="mt-2 block text-xs font-medium">System</span>
+                </button>
             </div>
-        </section>
-    </div>
-
-    <section class="rounded-2xl border border-border bg-card p-5">
-        <h2 class="text-sm font-semibold text-foreground">Appearance</h2>
-        <p class="mt-1 text-xs text-muted-foreground">Customize the look and feel</p>
-        <div class="mt-5 flex items-center gap-3">
-            <button class="rounded-xl border-2 border-primary bg-primary/10 px-5 py-2.5 text-sm font-medium text-primary">Light</button>
-            <button class="rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-medium text-muted-foreground">Dark</button>
-            <button class="rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-medium text-muted-foreground">System</button>
         </div>
-    </section>
+    </SettingsSection>
+
+    <SettingsSection Title="Company Preferences">
+        @if (_loading)
+        {
+            @for (var i = 0; i < 6; i++)
+            {
+                <div class="flex items-center gap-3 border-b border-border px-4 py-4 last:border-b-0">
+                    <div class="h-8 w-8 animate-pulse rounded-full bg-muted"></div>
+                    <div class="min-w-0 flex-1 space-y-2">
+                        <div class="h-4 w-32 animate-pulse rounded bg-muted"></div>
+                        <div class="h-3 w-28 animate-pulse rounded bg-muted"></div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <SettingRowLink Href="settings/pricing/price-per-kilowatt" Label="Price per Kilowatt" Value="@PriceValue(_prefs?.PricePerKilowat)" IconSvg="@Icons.Zap" />
+            <SettingRowLink Href="settings/pricing/price-per-amp" Label="Price per Amp" Value="@PriceValue(_prefs?.PricePerAmp)" IconSvg="@Icons.Zap" />
+            <SettingRowLink Href="settings/pricing/fixed-charge" Label="Fixed Charge" Value="@PriceValue(_prefs?.FixedCharge)" IconSvg="@Icons.Wallet" />
+            <SettingRowLink Href="settings/pricing/tva" Label="TVA" Value="@(_prefs is null ? NotConfigured : $"{FormatHelper.Number(_prefs.TVA)}%")" IconSvg="@Icons.Percent" />
+            <SettingRowLink Href="settings/language" Label="Language" Value="@LanguageLabel(_prefs?.Language)" IconSvg="@Icons.Languages" />
+            <SettingRowLink Href="settings/due-date" Label="Due Date" Value="@(_prefs is null ? NotConfigured : DayLabel(_prefs.DueDate))" IconSvg="@Icons.Calendar" />
+            <SettingRowLink Href="settings/trigger-date" Label="Trigger Date" Value="@(_prefs is null ? NotConfigured : DayLabel(_prefs.TriggerDate))" IconSvg="@Icons.Calendar" />
+            <SettingRowLink Href="settings/trigger-message" Label="Trigger Message" Value="@(string.IsNullOrWhiteSpace(_prefs?.TriggerMessage) ? "Not set" : _prefs.TriggerMessage)" IconSvg="@Icons.Message" />
+            <SettingRowLink Href="settings/ampere-schedule-pricing" Label="Ampere Schedule Pricing" Value="@EnabledLabel(_prefs?.AmpereSchedulePricingEnabled == true)" IconSvg="@Icons.Zap" />
+            <SettingRowLink Href="settings/ampere-proration" Label="Ampere Proration" Value="@EnabledLabel(_prefs?.AmpereProrateByDaysEnabled == true)" IconSvg="@Icons.Percent" />
+            <SettingRowLink Href="ampere-schedules" Label="Ampere Schedules" Value="Manage tiers" IconSvg="@Icons.Clock" />
+            <SettingRowLink Href="settings/company-logo" Label="Company Logo / Profile" Value="@LogoLabel" IconSvg="@Icons.Image" />
+            <SettingRowLink Href="settings/whatsapp" Label="WhatsApp" Value="Not available offline" IconSvg="@Icons.Message" />
+        }
+    </SettingsSection>
+
+    <SettingsSection Title="About">
+        <div class="flex items-center gap-3 px-4 py-4">
+            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm font-medium text-foreground">Version</p>
+            </div>
+            <span class="text-sm text-muted-foreground">1.0.0</span>
+        </div>
+    </SettingsSection>
 </div>
+
+@code {
+    private const string NotConfigured = "Not configured";
+    private bool _loading = true;
+    private GetPreferencesResponse? _prefs;
+    private ProfileResponse? _profile;
+
+    private string LogoLabel =>
+        !string.IsNullOrWhiteSpace(_profile?.LogoUrl) ? "Configured"
+        : !string.IsNullOrWhiteSpace(_profile?.FullName) ? _profile.FullName
+        : "Not set";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _prefs = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
+        _profile = await UiActions.RunAsync(Toast, () => AppUserService.GetAsync());
+        _loading = false;
+    }
+
+    private void SetTheme(AppThemeMode mode)
+    {
+        ThemeService.SetTheme(mode);
+        StateHasChanged();
+    }
+
+    private string ThemeButtonClass(AppThemeMode mode) =>
+        ThemeService.Mode == mode
+            ? "rounded-2xl border border-primary bg-primary/10 px-3 py-3 text-center text-primary shadow-[0_0_0_1px_rgba(245,192,0,0.25)]"
+            : "rounded-2xl border border-border bg-background px-3 py-3 text-center text-muted-foreground hover:text-foreground";
+
+    private string PriceValue(decimal? value) =>
+        value is null ? NotConfigured : FormatHelper.Currency(value.Value);
+
+    private static string DayLabel(int day)
+    {
+        var suffix = day is 11 or 12 or 13
+            ? "th"
+            : (day % 10) switch
+            {
+                1 => "st",
+                2 => "nd",
+                3 => "rd",
+                _ => "th"
+            };
+        return $"{day}{suffix} of each month";
+    }
+
+    private static string LanguageLabel(string? language) =>
+        language is null ? NotConfigured
+        : string.Equals(language, "ar", StringComparison.OrdinalIgnoreCase) ? "Arabic" : "English";
+
+    private static string EnabledLabel(bool enabled) => enabled ? "Enabled" : "Disabled";
+
+    private static class Icons
+    {
+        public const string Zap = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h6l-2 8 10-12h-6l2-8z"/></svg>""";
+        public const string Wallet = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"/></svg>""";
+        public const string Percent = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>""";
+        public const string Languages = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>""";
+        public const string Calendar = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>""";
+        public const string Message = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>""";
+        public const string Clock = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>""";
+        public const string Image = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>""";
+    }
+}

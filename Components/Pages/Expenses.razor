@@ -1,116 +1,416 @@
 @page "/expenses"
-@using Shabakat.Components.Shared
-@using System.Linq
+@inject IExpenseService ExpenseService
+@inject IToastService Toast
 
 <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-3">
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground" @bind="categoryFilter">
-            <option value="">All Categories</option>
-            @foreach (var cat in categories)
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                @bind="_typeFilterKey"
+                @bind:after="ApplyFiltersAsync">
+            <option value="">All Types</option>
+            @foreach (var type in Enum.GetValues<ExpenseType>())
             {
-                <option value="@cat">@cat</option>
+                <option value="@type">@type</option>
             }
         </select>
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground" @bind="areaFilter">
-            <option value="">All Areas</option>
-            @foreach (var area in areas)
-            {
-                <option value="@area">@area</option>
-            }
-        </select>
-        <input type="date" class="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground w-40" @bind="dateFrom" @bind:format="yyyy-MM-dd" />
+        <input type="date"
+               class="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground w-40"
+               @bind="_dateFrom"
+               @bind:format="yyyy-MM-dd"
+               @bind:after="ApplyFiltersAsync" />
         <span class="text-muted-foreground">to</span>
-        <input type="date" class="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground w-40" @bind="dateTo" @bind:format="yyyy-MM-dd" />
-        <button class="ml-auto rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" style="box-shadow: 0 0 16px rgba(230,196,58,0.25);">+ Add Expense</button>
+        <input type="date"
+               class="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground w-40"
+               @bind="_dateTo"
+               @bind:format="yyyy-MM-dd"
+               @bind:after="ApplyFiltersAsync" />
+        <button type="button"
+                class="ml-auto rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                style="box-shadow: 0 0 16px rgba(230,196,58,0.25);"
+                @onclick="OpenCreate">
+            + Add Expense
+        </button>
     </div>
 
     <div class="grid gap-4 md:grid-cols-3">
         <section class="rounded-2xl border border-border bg-card p-4">
             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Total This Period</p>
-            <p class="mt-2 font-mono text-2xl font-bold text-foreground">@MockData.FormatCurrency(filteredData.Sum(e => e.Amount))</p>
-            <p class="mt-1 text-xs text-muted-foreground">@filteredData.Count() entries</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-foreground">@FormatHelper.Currency(_totalAmount)</p>
+            <p class="mt-1 text-xs text-muted-foreground">@_totalCount entries</p>
         </section>
         <section class="rounded-2xl border border-border bg-card p-4">
             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Fuel Cost</p>
-            <p class="mt-2 font-mono text-2xl font-bold text-amber-600">@MockData.FormatCurrency(filteredData.Where(e => e.Category == "Fuel").Sum(e => e.Amount))</p>
-            <p class="mt-1 text-xs text-muted-foreground">@(filteredData.Any() ? $"{(filteredData.Where(e => e.Category == "Fuel").Sum(e => e.Amount) / filteredData.Sum(e => e.Amount) * 100):F1}% of total" : "0%")</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-amber-600">@FormatHelper.Currency(_fuelTotal)</p>
+            <p class="mt-1 text-xs text-muted-foreground">@FuelShareLabel</p>
         </section>
         <section class="rounded-2xl border border-border bg-card p-4">
             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Maintenance</p>
-            <p class="mt-2 font-mono text-2xl font-bold text-blue-400">@MockData.FormatCurrency(filteredData.Where(e => e.Category == "Maintenance" || e.Category == "Parts").Sum(e => e.Amount))</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-blue-400">@FormatHelper.Currency(_maintenanceTotal)</p>
             <p class="mt-1 text-xs text-muted-foreground">Repairs &amp; parts</p>
         </section>
     </div>
 
-    <section class="rounded-2xl border border-border bg-card overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[700px]">
-                <thead>
-                    <tr class="border-b border-border">
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Date</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Category</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Description</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Area</th>
-                        <th class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var exp in pagedData)
-                    {
-                        <tr class="border-b border-border hover:bg-muted/30">
-                            <td class="px-4 py-3.5 whitespace-nowrap text-sm text-muted-foreground">@MockData.FormatDate(exp.Date)</td>
-                            <td class="px-4 py-3.5"><ExpenseTypeBadge Category="@exp.Category" /></td>
-                            <td class="px-4 py-3.5 text-sm text-foreground">@exp.Description</td>
-                            <td class="px-4 py-3.5 text-sm text-muted-foreground">@(exp.AreaName ?? "—")</td>
-                            <td class="px-4 py-3.5 font-mono text-sm font-semibold text-foreground text-right">@MockData.FormatCurrency(exp.Amount)</td>
+    @if (_loading)
+    {
+        <p class="text-sm text-muted-foreground">Loading expenses...</p>
+    }
+    else
+    {
+        <section class="rounded-2xl border border-border bg-card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[760px]">
+                    <thead>
+                        <tr class="border-b border-border">
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Date</th>
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Type</th>
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Label</th>
+                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Notes</th>
+                            <th class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount</th>
+                            <th class="px-4 py-3.5"></th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-            <span>@filteredData.Count() expenses found</span>
-            <div class="flex items-center gap-2 self-end md:self-auto">
-                <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm" @bind="pageSize" @bind:after="GoToFirstPage">
-                    <option value="10">10 / page</option>
-                    <option value="20">20 / page</option>
-                    <option value="50">50 / page</option>
-                </select>
-                <button class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(currentPage == 0)" @onclick="PrevPage">Prev</button>
-                <span class="min-w-20 text-center">@(currentPage + 1) / @totalPages</span>
-                <button class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(currentPage >= totalPages - 1)" @onclick="NextPage">Next</button>
+                    </thead>
+                    <tbody>
+                        @if (_items.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-sm text-muted-foreground">No expenses found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var exp in _items)
+                            {
+                                <tr class="border-b border-border hover:bg-muted/30">
+                                    <td class="px-4 py-3.5 whitespace-nowrap text-sm text-muted-foreground">@FormatHelper.Date(exp.ExpenseDate)</td>
+                                    <td class="px-4 py-3.5"><ExpenseTypeBadge Category="@exp.ExpenseType" /></td>
+                                    <td class="px-4 py-3.5 text-sm text-foreground">@(exp.Label ?? "—")</td>
+                                    <td class="px-4 py-3.5 text-sm text-muted-foreground max-w-xs truncate">@(exp.Notes ?? "—")</td>
+                                    <td class="px-4 py-3.5 font-mono text-sm font-semibold text-foreground text-right">@FormatHelper.Currency(exp.Amount)</td>
+                                    <td class="px-4 py-3.5">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <button type="button"
+                                                    class="rounded-lg px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+                                                    @onclick="() => OpenEdit(exp)">
+                                                Edit
+                                            </button>
+                                            <button type="button"
+                                                    class="rounded-lg px-2 py-1 text-xs text-red-500 hover:bg-red-500/10"
+                                                    @onclick="() => OpenDelete(exp)">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
             </div>
-        </div>
-    </section>
+            <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+                <span>@_totalCount expenses found</span>
+                <div class="flex items-center gap-2 self-end md:self-auto">
+                    <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm"
+                            @bind="_pageSize"
+                            @bind:after="GoToFirstPageAsync">
+                        <option value="10">10 / page</option>
+                        <option value="20">20 / page</option>
+                        <option value="50">50 / page</option>
+                    </select>
+                    <button type="button"
+                            class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40"
+                            disabled="@(!_hasPrevious)"
+                            @onclick="PrevPageAsync">
+                        Prev
+                    </button>
+                    <span class="min-w-20 text-center">@_pageNumber / @_totalPages</span>
+                    <button type="button"
+                            class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40"
+                            disabled="@(!_hasNext)"
+                            @onclick="NextPageAsync">
+                        Next
+                    </button>
+                </div>
+            </div>
+        </section>
+    }
 </div>
 
-@code {
-    private string categoryFilter = "";
-    private string areaFilter = "";
-    private DateTime? dateFrom;
-    private DateTime? dateTo;
-    private int currentPage = 0;
-    private int pageSize = 10;
+<SideSheet Open="_showForm"
+           Title="@(_editingId is null ? "Add Expense" : "Edit Expense")"
+           Description="Record a company expense for the selected period."
+           MaxWidthClass="sm:max-w-lg"
+           OnClose="CloseForm">
+    <ChildContent>
+        <div class="space-y-4">
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Type</label>
+                <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                        @bind="_formType">
+                    @foreach (var type in Enum.GetValues<ExpenseType>())
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Amount</label>
+                <input type="number" step="0.01" min="0.0001"
+                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                       @bind="_formAmount" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Date</label>
+                <input type="date"
+                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                       @bind="_formDate"
+                       @bind:format="yyyy-MM-dd" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    Label @(_formType == ExpenseType.Other ? "(required)" : "(optional)")
+                </label>
+                <input type="text" maxlength="100"
+                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                       @bind="_formLabel"
+                       placeholder="@(_formType == ExpenseType.Other ? "e.g. Rent, Insurance" : "")" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Notes</label>
+                <textarea maxlength="500" rows="3"
+                          class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                          @bind="_formNotes"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 border-t border-border pt-5">
+                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="CloseForm">Cancel</button>
+                <button type="button"
+                        class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                        disabled="@_saving"
+                        @onclick="SaveAsync">
+                    @(_saving ? "Saving..." : "Save")
+                </button>
+            </div>
+        </div>
+    </ChildContent>
+</SideSheet>
 
-    private string[] categories = MockData.Expenses.Select(e => e.Category).Distinct().OrderBy(c => c).ToArray();
-    private string[] areas = MockData.Expenses.Select(e => e.AreaName ?? "").Where(a => !string.IsNullOrEmpty(a)).Distinct().OrderBy(a => a).ToArray();
-
-    private IEnumerable<ExpenseData> filteredData
-    {
-        get
+<ConfirmDialog Open="@(_deleteTarget is not null)"
+               Title="Delete Expense"
+               OnClose="CloseDelete">
+    <ChildContent>
+        @if (_deleteTarget is not null)
         {
-            var query = MockData.Expenses.AsEnumerable();
-            if (!string.IsNullOrEmpty(categoryFilter)) query = query.Where(e => e.Category == categoryFilter);
-            if (!string.IsNullOrEmpty(areaFilter)) query = query.Where(e => e.AreaName == areaFilter);
-            if (dateFrom.HasValue) query = query.Where(e => e.Date >= dateFrom.Value);
-            if (dateTo.HasValue) query = query.Where(e => e.Date <= dateTo.Value);
-            return query;
+            <p>
+                Delete @_deleteTarget.ExpenseType expense of @FormatHelper.Currency(_deleteTarget.Amount) on @FormatHelper.Date(_deleteTarget.ExpenseDate)?
+            </p>
         }
+    </ChildContent>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="CloseDelete">Cancel</button>
+        <button type="button"
+                class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+                disabled="@_saving"
+                @onclick="ConfirmDeleteAsync">
+            @(_saving ? "Deleting..." : "Delete")
+        </button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    private bool _loading = true;
+    private bool _saving;
+    private bool _showForm;
+    private Guid? _editingId;
+    private ExpenseResponse? _deleteTarget;
+
+    private string _typeFilterKey = "";
+    private DateOnly? _dateFrom;
+    private DateOnly? _dateTo;
+    private int _pageNumber = 1;
+    private int _pageSize = 10;
+    private int _totalPages = 1;
+    private int _totalCount;
+    private bool _hasPrevious;
+    private bool _hasNext;
+    private decimal _totalAmount;
+    private decimal _fuelTotal;
+    private decimal _maintenanceTotal;
+    private List<ExpenseResponse> _items = [];
+
+    private ExpenseType _formType = ExpenseType.Fuel;
+    private decimal _formAmount;
+    private DateOnly _formDate = DateOnly.FromDateTime(DateTime.Today);
+    private string? _formLabel;
+    private string? _formNotes;
+
+    private string FuelShareLabel =>
+        _totalAmount > 0
+            ? $"{(_fuelTotal / _totalAmount * 100):F1}% of total"
+            : "0%";
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private ExpenseFilterRequest BuildFilter(int pageNumber, int pageSize)
+    {
+        ExpenseType? type = null;
+        if (!string.IsNullOrWhiteSpace(_typeFilterKey) &&
+            Enum.TryParse<ExpenseType>(_typeFilterKey, out var parsed))
+        {
+            type = parsed;
+        }
+
+        return new ExpenseFilterRequest(_dateFrom, _dateTo, type, pageNumber, pageSize);
     }
 
-    private ExpenseData[] pagedData => filteredData.Skip(currentPage * pageSize).Take(pageSize).ToArray();
-    private int totalPages => Math.Max(1, (int)Math.Ceiling((double)filteredData.Count() / pageSize));
-    private void NextPage() { if (currentPage < totalPages - 1) currentPage++; }
-    private void PrevPage() { if (currentPage > 0) currentPage--; }
-    private void GoToFirstPage() { currentPage = 0; }
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        var result = await UiActions.RunAsync(
+            Toast,
+            () => ExpenseService.GetAllAsync(BuildFilter(_pageNumber, _pageSize)));
+
+        if (result is not null)
+        {
+            _items = result.Data.ToList();
+            _totalCount = result.TotalCount;
+            _totalPages = Math.Max(1, result.TotalPages);
+            _pageNumber = result.PageNumber;
+            _hasPrevious = result.HasPreviousPage;
+            _hasNext = result.HasNextPage;
+            _totalAmount = result.TotalAmount;
+
+            IEnumerable<ExpenseResponse> forTotals = result.Data;
+            if (result.TotalCount > result.PageSize)
+            {
+                var all = await UiActions.RunAsync(
+                    Toast,
+                    () => ExpenseService.GetAllAsync(BuildFilter(1, Math.Max(result.TotalCount, 1))));
+                if (all is not null)
+                    forTotals = all.Data;
+            }
+
+            var list = forTotals.ToList();
+            _fuelTotal = list.Where(e => e.ExpenseType == nameof(ExpenseType.Fuel)).Sum(e => e.Amount);
+            _maintenanceTotal = list.Where(e => e.ExpenseType == nameof(ExpenseType.Maintenance)).Sum(e => e.Amount);
+        }
+        else
+        {
+            _items = [];
+            _totalCount = 0;
+            _totalPages = 1;
+            _totalAmount = 0;
+            _fuelTotal = 0;
+            _maintenanceTotal = 0;
+            _hasPrevious = false;
+            _hasNext = false;
+        }
+
+        _loading = false;
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        _pageNumber = 1;
+        await LoadAsync();
+    }
+
+    private async Task GoToFirstPageAsync()
+    {
+        _pageNumber = 1;
+        await LoadAsync();
+    }
+
+    private async Task PrevPageAsync()
+    {
+        if (!_hasPrevious) return;
+        _pageNumber--;
+        await LoadAsync();
+    }
+
+    private async Task NextPageAsync()
+    {
+        if (!_hasNext) return;
+        _pageNumber++;
+        await LoadAsync();
+    }
+
+    private void OpenCreate()
+    {
+        _editingId = null;
+        _formType = ExpenseType.Fuel;
+        _formAmount = 0;
+        _formDate = DateOnly.FromDateTime(DateTime.Today);
+        _formLabel = null;
+        _formNotes = null;
+        _showForm = true;
+    }
+
+    private void OpenEdit(ExpenseResponse exp)
+    {
+        _editingId = exp.Id;
+        _formType = Enum.TryParse<ExpenseType>(exp.ExpenseType, out var t) ? t : ExpenseType.Other;
+        _formAmount = exp.Amount;
+        _formDate = exp.ExpenseDate;
+        _formLabel = exp.Label;
+        _formNotes = exp.Notes;
+        _showForm = true;
+    }
+
+    private void CloseForm() => _showForm = false;
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        if (_editingId is null)
+        {
+            var created = await UiActions.RunAsync(
+                Toast,
+                () => ExpenseService.CreateAsync(new CreateExpenseRequest(
+                    _formType,
+                    _formAmount,
+                    _formDate,
+                    _formLabel,
+                    _formNotes)),
+                "Expense created.");
+            if (created is not null)
+            {
+                _showForm = false;
+                await LoadAsync();
+            }
+        }
+        else
+        {
+            var updated = await UiActions.RunAsync(
+                Toast,
+                () => ExpenseService.UpdateAsync(_editingId.Value, new UpdateExpenseRequest(
+                    _formType,
+                    _formAmount,
+                    _formDate,
+                    _formLabel,
+                    _formNotes)),
+                "Expense updated.");
+            if (updated is not null)
+            {
+                _showForm = false;
+                await LoadAsync();
+            }
+        }
+
+        _saving = false;
+    }
+
+    private void OpenDelete(ExpenseResponse exp) => _deleteTarget = exp;
+    private void CloseDelete() => _deleteTarget = null;
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (_deleteTarget is null) return;
+        _saving = true;
+        await UiActions.RunAsync(
+            Toast,
+            () => ExpenseService.DeleteAsync(_deleteTarget.Id),
+            "Expense deleted.");
+        _deleteTarget = null;
+        _saving = false;
+        await LoadAsync();
+    }
 }

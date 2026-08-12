@@ -1,60 +1,164 @@
-@page "/settings/pricing"
+@page "/settings/pricing/{Field}"
+@inject IAppPreferencesService PreferencesService
+@inject IToastService Toast
+@inject NavigationManager Navigation
 
-<div class="space-y-5">
-    <NavLink href="settings" class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-2">
-        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        Back to Settings
-    </NavLink>
-    <h1 class="text-xl font-bold text-foreground">Pricing Configuration</h1>
-    <p class="text-xs text-muted-foreground">Set the rates used for billing calculations</p>
+<SettingsScaffold Title="@_title">
+    <div class="space-y-4">
+        @if (_loading)
+        {
+            <p class="text-sm text-muted-foreground">Loading company preferences...</p>
+        }
+        else if (_fieldKey is null)
+        {
+            <p class="text-sm text-muted-foreground">Unknown pricing field.</p>
+        }
+        else
+        {
+            <div class="grid gap-3 sm:grid-cols-[180px_1fr]">
+                <label class="space-y-1 block">
+                    <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Customer type</span>
+                    <select class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                            @bind="_tier"
+                            @bind:after="LoadValueForTier">
+                        <option value="base">Base</option>
+                        <option value="residential">Residential</option>
+                        <option value="commercial">Commercial</option>
+                        <option value="industrial">Industrial</option>
+                    </select>
+                </label>
+                <label class="space-y-1 block">
+                    <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Value@(_isTva ? " (%)" : "")</span>
+                    <input type="number" step="0.01"
+                           class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                           @bind="_value" />
+                </label>
+            </div>
+            <p class="max-w-md text-sm leading-6 text-muted-foreground">
+                This value is used when billing that customer type. Base applies when no type-specific rate is set.
+            </p>
+            <div class="pt-6">
+                <button type="button"
+                        class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+                        disabled="@_saving"
+                        @onclick="SaveAsync">
+                    @(_saving ? "Saving..." : "Save")
+                </button>
+            </div>
+        }
+    </div>
+</SettingsScaffold>
 
-    <section class="rounded-2xl border border-border bg-card p-5 space-y-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-foreground">Price per Kilowatt</p>
-                <p class="text-xs text-muted-foreground">Rate charged per kWh for meter-based subscribers</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="text-muted-foreground">$</span>
-                <input type="number" class="w-24 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground text-right" value="0.12" step="0.01" />
-                <span class="text-muted-foreground">/kWh</span>
-            </div>
-        </div>
-        <hr class="border-border" />
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-foreground">Price per Amp</p>
-                <p class="text-xs text-muted-foreground">Rate charged per ampere for ampere-based subscribers</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="text-muted-foreground">$</span>
-                <input type="number" class="w-24 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground text-right" value="17.00" step="0.01" />
-                <span class="text-muted-foreground">/A</span>
-            </div>
-        </div>
-        <hr class="border-border" />
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-foreground">Fixed Charge</p>
-                <p class="text-xs text-muted-foreground">Additional fixed amount added to every invoice</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="text-muted-foreground">$</span>
-                <input type="number" class="w-24 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground text-right" value="15.00" step="0.01" />
-            </div>
-        </div>
-        <hr class="border-border" />
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-foreground">TVA Rate</p>
-                <p class="text-xs text-muted-foreground">Value-added tax percentage</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <input type="number" class="w-24 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground text-right" value="11" step="1" />
-                <span class="text-muted-foreground">%</span>
-            </div>
-        </div>
-    </section>
+@code {
+    [Parameter] public string Field { get; set; } = "";
 
-    <button class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">Save Changes</button>
-</div>
+    private bool _loading = true;
+    private bool _saving;
+    private GetPreferencesResponse? _existing;
+    private string? _fieldKey;
+    private string _title = "Pricing";
+    private string _tier = "base";
+    private decimal _value;
+    private bool _isTva;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _fieldKey = Field?.Trim().ToLowerInvariant() switch
+        {
+            "price-per-kilowatt" => "pricePerKilowat",
+            "price-per-amp" => "pricePerAmp",
+            "fixed-charge" => "fixedCharge",
+            "tva" => "tva",
+            _ => null
+        };
+
+        _title = Field?.Trim().ToLowerInvariant() switch
+        {
+            "price-per-kilowatt" => "Price per Kilowatt",
+            "price-per-amp" => "Price per Amp",
+            "fixed-charge" => "Fixed Charge",
+            "tva" => "TVA",
+            _ => "Pricing"
+        };
+        _isTva = _fieldKey == "tva";
+
+        if (_fieldKey is null)
+        {
+            Navigation.NavigateTo("settings");
+            return;
+        }
+
+        _loading = true;
+        _existing = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
+        LoadValueForTier();
+        _loading = false;
+    }
+
+    private void LoadValueForTier()
+    {
+        var src = PreferencesMapper.FromExistingOrDefaults(_existing);
+        _value = (_fieldKey, _tier) switch
+        {
+            ("pricePerKilowat", "residential") => src.ResidentialPricePerKilowat,
+            ("pricePerKilowat", "commercial") => src.CommercialPricePerKilowat,
+            ("pricePerKilowat", "industrial") => src.IndustrialPricePerKilowat,
+            ("pricePerKilowat", _) => src.PricePerKilowat,
+
+            ("pricePerAmp", "residential") => src.ResidentialPricePerAmp,
+            ("pricePerAmp", "commercial") => src.CommercialPricePerAmp,
+            ("pricePerAmp", "industrial") => src.IndustrialPricePerAmp,
+            ("pricePerAmp", _) => src.PricePerAmp,
+
+            ("fixedCharge", "residential") => src.ResidentialFixedCharge,
+            ("fixedCharge", "commercial") => src.CommercialFixedCharge,
+            ("fixedCharge", "industrial") => src.IndustrialFixedCharge,
+            ("fixedCharge", _) => src.FixedCharge,
+
+            ("tva", "residential") => src.ResidentialTVA,
+            ("tva", "commercial") => src.CommercialTVA,
+            ("tva", "industrial") => src.IndustrialTVA,
+            ("tva", _) => src.TVA,
+
+            _ => 0
+        };
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        var baseReq = PreferencesMapper.FromExistingOrDefaults(_existing);
+        var request = (_fieldKey, _tier) switch
+        {
+            ("pricePerKilowat", "residential") => baseReq with { ResidentialPricePerKilowat = _value },
+            ("pricePerKilowat", "commercial") => baseReq with { CommercialPricePerKilowat = _value },
+            ("pricePerKilowat", "industrial") => baseReq with { IndustrialPricePerKilowat = _value },
+            ("pricePerKilowat", _) => baseReq with { PricePerKilowat = _value },
+
+            ("pricePerAmp", "residential") => baseReq with { ResidentialPricePerAmp = _value },
+            ("pricePerAmp", "commercial") => baseReq with { CommercialPricePerAmp = _value },
+            ("pricePerAmp", "industrial") => baseReq with { IndustrialPricePerAmp = _value },
+            ("pricePerAmp", _) => baseReq with { PricePerAmp = _value },
+
+            ("fixedCharge", "residential") => baseReq with { ResidentialFixedCharge = _value },
+            ("fixedCharge", "commercial") => baseReq with { CommercialFixedCharge = _value },
+            ("fixedCharge", "industrial") => baseReq with { IndustrialFixedCharge = _value },
+            ("fixedCharge", _) => baseReq with { FixedCharge = _value },
+
+            ("tva", "residential") => baseReq with { ResidentialTVA = _value },
+            ("tva", "commercial") => baseReq with { CommercialTVA = _value },
+            ("tva", "industrial") => baseReq with { IndustrialTVA = _value },
+            ("tva", _) => baseReq with { TVA = _value },
+
+            _ => baseReq
+        };
+
+        var ok = false;
+        await UiActions.RunAsync(Toast, async () =>
+        {
+            await PreferencesService.UpsertAsync(request);
+            ok = true;
+        }, "Preferences saved.");
+        _saving = false;
+        if (ok) Navigation.NavigateTo("settings");
+    }
+}

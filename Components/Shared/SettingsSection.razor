@@ -1,0 +1,11 @@
+<section class="space-y-2">
+    <h2 class="px-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">@Title</h2>
+    <div class="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+        @ChildContent
+    </div>
+</section>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,102 @@
+@implements IDisposable
+
+@* Centered confirm dialog. Timed unmount — WebView2 often skips animationend. *@
+
+@if (_mounted)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 @(_openVisual ? null : "pointer-events-none")"
+         role="alertdialog"
+         aria-modal="true">
+        <div class="ui-sheet-overlay absolute inset-0 bg-black/50"
+             data-state="@StateAttr"
+             @onclick="RequestCloseAsync"></div>
+
+        <div class="ui-dialog-panel relative z-10 w-full max-w-md rounded-2xl border border-border bg-card shadow-xl"
+             data-state="@StateAttr"
+             @onclick:stopPropagation="true">
+            <div class="px-6 py-5">
+                <h2 class="text-lg font-semibold text-foreground">@Title</h2>
+                @if (ChildContent is not null)
+                {
+                    <div class="mt-2 text-sm text-muted-foreground">@ChildContent</div>
+                }
+            </div>
+            @if (Footer is not null)
+            {
+                <div class="flex items-center justify-end gap-3 border-t border-border px-6 py-4">
+                    @Footer
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private const int ExitMs = 200;
+
+    private bool _mounted;
+    private bool _openVisual;
+    private bool _closing;
+    private CancellationTokenSource? _exitCts;
+
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+
+    private string StateAttr => _openVisual ? "open" : "closed";
+
+    protected override void OnParametersSet()
+    {
+        if (Open)
+        {
+            if (_closing) return;
+
+            _exitCts?.Cancel();
+            _mounted = true;
+            _openVisual = true;
+            return;
+        }
+
+        if (_mounted && !_closing)
+            _ = ExitAsync(notifyParent: false);
+    }
+
+    private Task RequestCloseAsync() => ExitAsync(notifyParent: true);
+
+    private async Task ExitAsync(bool notifyParent)
+    {
+        if (_closing || !_mounted) return;
+
+        _closing = true;
+        _openVisual = false;
+        await InvokeAsync(StateHasChanged);
+
+        if (notifyParent && OnClose.HasDelegate)
+            await OnClose.InvokeAsync();
+
+        _exitCts?.Cancel();
+        _exitCts = new CancellationTokenSource();
+        var token = _exitCts.Token;
+
+        try
+        {
+            await Task.Delay(ExitMs, token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        _mounted = false;
+        _closing = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        _exitCts?.Cancel();
+        _exitCts?.Dispose();
+    }
+}

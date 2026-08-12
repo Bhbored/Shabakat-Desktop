@@ -1,88 +1,391 @@
 @page "/boxes"
-@using Shabakat.Components.Shared
-@using System.Linq
+@inject IDistributionBoxService DistributionBoxService
+@inject IAreaService AreaService
+@inject IToastService Toast
 
 <div class="space-y-4">
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex flex-1 flex-col gap-3 sm:flex-row">
-            <input type="text" class="h-11 min-w-60 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none focus:border-primary" placeholder="Search boxes..." @bind="searchTerm" @bind:event="oninput" />
-            <select class="h-11 w-full sm:w-60 rounded-xl border border-border bg-card px-3 text-sm text-foreground" @bind="areaFilter">
+            <input type="text"
+                   class="h-11 min-w-60 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none focus:border-primary"
+                   placeholder="Search boxes..."
+                   @bind="_searchTerm"
+                   @bind:event="oninput"
+                   @bind:after="ApplyFilter" />
+            <select class="h-11 w-full sm:w-60 rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                    @bind="_areaFilter"
+                    @bind:after="ApplyFilter">
                 <option value="">All Areas</option>
-                @foreach (var area in areas)
+                @foreach (var area in _areas)
                 {
                     <option value="@area.Id">@area.Name</option>
                 }
             </select>
         </div>
-        <button class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" style="box-shadow: 0 0 16px rgba(230,196,58,0.25);">+ Add Box</button>
+        <button type="button"
+                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                style="box-shadow: 0 0 16px rgba(230,196,58,0.25);"
+                disabled="@(_loading || _areas.Count == 0)"
+                @onclick="OpenCreate">
+            + Add Box
+        </button>
     </div>
-    <p class="text-xs text-muted-foreground">@filteredBoxes.Length box@(filteredBoxes.Length != 1 ? "es" : "") found</p>
+    <p class="text-xs text-muted-foreground">@_filtered.Count box@(_filtered.Count != 1 ? "es" : "") found</p>
 
-    <div class="grid gap-4 xl:grid-cols-2">
-        @foreach (var box in filteredBoxes)
-        {
-            <section class="rounded-2xl border border-border bg-card/80 p-5 hover:bg-card transition-colors">
-                <div class="flex items-start gap-4">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full text-white text-sm font-semibold shrink-0" style="background-color: @GetAvatarColor(box.Name)">@GetInitials(box.Name)</div>
-                    <button type="button" class="min-w-0 flex-1 text-left">
-                        <p class="truncate text-base font-semibold text-foreground">@box.Name</p>
-                        <p class="mt-1 text-sm text-muted-foreground">@box.AreaName</p>
-                        <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                            <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1">
-                                <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                                @box.CustomerCount subscriber@(box.CustomerCount != 1 ? "s" : "")
-                            </span>
-                            <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1">
-                                <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                @(box.LocationNote ?? "No location")
-                            </span>
+    @if (_loading)
+    {
+        <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
+            Loading boxes...
+        </section>
+    }
+    else if (_areas.Count == 0)
+    {
+        <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
+            Create an area before adding distribution boxes.
+        </section>
+    }
+    else if (_filtered.Count == 0)
+    {
+        <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
+            No boxes found.
+        </section>
+    }
+    else
+    {
+        <div class="grid gap-4 xl:grid-cols-2">
+            @foreach (var box in _filtered)
+            {
+                <section class="rounded-2xl border border-border bg-card/80 p-5 hover:bg-card transition-colors">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-full text-white text-sm font-semibold shrink-0"
+                             style="background-color: @FormatHelper.AvatarColor(box.Name)">
+                            @FormatHelper.Initials(box.Name)
                         </div>
-                        <div class="mt-4 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
-                            <div class="rounded-xl border border-border bg-muted/50 px-3 py-2">
-                                <div class="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                                    <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                                    Area
-                                </div>
-                                <p class="truncate text-sm text-foreground">@box.AreaName</p>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-base font-semibold text-foreground">@box.Name</p>
+                            <p class="mt-1 text-sm text-muted-foreground">@box.AreaName</p>
+                            <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                                <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1">
+                                    <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                                    @box.CustomerCount subscriber@(box.CustomerCount != 1 ? "s" : "")
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1">
+                                    <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    @(string.IsNullOrWhiteSpace(box.LocationNote) ? "No location" : box.LocationNote)
+                                </span>
                             </div>
-                            <div class="rounded-xl border border-border bg-muted/50 px-3 py-2">
-                                <div class="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                                    <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                    Created
+                            <div class="mt-4 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
+                                <div class="rounded-xl border border-border bg-muted/50 px-3 py-2">
+                                    <div class="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                                        Area
+                                    </div>
+                                    <p class="truncate text-sm text-foreground">@box.AreaName</p>
                                 </div>
-                                <p class="text-sm text-foreground">@MockData.FormatDate(box.CreatedAt)</p>
+                                <div class="rounded-xl border border-border bg-muted/50 px-3 py-2">
+                                    <div class="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                                        Created
+                                    </div>
+                                    <p class="text-sm text-foreground">@FormatHelper.Date(box.CreatedAt)</p>
+                                </div>
                             </div>
+                            @if (!string.IsNullOrWhiteSpace(box.Notes))
+                            {
+                                <p class="mt-3 line-clamp-2 text-xs text-muted-foreground">@box.Notes</p>
+                            }
                         </div>
-                    </button>
-                    <button class="rounded-lg p-1 text-muted-foreground hover:text-foreground">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                    </button>
-                </div>
-            </section>
-        }
-    </div>
+                        <div class="flex shrink-0 flex-col gap-1">
+                            <button type="button"
+                                    class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    @onclick="() => OpenEdit(box)">
+                                Edit
+                            </button>
+                            <button type="button"
+                                    class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-500 hover:bg-red-500/10 disabled:opacity-40"
+                                    disabled="@(box.CustomerCount > 0 || _saving)"
+                                    title="@(box.CustomerCount > 0 ? "Cannot delete a box with subscribers" : "Delete box")"
+                                    @onclick="() => OpenDelete(box)">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            }
+        </div>
+    }
 </div>
 
-@code {
-    private string searchTerm = "";
-    private string areaFilter = "";
+<SideSheet Open="_showForm"
+           Title="@(_editingId is null ? "Add Distribution Box" : "Edit Distribution Box")"
+           Description="Assign the box to an area and optionally add location notes."
+           MaxWidthClass="sm:max-w-xl"
+           OnClose="CloseForm">
+    <ChildContent>
+        <EditForm Model="_form" OnValidSubmit="SaveAsync" class="space-y-5">
+            <DataAnnotationsValidator />
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-foreground">Name</label>
+                    <InputText @bind-Value="_form.Name"
+                               class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                               placeholder="e.g. Box A-12" />
+                    <ValidationMessage For="() => _form.Name" class="mt-1 text-xs text-red-500" />
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-foreground">Area</label>
+                    <InputSelect @bind-Value="_form.AreaId"
+                                 class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary">
+                        <option value="@Guid.Empty">Select area...</option>
+                        @foreach (var area in _areas)
+                        {
+                            <option value="@area.Id">@area.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => _form.AreaId" class="mt-1 text-xs text-red-500" />
+                </div>
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">Location note</label>
+                <InputText @bind-Value="_form.LocationNote"
+                           class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                           placeholder="Optional landmark or address hint" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">Notes</label>
+                <InputTextArea @bind-Value="_form.Notes"
+                               class="min-h-28 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                               placeholder="Optional internal notes" />
+            </div>
+            <div class="flex items-center justify-end gap-3 border-t border-border pt-5">
+                <button type="button"
+                        class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                        disabled="@_saving"
+                        @onclick="CloseForm">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                        disabled="@_saving">
+                    @(_saving ? "Saving..." : (_editingId is null ? "Create" : "Save"))
+                </button>
+            </div>
+        </EditForm>
+    </ChildContent>
+</SideSheet>
 
-    private AreaData[] areas = MockData.Areas;
-
-    private BoxData[] filteredBoxes
-    {
-        get
+<ConfirmDialog Open="_showDelete"
+               Title="Delete distribution box"
+               OnClose="CloseDelete">
+    <ChildContent>
+        @if (_pendingDelete is not null)
         {
-            var query = MockData.Boxes.AsEnumerable();
-            if (!string.IsNullOrEmpty(areaFilter)) query = query.Where(b => b.AreaId == areaFilter);
-            var term = searchTerm.Trim().ToLower();
-            if (!string.IsNullOrEmpty(term))
-                query = query.Where(b => b.Name.ToLower().Contains(term) || b.AreaName.ToLower().Contains(term) || (b.LocationNote ?? "").ToLower().Contains(term));
-            return query.ToArray();
+            <p>
+                Delete <span class="font-medium text-foreground">@_pendingDelete.Name</span>? This cannot be undone.
+            </p>
         }
+    </ChildContent>
+    <Footer>
+        <button type="button"
+                class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                disabled="@_saving"
+                @onclick="CloseDelete">
+            Cancel
+        </button>
+        <button type="button"
+                class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500/90 disabled:opacity-50"
+                disabled="@_saving"
+                @onclick="ConfirmDeleteAsync">
+            @(_saving ? "Deleting..." : "Delete")
+        </button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    private readonly List<DistributionBoxResponse> _items = [];
+    private readonly List<AreaResponse> _areas = [];
+    private List<DistributionBoxResponse> _filtered = [];
+    private string _searchTerm = "";
+    private string _areaFilter = "";
+    private bool _loading = true;
+    private bool _saving;
+    private bool _showForm;
+    private bool _showDelete;
+    private Guid? _editingId;
+    private DistributionBoxResponse? _pendingDelete;
+    private BoxFormModel _form = new();
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+
+        var areas = await UiActions.RunAsync(Toast, () => AreaService.GetAllAsync());
+        var boxes = await UiActions.RunAsync(Toast, () => DistributionBoxService.GetAllUnpagedAsync());
+
+        _areas.Clear();
+        if (areas is not null)
+            _areas.AddRange(areas.OrderBy(a => a.Name));
+
+        _items.Clear();
+        if (boxes is not null)
+            _items.AddRange(boxes.OrderBy(b => b.Name));
+
+        ApplyFilter();
+        _loading = false;
     }
 
-    private static readonly string[] AvatarColors = new[] { "#7c3aed", "#2563eb", "#059669", "#db2777", "#ea580c", "#0891b2", "#d97706" };
-    private string GetAvatarColor(string name) => AvatarColors[Math.Abs(name.GetHashCode()) % AvatarColors.Length];
-    private string GetInitials(string name) => string.Join("", name.Split(' ').Take(2).Select(w => w[0])).ToUpperInvariant();
+    private void ApplyFilter()
+    {
+        IEnumerable<DistributionBoxResponse> query = _items;
+
+        if (Guid.TryParse(_areaFilter, out var areaId))
+            query = query.Where(b => b.AreaId == areaId);
+
+        var term = _searchTerm.Trim();
+        if (!string.IsNullOrEmpty(term))
+        {
+            query = query.Where(b =>
+                b.Name.Contains(term, StringComparison.OrdinalIgnoreCase)
+                || b.AreaName.Contains(term, StringComparison.OrdinalIgnoreCase)
+                || (b.LocationNote?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (b.Notes?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        _filtered = query.ToList();
+    }
+
+    private void OpenCreate()
+    {
+        if (_areas.Count == 0)
+        {
+            Toast.Error("Create an area before adding a distribution box.");
+            return;
+        }
+
+        _editingId = null;
+        _form = new BoxFormModel
+        {
+            AreaId = _areas[0].Id
+        };
+        _showForm = true;
+    }
+
+    private void OpenEdit(DistributionBoxResponse box)
+    {
+        _editingId = box.Id;
+        _form = new BoxFormModel
+        {
+            Name = box.Name,
+            AreaId = box.AreaId,
+            LocationNote = box.LocationNote ?? "",
+            Notes = box.Notes ?? ""
+        };
+        _showForm = true;
+    }
+
+    private void CloseForm()
+    {
+        if (_saving) return;
+        _showForm = false;
+        _editingId = null;
+    }
+
+    private void OpenDelete(DistributionBoxResponse box)
+    {
+        if (box.CustomerCount > 0)
+        {
+            Toast.Error("Cannot delete a distribution box that has customers assigned to it.");
+            return;
+        }
+
+        _pendingDelete = box;
+        _showDelete = true;
+    }
+
+    private void CloseDelete()
+    {
+        if (_saving) return;
+        _showDelete = false;
+        _pendingDelete = null;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_saving) return;
+
+        if (_form.AreaId == Guid.Empty)
+        {
+            Toast.Error("Please select an area.");
+            return;
+        }
+
+        _saving = true;
+        var location = string.IsNullOrWhiteSpace(_form.LocationNote) ? null : _form.LocationNote.Trim();
+        var notes = string.IsNullOrWhiteSpace(_form.Notes) ? null : _form.Notes.Trim();
+
+        var ok = false;
+        if (_editingId is null)
+        {
+            var created = await UiActions.RunAsync(
+                Toast,
+                () => DistributionBoxService.CreateAsync(new CreateDistributionBoxRequest(
+                    _form.Name,
+                    _form.AreaId,
+                    location,
+                    notes)),
+                "Distribution box created.");
+            ok = created is not null;
+        }
+        else
+        {
+            var updated = await UiActions.RunAsync(
+                Toast,
+                () => DistributionBoxService.UpdateAsync(_editingId.Value, new UpdateDistributionBoxRequest(
+                    _form.Name,
+                    _form.AreaId,
+                    location,
+                    notes)),
+                "Distribution box updated.");
+            ok = updated is not null;
+        }
+
+        _saving = false;
+        if (!ok) return;
+
+        _showForm = false;
+        _editingId = null;
+        await LoadAsync();
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (_pendingDelete is null || _saving) return;
+        _saving = true;
+
+        await UiActions.RunAsync(
+            Toast,
+            () => DistributionBoxService.DeleteAsync(_pendingDelete.Id),
+            "Distribution box deleted.");
+
+        _saving = false;
+        _showDelete = false;
+        _pendingDelete = null;
+        await LoadAsync();
+    }
+
+    private sealed class BoxFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Name is required.")]
+        [System.ComponentModel.DataAnnotations.MaxLength(200)]
+        public string Name { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        public Guid AreaId { get; set; }
+
+        [System.ComponentModel.DataAnnotations.MaxLength(500)]
+        public string LocationNote { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.MaxLength(1000)]
+        public string Notes { get; set; } = "";
+    }
 }

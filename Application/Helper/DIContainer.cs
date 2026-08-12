@@ -13,6 +13,8 @@ using Shabakat.Application.Services.MeterReadings;
 using Shabakat.Application.Services.Preferences;
 using Shabakat.Application.Services.Pricing;
 using Shabakat.Application.Services.Profile;
+using Shabakat.Application.Services.Theme;
+using Shabakat.Application.Services.Toasts;
 using Shabakat.Infrastructure.Persistence;
 using Shabakat.Infrastructure.Persistence.Interceptors;
 using Shabakat.Infrastructure.Repository;
@@ -49,6 +51,8 @@ public static class DIContainer
     {
         services.RegisterDataBase();
 
+        services.AddSingleton<IThemeService, ThemeService>();
+        services.AddScoped<IToastService, ToastService>();
         services.AddScoped<IPricingService, PricingService>();
         services.AddScoped<IAppPreferencesService, AppPreferencesService>();
         services.AddScoped<IAppUserService, AppUserService>();

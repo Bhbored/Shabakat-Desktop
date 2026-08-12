@@ -1,0 +1,132 @@
+@page "/calculator"
+@inject IInvoiceService InvoiceService
+@inject IToastService Toast
+
+<div class="space-y-5">
+    <div>
+        <h1 class="text-xl font-bold text-foreground">Fixed Kilowatt Calculator</h1>
+        <p class="text-xs text-muted-foreground">Estimate payment or kilowatt credits for prepaid plans</p>
+    </div>
+
+    <section class="rounded-2xl border border-border bg-card p-5 space-y-4 max-w-xl">
+        <div>
+            <label class="text-xs font-medium text-muted-foreground">Customer Type</label>
+            <select class="mt-1 w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm text-foreground"
+                    @bind="_customerType">
+                @foreach (var type in Enum.GetValues<CustomerType>())
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label class="text-xs font-medium text-muted-foreground">Plan Value (optional)</label>
+            <input type="number" step="0.01" min="0"
+                   class="mt-1 w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm text-foreground"
+                   @bind="_planValue" />
+        </div>
+        <div>
+            <label class="text-xs font-medium text-muted-foreground">Input Mode</label>
+            <div class="mt-2 flex gap-2">
+                <button type="button"
+                        class="@ModeButtonClass(_inputMode == "payment")"
+                        @onclick='() => _inputMode = "payment"'>
+                    Payment Amount
+                </button>
+                <button type="button"
+                        class="@ModeButtonClass(_inputMode == "kilowatt")"
+                        @onclick='() => _inputMode = "kilowatt"'>
+                    Kilowatt Amount
+                </button>
+            </div>
+        </div>
+        @if (_inputMode == "payment")
+        {
+            <div>
+                <label class="text-xs font-medium text-muted-foreground">Payment Amount</label>
+                <input type="number" step="0.01" min="0.0001"
+                       class="mt-1 w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm text-foreground"
+                       @bind="_paymentAmount" />
+            </div>
+        }
+        else
+        {
+            <div>
+                <label class="text-xs font-medium text-muted-foreground">Kilowatt Amount</label>
+                <input type="number" step="0.01" min="0.0001"
+                       class="mt-1 w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm text-foreground"
+                       @bind="_kilowattAmount" />
+            </div>
+        }
+        <button type="button"
+                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                style="box-shadow: 0 0 16px rgba(230,196,58,0.25);"
+                disabled="@_calculating"
+                @onclick="CalculateAsync">
+            @(_calculating ? "Calculating..." : "Calculate")
+        </button>
+    </section>
+
+    @if (_result is not null)
+    {
+        <section class="rounded-2xl border border-border bg-card p-5 max-w-xl">
+            <h2 class="text-sm font-semibold text-foreground">Results</h2>
+            <p class="mt-1 text-xs text-muted-foreground">@_result.CustomerType · Plan @FormatHelper.Number(_result.PlanValue)</p>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <div class="rounded-xl border border-border bg-muted/50 px-4 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Payment</p>
+                    <p class="mt-1 font-mono text-lg font-semibold text-foreground">@FormatHelper.Currency(_result.PaymentAmount)</p>
+                </div>
+                <div class="rounded-xl border border-border bg-muted/50 px-4 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Kilowatts</p>
+                    <p class="mt-1 font-mono text-lg font-semibold text-foreground">@FormatHelper.Number(_result.KilowattAmount)</p>
+                </div>
+                <div class="rounded-xl border border-border bg-muted/50 px-4 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Unit Price</p>
+                    <p class="mt-1 font-mono text-lg font-semibold text-foreground">@FormatHelper.Currency(_result.UnitPrice)</p>
+                </div>
+                <div class="rounded-xl border border-border bg-muted/50 px-4 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Fixed Charge</p>
+                    <p class="mt-1 font-mono text-lg font-semibold text-foreground">@FormatHelper.Currency(_result.FixedCharge)</p>
+                </div>
+                <div class="rounded-xl border border-border bg-muted/50 px-4 py-3 sm:col-span-2">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">TVA</p>
+                    <p class="mt-1 font-mono text-lg font-semibold text-foreground">@FormatHelper.Number(_result.TVA)%</p>
+                </div>
+            </div>
+        </section>
+    }
+</div>
+
+@code {
+    private CustomerType _customerType = CustomerType.Residential;
+    private decimal? _planValue;
+    private string _inputMode = "payment";
+    private decimal? _paymentAmount;
+    private decimal? _kilowattAmount;
+    private bool _calculating;
+    private FixedKilowattCalculateResponse? _result;
+
+    private static string ModeButtonClass(bool active) =>
+        active
+            ? "flex-1 rounded-xl border-2 border-primary bg-primary/10 px-3 py-2.5 text-sm font-medium text-primary"
+            : "flex-1 rounded-xl border border-border bg-card px-3 py-2.5 text-sm font-medium text-muted-foreground";
+
+    private async Task CalculateAsync()
+    {
+        _calculating = true;
+        _result = null;
+
+        var request = new FixedKilowattCalculateRequest(
+            CustomerType: _customerType,
+            PlanValue: _planValue is > 0 ? _planValue : null,
+            PaymentAmount: _inputMode == "payment" ? _paymentAmount : null,
+            KilowattAmount: _inputMode == "kilowatt" ? _kilowattAmount : null);
+
+        _result = await UiActions.RunAsync(
+            Toast,
+            () => InvoiceService.CalculateFixedKilowattAsync(request));
+
+        _calculating = false;
+    }
+}

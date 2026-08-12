@@ -1,21 +1,63 @@
 @page "/settings/ampere-proration"
+@inject IAppPreferencesService PreferencesService
+@inject IToastService Toast
+@inject NavigationManager Navigation
 
-<div class="space-y-5">
-    <NavLink href="settings" class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-2">
-        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        Back to Settings
-    </NavLink>
-    <h1 class="text-xl font-bold text-foreground">Ampere Proration</h1>
-    <p class="text-xs text-muted-foreground">Prorate ampere charges based on days remaining in billing cycle</p>
-
-    <section class="rounded-2xl border border-border bg-card p-5">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-foreground">Day-Based Proration</p>
-                <p class="text-xs text-muted-foreground">When enabled, charges are prorated based on days remaining in the month</p>
+<SettingsScaffold Title="Ampere Proration">
+    <div class="space-y-4">
+        @if (_loading)
+        {
+            <p class="text-sm text-muted-foreground">Loading company preferences...</p>
+        }
+        else
+        {
+            <div class="rounded-2xl border border-border bg-background px-4 py-4">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <p class="text-sm font-medium text-foreground">Ampere Proration</p>
+                        <p class="text-sm text-muted-foreground">Prorate ampere charges by days remaining in the billing cycle.</p>
+                    </div>
+                    <label class="relative inline-flex cursor-pointer items-center">
+                        <input type="checkbox" class="peer sr-only" @bind="_enabled" />
+                        <span class="h-6 w-11 rounded-full bg-muted transition peer-checked:bg-primary after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-card after:transition-all peer-checked:after:translate-x-full"></span>
+                    </label>
+                </div>
             </div>
-            <input type="checkbox" class="h-5 w-5 rounded accent-primary" />
-        </div>
-    </section>
-    <button class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">Save Changes</button>
-</div>
+            <p class="text-sm leading-6 text-muted-foreground">When enabled, ampere invoices can charge for a partial month using billed days.</p>
+            <button type="button"
+                    class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+                    disabled="@_saving"
+                    @onclick="SaveAsync">
+                @(_saving ? "Saving..." : "Save")
+            </button>
+        }
+    </div>
+</SettingsScaffold>
+
+@code {
+    private bool _loading = true;
+    private bool _saving;
+    private GetPreferencesResponse? _existing;
+    private bool _enabled;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _existing = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
+        _enabled = PreferencesMapper.FromExistingOrDefaults(_existing).AmpereProrateByDaysEnabled;
+        _loading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        var request = PreferencesMapper.FromExistingOrDefaults(_existing) with { AmpereProrateByDaysEnabled = _enabled };
+        var ok = false;
+        await UiActions.RunAsync(Toast, async () =>
+        {
+            await PreferencesService.UpsertAsync(request);
+            ok = true;
+        }, "Preferences saved.");
+        _saving = false;
+        if (ok) Navigation.NavigateTo("settings");
+    }
+}

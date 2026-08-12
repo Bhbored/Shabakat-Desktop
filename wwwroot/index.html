@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -11,6 +11,16 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="Shabakat.styles.css" />
     <link rel="icon" href="data:,">
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('shabakat-theme-ui');
+                if (saved === 'light' || saved === 'dark') {
+                    document.documentElement.setAttribute('data-theme', saved);
+                }
+            } catch (_) { }
+        })();
+    </script>
 </head>
 
 <body>

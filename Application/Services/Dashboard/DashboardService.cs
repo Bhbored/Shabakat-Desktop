@@ -50,6 +50,9 @@ public sealed class DashboardService : IDashboardService
 
         var netIncome = totalCollected - totalExpenses;
 
+        var recentlyPaid = await _dashboardRepository.GetRecentlyPaidAsync();
+        var upcomingDue = await _dashboardRepository.GetUpcomingDueAsync();
+
         return new DashboardSummaryResponse(
             TotalBilledAllTime: totalBilled,
             TotalCollectedAllTime: totalCollected,
@@ -59,7 +62,9 @@ public sealed class DashboardService : IDashboardService
             NetIncomeAllTime: netIncome,
             Customers: customers,
             Invoices: invoiceOverview,
-            ExpensesByType: expensesByType);
+            ExpensesByType: expensesByType,
+            RecentlyPaid: recentlyPaid,
+            UpcomingDue: upcomingDue);
     }
 
     private static (DateOnly? PeriodStart, DateOnly? PeriodEndExclusive) ResolvePeriod(
