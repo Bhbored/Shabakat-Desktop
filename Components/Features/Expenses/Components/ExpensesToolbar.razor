@@ -1,0 +1,78 @@
+@namespace Shabakat.Components.Features.Expenses.Components
+
+<div class="space-y-4">
+    <div class="flex flex-wrap items-center gap-3">
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                value="@TypeFilterKey"
+                @onchange="OnTypeFilterChanged">
+            <option value="">All Types</option>
+            @foreach (var type in Enum.GetValues<ExpenseType>())
+            {
+                <option value="@type">@type</option>
+            }
+        </select>
+        <input type="date"
+               class="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground w-40"
+               value="@(DateFrom?.ToString("yyyy-MM-dd") ?? "")"
+               @onchange="OnDateFromChanged" />
+        <span class="text-muted-foreground">to</span>
+        <input type="date"
+               class="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground w-40"
+               value="@(DateTo?.ToString("yyyy-MM-dd") ?? "")"
+               @onchange="OnDateToChanged" />
+        <button type="button"
+                class="ml-auto rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                style="box-shadow: 0 0 16px rgba(230,196,58,0.25);"
+                @onclick="OnCreate">
+            + Add Expense
+        </button>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-3">
+        <section class="rounded-2xl border border-border bg-card p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Total This Period</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-foreground">@FormatHelper.Currency(TotalAmount)</p>
+            <p class="mt-1 text-xs text-muted-foreground">@TotalCount entries</p>
+        </section>
+        <section class="rounded-2xl border border-border bg-card p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Fuel Cost</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-amber-600">@FormatHelper.Currency(FuelTotal)</p>
+            <p class="mt-1 text-xs text-muted-foreground">@FuelShareLabel</p>
+        </section>
+        <section class="rounded-2xl border border-border bg-card p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Maintenance</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-blue-400">@FormatHelper.Currency(MaintenanceTotal)</p>
+            <p class="mt-1 text-xs text-muted-foreground">Repairs &amp; parts</p>
+        </section>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string TypeFilterKey { get; set; } = "";
+    [Parameter] public DateOnly? DateFrom { get; set; }
+    [Parameter] public DateOnly? DateTo { get; set; }
+    [Parameter] public decimal TotalAmount { get; set; }
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public decimal FuelTotal { get; set; }
+    [Parameter] public decimal MaintenanceTotal { get; set; }
+    [Parameter] public string FuelShareLabel { get; set; } = "0%";
+    [Parameter] public EventCallback<string> TypeFilterKeyChanged { get; set; }
+    [Parameter] public EventCallback<DateOnly?> DateFromChanged { get; set; }
+    [Parameter] public EventCallback<DateOnly?> DateToChanged { get; set; }
+    [Parameter] public EventCallback OnCreate { get; set; }
+
+    private async Task OnTypeFilterChanged(ChangeEventArgs e)
+        => await TypeFilterKeyChanged.InvokeAsync(e.Value?.ToString() ?? "");
+
+    private async Task OnDateFromChanged(ChangeEventArgs e)
+    {
+        DateOnly? value = DateOnly.TryParse(e.Value?.ToString(), out var parsed) ? parsed : null;
+        await DateFromChanged.InvokeAsync(value);
+    }
+
+    private async Task OnDateToChanged(ChangeEventArgs e)
+    {
+        DateOnly? value = DateOnly.TryParse(e.Value?.ToString(), out var parsed) ? parsed : null;
+        await DateToChanged.InvokeAsync(value);
+    }
+}

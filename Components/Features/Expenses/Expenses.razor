@@ -3,217 +3,50 @@
 @inject IToastService Toast
 
 <div class="space-y-4">
-    <div class="flex flex-wrap items-center gap-3">
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                @bind="_typeFilterKey"
-                @bind:after="ApplyFiltersAsync">
-            <option value="">All Types</option>
-            @foreach (var type in Enum.GetValues<ExpenseType>())
-            {
-                <option value="@type">@type</option>
-            }
-        </select>
-        <input type="date"
-               class="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground w-40"
-               @bind="_dateFrom"
-               @bind:format="yyyy-MM-dd"
-               @bind:after="ApplyFiltersAsync" />
-        <span class="text-muted-foreground">to</span>
-        <input type="date"
-               class="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground w-40"
-               @bind="_dateTo"
-               @bind:format="yyyy-MM-dd"
-               @bind:after="ApplyFiltersAsync" />
-        <button type="button"
-                class="ml-auto rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
-                style="box-shadow: 0 0 16px rgba(230,196,58,0.25);"
-                @onclick="OpenCreate">
-            + Add Expense
-        </button>
-    </div>
+    <ExpensesToolbar TypeFilterKey="@_typeFilterKey"
+                     TypeFilterKeyChanged="OnTypeFilterChangedAsync"
+                     DateFrom="_dateFrom"
+                     DateFromChanged="OnDateFromChangedAsync"
+                     DateTo="_dateTo"
+                     DateToChanged="OnDateToChangedAsync"
+                     TotalAmount="_totalAmount"
+                     TotalCount="_totalCount"
+                     FuelTotal="_fuelTotal"
+                     MaintenanceTotal="_maintenanceTotal"
+                     FuelShareLabel="@FuelShareLabel"
+                     OnCreate="OpenCreate" />
 
-    <div class="grid gap-4 md:grid-cols-3">
-        <section class="rounded-2xl border border-border bg-card p-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Total This Period</p>
-            <p class="mt-2 font-mono text-2xl font-bold text-foreground">@FormatHelper.Currency(_totalAmount)</p>
-            <p class="mt-1 text-xs text-muted-foreground">@_totalCount entries</p>
-        </section>
-        <section class="rounded-2xl border border-border bg-card p-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Fuel Cost</p>
-            <p class="mt-2 font-mono text-2xl font-bold text-amber-600">@FormatHelper.Currency(_fuelTotal)</p>
-            <p class="mt-1 text-xs text-muted-foreground">@FuelShareLabel</p>
-        </section>
-        <section class="rounded-2xl border border-border bg-card p-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Maintenance</p>
-            <p class="mt-2 font-mono text-2xl font-bold text-blue-400">@FormatHelper.Currency(_maintenanceTotal)</p>
-            <p class="mt-1 text-xs text-muted-foreground">Repairs &amp; parts</p>
-        </section>
-    </div>
-
-    @if (_loading)
-    {
-        <p class="text-sm text-muted-foreground">Loading expenses...</p>
-    }
-    else
-    {
-        <section class="rounded-2xl border border-border bg-card overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full min-w-[760px]">
-                    <thead>
-                        <tr class="border-b border-border">
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Date</th>
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Type</th>
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Label</th>
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Notes</th>
-                            <th class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount</th>
-                            <th class="px-4 py-3.5"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (_items.Count == 0)
-                        {
-                            <tr>
-                                <td colspan="6" class="px-4 py-8 text-center text-sm text-muted-foreground">No expenses found.</td>
-                            </tr>
-                        }
-                        else
-                        {
-                            @foreach (var exp in _items)
-                            {
-                                <tr class="border-b border-border hover:bg-muted/30">
-                                    <td class="px-4 py-3.5 whitespace-nowrap text-sm text-muted-foreground">@FormatHelper.Date(exp.ExpenseDate)</td>
-                                    <td class="px-4 py-3.5"><ExpenseTypeBadge Category="@exp.ExpenseType" /></td>
-                                    <td class="px-4 py-3.5 text-sm text-foreground">@(exp.Label ?? "—")</td>
-                                    <td class="px-4 py-3.5 text-sm text-muted-foreground max-w-xs truncate">@(exp.Notes ?? "—")</td>
-                                    <td class="px-4 py-3.5 font-mono text-sm font-semibold text-foreground text-right">@FormatHelper.Currency(exp.Amount)</td>
-                                    <td class="px-4 py-3.5">
-                                        <div class="flex items-center justify-end gap-1">
-                                            <button type="button"
-                                                    class="rounded-lg px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
-                                                    @onclick="() => OpenEdit(exp)">
-                                                Edit
-                                            </button>
-                                            <button type="button"
-                                                    class="rounded-lg px-2 py-1 text-xs text-red-500 hover:bg-red-500/10"
-                                                    @onclick="() => OpenDelete(exp)">
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-                <span>@_totalCount expenses found</span>
-                <div class="flex items-center gap-2 self-end md:self-auto">
-                    <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm"
-                            @bind="_pageSize"
-                            @bind:after="GoToFirstPageAsync">
-                        <option value="10">10 / page</option>
-                        <option value="20">20 / page</option>
-                        <option value="50">50 / page</option>
-                    </select>
-                    <button type="button"
-                            class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40"
-                            disabled="@(!_hasPrevious)"
-                            @onclick="PrevPageAsync">
-                        Prev
-                    </button>
-                    <span class="min-w-20 text-center">@_pageNumber / @_totalPages</span>
-                    <button type="button"
-                            class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40"
-                            disabled="@(!_hasNext)"
-                            @onclick="NextPageAsync">
-                        Next
-                    </button>
-                </div>
-            </div>
-        </section>
-    }
+    <ExpensesList Items="_items"
+                  IsLoading="_loading"
+                  TotalCount="_totalCount"
+                  PageNumber="_pageNumber"
+                  TotalPages="_totalPages"
+                  PageSize="_pageSize"
+                  HasPrevious="_hasPrevious"
+                  HasNext="_hasNext"
+                  PageSizeChanged="OnPageSizeChangedAsync"
+                  OnPrevPage="PrevPageAsync"
+                  OnNextPage="NextPageAsync"
+                  OnEdit="OpenEdit"
+                  OnDelete="OpenDelete" />
 </div>
 
-<SideSheet Open="_showForm"
-           Title="@(_editingId is null ? "Add Expense" : "Edit Expense")"
-           Description="Record a company expense for the selected period."
-           MaxWidthClass="sm:max-w-lg"
-           OnClose="CloseForm">
-    <ChildContent>
-        <div class="space-y-4">
-            <div>
-                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Type</label>
-                <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                        @bind="_formType">
-                    @foreach (var type in Enum.GetValues<ExpenseType>())
-                    {
-                        <option value="@type">@type</option>
-                    }
-                </select>
-            </div>
-            <div>
-                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Amount</label>
-                <input type="number" step="0.01" min="0.0001"
-                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                       @bind="_formAmount" />
-            </div>
-            <div>
-                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Date</label>
-                <input type="date"
-                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                       @bind="_formDate"
-                       @bind:format="yyyy-MM-dd" />
-            </div>
-            <div>
-                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                    Label @(_formType == ExpenseType.Other ? "(required)" : "(optional)")
-                </label>
-                <input type="text" maxlength="100"
-                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                       @bind="_formLabel"
-                       placeholder="@(_formType == ExpenseType.Other ? "e.g. Rent, Insurance" : "")" />
-            </div>
-            <div>
-                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Notes</label>
-                <textarea maxlength="500" rows="3"
-                          class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                          @bind="_formNotes"></textarea>
-            </div>
-            <div class="flex justify-end gap-2 border-t border-border pt-5">
-                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="CloseForm">Cancel</button>
-                <button type="button"
-                        class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
-                        disabled="@_saving"
-                        @onclick="SaveAsync">
-                    @(_saving ? "Saving..." : "Save")
-                </button>
-            </div>
-        </div>
-    </ChildContent>
-</SideSheet>
+<ExpenseFormSheet Open="_showForm"
+                  IsEdit="@(_editingId is not null)"
+                  Saving="_saving"
+                  @bind-Type="_formType"
+                  @bind-Amount="_formAmount"
+                  @bind-Date="_formDate"
+                  @bind-Label="_formLabel"
+                  @bind-Notes="_formNotes"
+                  OnClose="CloseForm"
+                  OnSave="SaveAsync" />
 
-<ConfirmDialog Open="@(_deleteTarget is not null)"
-               Title="Delete Expense"
-               OnClose="CloseDelete">
-    <ChildContent>
-        @if (_deleteTarget is not null)
-        {
-            <p>
-                Delete @_deleteTarget.ExpenseType expense of @FormatHelper.Currency(_deleteTarget.Amount) on @FormatHelper.Date(_deleteTarget.ExpenseDate)?
-            </p>
-        }
-    </ChildContent>
-    <Footer>
-        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="CloseDelete">Cancel</button>
-        <button type="button"
-                class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
-                disabled="@_saving"
-                @onclick="ConfirmDeleteAsync">
-            @(_saving ? "Deleting..." : "Delete")
-        </button>
-    </Footer>
-</ConfirmDialog>
+<DeleteExpenseDialog Open="@(_deleteTarget is not null)"
+                     Expense="_deleteTarget"
+                     Saving="_saving"
+                     OnClose="CloseDelete"
+                     OnConfirm="ConfirmDeleteAsync" />
 
 @code {
     private bool _loading = true;
@@ -311,6 +144,30 @@
     {
         _pageNumber = 1;
         await LoadAsync();
+    }
+
+    private async Task OnTypeFilterChangedAsync(string value)
+    {
+        _typeFilterKey = value;
+        await ApplyFiltersAsync();
+    }
+
+    private async Task OnDateFromChangedAsync(DateOnly? value)
+    {
+        _dateFrom = value;
+        await ApplyFiltersAsync();
+    }
+
+    private async Task OnDateToChangedAsync(DateOnly? value)
+    {
+        _dateTo = value;
+        await ApplyFiltersAsync();
+    }
+
+    private async Task OnPageSizeChangedAsync(int pageSize)
+    {
+        _pageSize = pageSize;
+        await GoToFirstPageAsync();
     }
 
     private async Task GoToFirstPageAsync()

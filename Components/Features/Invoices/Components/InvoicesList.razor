@@ -1,0 +1,122 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+@if (IsLoading)
+{
+    <p class="text-sm text-muted-foreground">Loading invoices...</p>
+}
+else
+{
+    <section class="rounded-2xl border border-border bg-card">
+        <table class="w-full min-w-[860px]">
+            <thead>
+                <tr class="border-b border-border">
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Invoice #</th>
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Customer</th>
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Total</th>
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Paid</th>
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Due</th>
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Period</th>
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Status</th>
+                    <th class="px-4 py-3.5"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Items.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="px-4 py-8 text-center text-sm text-muted-foreground">No invoices found.</td>
+                    </tr>
+                }
+                @foreach (var inv in Items)
+                {
+                    <tr class="border-b border-border hover:bg-muted/30">
+                        <td class="px-4 py-3.5 font-mono text-sm font-medium text-foreground">#@inv.InvoiceNumber</td>
+                        <td class="px-4 py-3.5 text-sm text-foreground">@inv.CustomerName</td>
+                        <td class="px-4 py-3.5 font-mono text-sm text-foreground">@FormatHelper.Currency(inv.TotalAmount)</td>
+                        <td class="px-4 py-3.5 font-mono text-sm text-emerald-600">@FormatHelper.Currency(inv.PaidAmount)</td>
+                        <td class="px-4 py-3.5 font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(inv.AmountDue)</td>
+                        <td class="px-4 py-3.5 whitespace-nowrap text-sm text-muted-foreground">
+                            @FormatHelper.Date(inv.ConsumptionStart) – @FormatHelper.Date(inv.ConsumptionEnd)
+                        </td>
+                        <td class="px-4 py-3.5"><InvoiceStatusBadge Status="@ToBadgeStatus(inv.InvoiceStatus)" /></td>
+                        <td class="px-4 py-3.5">
+                            <div class="relative flex justify-end">
+                                <button type="button"
+                                        class="rounded-lg p-1 text-muted-foreground hover:text-foreground"
+                                        @onclick="() => OnToggleMenu.InvokeAsync(inv.Id)"
+                                        @onclick:stopPropagation="true">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                                </button>
+                                @if (OpenMenuId == inv.Id)
+                                {
+                                    <div class="absolute end-0 top-full z-30 mt-1 min-w-44 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg"
+                                         @onclick:stopPropagation="true">
+                                        <button type="button" class="flex w-full px-3 py-2 text-left text-sm text-foreground hover:bg-muted" @onclick="() => OnView.InvokeAsync(inv)">View details</button>
+                                        @if (!inv.InvoiceStatus.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <button type="button" class="flex w-full px-3 py-2 text-left text-sm text-foreground hover:bg-muted" @onclick="() => OnPay.InvokeAsync(inv)">Record payment</button>
+                                        }
+                                        <button type="button" class="flex w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-muted" @onclick="() => OnDelete.InvokeAsync(inv)">Delete</button>
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+            <span>
+                @if (TotalCount == 0)
+                {
+                    <text>0 invoices</text>
+                }
+                else
+                {
+                    <text>Showing @((PageNumber - 1) * PageSize + 1)–@Math.Min(PageNumber * PageSize, TotalCount) of @TotalCount</text>
+                }
+            </span>
+            <div class="flex items-center gap-2 self-end md:self-auto">
+                <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm" value="@PageSize" @onchange="OnPageSizeChanged">
+                    <option value="10">10 / page</option>
+                    <option value="20">20 / page</option>
+                    <option value="50">50 / page</option>
+                </select>
+                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasPrevious)" @onclick="OnPreviousPage">Previous</button>
+                <span class="min-w-24 text-center">Page @PageNumber of @Math.Max(1, TotalPages)</span>
+                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasNext)" @onclick="OnNextPage">Next</button>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<InvoiceSummaryResponse> Items { get; set; } = [];
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public Guid? OpenMenuId { get; set; }
+    [Parameter] public int PageNumber { get; set; } = 1;
+    [Parameter] public int PageSize { get; set; } = 10;
+    [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+    [Parameter] public bool HasPrevious { get; set; }
+    [Parameter] public bool HasNext { get; set; }
+    [Parameter] public EventCallback<Guid> OnToggleMenu { get; set; }
+    [Parameter] public EventCallback<InvoiceSummaryResponse> OnView { get; set; }
+    [Parameter] public EventCallback<InvoiceSummaryResponse> OnPay { get; set; }
+    [Parameter] public EventCallback<InvoiceSummaryResponse> OnDelete { get; set; }
+    [Parameter] public EventCallback OnPreviousPage { get; set; }
+    [Parameter] public EventCallback OnNextPage { get; set; }
+
+    private Task OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), out var size))
+            return Task.CompletedTask;
+        return PageSizeChanged.InvokeAsync(size);
+    }
+
+    private static string ToBadgeStatus(string status) =>
+        status.Equals(nameof(InvoiceStatus.PartiallyPaid), StringComparison.OrdinalIgnoreCase)
+            ? "partiallyPaid"
+            : status.ToLowerInvariant();
+}

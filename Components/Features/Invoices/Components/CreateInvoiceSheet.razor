@@ -1,0 +1,93 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+<SideSheet Open="Open"
+           Title="Create Invoice"
+           Description="Generate a billing invoice for one customer"
+           MaxWidthClass="sm:max-w-lg"
+           OnClose="OnClose">
+    <ChildContent>
+        <div class="space-y-4">
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Customer</label>
+                <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="Model.CustomerId" @bind:after="HandleCustomerChanged">
+                    <option value="">Select customer</option>
+                    @foreach (var cust in Customers)
+                    {
+                        <option value="@cust.Id">@cust.Name (@cust.Plan)</option>
+                    }
+                </select>
+            </div>
+            @if (SelectedCustomer?.Plan.Equals(nameof(PlanType.Ampere), StringComparison.OrdinalIgnoreCase) == true)
+            {
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Billed Days (optional)</label>
+                    <input type="number" min="1" max="31" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="Model.BilledDays" />
+                </div>
+            }
+            @if (SelectedCustomer?.Plan.Equals(nameof(PlanType.FixedKilowatt), StringComparison.OrdinalIgnoreCase) == true)
+            {
+                <div class="flex gap-2 rounded-xl border border-border bg-muted/40 p-1">
+                    <button type="button" class="flex-1 rounded-lg px-3 py-2 text-sm @(Model.FixedMode == "payment" ? "bg-card font-medium shadow-sm" : "text-muted-foreground")" @onclick='() => Model.FixedMode = "payment"'>By payment</button>
+                    <button type="button" class="flex-1 rounded-lg px-3 py-2 text-sm @(Model.FixedMode == "kilowatt" ? "bg-card font-medium shadow-sm" : "text-muted-foreground")" @onclick='() => Model.FixedMode = "kilowatt"'>By kWh</button>
+                </div>
+                @if (Model.FixedMode == "payment")
+                {
+                    <div>
+                        <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Payment Amount</label>
+                        <input type="number" step="0.01" min="0.0001" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="Model.PaymentAmount" />
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Kilowatt Amount</label>
+                        <input type="number" step="0.01" min="0.0001" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="Model.KilowattAmount" />
+                    </div>
+                }
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Payment Method</label>
+                    <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="Model.PaymentMethod">
+                        <option value="@PaymentMethod.Cash">Cash</option>
+                        <option value="@PaymentMethod.Wish">Wish</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Notes</label>
+                    <input class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="Model.Notes" />
+                </div>
+            }
+            <div class="flex justify-end gap-2 border-t border-border pt-5">
+                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
+                <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled="@Saving" @onclick="OnSave">@(Saving ? "Creating..." : "Create Invoice")</button>
+            </div>
+        </div>
+    </ChildContent>
+</SideSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public IReadOnlyList<CustomerResponse> Customers { get; set; } = [];
+    [Parameter] public CreateFormModel Model { get; set; } = new();
+    [Parameter] public bool Saving { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public EventCallback OnCustomerChanged { get; set; }
+
+    private CustomerResponse? SelectedCustomer =>
+        Guid.TryParse(Model.CustomerId, out var id)
+            ? Customers.FirstOrDefault(c => c.Id == id)
+            : null;
+
+    private Task HandleCustomerChanged() => OnCustomerChanged.InvokeAsync();
+
+    public sealed class CreateFormModel
+    {
+        public string CustomerId { get; set; } = "";
+        public int? BilledDays { get; set; }
+        public string FixedMode { get; set; } = "payment";
+        public decimal? PaymentAmount { get; set; }
+        public decimal? KilowattAmount { get; set; }
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
+        public string Notes { get; set; } = "";
+    }
+}

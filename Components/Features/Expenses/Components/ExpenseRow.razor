@@ -1,0 +1,29 @@
+@namespace Shabakat.Components.Features.Expenses.Components
+
+<tr class="border-b border-border hover:bg-muted/30">
+    <td class="px-4 py-3.5 whitespace-nowrap text-sm text-muted-foreground">@FormatHelper.Date(Expense.ExpenseDate)</td>
+    <td class="px-4 py-3.5"><ExpenseTypeBadge Category="@Expense.ExpenseType" /></td>
+    <td class="px-4 py-3.5 text-sm text-foreground">@(Expense.Label ?? "—")</td>
+    <td class="px-4 py-3.5 text-sm text-muted-foreground max-w-xs truncate">@(Expense.Notes ?? "—")</td>
+    <td class="px-4 py-3.5 font-mono text-sm font-semibold text-foreground text-right">@FormatHelper.Currency(Expense.Amount)</td>
+    <td class="px-4 py-3.5">
+        <div class="flex items-center justify-end gap-1">
+            <button type="button"
+                    class="rounded-lg px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+                    @onclick="OnEdit">
+                Edit
+            </button>
+            <button type="button"
+                    class="rounded-lg px-2 py-1 text-xs text-red-500 hover:bg-red-500/10"
+                    @onclick="OnDelete">
+                Delete
+            </button>
+        </div>
+    </td>
+</tr>
+
+@code {
+    [Parameter, EditorRequired] public ExpenseResponse Expense { get; set; } = null!;
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+}

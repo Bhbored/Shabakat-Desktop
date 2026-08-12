@@ -1,0 +1,49 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+<SideSheet Open="Open" Title="Record Payment" Description="@(Invoice is null ? "Payment" : $"Invoice #{Invoice.InvoiceNumber} · {Invoice.CustomerName}")" MaxWidthClass="sm:max-w-md" OnClose="OnClose">
+    <ChildContent>
+        @if (Invoice is not null)
+        {
+            <div class="space-y-4">
+                <div class="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                    Remaining due: <span class="font-mono font-semibold text-foreground">@FormatHelper.Currency(Invoice.AmountDue)</span>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Amount</label>
+                    <input type="number" step="0.01" min="0.0001" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="Model.Amount" />
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Payment Method</label>
+                    <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="Model.PaymentMethod">
+                        <option value="@PaymentMethod.Cash">Cash</option>
+                        <option value="@PaymentMethod.Wish">Wish</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Notes</label>
+                    <input class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="Model.Notes" />
+                </div>
+                <div class="flex justify-end gap-2 border-t border-border pt-5">
+                    <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
+                    <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled="@Saving" @onclick="OnSave">@(Saving ? "Saving..." : "Record Payment")</button>
+                </div>
+            </div>
+        }
+    </ChildContent>
+</SideSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public InvoiceSummaryResponse? Invoice { get; set; }
+    [Parameter] public PayFormModel Model { get; set; } = new();
+    [Parameter] public bool Saving { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    public sealed class PayFormModel
+    {
+        public decimal Amount { get; set; }
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
+        public string Notes { get; set; } = "";
+    }
+}

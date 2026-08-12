@@ -1,0 +1,109 @@
+@namespace Shabakat.Components.Features.Boxes.Components
+
+<SideSheet Open="Open"
+           Title="@(IsEdit ? "Edit Distribution Box" : "Add Distribution Box")"
+           Description="Assign the box to an area and optionally add location notes."
+           MaxWidthClass="sm:max-w-xl"
+           OnClose="OnClose">
+    <ChildContent>
+        <EditForm Model="_form" OnValidSubmit="HandleSubmitAsync" class="space-y-5">
+            <DataAnnotationsValidator />
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-foreground">Name</label>
+                    <InputText @bind-Value="_form.Name"
+                               class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                               placeholder="e.g. Box A-12" />
+                    <ValidationMessage For="() => _form.Name" class="mt-1 text-xs text-red-500" />
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-foreground">Area</label>
+                    <InputSelect @bind-Value="_form.AreaId"
+                                 class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary">
+                        <option value="@Guid.Empty">Select area...</option>
+                        @foreach (var area in Areas)
+                        {
+                            <option value="@area.Id">@area.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => _form.AreaId" class="mt-1 text-xs text-red-500" />
+                </div>
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">Location note</label>
+                <InputText @bind-Value="_form.LocationNote"
+                           class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                           placeholder="Optional landmark or address hint" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">Notes</label>
+                <InputTextArea @bind-Value="_form.Notes"
+                               class="min-h-28 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                               placeholder="Optional internal notes" />
+            </div>
+            <div class="flex items-center justify-end gap-3 border-t border-border pt-5">
+                <button type="button"
+                        class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                        disabled="@Saving"
+                        @onclick="OnClose">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                        disabled="@Saving">
+                    @(Saving ? "Saving..." : (IsEdit ? "Save" : "Create"))
+                </button>
+            </div>
+        </EditForm>
+    </ChildContent>
+</SideSheet>
+
+@code {
+    private BoxFormModel _form = new();
+
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public string InitialName { get; set; } = "";
+    [Parameter] public Guid InitialAreaId { get; set; }
+    [Parameter] public string InitialLocationNote { get; set; } = "";
+    [Parameter] public string InitialNotes { get; set; } = "";
+    [Parameter] public IReadOnlyList<AreaResponse> Areas { get; set; } = [];
+    [Parameter] public bool Saving { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<BoxFormValues> OnSave { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (Open)
+        {
+            _form = new BoxFormModel
+            {
+                Name = InitialName,
+                AreaId = InitialAreaId,
+                LocationNote = InitialLocationNote,
+                Notes = InitialNotes
+            };
+        }
+    }
+
+    private async Task HandleSubmitAsync()
+        => await OnSave.InvokeAsync(new BoxFormValues(_form.Name, _form.AreaId, _form.LocationNote, _form.Notes));
+
+    public sealed record BoxFormValues(string Name, Guid AreaId, string LocationNote, string Notes);
+
+    private sealed class BoxFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Name is required.")]
+        [System.ComponentModel.DataAnnotations.MaxLength(200)]
+        public string Name { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        public Guid AreaId { get; set; }
+
+        [System.ComponentModel.DataAnnotations.MaxLength(500)]
+        public string LocationNote { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.MaxLength(1000)]
+        public string Notes { get; set; } = "";
+    }
+}

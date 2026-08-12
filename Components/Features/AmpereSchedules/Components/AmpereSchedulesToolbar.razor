@@ -1,0 +1,39 @@
+@namespace Shabakat.Components.Features.AmpereSchedules.Components
+
+<div class="space-y-4">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <label class="min-w-60 flex-1">
+            <span class="sr-only">Search schedules</span>
+            <input type="text"
+                   class="h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition focus:border-primary"
+                   placeholder="Search schedules..."
+                   value="@Search"
+                   @oninput="OnSearchInput" />
+        </label>
+        <button type="button"
+                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
+                disabled="@Disabled"
+                @onclick="HandleCreateAsync">
+            + Add Schedule
+        </button>
+    </div>
+    <p class="text-xs text-muted-foreground">
+        @Total pricing tier@(Total != 1 ? "s" : "")
+    </p>
+</div>
+
+@code {
+    [Parameter] public string Search { get; set; } = "";
+    [Parameter] public int Total { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<string> SearchChanged { get; set; }
+    [Parameter] public EventCallback OnCreate { get; set; }
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        await SearchChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    }
+
+    private Task HandleCreateAsync() => OnCreate.InvokeAsync();
+}

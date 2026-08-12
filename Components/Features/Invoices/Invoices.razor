@@ -4,343 +4,71 @@
 @inject IToastService Toast
 
 <div class="space-y-4">
-    <div class="flex flex-wrap items-center gap-3 xl:flex-nowrap">
-        <select class="min-w-56 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                @bind="_customerFilter" @bind:after="ReloadFromFiltersAsync">
-            <option value="">All Customers</option>
-            @foreach (var cust in _customers)
-            {
-                <option value="@cust.Id">@cust.Name</option>
-            }
-        </select>
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                @bind="_statusFilter" @bind:after="ReloadFromFiltersAsync">
-            <option value="">All Statuses</option>
-            <option value="@InvoiceStatus.Paid">Paid</option>
-            <option value="@InvoiceStatus.Unpaid">Unpaid</option>
-            <option value="@InvoiceStatus.PartiallyPaid">Partially Paid</option>
-        </select>
-        <div class="flex gap-2">
-            <input type="date" class="w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                   @bind="_dateFrom" @bind:format="yyyy-MM-dd" @bind:after="ReloadFromFiltersAsync" />
-            <span class="self-center text-muted-foreground">to</span>
-            <input type="date" class="w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                   @bind="_dateTo" @bind:format="yyyy-MM-dd" @bind:after="ReloadFromFiltersAsync" />
-        </div>
-        <div class="ml-auto flex gap-2">
-            <button type="button" class="rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="OpenBulk">Bulk Create</button>
-            <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
-                    style="box-shadow: 0 0 16px rgba(230,196,58,0.25);" @onclick="OpenCreate">+ Create Invoice</button>
-        </div>
-    </div>
+    <InvoicesToolbar Customers="_customers"
+                     Skipped="_skipped"
+                     @bind-CustomerFilter="_customerFilter"
+                     @bind-StatusFilter="_statusFilter"
+                     @bind-DateFrom="_dateFrom"
+                     @bind-DateTo="_dateTo"
+                     TotalCount="_totalCount"
+                     ShowSkipped="_showSkipped"
+                     PaidTotal="_paidTotal"
+                     UnpaidTotal="_unpaidTotal"
+                     PartialTotal="_partialTotal"
+                     OnFiltersChanged="ReloadFromFiltersAsync"
+                     OnToggleSkipped="ToggleSkipped"
+                     OnBulkCreate="OpenBulk"
+                     OnCreate="OpenCreate" />
 
-    <div class="flex items-center gap-3 text-xs text-muted-foreground">
-        <span>@_totalCount invoice@(_totalCount != 1 ? "s" : "") found</span>
-        <button type="button" class="underline hover:text-foreground" @onclick="ToggleSkipped">
-            @(_showSkipped ? "Hide skipped" : "Show skipped") (@_skipped.Count)
-        </button>
-    </div>
-
-    <div class="grid gap-4 md:grid-cols-3">
-        <section class="rounded-2xl border border-border bg-card p-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Total Paid</p>
-            <p class="mt-2 font-mono text-2xl font-bold text-emerald-600">@FormatHelper.Currency(_paidTotal)</p>
-        </section>
-        <section class="rounded-2xl border border-border bg-card p-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Unpaid</p>
-            <p class="mt-2 font-mono text-2xl font-bold text-amber-600">@FormatHelper.Currency(_unpaidTotal)</p>
-        </section>
-        <section class="rounded-2xl border border-border bg-card p-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Partially Paid</p>
-            <p class="mt-2 font-mono text-2xl font-bold text-blue-400">@FormatHelper.Currency(_partialTotal)</p>
-        </section>
-    </div>
-
-    @if (_showSkipped)
-    {
-        <section class="rounded-2xl border border-border bg-card p-4">
-            <h2 class="text-sm font-semibold text-foreground">Skipped Invoices</h2>
-            <p class="mt-1 text-xs text-muted-foreground">Customers skipped during bulk generation</p>
-            @if (_skipped.Count == 0)
-            {
-                <p class="mt-3 text-sm text-muted-foreground">No skipped customers.</p>
-            }
-            else
-            {
-                <div class="mt-3 space-y-2">
-                    @foreach (var skip in _skipped)
-                    {
-                        <div class="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2">
-                            <div>
-                                <p class="text-sm font-medium text-foreground">@skip.CustomerName</p>
-                                <p class="text-xs text-muted-foreground">@skip.Reason</p>
-                            </div>
-                            <span class="shrink-0 text-xs text-muted-foreground">@FormatHelper.Date(skip.SkippedAt)</span>
-                        </div>
-                    }
-                </div>
-            }
-        </section>
-    }
-
-    @if (_loading)
-    {
-        <p class="text-sm text-muted-foreground">Loading invoices...</p>
-    }
-    else
-    {
-        <section class="rounded-2xl border border-border bg-card overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full min-w-[860px]">
-                    <thead>
-                        <tr class="border-b border-border">
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Invoice #</th>
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Customer</th>
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Total</th>
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Paid</th>
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Due</th>
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Period</th>
-                            <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Status</th>
-                            <th class="px-4 py-3.5"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (_items.Count == 0)
-                        {
-                            <tr>
-                                <td colspan="8" class="px-4 py-8 text-center text-sm text-muted-foreground">No invoices found.</td>
-                            </tr>
-                        }
-                        @foreach (var inv in _items)
-                        {
-                            <tr class="border-b border-border hover:bg-muted/30">
-                                <td class="px-4 py-3.5 font-mono text-sm font-medium text-foreground">#@inv.InvoiceNumber</td>
-                                <td class="px-4 py-3.5 text-sm text-foreground">@inv.CustomerName</td>
-                                <td class="px-4 py-3.5 font-mono text-sm text-foreground">@FormatHelper.Currency(inv.TotalAmount)</td>
-                                <td class="px-4 py-3.5 font-mono text-sm text-emerald-600">@FormatHelper.Currency(inv.PaidAmount)</td>
-                                <td class="px-4 py-3.5 font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(inv.AmountDue)</td>
-                                <td class="px-4 py-3.5 whitespace-nowrap text-sm text-muted-foreground">
-                                    @FormatHelper.Date(inv.ConsumptionStart) â€“ @FormatHelper.Date(inv.ConsumptionEnd)
-                                </td>
-                                <td class="px-4 py-3.5"><InvoiceStatusBadge Status="@ToBadgeStatus(inv.InvoiceStatus)" /></td>
-                                <td class="px-4 py-3.5">
-                                    <div class="relative flex justify-end">
-                                        <button type="button" class="rounded-lg p-1 text-muted-foreground hover:text-foreground" @onclick="() => ToggleMenu(inv.Id)">
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                                        </button>
-                                        @if (_openMenuId == inv.Id)
-                                        {
-                                            <div class="absolute right-0 top-8 z-20 min-w-44 rounded-xl border border-border bg-card p-1 shadow-lg">
-                                                <button type="button" class="flex w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted" @onclick="() => OpenDetails(inv)">View details</button>
-                                                @if (!inv.InvoiceStatus.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase))
-                                                {
-                                                    <button type="button" class="flex w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted" @onclick="() => OpenPay(inv)">Record payment</button>
-                                                }
-                                                <button type="button" class="flex w-full rounded-lg px-3 py-2 text-left text-sm text-red-500 hover:bg-muted" @onclick="() => OpenDelete(inv)">Delete</button>
-                                            </div>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-                <span>
-                    @if (_totalCount == 0)
-                    {
-                        <text>0 invoices</text>
-                    }
-                    else
-                    {
-                        <text>Showing @((_pageNumber - 1) * _pageSize + 1)â€“@Math.Min(_pageNumber * _pageSize, _totalCount) of @_totalCount</text>
-                    }
-                </span>
-                <div class="flex items-center gap-2 self-end md:self-auto">
-                    <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm" @bind="_pageSize" @bind:after="ReloadFromFiltersAsync">
-                        <option value="10">10 / page</option>
-                        <option value="20">20 / page</option>
-                        <option value="50">50 / page</option>
-                    </select>
-                    <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!_hasPrevious)" @onclick="PrevPageAsync">Previous</button>
-                    <span class="min-w-24 text-center">Page @_pageNumber of @Math.Max(1, _totalPages)</span>
-                    <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!_hasNext)" @onclick="NextPageAsync">Next</button>
-                </div>
-            </div>
-        </section>
-    }
+    <InvoicesList Items="_items"
+                  IsLoading="_loading"
+                  OpenMenuId="_openMenuId"
+                  PageNumber="_pageNumber"
+                  @bind-PageSize="_pageSize"
+                  @bind-PageSize:after="ReloadFromFiltersAsync"
+                  TotalCount="_totalCount"
+                  TotalPages="_totalPages"
+                  HasPrevious="_hasPrevious"
+                  HasNext="_hasNext"
+                  OnToggleMenu="ToggleMenu"
+                  OnView="OpenDetails"
+                  OnPay="OpenPay"
+                  OnDelete="OpenDelete"
+                  OnPreviousPage="PrevPageAsync"
+                  OnNextPage="NextPageAsync" />
 </div>
 
-<SideSheet Open="_showCreate"
-           Title="Create Invoice"
-           Description="Generate a billing invoice for one customer"
-           MaxWidthClass="sm:max-w-lg"
-           OnClose="CloseCreate">
-    <ChildContent>
-        <div class="space-y-4">
-            <div>
-                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Customer</label>
-                <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_create.CustomerId" @bind:after="OnCreateCustomerChanged">
-                    <option value="">Select customer</option>
-                    @foreach (var cust in _customers)
-                    {
-                        <option value="@cust.Id">@cust.Name (@cust.Plan)</option>
-                    }
-                </select>
-            </div>
-            @if (SelectedCreateCustomer?.Plan.Equals(nameof(PlanType.Ampere), StringComparison.OrdinalIgnoreCase) == true)
-            {
-                <div>
-                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Billed Days (optional)</label>
-                    <input type="number" min="1" max="31" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_create.BilledDays" />
-                </div>
-            }
-            @if (SelectedCreateCustomer?.Plan.Equals(nameof(PlanType.FixedKilowatt), StringComparison.OrdinalIgnoreCase) == true)
-            {
-                <div class="flex gap-2 rounded-xl border border-border bg-muted/40 p-1">
-                    <button type="button" class="flex-1 rounded-lg px-3 py-2 text-sm @(_create.FixedMode == "payment" ? "bg-card font-medium shadow-sm" : "text-muted-foreground")" @onclick='() => _create.FixedMode = "payment"'>By payment</button>
-                    <button type="button" class="flex-1 rounded-lg px-3 py-2 text-sm @(_create.FixedMode == "kilowatt" ? "bg-card font-medium shadow-sm" : "text-muted-foreground")" @onclick='() => _create.FixedMode = "kilowatt"'>By kWh</button>
-                </div>
-                @if (_create.FixedMode == "payment")
-                {
-                    <div>
-                        <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Payment Amount</label>
-                        <input type="number" step="0.01" min="0.0001" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_create.PaymentAmount" />
-                    </div>
-                }
-                else
-                {
-                    <div>
-                        <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Kilowatt Amount</label>
-                        <input type="number" step="0.01" min="0.0001" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_create.KilowattAmount" />
-                    </div>
-                }
-                <div>
-                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Payment Method</label>
-                    <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_create.PaymentMethod">
-                        <option value="@PaymentMethod.Cash">Cash</option>
-                        <option value="@PaymentMethod.Wish">Wish</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Notes</label>
-                    <input class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_create.Notes" />
-                </div>
-            }
-            <div class="flex justify-end gap-2 border-t border-border pt-5">
-                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="CloseCreate">Cancel</button>
-                <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled="@_saving" @onclick="CreateInvoiceAsync">@(_saving ? "Creating..." : "Create Invoice")</button>
-            </div>
-        </div>
-    </ChildContent>
-</SideSheet>
+<CreateInvoiceSheet Open="_showCreate"
+                    Customers="_customers"
+                    Model="_create"
+                    Saving="_saving"
+                    OnClose="CloseCreate"
+                    OnSave="CreateInvoiceAsync"
+                    OnCustomerChanged="OnCreateCustomerChanged" />
 
-<SideSheet Open="_showBulk" Title="Bulk Create Invoices" Description="Generate invoices for eligible customers this period" MaxWidthClass="sm:max-w-md" OnClose="CloseBulk">
-    <ChildContent>
-        <div class="space-y-4">
-            <div>
-                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Plan Type</label>
-                <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_bulkPlan">
-                    <option value="">Ampere &amp; Kilowatt</option>
-                    <option value="@PlanType.Ampere">Ampere only</option>
-                    <option value="@PlanType.Kilowatt">Kilowatt only</option>
-                </select>
-            </div>
-            <div class="flex justify-end gap-2 border-t border-border pt-5">
-                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="CloseBulk">Cancel</button>
-                <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled="@_saving" @onclick="BulkCreateAsync">@(_saving ? "Generating..." : "Generate")</button>
-            </div>
-        </div>
-    </ChildContent>
-</SideSheet>
+<BulkCreateInvoiceSheet Open="_showBulk"
+                        @bind-Plan="_bulkPlan"
+                        Saving="_saving"
+                        OnClose="CloseBulk"
+                        OnSave="BulkCreateAsync" />
 
-<SideSheet Open="_showPay" Title="Record Payment" Description="@(_payInvoice is null ? "Payment" : $"Invoice #{_payInvoice.InvoiceNumber} · {_payInvoice.CustomerName}")" MaxWidthClass="sm:max-w-md" OnClose="ClosePay">
-    <ChildContent>
-        @if (_payInvoice is not null)
-        {
-            <div class="space-y-4">
-                <div class="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-                    Remaining due: <span class="font-mono font-semibold text-foreground">@FormatHelper.Currency(_payInvoice.AmountDue)</span>
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Amount</label>
-                    <input type="number" step="0.01" min="0.0001" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_pay.Amount" />
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Payment Method</label>
-                    <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_pay.PaymentMethod">
-                        <option value="@PaymentMethod.Cash">Cash</option>
-                        <option value="@PaymentMethod.Wish">Wish</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Notes</label>
-                    <input class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="_pay.Notes" />
-                </div>
-                <div class="flex justify-end gap-2 border-t border-border pt-5">
-                    <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="ClosePay">Cancel</button>
-                    <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled="@_saving" @onclick="SavePaymentAsync">@(_saving ? "Saving..." : "Record Payment")</button>
-                </div>
-            </div>
-        }
-    </ChildContent>
-</SideSheet>
+<PayInvoiceSheet Open="_showPay"
+                 Invoice="_payInvoice"
+                 Model="_pay"
+                 Saving="_saving"
+                 OnClose="ClosePay"
+                 OnSave="SavePaymentAsync" />
 
-<SideSheet Open="_showDetails" Title="@(_details is null ? "Invoice details" : $"Invoice #{_details.InvoiceNumber}")" Description="@(_details is null ? "" : $"{_details.CustomerName} · {FormatHelper.Date(_details.CreatedAt)}")" MaxWidthClass="sm:max-w-xl" OnClose="CloseDetails">
-    @if (_details is not null)
-    {
-        <div class="space-y-4">
-            <div class="flex justify-end"><InvoiceStatusBadge Status="@ToBadgeStatus(_details.InvoiceStatus)" /></div>
-            <div class="grid gap-3 md:grid-cols-3">
-                <div class="rounded-2xl border border-border bg-card p-4"><p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Total</p><p class="mt-1 font-mono text-sm font-semibold">@FormatHelper.Currency(_details.TotalAmount)</p></div>
-                <div class="rounded-2xl border border-border bg-card p-4"><p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Paid</p><p class="mt-1 font-mono text-sm font-semibold text-emerald-600">@FormatHelper.Currency(_details.PaidAmount)</p></div>
-                <div class="rounded-2xl border border-border bg-card p-4"><p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Due</p><p class="mt-1 font-mono text-sm font-semibold text-red-500">@FormatHelper.Currency(_details.AmountDue)</p></div>
-            </div>
-            <div class="space-y-3 rounded-2xl border border-border bg-card p-5 text-sm">
-                @DetailRow("Period", $"{FormatHelper.Date(_details.ConsumptionStart)} – {FormatHelper.Date(_details.ConsumptionEnd)}")
-                @DetailRow("Fixed Charge", FormatHelper.Currency(_details.FixedCharge))
-                @DetailRow("TVA", FormatHelper.Number(_details.TVA))
-                @DetailRow("Consumption", _details.BilledConsumption.HasValue ? FormatHelper.Number(_details.BilledConsumption.Value) : "—")
-                @DetailRow("Phone", _details.CustomerPhone ?? "—")
-            </div>
-            <div class="rounded-2xl border border-border bg-card p-5">
-                <h3 class="mb-3 text-sm font-semibold text-foreground">Payments</h3>
-                @if (_payments.Count == 0) { <p class="text-sm text-muted-foreground">No payments recorded.</p> }
-                else {
-                    <div class="space-y-2">
-                        @foreach (var payment in _payments) {
-                            <div class="rounded-xl border border-border px-3 py-2">
-                                <p class="font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(payment.Amount)</p>
-                                <p class="text-xs text-muted-foreground">@payment.PaymentMethod · @FormatHelper.Date(payment.PaymentDate)</p>
-                                @if (!string.IsNullOrWhiteSpace(payment.Notes)) { <p class="text-xs text-muted-foreground">@payment.Notes</p> }
-                            </div>
-                        }
-                    </div>
-                }
-            </div>
-            <div class="flex justify-end gap-2 border-t border-border pt-5">
-                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="CloseDetails">Close</button>
-                @if (!_details.InvoiceStatus.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase)) {
-                    <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" @onclick="OpenPayFromDetails">Record Payment</button>
-                }
-            </div>
-        </div>
-    }
-</SideSheet>
+<InvoiceDetailsSheet Open="_showDetails"
+                     Invoice="_details"
+                     Payments="_payments"
+                     OnClose="CloseDetails"
+                     OnRecordPayment="OpenPayFromDetails" />
 
-<ConfirmDialog Open="@(_confirmDelete is not null)" Title="Delete Invoice" OnClose="() => _confirmDelete = null">
-    <ChildContent>
-        @if (_confirmDelete is not null) {
-            <p>Delete invoice #@_confirmDelete.InvoiceNumber for @_confirmDelete.CustomerName? This cannot be undone.</p>
-        }
-    </ChildContent>
-    <Footer>
-        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="() => _confirmDelete = null">Cancel</button>
-        <button type="button" class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white" @onclick="ConfirmDeleteAsync">Delete</button>
-    </Footer>
-</ConfirmDialog>
-
+<DeleteInvoiceDialog Open="@(_confirmDelete is not null)"
+                     Invoice="_confirmDelete"
+                     OnClose="CloseDelete"
+                     OnConfirm="ConfirmDeleteAsync" />
 
 @code {
     private readonly List<InvoiceSummaryResponse> _items = [];
@@ -372,17 +100,12 @@
     private decimal _unpaidTotal;
     private decimal _partialTotal;
 
-    private CreateFormModel _create = new();
+    private CreateInvoiceSheet.CreateFormModel _create = new();
     private string _bulkPlan = "";
-    private PayFormModel _pay = new();
+    private PayInvoiceSheet.PayFormModel _pay = new();
     private InvoiceSummaryResponse? _payInvoice;
     private InvoiceResponse? _details;
     private InvoiceSummaryResponse? _confirmDelete;
-
-    private CustomerResponse? SelectedCreateCustomer =>
-        Guid.TryParse(_create.CustomerId, out var id)
-            ? _customers.FirstOrDefault(c => c.Id == id)
-            : null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -486,7 +209,7 @@
     private void OpenCreate()
     {
         _openMenuId = null;
-        _create = new CreateFormModel();
+        _create = new CreateInvoiceSheet.CreateFormModel();
         _showCreate = true;
     }
 
@@ -581,7 +304,7 @@
     {
         _openMenuId = null;
         _payInvoice = inv;
-        _pay = new PayFormModel
+        _pay = new PayInvoiceSheet.PayFormModel
         {
             Amount = inv.AmountDue,
             PaymentMethod = PaymentMethod.Cash,
@@ -605,7 +328,7 @@
             _details.AmountDue,
             _details.BilledConsumption,
             _details.CreatedAt);
-        _pay = new PayFormModel
+        _pay = new PayInvoiceSheet.PayFormModel
         {
             Amount = _details.AmountDue,
             PaymentMethod = PaymentMethod.Cash,
@@ -675,6 +398,8 @@
         _confirmDelete = inv;
     }
 
+    private void CloseDelete() => _confirmDelete = null;
+
     private async Task ConfirmDeleteAsync()
     {
         if (_confirmDelete is null) return;
@@ -689,43 +414,5 @@
         _confirmDelete = null;
         if (_details?.Id == id) CloseDetails();
         await LoadAsync();
-    }
-
-    private static string ToBadgeStatus(string status) =>
-        status.Equals(nameof(InvoiceStatus.PartiallyPaid), StringComparison.OrdinalIgnoreCase)
-            ? "partiallyPaid"
-            : status.ToLowerInvariant();
-
-    private static RenderFragment DetailRow(string label, string value) => builder =>
-    {
-        builder.OpenElement(0, "div");
-        builder.AddAttribute(1, "class", "flex items-start justify-between gap-3");
-        builder.OpenElement(2, "span");
-        builder.AddAttribute(3, "class", "text-muted-foreground");
-        builder.AddContent(4, label);
-        builder.CloseElement();
-        builder.OpenElement(5, "span");
-        builder.AddAttribute(6, "class", "text-right font-medium text-foreground");
-        builder.AddContent(7, value);
-        builder.CloseElement();
-        builder.CloseElement();
-    };
-
-    private sealed class CreateFormModel
-    {
-        public string CustomerId { get; set; } = "";
-        public int? BilledDays { get; set; }
-        public string FixedMode { get; set; } = "payment";
-        public decimal? PaymentAmount { get; set; }
-        public decimal? KilowattAmount { get; set; }
-        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
-        public string Notes { get; set; } = "";
-    }
-
-    private sealed class PayFormModel
-    {
-        public decimal Amount { get; set; }
-        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
-        public string Notes { get; set; } = "";
     }
 }

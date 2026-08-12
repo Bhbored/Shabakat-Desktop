@@ -1,0 +1,142 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+<div class="space-y-4">
+    <div class="flex flex-wrap items-center gap-3 xl:flex-nowrap">
+        <select class="min-w-56 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                value="@CustomerFilter"
+                @onchange="OnCustomerFilterChanged">
+            <option value="">All Customers</option>
+            @foreach (var cust in Customers)
+            {
+                <option value="@cust.Id">@cust.Name</option>
+            }
+        </select>
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                value="@StatusFilter"
+                @onchange="OnStatusFilterChanged">
+            <option value="">All Statuses</option>
+            <option value="@InvoiceStatus.Paid">Paid</option>
+            <option value="@InvoiceStatus.Unpaid">Unpaid</option>
+            <option value="@InvoiceStatus.PartiallyPaid">Partially Paid</option>
+        </select>
+        <div class="flex gap-2">
+            <input type="date" class="w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                   value="@DateFromText"
+                   @onchange="OnDateFromChanged" />
+            <span class="self-center text-muted-foreground">to</span>
+            <input type="date" class="w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                   value="@DateToText"
+                   @onchange="OnDateToChanged" />
+        </div>
+        <div class="ml-auto flex gap-2">
+            <button type="button" class="rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="OnBulkCreate">Bulk Create</button>
+            <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                    style="box-shadow: 0 0 16px rgba(230,196,58,0.25);" @onclick="OnCreate">+ Create Invoice</button>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-3 text-xs text-muted-foreground">
+        <span>@TotalCount invoice@(TotalCount != 1 ? "s" : "") found</span>
+        <button type="button" class="underline hover:text-foreground" @onclick="OnToggleSkipped">
+            @(ShowSkipped ? "Hide skipped" : "Show skipped") (@Skipped.Count)
+        </button>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-3">
+        <section class="rounded-2xl border border-border bg-card p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Total Paid</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-emerald-600">@FormatHelper.Currency(PaidTotal)</p>
+        </section>
+        <section class="rounded-2xl border border-border bg-card p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Unpaid</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-amber-600">@FormatHelper.Currency(UnpaidTotal)</p>
+        </section>
+        <section class="rounded-2xl border border-border bg-card p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Partially Paid</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-blue-400">@FormatHelper.Currency(PartialTotal)</p>
+        </section>
+    </div>
+
+    @if (ShowSkipped)
+    {
+        <section class="rounded-2xl border border-border bg-card p-4">
+            <h2 class="text-sm font-semibold text-foreground">Skipped Invoices</h2>
+            <p class="mt-1 text-xs text-muted-foreground">Customers skipped during bulk generation</p>
+            @if (Skipped.Count == 0)
+            {
+                <p class="mt-3 text-sm text-muted-foreground">No skipped customers.</p>
+            }
+            else
+            {
+                <div class="mt-3 space-y-2">
+                    @foreach (var skip in Skipped)
+                    {
+                        <div class="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2">
+                            <div>
+                                <p class="text-sm font-medium text-foreground">@skip.CustomerName</p>
+                                <p class="text-xs text-muted-foreground">@skip.Reason</p>
+                            </div>
+                            <span class="shrink-0 text-xs text-muted-foreground">@FormatHelper.Date(skip.SkippedAt)</span>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<CustomerResponse> Customers { get; set; } = [];
+    [Parameter] public IReadOnlyList<InvoiceSkippedResponse> Skipped { get; set; } = [];
+    [Parameter] public string CustomerFilter { get; set; } = "";
+    [Parameter] public EventCallback<string> CustomerFilterChanged { get; set; }
+    [Parameter] public string StatusFilter { get; set; } = "";
+    [Parameter] public EventCallback<string> StatusFilterChanged { get; set; }
+    [Parameter] public DateTime? DateFrom { get; set; }
+    [Parameter] public EventCallback<DateTime?> DateFromChanged { get; set; }
+    [Parameter] public DateTime? DateTo { get; set; }
+    [Parameter] public EventCallback<DateTime?> DateToChanged { get; set; }
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public bool ShowSkipped { get; set; }
+    [Parameter] public decimal PaidTotal { get; set; }
+    [Parameter] public decimal UnpaidTotal { get; set; }
+    [Parameter] public decimal PartialTotal { get; set; }
+    [Parameter] public EventCallback OnFiltersChanged { get; set; }
+    [Parameter] public EventCallback OnToggleSkipped { get; set; }
+    [Parameter] public EventCallback OnBulkCreate { get; set; }
+    [Parameter] public EventCallback OnCreate { get; set; }
+
+    private string DateFromText => DateFrom?.ToString("yyyy-MM-dd") ?? "";
+    private string DateToText => DateTo?.ToString("yyyy-MM-dd") ?? "";
+
+    private async Task OnCustomerFilterChanged(ChangeEventArgs e)
+    {
+        await CustomerFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task OnStatusFilterChanged(ChangeEventArgs e)
+    {
+        await StatusFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task OnDateFromChanged(ChangeEventArgs e)
+    {
+        await DateFromChanged.InvokeAsync(ParseDate(e.Value?.ToString()));
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task OnDateToChanged(ChangeEventArgs e)
+    {
+        await DateToChanged.InvokeAsync(ParseDate(e.Value?.ToString()));
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private static DateTime? ParseDate(string? text) =>
+        string.IsNullOrWhiteSpace(text)
+            ? null
+            : DateTime.TryParseExact(text, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var d)
+                ? d
+                : null;
+}

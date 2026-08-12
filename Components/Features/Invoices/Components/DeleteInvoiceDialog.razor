@@ -1,0 +1,21 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+<ConfirmDialog Open="Open" Title="Delete Invoice" OnClose="OnClose">
+    <ChildContent>
+        @if (Invoice is not null)
+        {
+            <p>Delete invoice #@Invoice.InvoiceNumber for @Invoice.CustomerName? This cannot be undone.</p>
+        }
+    </ChildContent>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
+        <button type="button" class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white" @onclick="OnConfirm">Delete</button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public InvoiceSummaryResponse? Invoice { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
+}

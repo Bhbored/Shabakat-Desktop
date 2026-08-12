@@ -1,0 +1,89 @@
+@namespace Shabakat.Components.Features.Expenses.Components
+
+@if (IsLoading)
+{
+    <p class="text-sm text-muted-foreground">Loading expenses...</p>
+}
+else
+{
+    <section class="rounded-2xl border border-border bg-card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[760px]">
+                <thead>
+                    <tr class="border-b border-border">
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Date</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Type</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Label</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Notes</th>
+                        <th class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount</th>
+                        <th class="px-4 py-3.5"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Items.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="px-4 py-8 text-center text-sm text-muted-foreground">No expenses found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var exp in Items)
+                        {
+                            <ExpenseRow Expense="exp"
+                                        OnEdit="() => OnEdit.InvokeAsync(exp)"
+                                        OnDelete="() => OnDelete.InvokeAsync(exp)" />
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+            <span>@TotalCount expenses found</span>
+            <div class="flex items-center gap-2 self-end md:self-auto">
+                <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm"
+                        value="@PageSize"
+                        @onchange="OnPageSizeChanged">
+                    <option value="10">10 / page</option>
+                    <option value="20">20 / page</option>
+                    <option value="50">50 / page</option>
+                </select>
+                <button type="button"
+                        class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40"
+                        disabled="@(!HasPrevious)"
+                        @onclick="OnPrevPage">
+                    Prev
+                </button>
+                <span class="min-w-20 text-center">@PageNumber / @TotalPages</span>
+                <button type="button"
+                        class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40"
+                        disabled="@(!HasNext)"
+                        @onclick="OnNextPage">
+                    Next
+                </button>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<ExpenseResponse> Items { get; set; } = [];
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public int PageNumber { get; set; } = 1;
+    [Parameter] public int TotalPages { get; set; } = 1;
+    [Parameter] public int PageSize { get; set; } = 10;
+    [Parameter] public bool HasPrevious { get; set; }
+    [Parameter] public bool HasNext { get; set; }
+    [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
+    [Parameter] public EventCallback OnPrevPage { get; set; }
+    [Parameter] public EventCallback OnNextPage { get; set; }
+    [Parameter] public EventCallback<ExpenseResponse> OnEdit { get; set; }
+    [Parameter] public EventCallback<ExpenseResponse> OnDelete { get; set; }
+
+    private async Task OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var size))
+            await PageSizeChanged.InvokeAsync(size);
+    }
+}

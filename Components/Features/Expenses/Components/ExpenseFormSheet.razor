@@ -1,0 +1,107 @@
+@namespace Shabakat.Components.Features.Expenses.Components
+
+<SideSheet Open="Open"
+           Title="@(IsEdit ? "Edit Expense" : "Add Expense")"
+           Description="Record a company expense for the selected period."
+           MaxWidthClass="sm:max-w-lg"
+           OnClose="OnClose">
+    <ChildContent>
+        <div class="space-y-4">
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Type</label>
+                <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                        value="@Type"
+                        @onchange="OnTypeChanged">
+                    @foreach (var type in Enum.GetValues<ExpenseType>())
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Amount</label>
+                <input type="number" step="0.01" min="0.0001"
+                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                       value="@Amount"
+                       @onchange="OnAmountChanged" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Date</label>
+                <input type="date"
+                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                       value="@Date.ToString("yyyy-MM-dd")"
+                       @onchange="OnDateChanged" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    Label @(Type == ExpenseType.Other ? "(required)" : "(optional)")
+                </label>
+                <input type="text" maxlength="100"
+                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                       value="@Label"
+                       @onchange="OnLabelChanged"
+                       placeholder="@(Type == ExpenseType.Other ? "e.g. Rent, Insurance" : "")" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Notes</label>
+                <textarea maxlength="500" rows="3"
+                          class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                          value="@Notes"
+                          @onchange="OnNotesChanged"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 border-t border-border pt-5">
+                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="OnClose">Cancel</button>
+                <button type="button"
+                        class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                        disabled="@Saving"
+                        @onclick="OnSave">
+                    @(Saving ? "Saving..." : "Save")
+                </button>
+            </div>
+        </div>
+    </ChildContent>
+</SideSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool Saving { get; set; }
+    [Parameter] public ExpenseType Type { get; set; } = ExpenseType.Fuel;
+    [Parameter] public EventCallback<ExpenseType> TypeChanged { get; set; }
+    [Parameter] public decimal Amount { get; set; }
+    [Parameter] public EventCallback<decimal> AmountChanged { get; set; }
+    [Parameter] public DateOnly Date { get; set; }
+    [Parameter] public EventCallback<DateOnly> DateChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public EventCallback<string?> LabelChanged { get; set; }
+    [Parameter] public string? Notes { get; set; }
+    [Parameter] public EventCallback<string?> NotesChanged { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private async Task OnTypeChanged(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<ExpenseType>(e.Value?.ToString(), out var type))
+            await TypeChanged.InvokeAsync(type);
+    }
+
+    private async Task OnAmountChanged(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var amount))
+            await AmountChanged.InvokeAsync(amount);
+        else
+            await AmountChanged.InvokeAsync(0);
+    }
+
+    private async Task OnDateChanged(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var date))
+            await DateChanged.InvokeAsync(date);
+    }
+
+    private async Task OnLabelChanged(ChangeEventArgs e)
+        => await LabelChanged.InvokeAsync(e.Value?.ToString());
+
+    private async Task OnNotesChanged(ChangeEventArgs e)
+        => await NotesChanged.InvokeAsync(e.Value?.ToString());
+}

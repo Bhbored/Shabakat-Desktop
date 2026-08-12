@@ -1,0 +1,38 @@
+@namespace Shabakat.Components.Features.Subscribers.Components
+
+<SideSheet Open="Open"
+           Title="Add Meter Reading"
+           Description="@Description"
+           MaxWidthClass="sm:max-w-md"
+           OnClose="OnClose">
+    <ChildContent>
+        <div class="space-y-4">
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Reading Value</label>
+                <input type="number" step="0.01" min="0" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="MeterValue" @bind:after="NotifyMeterValueAsync" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Reading Date</label>
+                <input type="date" class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" @bind="MeterDate" @bind:format="yyyy-MM-dd" @bind:after="NotifyMeterDateAsync" />
+            </div>
+            <div class="flex justify-end gap-2 border-t border-border pt-5">
+                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
+                <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" @onclick="OnSave">Save Reading</button>
+            </div>
+        </div>
+    </ChildContent>
+</SideSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public string Description { get; set; } = "Meter reading";
+    [Parameter] public decimal MeterValue { get; set; }
+    [Parameter] public DateTime? MeterDate { get; set; }
+    [Parameter] public EventCallback<decimal> MeterValueChanged { get; set; }
+    [Parameter] public EventCallback<DateTime?> MeterDateChanged { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private Task NotifyMeterValueAsync() => MeterValueChanged.InvokeAsync(MeterValue);
+    private Task NotifyMeterDateAsync() => MeterDateChanged.InvokeAsync(MeterDate);
+}

@@ -1,0 +1,115 @@
+@namespace Shabakat.Components.Features.Subscribers.Components
+
+<SideSheet Open="Open"
+           Title="@(Details?.Name ?? "Subscriber details")"
+           Description="Subscriber details and billing summary"
+           MaxWidthClass="sm:max-w-xl"
+           OnClose="OnClose">
+    @if (Details is not null)
+    {
+        <div class="space-y-4">
+            <div class="grid gap-3 md:grid-cols-3">
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Total Billed</p>
+                    <p class="mt-1 font-mono text-sm font-semibold">@FormatHelper.Currency(Details.TotalBilled)</p>
+                </div>
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Total Paid</p>
+                    <p class="mt-1 font-mono text-sm font-semibold text-emerald-600">@FormatHelper.Currency(Details.TotalPaid)</p>
+                </div>
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Outstanding</p>
+                    <p class="mt-1 font-mono text-sm font-semibold text-red-500">@FormatHelper.Currency(Details.TotalOutstanding)</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 rounded-2xl border border-border bg-card p-5 text-sm">
+                @DetailRow("Type", Details.CustomerType)
+                @DetailRow("Plan", FormatPlan(Details.Plan, Details.PlanValue))
+                @DetailRow("Phone", Details.Phone ?? "—")
+                @DetailRow("Area", Details.AreaName ?? "Unassigned")
+                @DetailRow("Box", Details.BoxName ?? "—")
+                @DetailRow("Building", Details.Building ?? "—")
+                @DetailRow("Floor", Details.Floor ?? "—")
+                @DetailRow("Cable", Details.CableName ?? "—")
+                @DetailRow("Relation", Details.CustomerRelation ?? "—")
+                @DetailRow("Status", Details.CustomerStatus)
+                @DetailRow("Since", FormatHelper.Date(Details.SubscriptionDate))
+                @DetailRow("Address", Details.Address ?? "—")
+            </div>
+
+            @if (Details.Plan.Equals(nameof(PlanType.Kilowatt), StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="rounded-2xl border border-border bg-card p-5">
+                    <div class="mb-3 flex items-center justify-between gap-2">
+                        <h3 class="text-sm font-semibold text-foreground">Meter Readings</h3>
+                        <button type="button" class="rounded-xl bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground" @onclick="OnAddReading">+ Add Reading</button>
+                    </div>
+                    @if (MeterReadings.Count == 0)
+                    {
+                        <p class="text-sm text-muted-foreground">No meter readings yet.</p>
+                    }
+                    else
+                    {
+                        <div class="space-y-2">
+                            @foreach (var reading in MeterReadings)
+                            {
+                                <div class="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2">
+                                    <div>
+                                        <p class="font-mono text-sm font-semibold text-foreground">@FormatHelper.Number(reading.ReadingValue)</p>
+                                        <p class="text-xs text-muted-foreground">
+                                            @FormatHelper.Date(reading.CreatedAt)
+                                            @if (reading.Consumption.HasValue)
+                                            {
+                                                <text> · +@FormatHelper.Number(reading.Consumption.Value)</text>
+                                            }
+                                        </p>
+                                    </div>
+                                    <button type="button" class="rounded-lg px-2 py-1 text-xs text-red-500 hover:bg-muted" @onclick="() => OnDeleteReading.InvokeAsync(reading.Id)">Delete</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="flex justify-end gap-2 border-t border-border pt-5">
+                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Close</button>
+                <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" @onclick="OnEdit">Edit</button>
+            </div>
+        </div>
+    }
+</SideSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public CustomerResponse? Details { get; set; }
+    [Parameter] public IReadOnlyList<MeterReadingResponse> MeterReadings { get; set; } = [];
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnAddReading { get; set; }
+    [Parameter] public EventCallback<Guid> OnDeleteReading { get; set; }
+
+    private static string FormatPlan(string plan, decimal value) =>
+        plan switch
+        {
+            nameof(PlanType.Ampere) => $"{value}A",
+            nameof(PlanType.FixedKilowatt) => $"{value}kW prepaid",
+            _ => $"{value}kW"
+        };
+
+    private static RenderFragment DetailRow(string Label, string Value) => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "flex items-start justify-between gap-3");
+        builder.OpenElement(2, "span");
+        builder.AddAttribute(3, "class", "text-muted-foreground");
+        builder.AddContent(4, Label);
+        builder.CloseElement();
+        builder.OpenElement(5, "span");
+        builder.AddAttribute(6, "class", "text-right font-medium text-foreground");
+        builder.AddContent(7, Value);
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+}

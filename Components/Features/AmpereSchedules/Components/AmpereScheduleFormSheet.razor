@@ -1,0 +1,177 @@
+@namespace Shabakat.Components.Features.AmpereSchedules.Components
+
+<SideSheet Open="Open"
+           Title="@(IsEdit ? "Edit Ampere Schedule" : "Add Ampere Schedule")"
+           Description="Set hours per day and per-amp pricing tiers."
+           MaxWidthClass="sm:max-w-xl"
+           OnClose="OnClose">
+    <TitleIcon>
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </TitleIcon>
+    <ChildContent>
+        <EditForm Model="_form" OnValidSubmit="HandleSubmitAsync" class="space-y-6">
+            <DataAnnotationsValidator />
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">Name</label>
+                <InputText @bind-Value="_form.Name"
+                           class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                           placeholder="e.g. 8-Hour" />
+                <ValidationMessage For="() => _form.Name" class="mt-1 text-xs text-red-500" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">Hours per day</label>
+                <InputNumber @bind-Value="_form.HoursPerDay"
+                             class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                             min="1" max="24" />
+                <p class="mt-1 text-xs text-muted-foreground">Must be unique across schedules (1–24).</p>
+                <ValidationMessage For="() => _form.HoursPerDay" class="mt-1 text-xs text-red-500" />
+            </div>
+
+            <div class="space-y-4 rounded-2xl border border-border bg-muted/30 p-5">
+                <p class="text-sm font-medium text-foreground">Pricing per amp</p>
+                <p class="text-xs text-muted-foreground">Choose a customer type, then set its amp price.</p>
+                <p class="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Customer type</p>
+
+                <div class="flex items-start gap-3">
+                    <select class="w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                            @bind="_pricingTier"
+                            @bind:after="StateHasChanged">
+                        <option value="base">Base</option>
+                        <option value="residential">Residential</option>
+                        <option value="commercial">Commercial</option>
+                        <option value="industrial">Industrial</option>
+                    </select>
+                    <InputNumber @bind-Value="ActiveTierPrice"
+                                 class="min-w-0 flex-1 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                                 step="0.01" min="0" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <button type="button" class="@TierTileClass("base")" @onclick='() => _pricingTier = "base"'>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Base</p>
+                        <p class="mt-0.5 text-sm font-medium text-foreground">@_form.PricePerAmp.ToString("0.00")</p>
+                    </button>
+                    <button type="button" class="@TierTileClass("residential")" @onclick='() => _pricingTier = "residential"'>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Residential</p>
+                        <p class="mt-0.5 text-sm font-medium text-foreground">@_form.ResidentialPricePerAmp.ToString("0.00")</p>
+                    </button>
+                    <button type="button" class="@TierTileClass("commercial")" @onclick='() => _pricingTier = "commercial"'>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Commercial</p>
+                        <p class="mt-0.5 text-sm font-medium text-foreground">@_form.CommercialPricePerAmp.ToString("0.00")</p>
+                    </button>
+                    <button type="button" class="@TierTileClass("industrial")" @onclick='() => _pricingTier = "industrial"'>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Industrial</p>
+                        <p class="mt-0.5 text-sm font-medium text-foreground">@_form.IndustrialPricePerAmp.ToString("0.00")</p>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+                <p class="text-sm text-muted-foreground">Schedules define hours and amp rates for billing.</p>
+                <div class="flex items-center gap-3">
+                    <button type="button"
+                            class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                            disabled="@Saving"
+                            @onclick="OnClose">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                            disabled="@Saving">
+                        @(Saving ? "Saving..." : (IsEdit ? "Save" : "Create"))
+                    </button>
+                </div>
+            </div>
+        </EditForm>
+    </ChildContent>
+</SideSheet>
+
+@code {
+    private ScheduleFormModel _form = new();
+    private string _pricingTier = "base";
+
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public string InitialName { get; set; } = "";
+    [Parameter] public int InitialHoursPerDay { get; set; } = 8;
+    [Parameter] public decimal InitialPricePerAmp { get; set; }
+    [Parameter] public decimal InitialResidentialPricePerAmp { get; set; }
+    [Parameter] public decimal InitialCommercialPricePerAmp { get; set; }
+    [Parameter] public decimal InitialIndustrialPricePerAmp { get; set; }
+    [Parameter] public bool Saving { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<CreateAmpereScheduleRequest> OnSave { get; set; }
+
+    private decimal ActiveTierPrice
+    {
+        get => _pricingTier switch
+        {
+            "residential" => _form.ResidentialPricePerAmp,
+            "commercial" => _form.CommercialPricePerAmp,
+            "industrial" => _form.IndustrialPricePerAmp,
+            _ => _form.PricePerAmp
+        };
+        set
+        {
+            switch (_pricingTier)
+            {
+                case "residential": _form.ResidentialPricePerAmp = value; break;
+                case "commercial": _form.CommercialPricePerAmp = value; break;
+                case "industrial": _form.IndustrialPricePerAmp = value; break;
+                default: _form.PricePerAmp = value; break;
+            }
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!Open) return;
+
+        _pricingTier = "base";
+        _form = new ScheduleFormModel
+        {
+            Name = InitialName,
+            HoursPerDay = InitialHoursPerDay,
+            PricePerAmp = InitialPricePerAmp,
+            ResidentialPricePerAmp = InitialResidentialPricePerAmp,
+            CommercialPricePerAmp = InitialCommercialPricePerAmp,
+            IndustrialPricePerAmp = InitialIndustrialPricePerAmp
+        };
+    }
+
+    private string TierTileClass(string tier) =>
+        string.Equals(_pricingTier, tier, StringComparison.Ordinal)
+            ? "rounded-xl border border-primary/40 bg-primary/5 px-3 py-2 text-left text-xs transition"
+            : "rounded-xl border border-border bg-muted/20 px-3 py-2 text-left text-xs transition hover:border-border";
+
+    private async Task HandleSubmitAsync() =>
+        await OnSave.InvokeAsync(new CreateAmpereScheduleRequest(
+            _form.Name,
+            _form.HoursPerDay,
+            _form.PricePerAmp,
+            _form.ResidentialPricePerAmp,
+            _form.CommercialPricePerAmp,
+            _form.IndustrialPricePerAmp));
+
+    private sealed class ScheduleFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Name is required.")]
+        [System.ComponentModel.DataAnnotations.MaxLength(200)]
+        public string Name { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Range(1, 24, ErrorMessage = "Hours must be between 1 and 24.")]
+        public int HoursPerDay { get; set; } = 8;
+
+        [System.ComponentModel.DataAnnotations.Range(0, 9999999)]
+        public decimal PricePerAmp { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Range(0, 9999999)]
+        public decimal ResidentialPricePerAmp { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Range(0, 9999999)]
+        public decimal CommercialPricePerAmp { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Range(0, 9999999)]
+        public decimal IndustrialPricePerAmp { get; set; }
+    }
+}

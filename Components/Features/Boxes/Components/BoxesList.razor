@@ -1,0 +1,41 @@
+@namespace Shabakat.Components.Features.Boxes.Components
+
+@if (IsLoading)
+{
+    <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
+        Loading boxes...
+    </section>
+}
+else if (!HasAreas)
+{
+    <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
+        Create an area before adding distribution boxes.
+    </section>
+}
+else if (Boxes.Count == 0)
+{
+    <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
+        No boxes found.
+    </section>
+}
+else
+{
+    <div class="grid gap-4 xl:grid-cols-2">
+        @foreach (var box in Boxes)
+        {
+            <BoxCard Box="box"
+                     Saving="Saving"
+                     OnEdit="() => OnEdit.InvokeAsync(box)"
+                     OnDelete="() => OnDelete.InvokeAsync(box)" />
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<DistributionBoxResponse> Boxes { get; set; } = [];
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool HasAreas { get; set; }
+    [Parameter] public bool Saving { get; set; }
+    [Parameter] public EventCallback<DistributionBoxResponse> OnEdit { get; set; }
+    [Parameter] public EventCallback<DistributionBoxResponse> OnDelete { get; set; }
+}

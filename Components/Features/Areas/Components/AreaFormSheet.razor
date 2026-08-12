@@ -1,0 +1,65 @@
+@namespace Shabakat.Components.Features.Areas.Components
+
+<SideSheet Open="Open"
+           Title="@(IsEdit ? "Edit Area" : "Add Area")"
+           Description="@(IsEdit ? "Update the area name." : "Create a new service area.")"
+           MaxWidthClass="sm:max-w-lg"
+           OnClose="OnClose">
+    <TitleIcon>
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    </TitleIcon>
+    <ChildContent>
+        <EditForm Model="_form" OnValidSubmit="HandleSubmitAsync" class="space-y-6">
+            <DataAnnotationsValidator />
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">Name</label>
+                <InputText @bind-Value="_form.Name"
+                           class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                           placeholder="e.g. Downtown" />
+                <ValidationMessage For="() => _form.Name" class="mt-1 text-xs text-red-500" />
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+                <p class="text-sm text-muted-foreground">Areas group subscribers for billing and routing.</p>
+                <div class="flex items-center gap-3">
+                    <button type="button"
+                            class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                            disabled="@Saving"
+                            @onclick="OnClose">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                            disabled="@Saving">
+                        @(Saving ? "Saving..." : (IsEdit ? "Save" : "Create"))
+                    </button>
+                </div>
+            </div>
+        </EditForm>
+    </ChildContent>
+</SideSheet>
+
+@code {
+    private AreaFormModel _form = new();
+
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public string InitialName { get; set; } = "";
+    [Parameter] public bool Saving { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<string> OnSave { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (Open)
+            _form = new AreaFormModel { Name = InitialName };
+    }
+
+    private async Task HandleSubmitAsync() => await OnSave.InvokeAsync(_form.Name);
+
+    private sealed class AreaFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Name is required.")]
+        [System.ComponentModel.DataAnnotations.MaxLength(200)]
+        public string Name { get; set; } = "";
+    }
+}

@@ -1,0 +1,75 @@
+@namespace Shabakat.Components.Features.Subscribers.Components
+
+<tr class="border-b border-border hover:bg-muted/30">
+    <td class="px-4 py-3.5">
+        <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 items-center justify-center rounded-full text-white text-xs font-semibold shrink-0"
+                 style="background-color: @FormatHelper.AvatarColor(Subscriber.Name)">@FormatHelper.Initials(Subscriber.Name)</div>
+            <span class="whitespace-nowrap text-sm font-medium text-foreground">@Subscriber.Name</span>
+        </div>
+    </td>
+    <td class="px-4 py-3.5 font-mono text-sm text-muted-foreground">@(Subscriber.Phone ?? "—")</td>
+    <td class="px-4 py-3.5 text-sm text-foreground">@(Subscriber.AreaName ?? "Unassigned")</td>
+    <td class="px-4 py-3.5">
+        <span class="font-mono text-sm font-bold text-primary">@FormatPlan(Subscriber.Plan, Subscriber.PlanValue)</span>
+    </td>
+    <td class="px-4 py-3.5 whitespace-nowrap text-sm text-muted-foreground">@FormatHelper.Date(Subscriber.SubscriptionDate)</td>
+    <td class="px-4 py-3.5">@CustomerStatusBadge(Subscriber.CustomerStatus)</td>
+    <td class="px-4 py-3.5 font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(Subscriber.AmountDue)</td>
+    <td class="px-4 py-3.5">
+        <div class="relative flex justify-end">
+            <button type="button"
+                    class="rounded-lg p-1 text-muted-foreground hover:text-foreground"
+                    @onclick="OnToggleMenu"
+                    @onclick:stopPropagation="true">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </button>
+            @if (MenuOpen)
+            {
+                <div class="absolute end-0 top-full z-30 mt-1 min-w-44 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg"
+                     @onclick:stopPropagation="true">
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-muted" @onclick="OnView">View details</button>
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-muted" @onclick="OnEdit">Edit</button>
+                    @if (Subscriber.CustomerStatus.Equals(nameof(CustomerStatus.Active), StringComparison.OrdinalIgnoreCase))
+                    {
+                        <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-muted" @onclick="OnSuspend">Suspend</button>
+                    }
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-500 hover:bg-muted" @onclick="OnDelete">Delete</button>
+                </div>
+            }
+        </div>
+    </td>
+</tr>
+
+@code {
+    [Parameter, EditorRequired] public CustomerSummaryResponse Subscriber { get; set; } = null!;
+    [Parameter] public bool MenuOpen { get; set; }
+    [Parameter] public EventCallback OnToggleMenu { get; set; }
+    [Parameter] public EventCallback OnView { get; set; }
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnSuspend { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    private static string FormatPlan(string plan, decimal value) =>
+        plan switch
+        {
+            nameof(PlanType.Ampere) => $"{value}A",
+            nameof(PlanType.FixedKilowatt) => $"{value}kW prepaid",
+            _ => $"{value}kW"
+        };
+
+    private static RenderFragment CustomerStatusBadge(string status) => builder =>
+    {
+        var (cls, label) = status.ToLowerInvariant() switch
+        {
+            "active" => ("border-emerald-400/20 bg-emerald-400/10 text-emerald-600", "Active"),
+            "suspended" => ("border-amber-400/20 bg-amber-400/10 text-amber-600", "Suspended"),
+            "terminated" => ("border-red-400/20 bg-red-400/10 text-red-500", "Terminated"),
+            _ => ("border-border bg-muted text-muted-foreground", status)
+        };
+        builder.OpenElement(0, "span");
+        builder.AddAttribute(1, "class", $"inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium {cls}");
+        builder.AddContent(2, label);
+        builder.CloseElement();
+    };
+}

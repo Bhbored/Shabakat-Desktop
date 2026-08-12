@@ -4,434 +4,56 @@
 @inject IToastService Toast
 
 <div class="space-y-4" @onclick="CloseMenu">
-    <div class="space-y-4">
-        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <label class="min-w-60 flex-1">
-                <span class="sr-only">Search schedules</span>
-                <input type="text"
-                       class="h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition focus:border-primary"
-                       placeholder="Search schedules..."
-                       @bind="_searchTerm"
-                       @bind:event="oninput"
-                       @bind:after="ApplyFilter" />
-            </label>
-            <button type="button"
-                    class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
-                    style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
-                    disabled="@_loading"
-                    @onclick="OpenCreate">
-                + Add Schedule
-            </button>
-        </div>
-        <p class="text-xs text-muted-foreground">
-            @_filtered.Count pricing tier@(_filtered.Count != 1 ? "s" : "")
-        </p>
-    </div>
+    <AmpereSchedulesToolbar Search="@_searchTerm"
+                            Total="_filtered.Count"
+                            Disabled="_loading"
+                            SearchChanged="OnSearchChanged"
+                            OnCreate="OpenCreate" />
 
-    @if (_loading)
-    {
-        <div class="grid gap-4 xl:grid-cols-2">
-            @for (var i = 0; i < 4; i++)
-            {
-                <section class="rounded-2xl border border-border bg-card/80 p-5">
-                    <div class="flex items-start gap-4">
-                        <div class="h-10 w-10 animate-pulse rounded-full bg-muted"></div>
-                        <div class="min-w-0 flex-1 space-y-3">
-                            <div class="h-5 w-40 animate-pulse rounded bg-muted"></div>
-                            <div class="h-4 w-28 animate-pulse rounded bg-muted"></div>
-                            <div class="flex gap-3">
-                                <div class="h-7 w-28 animate-pulse rounded-full bg-muted"></div>
-                                <div class="h-7 w-24 animate-pulse rounded-full bg-muted"></div>
-                            </div>
-                            <div class="grid gap-3 sm:grid-cols-2">
-                                <div class="h-16 animate-pulse rounded-xl bg-muted"></div>
-                                <div class="h-16 animate-pulse rounded-xl bg-muted"></div>
-                            </div>
-                        </div>
-                        <div class="h-9 w-9 animate-pulse rounded-lg bg-muted"></div>
-                    </div>
-                </section>
-            }
-        </div>
-    }
-    else if (_filtered.Count == 0)
-    {
-        <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
-            No ampere schedules found.
-        </section>
-    }
-    else
-    {
-        <div class="grid gap-4 xl:grid-cols-2">
-            @foreach (var schedule in _filtered)
-            {
-                <section class="rounded-2xl border border-border bg-card/80 p-5 transition-colors hover:bg-card">
-                    <div class="flex items-start gap-4">
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-                             style="background-color: @FormatHelper.AvatarColor(schedule.Name)">
-                            @FormatHelper.Initials(schedule.Name)
-                        </div>
-
-                        <button type="button"
-                                class="min-w-0 flex-1 text-left"
-                                @onclick="() => OpenDetails(schedule)">
-                            <p class="truncate text-base font-semibold text-foreground">@schedule.Name</p>
-                            <p class="mt-1 text-sm text-muted-foreground">@schedule.HoursPerDay hours/day</p>
-
-                            <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                                <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1">
-                                    <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                    @schedule.CustomerCount subscriber@(schedule.CustomerCount != 1 ? "s" : "")
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1">
-                                    <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                                    @FormatHelper.Currency(schedule.PricePerAmp)/A
-                                </span>
-                            </div>
-
-                            <div class="mt-4 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
-                                <div class="rounded-xl border border-border bg-muted/50 px-3 py-2">
-                                    <div class="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                                        <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                        Hours / day
-                                    </div>
-                                    <p class="truncate text-sm text-foreground">@schedule.HoursPerDay hours/day</p>
-                                </div>
-                                <div class="rounded-xl border border-border bg-muted/50 px-3 py-2">
-                                    <div class="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                                        <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                        Created
-                                    </div>
-                                    <p class="text-sm text-foreground">@FormatHelper.Date(schedule.CreatedAt)</p>
-                                </div>
-                            </div>
-                        </button>
-
-                        <div class="relative shrink-0">
-                            <button type="button"
-                                    class="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
-                                    aria-label="Actions"
-                                    @onclick="() => ToggleMenu(schedule.Id)"
-                                    @onclick:stopPropagation="true">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                            </button>
-                            @if (_menuId == schedule.Id)
-                            {
-                                <div class="absolute end-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg"
-                                     @onclick:stopPropagation="true">
-                                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted" @onclick="() => OpenDetails(schedule)">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                                        View details
-                                    </button>
-                                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted" @onclick="() => OpenEdit(schedule)">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                        Edit
-                                    </button>
-                                    @if (schedule.CanBeDeleted)
-                                    {
-                                        <button type="button"
-                                                class="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-500/10"
-                                                @onclick="() => OpenDelete(schedule)">
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                            Delete
-                                        </button>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </section>
-            }
-        </div>
-    }
+    <AmpereSchedulesList Schedules="_filtered"
+                         IsLoading="_loading"
+                         OpenMenuId="_menuId"
+                         OnToggleMenu="ToggleMenu"
+                         OnView="OpenDetails"
+                         OnEdit="OpenEdit"
+                         OnDelete="OpenDelete" />
 </div>
 
-@* Details side panel *@
-<SideSheet Open="_showDetails"
-           Title="@(_selected?.Name ?? "Schedule details")"
-           Description="Ampere schedule overview, pricing tiers, and assigned subscribers."
-           MaxWidthClass="sm:max-w-xl"
-           OnClose="CloseDetails">
-    @if (_selected is not null)
-    {
-        <div class="space-y-4">
-            <div class="grid gap-4 md:grid-cols-2">
-                <div class="rounded-2xl border border-border bg-card p-4">
-                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Subscribers</p>
-                    <p class="mt-2 text-xl font-semibold text-foreground">
-                        @_selected.CustomerCount subscriber@(_selected.CustomerCount != 1 ? "s" : "")
-                    </p>
-                </div>
-                <div class="rounded-2xl border border-border bg-card p-4">
-                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Hours / day</p>
-                    <p class="mt-2 text-xl font-semibold text-foreground">@_selected.HoursPerDay hours/day</p>
-                </div>
-            </div>
+<AmpereScheduleDetailsSheet Open="_showDetails"
+                            Schedule="_selected"
+                            SubscribersPage="_subscribersPage"
+                            SubscribersLoading="_subscribersLoading"
+                            OnClose="CloseDetails"
+                            OnSubscribersPageChanged="LoadSubscribersPageAsync" />
 
-            <div class="space-y-3 rounded-2xl border border-border bg-card p-5">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Pricing per amp</p>
-                <div class="grid gap-3 sm:grid-cols-2">
-                    <div class="rounded-xl border border-border bg-muted/40 px-3 py-2">
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Base</p>
-                        <p class="mt-1 text-sm font-medium text-foreground">@_selected.PricePerAmp.ToString("0.00")</p>
-                    </div>
-                    <div class="rounded-xl border border-border bg-muted/40 px-3 py-2">
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Residential</p>
-                        <p class="mt-1 text-sm font-medium text-foreground">@_selected.ResidentialPricePerAmp.ToString("0.00")</p>
-                    </div>
-                    <div class="rounded-xl border border-border bg-muted/40 px-3 py-2">
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Commercial</p>
-                        <p class="mt-1 text-sm font-medium text-foreground">@_selected.CommercialPricePerAmp.ToString("0.00")</p>
-                    </div>
-                    <div class="rounded-xl border border-border bg-muted/40 px-3 py-2">
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Industrial</p>
-                        <p class="mt-1 text-sm font-medium text-foreground">@_selected.IndustrialPricePerAmp.ToString("0.00")</p>
-                    </div>
-                </div>
-            </div>
+<AmpereScheduleFormSheet Open="_showForm"
+                         IsEdit="@(_editingId is not null)"
+                         InitialName="@_formName"
+                         InitialHoursPerDay="_formHoursPerDay"
+                         InitialPricePerAmp="_formPricePerAmp"
+                         InitialResidentialPricePerAmp="_formResidentialPricePerAmp"
+                         InitialCommercialPricePerAmp="_formCommercialPricePerAmp"
+                         InitialIndustrialPricePerAmp="_formIndustrialPricePerAmp"
+                         Saving="_saving"
+                         OnClose="CloseForm"
+                         OnSave="SaveAsync" />
 
-            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
-                <div class="flex items-start gap-3">
-                    <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Hours / day</p>
-                        <p class="mt-1 text-sm text-foreground">@_selected.HoursPerDay hours/day</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Assigned subscribers</p>
-                        <p class="mt-1 text-sm text-foreground">@_selected.CustomerCount</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Created at</p>
-                        <p class="mt-1 text-sm text-foreground">@FormatHelper.Date(_selected.CreatedAt)</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
-                <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Assigned subscribers</h3>
-                        <p class="mt-2 text-sm text-muted-foreground">Subscribers billed on this ampere schedule.</p>
-                    </div>
-                    <span class="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-                        @(_subscribersPage?.TotalCount ?? 0) subscriber@((_subscribersPage?.TotalCount ?? 0) != 1 ? "s" : "")
-                    </span>
-                </div>
-
-                @if (_subscribersLoading)
-                {
-                    <div class="space-y-3">
-                        @for (var i = 0; i < 3; i++)
-                        {
-                            <div class="rounded-2xl border border-border bg-muted/30 p-4">
-                                <div class="flex items-start gap-3">
-                                    <div class="h-8 w-8 animate-pulse rounded-full bg-muted"></div>
-                                    <div class="flex-1 space-y-2">
-                                        <div class="h-4 w-32 animate-pulse rounded bg-muted"></div>
-                                        <div class="h-3 w-24 animate-pulse rounded bg-muted"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-                else if (_subscribersPage is null || !_subscribersPage.Data.Any())
-                {
-                    <p class="text-sm text-muted-foreground">No subscribers assigned to this schedule.</p>
-                }
-                else
-                {
-                    <div class="space-y-3">
-                        @foreach (var sub in _subscribersPage.Data)
-                        {
-                            <div class="rounded-2xl border border-border bg-muted/20 p-4">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex items-start gap-3">
-                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                                             style="background-color: @FormatHelper.AvatarColor(sub.Name)">
-                                            @FormatHelper.Initials(sub.Name)
-                                        </div>
-                                        <div class="space-y-2">
-                                            <div>
-                                                <p class="text-sm font-semibold text-foreground">@sub.Name</p>
-                                                <p class="text-xs text-muted-foreground">@sub.Plan · @FormatHelper.Number(sub.PlanValue)</p>
-                                            </div>
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <StatusBadge Status="@sub.CustomerStatus" />
-                                                <span class="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">@FormatHelper.Date(sub.SubscriptionDate)</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Amount due</p>
-                                        <p class="mt-2 text-base font-semibold text-foreground">@FormatHelper.Currency(sub.AmountDue)</p>
-                                    </div>
-                                </div>
-                                <div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-                                    <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg>
-                                    <span class="font-mono">@(string.IsNullOrWhiteSpace(sub.Phone) ? "Not set" : sub.Phone)</span>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-
-                @if (_subscribersPage is { TotalPages: > 1 })
-                {
-                    <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                        <span class="text-sm text-muted-foreground">Page @_subscribersPage.PageNumber of @_subscribersPage.TotalPages</span>
-                        <div class="flex gap-2">
-                            <button type="button"
-                                    class="rounded-xl border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-40"
-                                    disabled="@(!_subscribersPage.HasPreviousPage || _subscribersLoading)"
-                                    @onclick="() => LoadSubscribersPageAsync(_subscriberPage - 1)">
-                                Previous
-                            </button>
-                            <button type="button"
-                                    class="rounded-xl border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-40"
-                                    disabled="@(!_subscribersPage.HasNextPage || _subscribersLoading)"
-                                    @onclick="() => LoadSubscribersPageAsync(_subscriberPage + 1)">
-                                Next
-                            </button>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    }
-</SideSheet>
-
-@* Create / Edit side panel *@
-<SideSheet Open="_showForm"
-           Title="@(_editingId is null ? "Add Ampere Schedule" : "Edit Ampere Schedule")"
-           Description="Set hours per day and per-amp pricing tiers."
-           MaxWidthClass="sm:max-w-xl"
-           OnClose="CloseForm">
-    <TitleIcon>
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    </TitleIcon>
-    <ChildContent>
-        <EditForm Model="_form" OnValidSubmit="SaveAsync" class="space-y-6">
-            <DataAnnotationsValidator />
-            <div>
-                <label class="mb-1.5 block text-sm font-medium text-foreground">Name</label>
-                <InputText @bind-Value="_form.Name"
-                           class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                           placeholder="e.g. 8-Hour" />
-                <ValidationMessage For="() => _form.Name" class="mt-1 text-xs text-red-500" />
-            </div>
-            <div>
-                <label class="mb-1.5 block text-sm font-medium text-foreground">Hours per day</label>
-                <InputNumber @bind-Value="_form.HoursPerDay"
-                             class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                             min="1" max="24" />
-                <p class="mt-1 text-xs text-muted-foreground">Must be unique across schedules (1–24).</p>
-                <ValidationMessage For="() => _form.HoursPerDay" class="mt-1 text-xs text-red-500" />
-            </div>
-
-            <div class="space-y-4 rounded-2xl border border-border bg-muted/30 p-5">
-                <p class="text-sm font-medium text-foreground">Pricing per amp</p>
-                <p class="text-xs text-muted-foreground">Choose a customer type, then set its amp price.</p>
-                <p class="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Customer type</p>
-
-                <div class="flex items-start gap-3">
-                    <select class="w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                            @bind="_pricingTier"
-                            @bind:after="StateHasChanged">
-                        <option value="base">Base</option>
-                        <option value="residential">Residential</option>
-                        <option value="commercial">Commercial</option>
-                        <option value="industrial">Industrial</option>
-                    </select>
-                    <InputNumber @bind-Value="ActiveTierPrice"
-                                 class="min-w-0 flex-1 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                                 step="0.01" min="0" />
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    <button type="button" class="@TierTileClass("base")" @onclick='() => _pricingTier = "base"'>
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Base</p>
-                        <p class="mt-0.5 text-sm font-medium text-foreground">@_form.PricePerAmp.ToString("0.00")</p>
-                    </button>
-                    <button type="button" class="@TierTileClass("residential")" @onclick='() => _pricingTier = "residential"'>
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Residential</p>
-                        <p class="mt-0.5 text-sm font-medium text-foreground">@_form.ResidentialPricePerAmp.ToString("0.00")</p>
-                    </button>
-                    <button type="button" class="@TierTileClass("commercial")" @onclick='() => _pricingTier = "commercial"'>
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Commercial</p>
-                        <p class="mt-0.5 text-sm font-medium text-foreground">@_form.CommercialPricePerAmp.ToString("0.00")</p>
-                    </button>
-                    <button type="button" class="@TierTileClass("industrial")" @onclick='() => _pricingTier = "industrial"'>
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Industrial</p>
-                        <p class="mt-0.5 text-sm font-medium text-foreground">@_form.IndustrialPricePerAmp.ToString("0.00")</p>
-                    </button>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
-                <p class="text-sm text-muted-foreground">Schedules define hours and amp rates for billing.</p>
-                <div class="flex items-center gap-3">
-                    <button type="button"
-                            class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
-                            disabled="@_saving"
-                            @onclick="CloseForm">
-                        Cancel
-                    </button>
-                    <button type="submit"
-                            class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
-                            disabled="@_saving">
-                        @(_saving ? "Saving..." : (_editingId is null ? "Create" : "Save"))
-                    </button>
-                </div>
-            </div>
-        </EditForm>
-    </ChildContent>
-</SideSheet>
-
-<ConfirmDialog Open="_showDelete"
-               Title="Delete ampere schedule"
-               OnClose="CloseDelete">
-    <ChildContent>
-        @if (_pendingDelete is not null)
-        {
-            <p>
-                Delete <span class="font-medium text-foreground">@_pendingDelete.Name</span>? This cannot be undone.
-            </p>
-        }
-    </ChildContent>
-    <Footer>
-        <button type="button"
-                class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
-                disabled="@_saving"
-                @onclick="CloseDelete">
-            Cancel
-        </button>
-        <button type="button"
-                class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500/90 disabled:opacity-50"
-                disabled="@_saving"
-                @onclick="ConfirmDeleteAsync">
-            @(_saving ? "Deleting..." : "Delete")
-        </button>
-    </Footer>
-</ConfirmDialog>
+<DeleteAmpereScheduleDialog Open="_showDelete"
+                            Schedule="_pendingDelete"
+                            Saving="_saving"
+                            OnClose="CloseDelete"
+                            OnConfirm="ConfirmDeleteAsync" />
 
 @code {
     private readonly List<AmpereScheduleResponse> _items = [];
     private List<AmpereScheduleResponse> _filtered = [];
     private string _searchTerm = "";
+    private string _formName = "";
+    private int _formHoursPerDay = 8;
+    private decimal _formPricePerAmp;
+    private decimal _formResidentialPricePerAmp;
+    private decimal _formCommercialPricePerAmp;
+    private decimal _formIndustrialPricePerAmp;
     private bool _loading = true;
     private bool _saving;
     private bool _showForm;
@@ -441,33 +63,10 @@
     private Guid? _menuId;
     private AmpereScheduleResponse? _selected;
     private AmpereScheduleResponse? _pendingDelete;
-    private ScheduleFormModel _form = new();
-    private string _pricingTier = "base";
 
     private bool _subscribersLoading;
     private int _subscriberPage = 1;
     private PagedResponse<CustomerSummaryResponse>? _subscribersPage;
-
-    private decimal ActiveTierPrice
-    {
-        get => _pricingTier switch
-        {
-            "residential" => _form.ResidentialPricePerAmp,
-            "commercial" => _form.CommercialPricePerAmp,
-            "industrial" => _form.IndustrialPricePerAmp,
-            _ => _form.PricePerAmp
-        };
-        set
-        {
-            switch (_pricingTier)
-            {
-                case "residential": _form.ResidentialPricePerAmp = value; break;
-                case "commercial": _form.CommercialPricePerAmp = value; break;
-                case "industrial": _form.IndustrialPricePerAmp = value; break;
-                default: _form.PricePerAmp = value; break;
-            }
-        }
-    }
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
@@ -480,6 +79,12 @@
             _items.AddRange(result.OrderBy(s => s.HoursPerDay).ThenBy(s => s.Name));
         ApplyFilter();
         _loading = false;
+    }
+
+    private void OnSearchChanged(string value)
+    {
+        _searchTerm = value;
+        ApplyFilter();
     }
 
     private void ApplyFilter()
@@ -499,11 +104,6 @@
 
     private void ToggleMenu(Guid id) => _menuId = _menuId == id ? null : id;
     private void CloseMenu() => _menuId = null;
-
-    private string TierTileClass(string tier) =>
-        string.Equals(_pricingTier, tier, StringComparison.Ordinal)
-            ? "rounded-xl border border-primary/40 bg-primary/5 px-3 py-2 text-left text-xs transition"
-            : "rounded-xl border border-border bg-muted/20 px-3 py-2 text-left text-xs transition hover:border-border";
 
     private async Task OpenDetails(AmpereScheduleResponse schedule)
     {
@@ -539,8 +139,7 @@
     {
         CloseMenu();
         _editingId = null;
-        _pricingTier = "base";
-        _form = new ScheduleFormModel();
+        ResetFormSeed();
         _showForm = true;
     }
 
@@ -548,17 +147,23 @@
     {
         CloseMenu();
         _editingId = schedule.Id;
-        _pricingTier = "base";
-        _form = new ScheduleFormModel
-        {
-            Name = schedule.Name,
-            HoursPerDay = schedule.HoursPerDay,
-            PricePerAmp = schedule.PricePerAmp,
-            ResidentialPricePerAmp = schedule.ResidentialPricePerAmp,
-            CommercialPricePerAmp = schedule.CommercialPricePerAmp,
-            IndustrialPricePerAmp = schedule.IndustrialPricePerAmp
-        };
+        _formName = schedule.Name;
+        _formHoursPerDay = schedule.HoursPerDay;
+        _formPricePerAmp = schedule.PricePerAmp;
+        _formResidentialPricePerAmp = schedule.ResidentialPricePerAmp;
+        _formCommercialPricePerAmp = schedule.CommercialPricePerAmp;
+        _formIndustrialPricePerAmp = schedule.IndustrialPricePerAmp;
         _showForm = true;
+    }
+
+    private void ResetFormSeed()
+    {
+        _formName = "";
+        _formHoursPerDay = 8;
+        _formPricePerAmp = 0;
+        _formResidentialPricePerAmp = 0;
+        _formCommercialPricePerAmp = 0;
+        _formIndustrialPricePerAmp = 0;
     }
 
     private void CloseForm()
@@ -588,7 +193,7 @@
         _pendingDelete = null;
     }
 
-    private async Task SaveAsync()
+    private async Task SaveAsync(CreateAmpereScheduleRequest request)
     {
         if (_saving) return;
         _saving = true;
@@ -598,13 +203,7 @@
         {
             var created = await UiActions.RunAsync(
                 Toast,
-                () => AmpereScheduleService.CreateAsync(new CreateAmpereScheduleRequest(
-                    _form.Name,
-                    _form.HoursPerDay,
-                    _form.PricePerAmp,
-                    _form.ResidentialPricePerAmp,
-                    _form.CommercialPricePerAmp,
-                    _form.IndustrialPricePerAmp)),
+                () => AmpereScheduleService.CreateAsync(request),
                 "Ampere schedule created.");
             ok = created is not null;
         }
@@ -613,12 +212,12 @@
             var updated = await UiActions.RunAsync(
                 Toast,
                 () => AmpereScheduleService.UpdateAsync(_editingId.Value, new UpdateAmpereScheduleRequest(
-                    _form.Name,
-                    _form.HoursPerDay,
-                    _form.PricePerAmp,
-                    _form.ResidentialPricePerAmp,
-                    _form.CommercialPricePerAmp,
-                    _form.IndustrialPricePerAmp)),
+                    request.Name,
+                    request.HoursPerDay,
+                    request.PricePerAmp,
+                    request.ResidentialPricePerAmp,
+                    request.CommercialPricePerAmp,
+                    request.IndustrialPricePerAmp)),
                 "Ampere schedule updated.");
             ok = updated is not null;
         }
@@ -645,27 +244,5 @@
         _showDelete = false;
         _pendingDelete = null;
         await LoadAsync();
-    }
-
-    private sealed class ScheduleFormModel
-    {
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Name is required.")]
-        [System.ComponentModel.DataAnnotations.MaxLength(200)]
-        public string Name { get; set; } = "";
-
-        [System.ComponentModel.DataAnnotations.Range(1, 24, ErrorMessage = "Hours must be between 1 and 24.")]
-        public int HoursPerDay { get; set; } = 8;
-
-        [System.ComponentModel.DataAnnotations.Range(0, 9999999)]
-        public decimal PricePerAmp { get; set; }
-
-        [System.ComponentModel.DataAnnotations.Range(0, 9999999)]
-        public decimal ResidentialPricePerAmp { get; set; }
-
-        [System.ComponentModel.DataAnnotations.Range(0, 9999999)]
-        public decimal CommercialPricePerAmp { get; set; }
-
-        [System.ComponentModel.DataAnnotations.Range(0, 9999999)]
-        public decimal IndustrialPricePerAmp { get; set; }
     }
 }

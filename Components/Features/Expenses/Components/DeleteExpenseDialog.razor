@@ -1,0 +1,31 @@
+@namespace Shabakat.Components.Features.Expenses.Components
+
+<ConfirmDialog Open="Open"
+               Title="Delete Expense"
+               OnClose="OnClose">
+    <ChildContent>
+        @if (Expense is not null)
+        {
+            <p>
+                Delete @Expense.ExpenseType expense of @FormatHelper.Currency(Expense.Amount) on @FormatHelper.Date(Expense.ExpenseDate)?
+            </p>
+        }
+    </ChildContent>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="OnClose">Cancel</button>
+        <button type="button"
+                class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+                disabled="@Saving"
+                @onclick="OnConfirm">
+            @(Saving ? "Deleting..." : "Delete")
+        </button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public ExpenseResponse? Expense { get; set; }
+    [Parameter] public bool Saving { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
+}

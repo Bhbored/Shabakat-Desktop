@@ -1,0 +1,71 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+<SideSheet Open="Open" Title="@(Invoice is null ? "Invoice details" : $"Invoice #{Invoice.InvoiceNumber}")" Description="@(Invoice is null ? "" : $"{Invoice.CustomerName} · {FormatHelper.Date(Invoice.CreatedAt)}")" MaxWidthClass="sm:max-w-xl" OnClose="OnClose">
+    @if (Invoice is not null)
+    {
+        <div class="space-y-4">
+            <div class="flex justify-end"><InvoiceStatusBadge Status="@ToBadgeStatus(Invoice.InvoiceStatus)" /></div>
+            <div class="grid gap-3 md:grid-cols-3">
+                <div class="rounded-2xl border border-border bg-card p-4"><p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Total</p><p class="mt-1 font-mono text-sm font-semibold">@FormatHelper.Currency(Invoice.TotalAmount)</p></div>
+                <div class="rounded-2xl border border-border bg-card p-4"><p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Paid</p><p class="mt-1 font-mono text-sm font-semibold text-emerald-600">@FormatHelper.Currency(Invoice.PaidAmount)</p></div>
+                <div class="rounded-2xl border border-border bg-card p-4"><p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Due</p><p class="mt-1 font-mono text-sm font-semibold text-red-500">@FormatHelper.Currency(Invoice.AmountDue)</p></div>
+            </div>
+            <div class="space-y-3 rounded-2xl border border-border bg-card p-5 text-sm">
+                @DetailRow("Period", $"{FormatHelper.Date(Invoice.ConsumptionStart)} – {FormatHelper.Date(Invoice.ConsumptionEnd)}")
+                @DetailRow("Fixed Charge", FormatHelper.Currency(Invoice.FixedCharge))
+                @DetailRow("TVA", FormatHelper.Number(Invoice.TVA))
+                @DetailRow("Consumption", Invoice.BilledConsumption.HasValue ? FormatHelper.Number(Invoice.BilledConsumption.Value) : "—")
+                @DetailRow("Phone", Invoice.CustomerPhone ?? "—")
+            </div>
+            <div class="rounded-2xl border border-border bg-card p-5">
+                <h3 class="mb-3 text-sm font-semibold text-foreground">Payments</h3>
+                @if (Payments.Count == 0) { <p class="text-sm text-muted-foreground">No payments recorded.</p> }
+                else {
+                    <div class="space-y-2">
+                        @foreach (var payment in Payments) {
+                            <div class="rounded-xl border border-border px-3 py-2">
+                                <p class="font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(payment.Amount)</p>
+                                <p class="text-xs text-muted-foreground">@payment.PaymentMethod · @FormatHelper.Date(payment.PaymentDate)</p>
+                                @if (!string.IsNullOrWhiteSpace(payment.Notes)) { <p class="text-xs text-muted-foreground">@payment.Notes</p> }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="flex justify-end gap-2 border-t border-border pt-5">
+                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Close</button>
+                @if (!Invoice.InvoiceStatus.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase)) {
+                    <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" @onclick="OnRecordPayment">Record Payment</button>
+                }
+            </div>
+        </div>
+    }
+</SideSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public InvoiceResponse? Invoice { get; set; }
+    [Parameter] public IReadOnlyList<PaymentResponse> Payments { get; set; } = [];
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnRecordPayment { get; set; }
+
+    private static string ToBadgeStatus(string status) =>
+        status.Equals(nameof(InvoiceStatus.PartiallyPaid), StringComparison.OrdinalIgnoreCase)
+            ? "partiallyPaid"
+            : status.ToLowerInvariant();
+
+    private static RenderFragment DetailRow(string label, string value) => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "flex items-start justify-between gap-3");
+        builder.OpenElement(2, "span");
+        builder.AddAttribute(3, "class", "text-muted-foreground");
+        builder.AddContent(4, label);
+        builder.CloseElement();
+        builder.OpenElement(5, "span");
+        builder.AddAttribute(6, "class", "text-right font-medium text-foreground");
+        builder.AddContent(7, value);
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+}
