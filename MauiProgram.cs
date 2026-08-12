@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Maui.DevFlow.Agent;
 
 namespace Shabakat
 {
@@ -19,6 +20,7 @@ namespace Shabakat
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
+            builder.AddMauiDevFlowAgent();
 #endif
 
             return builder.Build();
