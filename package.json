@@ -1,0 +1,20 @@
+{
+  "name": "shabakat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tw:build": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/app.css --minify",
+    "tw:watch": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/app.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+ 
+}

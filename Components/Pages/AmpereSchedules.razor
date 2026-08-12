@@ -1,0 +1,43 @@
+@page "/ampere-schedules"
+@using Shabakat.Components.Shared
+
+<div class="space-y-4">
+    <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-xl font-bold text-foreground flex-1">Ampere Schedules</h1>
+        <button class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" style="box-shadow: 0 0 16px rgba(230,196,58,0.25);">+ Add Schedule</button>
+    </div>
+    <p class="text-xs text-muted-foreground">@MockData.AmpereSchedules.Length pricing tiers</p>
+
+    <div class="grid gap-4 xl:grid-cols-2">
+        @foreach (var schedule in MockData.AmpereSchedules)
+        {
+            <section class="rounded-2xl border border-border bg-card/80 p-5 hover:bg-card transition-colors">
+                <div class="flex items-start gap-4">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-sm shrink-0">@schedule.Name</div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between">
+                            <p class="text-base font-semibold text-foreground">@schedule.Name Tier</p>
+                            <button class="rounded-lg p-1 text-muted-foreground hover:text-foreground">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                            </button>
+                        </div>
+                        <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                            <div class="rounded-xl border border-border bg-muted/50 px-3 py-2.5 text-center">
+                                <p class="text-xs uppercase tracking-[0.12em] text-muted-foreground">Monthly Fee</p>
+                                <p class="mt-1 font-mono text-lg font-bold text-foreground">@MockData.FormatCurrency(schedule.Price)</p>
+                            </div>
+                            <div class="rounded-xl border border-border bg-muted/50 px-3 py-2.5 text-center">
+                                <p class="text-xs uppercase tracking-[0.12em] text-muted-foreground">Fixed Charge</p>
+                                <p class="mt-1 font-mono text-lg font-bold text-foreground">@MockData.FormatCurrency(schedule.FixedCharge)</p>
+                            </div>
+                            <div class="rounded-xl border border-border bg-muted/50 px-3 py-2.5 text-center">
+                                <p class="text-xs uppercase tracking-[0.12em] text-muted-foreground">TVA</p>
+                                <p class="mt-1 font-mono text-lg font-bold text-foreground">@schedule.Tva%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+    </div>
+</div>

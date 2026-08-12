@@ -1,0 +1,116 @@
+@page "/expenses"
+@using Shabakat.Components.Shared
+@using System.Linq
+
+<div class="space-y-4">
+    <div class="flex flex-wrap items-center gap-3">
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground" @bind="categoryFilter">
+            <option value="">All Categories</option>
+            @foreach (var cat in categories)
+            {
+                <option value="@cat">@cat</option>
+            }
+        </select>
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground" @bind="areaFilter">
+            <option value="">All Areas</option>
+            @foreach (var area in areas)
+            {
+                <option value="@area">@area</option>
+            }
+        </select>
+        <input type="date" class="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground w-40" @bind="dateFrom" @bind:format="yyyy-MM-dd" />
+        <span class="text-muted-foreground">to</span>
+        <input type="date" class="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground w-40" @bind="dateTo" @bind:format="yyyy-MM-dd" />
+        <button class="ml-auto rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" style="box-shadow: 0 0 16px rgba(230,196,58,0.25);">+ Add Expense</button>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-3">
+        <section class="rounded-2xl border border-border bg-card p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Total This Period</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-foreground">@MockData.FormatCurrency(filteredData.Sum(e => e.Amount))</p>
+            <p class="mt-1 text-xs text-muted-foreground">@filteredData.Count() entries</p>
+        </section>
+        <section class="rounded-2xl border border-border bg-card p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Fuel Cost</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-amber-600">@MockData.FormatCurrency(filteredData.Where(e => e.Category == "Fuel").Sum(e => e.Amount))</p>
+            <p class="mt-1 text-xs text-muted-foreground">@(filteredData.Any() ? $"{(filteredData.Where(e => e.Category == "Fuel").Sum(e => e.Amount) / filteredData.Sum(e => e.Amount) * 100):F1}% of total" : "0%")</p>
+        </section>
+        <section class="rounded-2xl border border-border bg-card p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Maintenance</p>
+            <p class="mt-2 font-mono text-2xl font-bold text-blue-400">@MockData.FormatCurrency(filteredData.Where(e => e.Category == "Maintenance" || e.Category == "Parts").Sum(e => e.Amount))</p>
+            <p class="mt-1 text-xs text-muted-foreground">Repairs &amp; parts</p>
+        </section>
+    </div>
+
+    <section class="rounded-2xl border border-border bg-card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[700px]">
+                <thead>
+                    <tr class="border-b border-border">
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Date</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Category</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Description</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Area</th>
+                        <th class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var exp in pagedData)
+                    {
+                        <tr class="border-b border-border hover:bg-muted/30">
+                            <td class="px-4 py-3.5 whitespace-nowrap text-sm text-muted-foreground">@MockData.FormatDate(exp.Date)</td>
+                            <td class="px-4 py-3.5"><ExpenseTypeBadge Category="@exp.Category" /></td>
+                            <td class="px-4 py-3.5 text-sm text-foreground">@exp.Description</td>
+                            <td class="px-4 py-3.5 text-sm text-muted-foreground">@(exp.AreaName ?? "—")</td>
+                            <td class="px-4 py-3.5 font-mono text-sm font-semibold text-foreground text-right">@MockData.FormatCurrency(exp.Amount)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+            <span>@filteredData.Count() expenses found</span>
+            <div class="flex items-center gap-2 self-end md:self-auto">
+                <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm" @bind="pageSize" @bind:after="GoToFirstPage">
+                    <option value="10">10 / page</option>
+                    <option value="20">20 / page</option>
+                    <option value="50">50 / page</option>
+                </select>
+                <button class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(currentPage == 0)" @onclick="PrevPage">Prev</button>
+                <span class="min-w-20 text-center">@(currentPage + 1) / @totalPages</span>
+                <button class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(currentPage >= totalPages - 1)" @onclick="NextPage">Next</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+@code {
+    private string categoryFilter = "";
+    private string areaFilter = "";
+    private DateTime? dateFrom;
+    private DateTime? dateTo;
+    private int currentPage = 0;
+    private int pageSize = 10;
+
+    private string[] categories = MockData.Expenses.Select(e => e.Category).Distinct().OrderBy(c => c).ToArray();
+    private string[] areas = MockData.Expenses.Select(e => e.AreaName ?? "").Where(a => !string.IsNullOrEmpty(a)).Distinct().OrderBy(a => a).ToArray();
+
+    private IEnumerable<ExpenseData> filteredData
+    {
+        get
+        {
+            var query = MockData.Expenses.AsEnumerable();
+            if (!string.IsNullOrEmpty(categoryFilter)) query = query.Where(e => e.Category == categoryFilter);
+            if (!string.IsNullOrEmpty(areaFilter)) query = query.Where(e => e.AreaName == areaFilter);
+            if (dateFrom.HasValue) query = query.Where(e => e.Date >= dateFrom.Value);
+            if (dateTo.HasValue) query = query.Where(e => e.Date <= dateTo.Value);
+            return query;
+        }
+    }
+
+    private ExpenseData[] pagedData => filteredData.Skip(currentPage * pageSize).Take(pageSize).ToArray();
+    private int totalPages => Math.Max(1, (int)Math.Ceiling((double)filteredData.Count() / pageSize));
+    private void NextPage() { if (currentPage < totalPages - 1) currentPage++; }
+    private void PrevPage() { if (currentPage > 0) currentPage--; }
+    private void GoToFirstPage() { currentPage = 0; }
+}

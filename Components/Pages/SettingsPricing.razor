@@ -1,0 +1,60 @@
+@page "/settings/pricing"
+
+<div class="space-y-5">
+    <NavLink href="settings" class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-2">
+        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Settings
+    </NavLink>
+    <h1 class="text-xl font-bold text-foreground">Pricing Configuration</h1>
+    <p class="text-xs text-muted-foreground">Set the rates used for billing calculations</p>
+
+    <section class="rounded-2xl border border-border bg-card p-5 space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-foreground">Price per Kilowatt</p>
+                <p class="text-xs text-muted-foreground">Rate charged per kWh for meter-based subscribers</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-muted-foreground">$</span>
+                <input type="number" class="w-24 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground text-right" value="0.12" step="0.01" />
+                <span class="text-muted-foreground">/kWh</span>
+            </div>
+        </div>
+        <hr class="border-border" />
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-foreground">Price per Amp</p>
+                <p class="text-xs text-muted-foreground">Rate charged per ampere for ampere-based subscribers</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-muted-foreground">$</span>
+                <input type="number" class="w-24 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground text-right" value="17.00" step="0.01" />
+                <span class="text-muted-foreground">/A</span>
+            </div>
+        </div>
+        <hr class="border-border" />
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-foreground">Fixed Charge</p>
+                <p class="text-xs text-muted-foreground">Additional fixed amount added to every invoice</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-muted-foreground">$</span>
+                <input type="number" class="w-24 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground text-right" value="15.00" step="0.01" />
+            </div>
+        </div>
+        <hr class="border-border" />
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-foreground">TVA Rate</p>
+                <p class="text-xs text-muted-foreground">Value-added tax percentage</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="number" class="w-24 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground text-right" value="11" step="1" />
+                <span class="text-muted-foreground">%</span>
+            </div>
+        </div>
+    </section>
+
+    <button class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">Save Changes</button>
+</div>

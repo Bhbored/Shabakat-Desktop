@@ -1,0 +1,21 @@
+@page "/settings/ampere-schedule-pricing"
+
+<div class="space-y-5">
+    <NavLink href="settings" class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-2">
+        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Settings
+    </NavLink>
+    <h1 class="text-xl font-bold text-foreground">Ampere Schedule Pricing</h1>
+    <p class="text-xs text-muted-foreground">Enable different pricing tiers based on ampere schedules</p>
+
+    <section class="rounded-2xl border border-border bg-card p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-foreground">Schedule-Based Pricing</p>
+                <p class="text-xs text-muted-foreground">When enabled, each ampere schedule can have its own price per amp</p>
+            </div>
+            <input type="checkbox" class="h-5 w-5 rounded accent-primary" checked />
+        </div>
+    </section>
+    <button class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">Save Changes</button>
+</div>

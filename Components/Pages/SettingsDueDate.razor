@@ -1,0 +1,26 @@
+@page "/settings/due-date"
+
+<div class="space-y-5">
+    <NavLink href="settings" class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-2">
+        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Settings
+    </NavLink>
+    <h1 class="text-xl font-bold text-foreground">Invoice Due Date</h1>
+    <p class="text-xs text-muted-foreground">Set the default day of month when invoices are due</p>
+
+    <section class="rounded-2xl border border-border bg-card p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-foreground">Due Day</p>
+                <p class="text-xs text-muted-foreground">Day of the month invoices must be paid by</p>
+            </div>
+            <select class="rounded-xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground">
+                @for (int i = 1; i <= 28; i++)
+                {
+                    <option value="@i" selected="@(i == 15)">@i</option>
+                }
+            </select>
+        </div>
+    </section>
+    <button class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">Save Changes</button>
+</div>
