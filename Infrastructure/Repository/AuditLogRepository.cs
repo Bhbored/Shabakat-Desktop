@@ -15,15 +15,14 @@ public sealed class AuditLogRepository : IAuditLogRepository
         _db = db;
     }
 
-    public async Task AddAsync(AuditLog auditLog, CancellationToken cancellationToken = default)
-        => await _db.AuditLogs.AddAsync(auditLog, cancellationToken);
+    public async Task AddAsync(AuditLog auditLog)
+        => await _db.AuditLogs.AddAsync(auditLog);
 
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-        => await _db.SaveChangesAsync(cancellationToken);
+    public async Task SaveChangesAsync()
+        => await _db.SaveChangesAsync();
 
     public async Task<(IEnumerable<AuditLog> Items, int TotalCount)> GetAllPagedAsync(
-        AuditLogFilterRequest filter,
-        CancellationToken cancellationToken = default)
+        AuditLogFilterRequest filter)
     {
         var query = _db.AuditLogs.AsQueryable();
 
@@ -39,7 +38,7 @@ public sealed class AuditLogRepository : IAuditLogRepository
         if (filter.CreatedTo.HasValue)
             query = query.Where(a => a.CreatedAt <= filter.CreatedTo.Value);
 
-        var totalCount = await query.CountAsync(cancellationToken);
+        var totalCount = await query.CountAsync();
         var pageSize = Math.Max(1, filter.PageSize);
         var pageNumber = Math.Max(1, filter.PageNumber);
 
@@ -47,7 +46,7 @@ public sealed class AuditLogRepository : IAuditLogRepository
             .OrderByDescending(a => a.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .ToListAsync(cancellationToken);
+            .ToListAsync();
 
         return (items, totalCount);
     }
