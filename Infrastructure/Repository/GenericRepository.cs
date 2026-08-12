@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Domain.Common;
 using Shabakat.Infrastructure.Persistence;
@@ -9,11 +10,13 @@ public class GenericRepository<T> : IGenericRepository<T> where T : Base
 {
     protected readonly AppDbContext _db;
     protected readonly DbSet<T> _dbSet;
+    protected readonly ILogger _logger;
 
-    public GenericRepository(AppDbContext db)
+    public GenericRepository(AppDbContext db, ILoggerFactory loggerFactory)
     {
         _db = db;
         _dbSet = db.Set<T>();
+        _logger = loggerFactory.CreateLogger($"Shabakat.Repository.{typeof(T).Name}");
     }
 
     public async Task<T?> GetByIdAsync(Guid id)
@@ -35,7 +38,11 @@ public class GenericRepository<T> : IGenericRepository<T> where T : Base
         => _dbSet.Remove(entity);
 
     public async Task SaveChangesAsync()
-        => await _db.SaveChangesAsync();
+    {
+        var count = await _db.SaveChangesAsync();
+        if (count > 0)
+            _logger.LogDebug("Saved {ChangeCount} change(s)", count);
+    }
 
     public async Task ExecuteInTransactionAsync(Func<Task> action)
     {
@@ -44,10 +51,12 @@ public class GenericRepository<T> : IGenericRepository<T> where T : Base
         {
             await action();
             await transaction.CommitAsync();
+            _logger.LogDebug("Transaction committed");
         }
-        catch
+        catch (Exception ex)
         {
             await transaction.RollbackAsync();
+            _logger.LogError(ex, "Transaction rolled back");
             throw;
         }
     }

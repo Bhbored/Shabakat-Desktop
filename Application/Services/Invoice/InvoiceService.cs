@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Invoices;
@@ -19,6 +20,8 @@ public sealed class InvoiceService : IInvoiceService
     private readonly IMeterReadingRepository _meterReadingRepository;
     private readonly IInvoiceSkipRepository _invoiceSkipRepository;
     private readonly IPricingService _pricingService;
+    private readonly IAuditLogService _auditLogService;
+    private readonly ILogger<InvoiceService> _logger;
 
     public InvoiceService(
         IInvoiceRepository invoiceRepository,
@@ -27,7 +30,9 @@ public sealed class InvoiceService : IInvoiceService
         IPaymentRepository paymentRepository,
         IMeterReadingRepository meterReadingRepository,
         IInvoiceSkipRepository invoiceSkipRepository,
-        IPricingService pricingService)
+        IPricingService pricingService,
+        IAuditLogService auditLogService,
+        ILogger<InvoiceService> logger)
     {
         _invoiceRepository = invoiceRepository;
         _customerRepository = customerRepository;
@@ -36,6 +41,8 @@ public sealed class InvoiceService : IInvoiceService
         _meterReadingRepository = meterReadingRepository;
         _invoiceSkipRepository = invoiceSkipRepository;
         _pricingService = pricingService;
+        _auditLogService = auditLogService;
+        _logger = logger;
     }
 
     public async Task<PagedResponse<InvoiceSummaryResponse>> GetAllAsync(InvoiceFilterRequest filter)
@@ -95,8 +102,17 @@ public sealed class InvoiceService : IInvoiceService
                 customer, prepared, preferences.Language, recordSkipOnMeterReadingOnly: true);
 
         var invoiceNumber = await _invoiceRepository.GetNextInvoiceNumberAsync();
-        await PersistStandardInvoiceAsync(customer, prepared, invoiceNumber);
+        var invoice = await PersistStandardInvoiceAsync(customer, prepared, invoiceNumber);
         await _invoiceRepository.SaveChangesAsync();
+
+        await _auditLogService.LogSuccessAsync(
+            AuditLogEntries.InvoiceCreated(invoice, customer.Name, customer.Plan.ToString()));
+
+        _logger.LogInformation(
+            "Created invoice #{InvoiceNumber} for customer {CustomerId} ({CustomerName})",
+            invoice.InvoiceNumber,
+            customer.Id,
+            customer.Name);
     }
 
     public async Task<BulkCreateInvoiceResponse> BulkCreateAsync(PlanType? planType = null)
@@ -179,6 +195,15 @@ public sealed class InvoiceService : IInvoiceService
 
         await _invoiceRepository.SaveChangesAsync();
 
+        await _auditLogService.LogSuccessAsync(
+            AuditLogEntries.InvoiceBulkCreated(created, skipped));
+
+        _logger.LogInformation(
+            "Bulk invoice create finished: {Created} created, {Skipped} skipped (plan filter: {PlanType})",
+            created,
+            skipped,
+            planType?.ToString() ?? "all");
+
         return new BulkCreateInvoiceResponse(
             Created: created,
             Skipped: skipped,
@@ -186,7 +211,7 @@ public sealed class InvoiceService : IInvoiceService
     }
 
     private async Task<(bool Created, bool Skipped, int NextInvoiceNumber)> TryCreateBulkInvoiceAsync(
-        Domain.Entities.Customer customer,
+        Customer customer,
         AppPreferences preferences,
         DateOnly billingReferenceDate,
         int nextInvoiceNumber)
@@ -208,6 +233,11 @@ public sealed class InvoiceService : IInvoiceService
         }
         catch (Exception ex)
         {
+            _logger.LogWarning(
+                ex,
+                "Bulk invoice skipped for customer {CustomerId} ({CustomerName})",
+                customer.Id,
+                customer.Name);
             await RecordInvoiceSkipAsync(
                 customer, prepared.ConsumptionStart, prepared.ConsumptionEnd, ex.Message);
             return (false, true, nextInvoiceNumber);
@@ -235,6 +265,8 @@ public sealed class InvoiceService : IInvoiceService
 
     public async Task PayAsync(Guid invoiceId, AddPaymentRequest request)
     {
+        Invoice? paidInvoice = null;
+
         await _invoiceRepository.ExecuteInTransactionAsync(async () =>
         {
             var invoice = await _invoiceRepository.GetByIdForUpdateAsync(invoiceId)
@@ -268,7 +300,21 @@ public sealed class InvoiceService : IInvoiceService
             _invoiceRepository.Update(invoice);
 
             await _invoiceRepository.SaveChangesAsync();
+            paidInvoice = invoice;
         });
+
+        if (paidInvoice is not null)
+        {
+            await _auditLogService.LogSuccessAsync(
+                AuditLogEntries.InvoicePaymentRecorded(
+                    paidInvoice, request.Amount, request.PaymentMethod));
+
+            _logger.LogInformation(
+                "Recorded payment of {Amount} on invoice #{InvoiceNumber} ({InvoiceId})",
+                request.Amount,
+                paidInvoice.InvoiceNumber,
+                paidInvoice.Id);
+        }
     }
 
     public async Task<InvoiceResponse> UpdateAsync(Guid id, UpdateInvoiceRequest request)
@@ -291,6 +337,7 @@ public sealed class InvoiceService : IInvoiceService
         _invoiceRepository.Update(invoice);
         await _invoiceRepository.SaveChangesAsync();
 
+        _logger.LogInformation("Updated invoice {InvoiceId} (#{InvoiceNumber})", invoice.Id, invoice.InvoiceNumber);
         return MapToResponse(invoice);
     }
 
@@ -305,8 +352,10 @@ public sealed class InvoiceService : IInvoiceService
                 "Cannot delete an invoice that has payments recorded against it.");
         }
 
+        var number = invoice.InvoiceNumber;
         _invoiceRepository.Delete(invoice);
         await _invoiceRepository.SaveChangesAsync();
+        _logger.LogInformation("Deleted invoice {InvoiceId} (#{InvoiceNumber})", id, number);
     }
 
     public async Task<IEnumerable<PaymentResponse>> GetPaymentsAsync(Guid invoiceId)
@@ -357,7 +406,7 @@ public sealed class InvoiceService : IInvoiceService
     }
 
     private async Task CreateFixedKilowattInvoiceAsync(
-        Domain.Entities.Customer customer,
+        Customer customer,
         CreateInvoiceRequest request)
     {
         if (request.PaymentMethod is null)
@@ -375,6 +424,9 @@ public sealed class InvoiceService : IInvoiceService
         var unitPrice = rates.UnitPrice;
 
         var today = DateOnly.FromDateTime(DateTime.Now);
+        Invoice? createdInvoice = null;
+        decimal paymentAmount = 0m;
+        decimal kilowattCredits = 0m;
 
         await _invoiceRepository.ExecuteInTransactionAsync(async () =>
         {
@@ -385,7 +437,7 @@ public sealed class InvoiceService : IInvoiceService
                 customer.Id, monthStart, monthEndInclusive);
             var effectivePlanValue = planAlreadyChargedThisMonth ? 0m : customer.PlanValue;
 
-            var (paymentAmount, kilowattCredits) = ResolveFixedKilowattAmounts(
+            (paymentAmount, kilowattCredits) = ResolveFixedKilowattAmounts(
                 request.PaymentAmount,
                 request.KilowattAmount,
                 effectivePlanValue,
@@ -419,7 +471,7 @@ public sealed class InvoiceService : IInvoiceService
             }
 
             var invoiceNumber = await _invoiceRepository.GetNextInvoiceNumberAsync();
-            var invoice = new Domain.Entities.Invoice
+            var invoice = new Invoice
             {
                 CustomerId = customer.Id,
                 InvoiceNumber = invoiceNumber,
@@ -446,7 +498,25 @@ public sealed class InvoiceService : IInvoiceService
             });
 
             await _invoiceRepository.SaveChangesAsync();
+            createdInvoice = invoice;
         });
+
+        if (createdInvoice is not null)
+        {
+            await _auditLogService.LogSuccessAsync(
+                AuditLogEntries.InvoiceFixedKilowattCharge(
+                    createdInvoice,
+                    customer.Name,
+                    paymentAmount,
+                    kilowattCredits));
+
+            _logger.LogInformation(
+                "Created fixed-kW invoice #{InvoiceNumber} for {CustomerName} (amount {Amount}, kWh {Credits})",
+                createdInvoice.InvoiceNumber,
+                customer.Name,
+                paymentAmount,
+                kilowattCredits);
+        }
     }
 
     private static (decimal PaymentAmount, decimal KilowattCredits) ResolveFixedKilowattAmounts(
@@ -564,7 +634,7 @@ public sealed class InvoiceService : IInvoiceService
     }
 
     private async Task<StandardInvoicePrepareResult> PrepareStandardInvoiceAsync(
-        Domain.Entities.Customer customer,
+        Customer customer,
         AppPreferences preferences,
         DateOnly today,
         int? ampereBilledDays = null)
@@ -661,7 +731,7 @@ public sealed class InvoiceService : IInvoiceService
     }
 
     private async Task<Exception> HandlePrepareFailureAsync(
-        Domain.Entities.Customer customer,
+        Customer customer,
         StandardInvoicePrepareResult prepared,
         string language,
         bool recordSkipOnMeterReadingOnly)
@@ -714,12 +784,12 @@ public sealed class InvoiceService : IInvoiceService
         }
     }
 
-    private async Task<Domain.Entities.Invoice> PersistStandardInvoiceAsync(
-        Domain.Entities.Customer customer,
+    private async Task<Invoice> PersistStandardInvoiceAsync(
+        Customer customer,
         StandardInvoicePrepareResult prepared,
         int invoiceNumber)
     {
-        var invoice = new Domain.Entities.Invoice
+        var invoice = new Invoice
         {
             CustomerId = customer.Id,
             InvoiceNumber = invoiceNumber,
@@ -740,7 +810,7 @@ public sealed class InvoiceService : IInvoiceService
     }
 
     private async Task RecordInvoiceSkipAsync(
-        Domain.Entities.Customer customer,
+        Customer customer,
         DateOnly billingPeriodStart,
         DateOnly billingPeriodEnd,
         string reason)
@@ -755,7 +825,7 @@ public sealed class InvoiceService : IInvoiceService
         });
     }
 
-    private static InvoiceSummaryResponse MapToSummary(Domain.Entities.Invoice i) =>
+    private static InvoiceSummaryResponse MapToSummary(Invoice i) =>
         new(
             Id: i.Id,
             InvoiceNumber: i.InvoiceNumber,
@@ -769,7 +839,7 @@ public sealed class InvoiceService : IInvoiceService
             BilledConsumption: i.BilledConsumption,
             CreatedAt: i.CreatedAt);
 
-    private static InvoiceResponse MapToResponse(Domain.Entities.Invoice i) =>
+    private static InvoiceResponse MapToResponse(Invoice i) =>
         new(
             Id: i.Id,
             InvoiceNumber: i.InvoiceNumber,

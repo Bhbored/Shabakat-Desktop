@@ -22,6 +22,7 @@ namespace Shabakat
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
+    		builder.Logging.SetMinimumLevel(LogLevel.Debug);
     		builder.Logging.AddDebug();
             builder.AddMauiDevFlowAgent();
 #endif

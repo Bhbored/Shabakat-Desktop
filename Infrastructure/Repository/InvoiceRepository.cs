@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.DTOs.Invoices;
 using Shabakat.Domain.Entities;
@@ -8,7 +9,7 @@ namespace Shabakat.Infrastructure.Repository;
 
 public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepository
 {
-    public InvoiceRepository(AppDbContext db) : base(db) { }
+    public InvoiceRepository(AppDbContext db, ILoggerFactory loggerFactory) : base(db, loggerFactory) { }
 
     public async Task<int> GetNextInvoiceNumberAsync()
         => (await _dbSet.MaxAsync(i => (int?)i.InvoiceNumber) ?? 0) + 1;

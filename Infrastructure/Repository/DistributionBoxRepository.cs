@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.DTOs.DistributionBox;
 using Shabakat.Domain.Entities;
@@ -8,7 +9,7 @@ namespace Shabakat.Infrastructure.Repository;
 
 public sealed class DistributionBoxRepository : GenericRepository<DistributionBox>, IDistributionBoxRepository
 {
-    public DistributionBoxRepository(AppDbContext db) : base(db) { }
+    public DistributionBoxRepository(AppDbContext db, ILoggerFactory loggerFactory) : base(db, loggerFactory) { }
 
     public async Task<(IEnumerable<DistributionBox> Items, int TotalCount)> GetAllPagedAsync(
         DistributionBoxFilterRequest filter)

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Domain.Entities;
 using Shabakat.Infrastructure.Persistence;
@@ -7,7 +8,7 @@ namespace Shabakat.Infrastructure.Repository;
 
 public sealed class AmpereScheduleRepository : GenericRepository<AmpereSchedule>, IAmpereScheduleRepository
 {
-    public AmpereScheduleRepository(AppDbContext db) : base(db) { }
+    public AmpereScheduleRepository(AppDbContext db, ILoggerFactory loggerFactory) : base(db, loggerFactory) { }
 
     public async Task<IEnumerable<AmpereSchedule>> GetAllWithCustomerCountAsync()
         => await _dbSet

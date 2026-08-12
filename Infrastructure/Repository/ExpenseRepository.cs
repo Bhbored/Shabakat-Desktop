@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.DTOs.Expenses;
 using Shabakat.Domain.Entities;
@@ -8,7 +9,7 @@ namespace Shabakat.Infrastructure.Repository;
 
 public sealed class ExpenseRepository : GenericRepository<Expenses>, IExpenseRepository
 {
-    public ExpenseRepository(AppDbContext db) : base(db) { }
+    public ExpenseRepository(AppDbContext db, ILoggerFactory loggerFactory) : base(db, loggerFactory) { }
 
     private IQueryable<Expenses> ApplyFilter(ExpenseFilterRequest filter)
     {

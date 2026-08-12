@@ -1,6 +1,8 @@
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Expenses;
+using Shabakat.Application.Helper;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Enums;
 using Shabakat.Domain.Exceptions;
@@ -10,10 +12,17 @@ namespace Shabakat.Application.Services.Expense;
 public sealed class ExpenseService : IExpenseService
 {
     private readonly IExpenseRepository _expenseRepository;
+    private readonly IAuditLogService _auditLogService;
+    private readonly ILogger<ExpenseService> _logger;
 
-    public ExpenseService(IExpenseRepository expenseRepository)
+    public ExpenseService(
+        IExpenseRepository expenseRepository,
+        IAuditLogService auditLogService,
+        ILogger<ExpenseService> logger)
     {
         _expenseRepository = expenseRepository;
+        _auditLogService = auditLogService;
+        _logger = logger;
     }
 
     public async Task<ExpenseListResponse> GetAllAsync(ExpenseFilterRequest filter)
@@ -72,6 +81,13 @@ public sealed class ExpenseService : IExpenseService
         await _expenseRepository.AddAsync(expense);
         await _expenseRepository.SaveChangesAsync();
 
+        await _auditLogService.LogSuccessAsync(AuditLogEntries.ExpenseCreated(expense));
+        _logger.LogInformation(
+            "Created expense {ExpenseId} ({ExpenseType}, {Amount})",
+            expense.Id,
+            expense.ExpenseType,
+            expense.Amount);
+
         return MapToResponse(expense);
     }
 
@@ -91,6 +107,7 @@ public sealed class ExpenseService : IExpenseService
         _expenseRepository.Update(expense);
         await _expenseRepository.SaveChangesAsync();
 
+        _logger.LogInformation("Updated expense {ExpenseId}", expense.Id);
         return MapToResponse(expense);
     }
 
@@ -101,6 +118,7 @@ public sealed class ExpenseService : IExpenseService
 
         _expenseRepository.Delete(expense);
         await _expenseRepository.SaveChangesAsync();
+        _logger.LogInformation("Deleted expense {ExpenseId}", id);
     }
 
     private static void ValidateExpense(ExpenseType type, decimal amount, string? label)

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.AmpereSchedule;
@@ -9,10 +10,14 @@ namespace Shabakat.Application.Services.AmpereSchedules;
 public sealed class AmpereScheduleService : IAmpereScheduleService
 {
     private readonly IAmpereScheduleRepository _ampereScheduleRepository;
+    private readonly ILogger<AmpereScheduleService> _logger;
 
-    public AmpereScheduleService(IAmpereScheduleRepository ampereScheduleRepository)
+    public AmpereScheduleService(
+        IAmpereScheduleRepository ampereScheduleRepository,
+        ILogger<AmpereScheduleService> logger)
     {
         _ampereScheduleRepository = ampereScheduleRepository;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<AmpereScheduleResponse>> GetAllAsync()
@@ -41,6 +46,12 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
         var created = await _ampereScheduleRepository.GetByIdWithDetailsAsync(schedule.Id)
             ?? throw new DomainException("Ampere schedule not found.");
 
+        _logger.LogInformation(
+            "Created ampere schedule {ScheduleId} ({Name}, {HoursPerDay}h/day)",
+            created.Id,
+            created.Name,
+            created.HoursPerDay);
+
         return MapToResponse(created);
     }
 
@@ -64,6 +75,7 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
         var updated = await _ampereScheduleRepository.GetByIdWithDetailsAsync(id)
             ?? throw new DomainException("Ampere schedule not found.");
 
+        _logger.LogInformation("Updated ampere schedule {ScheduleId} ({Name})", updated.Id, updated.Name);
         return MapToResponse(updated);
     }
 
@@ -79,8 +91,10 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
                 "Reassign or remove the customers first.");
         }
 
+        var name = schedule.Name;
         _ampereScheduleRepository.Delete(schedule);
         await _ampereScheduleRepository.SaveChangesAsync();
+        _logger.LogInformation("Deleted ampere schedule {ScheduleId} ({Name})", id, name);
     }
 
     private async Task EnsureUniqueHoursPerDayAsync(int hoursPerDay, Guid? excludeId = null)

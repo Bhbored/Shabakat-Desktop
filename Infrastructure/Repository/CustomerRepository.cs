@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.DTOs.Customers;
 using Shabakat.Domain.Entities;
@@ -9,7 +10,7 @@ namespace Shabakat.Infrastructure.Repository;
 
 public sealed class CustomerRepository : GenericRepository<Customer>, ICustomerRepository
 {
-    public CustomerRepository(AppDbContext db) : base(db) { }
+    public CustomerRepository(AppDbContext db, ILoggerFactory loggerFactory) : base(db, loggerFactory) { }
 
     public async Task<Customer?> GetByIdWithInvoicesAsync(Guid id)
         => await _dbSet

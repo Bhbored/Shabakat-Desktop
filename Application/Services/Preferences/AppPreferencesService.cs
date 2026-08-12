@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Preferences;
@@ -10,13 +11,16 @@ public sealed class AppPreferencesService : IAppPreferencesService
 {
     private readonly IAppPreferencesRepository _preferencesRepository;
     private readonly IAmpereScheduleRepository _ampereScheduleRepository;
+    private readonly ILogger<AppPreferencesService> _logger;
 
     public AppPreferencesService(
         IAppPreferencesRepository preferencesRepository,
-        IAmpereScheduleRepository ampereScheduleRepository)
+        IAmpereScheduleRepository ampereScheduleRepository,
+        ILogger<AppPreferencesService> logger)
     {
         _preferencesRepository = preferencesRepository;
         _ampereScheduleRepository = ampereScheduleRepository;
+        _logger = logger;
     }
 
     public async Task<GetPreferencesResponse?> GetAsync()
@@ -40,6 +44,7 @@ public sealed class AppPreferencesService : IAppPreferencesService
         }
 
         var existing = await _preferencesRepository.GetAsync();
+        var isCreate = existing is null;
 
         if (existing is null)
         {
@@ -52,6 +57,7 @@ public sealed class AppPreferencesService : IAppPreferencesService
         }
 
         await _preferencesRepository.SaveChangesAsync();
+        _logger.LogInformation("{Action} app preferences", isCreate ? "Created" : "Updated");
     }
 
     private static AppPreferences ApplyRequest(AppPreferences prefs, UpdatePreferencesRequest request)

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.DTOs.AuditLogs;
 using Shabakat.Domain.Entities;
@@ -9,17 +10,30 @@ namespace Shabakat.Infrastructure.Repository;
 public sealed class AuditLogRepository : IAuditLogRepository
 {
     private readonly AppDbContext _db;
+    private readonly ILogger<AuditLogRepository> _logger;
 
-    public AuditLogRepository(AppDbContext db)
+    public AuditLogRepository(AppDbContext db, ILogger<AuditLogRepository> logger)
     {
         _db = db;
+        _logger = logger;
     }
 
     public async Task AddAsync(AuditLog auditLog)
-        => await _db.AuditLogs.AddAsync(auditLog);
+    {
+        await _db.AuditLogs.AddAsync(auditLog);
+        _logger.LogDebug(
+            "Queued audit log {Action} for {EntityType} {EntityId}",
+            auditLog.Action,
+            auditLog.EntityType,
+            auditLog.EntityId);
+    }
 
     public async Task SaveChangesAsync()
-        => await _db.SaveChangesAsync();
+    {
+        var count = await _db.SaveChangesAsync();
+        if (count > 0)
+            _logger.LogDebug("Saved {ChangeCount} audit log change(s)", count);
+    }
 
     public async Task<(IEnumerable<AuditLog> Items, int TotalCount)> GetAllPagedAsync(
         AuditLogFilterRequest filter)

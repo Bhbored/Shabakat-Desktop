@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Customers;
@@ -15,19 +16,25 @@ public sealed class CustomerService : ICustomerService
     private readonly IAmpereScheduleRepository _ampereScheduleRepository;
     private readonly IAppPreferencesRepository _preferencesRepository;
     private readonly IMeterReadingRepository _meterReadingRepository;
+    private readonly IAuditLogService _auditLogService;
+    private readonly ILogger<CustomerService> _logger;
 
     public CustomerService(
         ICustomerRepository customerRepository,
         IDistributionBoxRepository distributionBoxRepository,
         IAmpereScheduleRepository ampereScheduleRepository,
         IAppPreferencesRepository preferencesRepository,
-        IMeterReadingRepository meterReadingRepository)
+        IMeterReadingRepository meterReadingRepository,
+        IAuditLogService auditLogService,
+        ILogger<CustomerService> logger)
     {
         _customerRepository = customerRepository;
         _distributionBoxRepository = distributionBoxRepository;
         _ampereScheduleRepository = ampereScheduleRepository;
         _preferencesRepository = preferencesRepository;
         _meterReadingRepository = meterReadingRepository;
+        _auditLogService = auditLogService;
+        _logger = logger;
     }
 
     public async Task<PagedResponse<CustomerSummaryResponse>> GetAllAsync(CustomerFilterRequest filter)
@@ -69,7 +76,7 @@ public sealed class CustomerService : ICustomerService
             request.Plan, ampereScheduleId, preferences);
         await EnsureAmpereScheduleExistsAsync(ampereScheduleId);
 
-        var customer = new Domain.Entities.Customer
+        var customer = new Customer
         {
             Name = request.Name.Trim(),
             Phone = request.Phone?.Trim(),
@@ -99,6 +106,13 @@ public sealed class CustomerService : ICustomerService
         await _customerRepository.AddAsync(customer);
         await _customerRepository.SaveChangesAsync();
         await TryApplyInitialMeterReadingAsync(customer, request.InitialMeterReading);
+
+        await _auditLogService.LogSuccessAsync(AuditLogEntries.CustomerCreated(customer));
+        _logger.LogInformation(
+            "Created customer {CustomerId} ({Name}, {Plan})",
+            customer.Id,
+            customer.Name,
+            customer.Plan);
 
         var created = await _customerRepository.GetByIdWithInvoicesAsync(customer.Id)
             ?? throw new DomainException("Customer not found.");
@@ -170,6 +184,7 @@ public sealed class CustomerService : ICustomerService
         var updated = await _customerRepository.GetByIdWithInvoicesAsync(customer.Id)
             ?? throw new DomainException("Customer not found.");
 
+        _logger.LogInformation("Updated customer {CustomerId} ({Name})", customer.Id, customer.Name);
         return MapToResponse(updated);
     }
 
@@ -184,8 +199,10 @@ public sealed class CustomerService : ICustomerService
                 $"Cannot delete '{customer.Name}' because they have one or more invoices.");
         }
 
+        var name = customer.Name;
         _customerRepository.Delete(customer);
         await _customerRepository.SaveChangesAsync();
+        _logger.LogInformation("Deleted customer {CustomerId} ({Name})", id, name);
     }
 
     public async Task<SuspendCustomersResponse> SuspendAsync(SuspendCustomersRequest request)
@@ -207,6 +224,7 @@ public sealed class CustomerService : ICustomerService
         }
 
         await _customerRepository.SaveChangesAsync();
+        _logger.LogInformation("Suspended {Count} customer(s)", customers.Count);
 
         var message = customers.Count == 1
             ? "1 customer was suspended."
@@ -217,7 +235,7 @@ public sealed class CustomerService : ICustomerService
             Message: message);
     }
 
-    private static CustomerSummaryResponse MapToSummary(Domain.Entities.Customer c)
+    private static CustomerSummaryResponse MapToSummary(Customer c)
     {
         var amountDue = c.Invoices
             .Where(i => i.InvoiceStatus != InvoiceStatus.Paid)
@@ -247,7 +265,7 @@ public sealed class CustomerService : ICustomerService
             AmountDue: amountDue);
     }
 
-    private static CustomerResponse MapToResponse(Domain.Entities.Customer c)
+    private static CustomerResponse MapToResponse(Customer c)
     {
         return new CustomerResponse(
             Id: c.Id,
@@ -304,7 +322,7 @@ public sealed class CustomerService : ICustomerService
     }
 
     private async Task TryApplyInitialMeterReadingAsync(
-        Domain.Entities.Customer customer,
+        Customer customer,
         decimal? initialMeterReading)
     {
         if (initialMeterReading is not > 0)

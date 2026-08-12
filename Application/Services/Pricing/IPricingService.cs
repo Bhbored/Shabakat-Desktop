@@ -5,7 +5,7 @@ namespace Shabakat.Application.Services.Pricing;
 
 public interface IPricingService
 {
-    PricingRates GetRates(Domain.Entities.Customer customer, AppPreferences preferences);
+    PricingRates GetRates(Customer customer, AppPreferences preferences);
 
     PricingRates GetRates(
         CustomerType customerType,

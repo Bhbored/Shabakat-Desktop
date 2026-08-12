@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.DistributionBox;
@@ -11,13 +12,16 @@ public sealed class DistributionBoxService : IDistributionBoxService
 {
     private readonly IDistributionBoxRepository _distributionBoxRepository;
     private readonly IAreaRepository _areaRepository;
+    private readonly ILogger<DistributionBoxService> _logger;
 
     public DistributionBoxService(
         IDistributionBoxRepository distributionBoxRepository,
-        IAreaRepository areaRepository)
+        IAreaRepository areaRepository,
+        ILogger<DistributionBoxService> logger)
     {
         _distributionBoxRepository = distributionBoxRepository;
         _areaRepository = areaRepository;
+        _logger = logger;
     }
 
     public async Task<PagedResponse<DistributionBoxResponse>> GetAllAsync(
@@ -56,6 +60,12 @@ public sealed class DistributionBoxService : IDistributionBoxService
         var created = await _distributionBoxRepository.GetByIdWithDetailsAsync(box.Id)
             ?? throw new DomainException("Distribution box not found.");
 
+        _logger.LogInformation(
+            "Created distribution box {BoxId} ({Name}) in area {AreaId}",
+            created.Id,
+            created.Name,
+            created.AreaId);
+
         return MapToResponse(created);
     }
 
@@ -78,6 +88,7 @@ public sealed class DistributionBoxService : IDistributionBoxService
         var updated = await _distributionBoxRepository.GetByIdWithDetailsAsync(id)
             ?? throw new DomainException("Distribution box not found.");
 
+        _logger.LogInformation("Updated distribution box {BoxId} ({Name})", updated.Id, updated.Name);
         return MapToResponse(updated);
     }
 
@@ -93,8 +104,10 @@ public sealed class DistributionBoxService : IDistributionBoxService
                 "Reassign or remove the customers first.");
         }
 
+        var name = box.Name;
         _distributionBoxRepository.Delete(box);
         await _distributionBoxRepository.SaveChangesAsync();
+        _logger.LogInformation("Deleted distribution box {BoxId} ({Name})", id, name);
     }
 
     private async Task EnsureAreaExistsAsync(Guid areaId)

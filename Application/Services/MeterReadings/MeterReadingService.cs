@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.MeterReadings;
@@ -11,13 +12,16 @@ public sealed class MeterReadingService : IMeterReadingService
 {
     private readonly IMeterReadingRepository _meterReadingRepository;
     private readonly ICustomerRepository _customerRepository;
+    private readonly ILogger<MeterReadingService> _logger;
 
     public MeterReadingService(
         IMeterReadingRepository meterReadingRepository,
-        ICustomerRepository customerRepository)
+        ICustomerRepository customerRepository,
+        ILogger<MeterReadingService> logger)
     {
         _meterReadingRepository = meterReadingRepository;
         _customerRepository = customerRepository;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<MeterReadingResponse>> GetAllForCustomerAsync(Guid customerId)
@@ -164,6 +168,12 @@ public sealed class MeterReadingService : IMeterReadingService
             ? reading.ReadingValue
             : reading.ReadingValue - previous.ReadingValue;
 
+        _logger.LogInformation(
+            "Created meter reading {ReadingId} for customer {CustomerId} (value {Value})",
+            reading.Id,
+            customerId,
+            reading.ReadingValue);
+
         return new MeterReadingResponse(
             Id: reading.Id,
             ReadingValue: reading.ReadingValue,
@@ -181,5 +191,9 @@ public sealed class MeterReadingService : IMeterReadingService
 
         _meterReadingRepository.Delete(reading);
         await _meterReadingRepository.SaveChangesAsync();
+        _logger.LogInformation(
+            "Deleted meter reading {ReadingId} for customer {CustomerId}",
+            readingId,
+            customerId);
     }
 }

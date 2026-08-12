@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Enums;
 using Shabakat.Domain.Exceptions;
@@ -6,10 +7,21 @@ namespace Shabakat.Application.Services.Pricing;
 
 public sealed class PricingService : IPricingService
 {
-    public PricingRates GetRates(Domain.Entities.Customer customer, AppPreferences preferences)
+    private readonly ILogger<PricingService> _logger;
+
+    public PricingService(ILogger<PricingService> logger)
+    {
+        _logger = logger;
+    }
+
+    public PricingRates GetRates(Customer customer, AppPreferences preferences)
     {
         if (customer.HasPricingOverride && customer.PriceOverride is > 0)
         {
+            _logger.LogDebug(
+                "Using pricing override for customer {CustomerId}",
+                customer.Id);
+
             return new PricingRates(
                 customer.PriceOverride!.Value,
                 customer.FixedChargeOverride ?? 0m,
@@ -40,7 +52,7 @@ public sealed class PricingService : IPricingService
     }
 
     private static decimal ResolveUnitPrice(
-        Domain.Entities.Customer customer,
+        Customer customer,
         AppPreferences preferences,
         decimal baseUnitPrice)
     {

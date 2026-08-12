@@ -3,6 +3,7 @@ using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.Services.AmpereSchedules;
 using Shabakat.Application.Services.Areas;
+using Shabakat.Application.Services.AuditLogs;
 using Shabakat.Application.Services.Customers;
 using Shabakat.Application.Services.Dashboard;
 using Shabakat.Application.Services.DistributionBoxes;
@@ -11,6 +12,7 @@ using Shabakat.Application.Services.Invoices;
 using Shabakat.Application.Services.MeterReadings;
 using Shabakat.Application.Services.Preferences;
 using Shabakat.Application.Services.Pricing;
+using Shabakat.Application.Services.Profile;
 using Shabakat.Infrastructure.Persistence;
 using Shabakat.Infrastructure.Persistence.Interceptors;
 using Shabakat.Infrastructure.Repository;
@@ -49,6 +51,8 @@ public static class DIContainer
 
         services.AddScoped<IPricingService, PricingService>();
         services.AddScoped<IAppPreferencesService, AppPreferencesService>();
+        services.AddScoped<IAppUserService, AppUserService>();
+        services.AddScoped<IAuditLogService, AuditLogService>();
         services.AddScoped<IAreaService, AreaService>();
         services.AddScoped<IAmpereScheduleService, AmpereScheduleService>();
         services.AddScoped<IDistributionBoxService, DistributionBoxService>();

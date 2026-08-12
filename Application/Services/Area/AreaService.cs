@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Area;
@@ -9,10 +10,12 @@ namespace Shabakat.Application.Services.Areas;
 public sealed class AreaService : IAreaService
 {
     private readonly IAreaRepository _areaRepository;
+    private readonly ILogger<AreaService> _logger;
 
-    public AreaService(IAreaRepository areaRepository)
+    public AreaService(IAreaRepository areaRepository, ILogger<AreaService> logger)
     {
         _areaRepository = areaRepository;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<AreaResponse>> GetAllAsync()
@@ -31,6 +34,7 @@ public sealed class AreaService : IAreaService
         await _areaRepository.AddAsync(area);
         await _areaRepository.SaveChangesAsync();
 
+        _logger.LogInformation("Created area {AreaId} ({Name})", area.Id, area.Name);
         return MapToResponse(area);
     }
 
@@ -44,6 +48,7 @@ public sealed class AreaService : IAreaService
         _areaRepository.Update(area);
         await _areaRepository.SaveChangesAsync();
 
+        _logger.LogInformation("Updated area {AreaId} ({Name})", area.Id, area.Name);
         return MapToResponse(area);
     }
 
@@ -59,8 +64,10 @@ public sealed class AreaService : IAreaService
                 "Reassign or remove the customers first.");
         }
 
+        var name = area.Name;
         _areaRepository.Delete(area);
         await _areaRepository.SaveChangesAsync();
+        _logger.LogInformation("Deleted area {AreaId} ({Name})", id, name);
     }
 
     private static AreaResponse MapToResponse(Domain.Entities.Area a) =>

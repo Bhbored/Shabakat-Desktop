@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Dashboard;
@@ -8,15 +9,23 @@ namespace Shabakat.Application.Services.Dashboard;
 public sealed class DashboardService : IDashboardService
 {
     private readonly IDashboardRepository _dashboardRepository;
+    private readonly ILogger<DashboardService> _logger;
 
-    public DashboardService(IDashboardRepository dashboardRepository)
+    public DashboardService(
+        IDashboardRepository dashboardRepository,
+        ILogger<DashboardService> logger)
     {
         _dashboardRepository = dashboardRepository;
+        _logger = logger;
     }
 
     public async Task<DashboardSummaryResponse> GetSummaryAsync(int? year = null, int? month = null)
     {
         var (periodStart, periodEndExclusive) = ResolvePeriod(year, month);
+        _logger.LogDebug(
+            "Loading dashboard summary for {PeriodStart}..{PeriodEnd}",
+            periodStart,
+            periodEndExclusive);
 
         var customers = await _dashboardRepository.GetCustomerOverviewAsync();
         var invoiceOverview = await _dashboardRepository.GetInvoiceOverviewAsync(
