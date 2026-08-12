@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "maui-ai-debugging",
+  "owner": "redth",
+  "repo": "mauidevflow",
+  "path": ".claude/skills/maui-ai-debugging",
+  "branch": "main",
+  "sha": "241b3f7cbe6679fd91966b18c4ed1fd1d198f00c",
+  "source": "manual"
+}

@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "blazor-expert",
+  "owner": "markpitt",
+  "repo": "claude-skills",
+  "path": "skills/blazor-expert",
+  "branch": "main",
+  "sha": "ff329c2178870b6315dc30d2aae7a17a1556cda0",
+  "source": "manual"
+}

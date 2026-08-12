@@ -1,0 +1,66 @@
+---
+description: Shabakat project stack — technologies, MCP, and skills to use
+alwaysApply: true
+---
+
+# Shabakat — What To Use
+
+Windows-only .NET MAUI Blazor Hybrid app. Prefer these tools and stay within this stack.
+
+## Technologies
+
+- **App**: .NET 10 MAUI Blazor Hybrid (`Microsoft.NET.Sdk.Razor`, `UseMaui`)
+- **Target**: `net10.0-windows10.0.19041.0` only — do not add Android/iOS/MacCatalyst
+- **UI**: Blazor components under `Components/` (`.razor`), not native MAUI pages for screens
+- **Styling**: Tailwind CSS v4 only — see CSS files below
+- **Dev tooling**: `Microsoft.Maui.DevFlow.Agent` + `Microsoft.Maui.DevFlow.Blazor` (DEBUG)
+- **Layers**: put logic in `Domain/`, `Application/`, `Infrastructure/` — keep UI thin
+
+### CSS (exactly two files)
+
+| Role | Path |
+|------|------|
+| Input (edit this) | `Styles/app.css` |
+| Output (built; do not hand-edit) | `wwwroot/app.css` |
+
+Build with `npm run tw:build` or `npm run tw:watch`.
+
+- **Do not** add `.razor.css` / scoped CSS — it is buggy in this MAUI Blazor Hybrid setup
+- **Do not** add extra CSS files; put all styles in `Styles/app.css`
+
+```csharp
+// ✅ Windows-only TFM in Shabakat.csproj
+<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+
+// ❌ Do not restore multi-target
+// <TargetFrameworks>net10.0-android;net10.0-ios;...</TargetFrameworks>
+```
+
+## MCP
+
+- **`user-maui-devflow`**: run/inspect the live MAUI app (tree, tap, screenshot, navigate, logs, network). Prefer this over guessing UI state.
+- **`ctx7` / find-docs skill**: fetch current docs for MAUI, Blazor, Tailwind, or NuGet APIs before answering from memory.
+- Do **not** use Flutter/Dart MCP or browser automation for this desktop MAUI app unless the user explicitly asks.
+
+## Skills
+
+Prefer these **project skills** under `.cursor/skills/` (read and follow the matching `SKILL.md` before coding):
+
+| Need | Skill |
+|------|--------|
+| MAUI Blazor Hybrid setup, BlazorWebView, platform/DI/navigation with MAUI | `maui-blazor-development` |
+| Blazor components, lifecycle, state, routing, forms, auth, JS interop, perf | `blazor-expert` |
+| Build/run/inspect/debug loop, DevFlow, UI tree, screenshots, CDP WebView | `maui-ai-debugging` |
+
+Also use when relevant (global/user skills):
+
+| Need | Skill |
+|------|--------|
+| Library/API/docs (MAUI, Blazor, Tailwind, NuGet) | `find-docs` (ctx7) |
+| UI polish / layout / a11y review | `ui-ux-pro-max` or `web-design-guidelines` |
+
+For live app inspection, combine `maui-ai-debugging` with MCP `user-maui-devflow`. This project is **Windows-only** — ignore iOS/Android/Mac/Linux paths in those skills unless the user asks.
+
+## Do not introduce
+
+React/Next, Flutter, Electron, CSS frameworks other than Tailwind v4, Blazor scoped CSS (`.razor.css`), extra CSS files, or extra mobile targets unless the user explicitly requests them.
