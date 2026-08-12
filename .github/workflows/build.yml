@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install MAUI Windows workload
+        run: dotnet workload install maui-windows --skip-manifest-update
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Restore
+        run: dotnet restore Shabakat.csproj
+
+      - name: Build
+        run: dotnet build Shabakat.csproj -c Release --no-restore

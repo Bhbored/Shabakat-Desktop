@@ -57,6 +57,16 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
@@ -65,7 +75,6 @@
 	</ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Infrastructure\" />
       <Folder Include="Domain\" />
       <Folder Include="Application\" />
     </ItemGroup>
@@ -78,10 +87,7 @@
 			<_DevFlowBlazorDstDir>$(_DevFlowBlazorRoot)\lib\net10.0-windows10.0.19041\Microsoft.Maui.DevFlow.Blazor\wwwroot</_DevFlowBlazorDstDir>
 		</PropertyGroup>
 		<MakeDir Directories="$(_DevFlowBlazorDstDir)" Condition="Exists('$(_DevFlowBlazorSrc)')" />
-		<Copy SourceFiles="$(_DevFlowBlazorSrc)"
-		      DestinationFolder="$(_DevFlowBlazorDstDir)"
-		      SkipUnchangedFiles="true"
-		      Condition="Exists('$(_DevFlowBlazorSrc)')" />
+		<Copy SourceFiles="$(_DevFlowBlazorSrc)" DestinationFolder="$(_DevFlowBlazorDstDir)" SkipUnchangedFiles="true" Condition="Exists('$(_DevFlowBlazorSrc)')" />
 	</Target>
 
 	<Target Name="BuildTailwind" BeforeTargets="BeforeBuild">
