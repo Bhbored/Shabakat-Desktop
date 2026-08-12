@@ -1,0 +1,78 @@
+using Shabakat.Application.Contracts.Repository;
+using Shabakat.Application.Contracts.Services;
+using Shabakat.Application.DTOs.Dashboard;
+using Shabakat.Domain.Exceptions;
+
+namespace Shabakat.Application.Services.Dashboard;
+
+public sealed class DashboardService : IDashboardService
+{
+    private readonly IDashboardRepository _dashboardRepository;
+
+    public DashboardService(IDashboardRepository dashboardRepository)
+    {
+        _dashboardRepository = dashboardRepository;
+    }
+
+    public async Task<DashboardSummaryResponse> GetSummaryAsync(int? year = null, int? month = null)
+    {
+        var (periodStart, periodEndExclusive) = ResolvePeriod(year, month);
+
+        var customers = await _dashboardRepository.GetCustomerOverviewAsync();
+        var invoiceOverview = await _dashboardRepository.GetInvoiceOverviewAsync(
+            periodStart, periodEndExclusive);
+        var outstanding = await _dashboardRepository.GetTotalOutstandingAsync(
+            periodStart, periodEndExclusive);
+        var expensesByType = await _dashboardRepository.GetExpensesByTypeAsync(
+            periodStart, periodEndExclusive);
+
+        var totalBilled = invoiceOverview.UnpaidTotal
+            + invoiceOverview.PartiallyPaidTotal
+            + invoiceOverview.PaidTotal;
+        var totalCollected = await _dashboardRepository.GetTotalCollectedAsync(
+            periodStart, periodEndExclusive);
+
+        var totalExpenses = expensesByType.Fuel + expensesByType.Maintenance
+                           + expensesByType.Employees + expensesByType.Other;
+
+        var collectionRate = totalBilled > 0
+            ? Math.Round(totalCollected / totalBilled * 100, 2)
+            : 0;
+
+        var netIncome = totalCollected - totalExpenses;
+
+        return new DashboardSummaryResponse(
+            TotalBilledAllTime: totalBilled,
+            TotalCollectedAllTime: totalCollected,
+            TotalOutstandingAllTime: outstanding,
+            CollectionRate: collectionRate,
+            TotalExpensesAllTime: totalExpenses,
+            NetIncomeAllTime: netIncome,
+            Customers: customers,
+            Invoices: invoiceOverview,
+            ExpensesByType: expensesByType);
+    }
+
+    private static (DateOnly? PeriodStart, DateOnly? PeriodEndExclusive) ResolvePeriod(
+        int? year,
+        int? month)
+    {
+        if (!year.HasValue && !month.HasValue)
+            return (null, null);
+
+        if (!year.HasValue || !month.HasValue)
+        {
+            throw new DomainException(
+                "Both year and month are required when filtering the dashboard by period.");
+        }
+
+        if (month is < 1 or > 12)
+            throw new DomainException("Month must be between 1 and 12.");
+
+        if (year is < 2000 or > 2100)
+            throw new DomainException("Year must be between 2000 and 2100.");
+
+        var periodStart = new DateOnly(year.Value, month.Value, 1);
+        return (periodStart, periodStart.AddMonths(1));
+    }
+}
