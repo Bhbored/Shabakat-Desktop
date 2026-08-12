@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.DevFlow.Agent;
+using Shabakat.Infrastructure.Persistence;
 
 namespace Shabakat
 {
@@ -16,6 +18,7 @@ namespace Shabakat
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.RegisterDependencies();
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
@@ -23,7 +26,15 @@ namespace Shabakat
             builder.AddMauiDevFlowAgent();
 #endif
 
-            return builder.Build();
+            var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                db.Database.Migrate();
+            }
+
+            return app;
         }
     }
 }
