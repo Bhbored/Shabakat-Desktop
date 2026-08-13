@@ -1,6 +1,6 @@
 using System.Net;
 using Shabakat.Application.DTOs.Invoices;
-using Shabakat.Components.Shared;
+using Shabakat.Application.Helper;
 
 namespace Shabakat.Components.Features.Invoices.Components;
 

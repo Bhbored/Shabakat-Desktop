@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Shabakat.Components.Shared;
+namespace Shabakat.Application.Helper;
 
 public static class FormatHelper
 {

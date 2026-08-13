@@ -11,7 +11,7 @@ public static class AuditLogEntries
         new(
             Action: AuditAction.CustomerCreated,
             Summary: $"Customer '{customer.Name}' created",
-            EntityType: AuditEntityTypes.Customer,
+            EntityType: AuditEntityType.Customer,
             EntityId: customer.Id,
             Details: Format(new Dictionary<string, object?>
             {
@@ -25,7 +25,7 @@ public static class AuditLogEntries
         new(
             Action: AuditAction.ExpenseCreated,
             Summary: $"Expense recorded ({expense.ExpenseType})",
-            EntityType: AuditEntityTypes.Expense,
+            EntityType: AuditEntityType.Expense,
             EntityId: expense.Id,
             Details: Format(new Dictionary<string, object?>
             {
@@ -42,7 +42,7 @@ public static class AuditLogEntries
         new(
             Action: AuditAction.InvoiceCreated,
             Summary: $"Invoice #{invoice.InvoiceNumber} created for {customerName}",
-            EntityType: AuditEntityTypes.Invoice,
+            EntityType: AuditEntityType.Invoice,
             EntityId: invoice.Id,
             Details: Format(new Dictionary<string, object?>
             {
@@ -58,7 +58,7 @@ public static class AuditLogEntries
         new(
             Action: AuditAction.InvoiceBulkCreated,
             Summary: $"Bulk invoices: {created} created, {skipped} skipped",
-            EntityType: AuditEntityTypes.Invoice,
+            EntityType: AuditEntityType.Invoice,
             Details: Format(new Dictionary<string, object?>
             {
                 ["created"] = created,
@@ -72,7 +72,7 @@ public static class AuditLogEntries
         new(
             Action: AuditAction.InvoicePaymentRecorded,
             Summary: $"Payment of {amount:F4} recorded on invoice #{invoice.InvoiceNumber}",
-            EntityType: AuditEntityTypes.Payment,
+            EntityType: AuditEntityType.Payment,
             EntityId: invoice.Id,
             Details: Format(new Dictionary<string, object?>
             {
@@ -91,7 +91,7 @@ public static class AuditLogEntries
         new(
             Action: AuditAction.InvoiceFixedKilowattCharge,
             Summary: $"Fixed kilowatt charge for {customerName} (invoice #{invoice.InvoiceNumber})",
-            EntityType: AuditEntityTypes.Invoice,
+            EntityType: AuditEntityType.Invoice,
             EntityId: invoice.Id,
             Details: Format(new Dictionary<string, object?>
             {

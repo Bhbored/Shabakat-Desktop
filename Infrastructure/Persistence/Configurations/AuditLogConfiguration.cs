@@ -25,6 +25,7 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
             .HasMaxLength(500);
 
         builder.Property(e => e.EntityType)
+            .HasConversion<string>()
             .HasMaxLength(50);
 
         builder.Property(e => e.ErrorMessage)

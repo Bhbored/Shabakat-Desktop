@@ -74,7 +74,7 @@ public sealed class AuditLogService : IAuditLogService
             Status: log.Status.ToString(),
             Summary: log.Summary,
             Details: log.Details,
-            EntityType: log.EntityType,
+            EntityType: log.EntityType?.ToString(),
             EntityId: log.EntityId,
             ErrorMessage: log.ErrorMessage,
             CreatedAt: log.CreatedAt);

@@ -6,7 +6,7 @@ public class AuditLog
 {
     public Guid Id { get; set; }
     public AuditAction Action { get; set; }
-    public string? EntityType { get; set; }
+    public AuditEntityType? EntityType { get; set; }
     public Guid? EntityId { get; set; }
     public string Summary { get; set; } = string.Empty;
     public string? Details { get; set; }

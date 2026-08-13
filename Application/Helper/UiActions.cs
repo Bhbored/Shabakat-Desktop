@@ -1,7 +1,7 @@
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Domain.Exceptions;
 
-namespace Shabakat.Components.Shared;
+namespace Shabakat.Application.Helper;
 
 public static class UiActions
 {
