@@ -28,7 +28,8 @@ public record CustomerResponse(
     CustomerPricingOverrideDto? PricingOverride,
     decimal TotalBilled,
     decimal TotalPaid,
-    decimal TotalOutstanding);
+    decimal TotalOutstanding,
+    bool PaidThisMonth);
 
 public record CustomerSummaryResponse(
     Guid Id,

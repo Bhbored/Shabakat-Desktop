@@ -10,31 +10,35 @@
                 <option value="phone">Phone</option>
             </select>
             <input type="text"
-                   class="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                   placeholder="@(SearchField == "phone" ? "Search by phone..." : "Search by name...")"
+                   class="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none transition focus:border-primary"
+                   placeholder="@(SearchField == "phone" ? "Search subscribers by phone..." : "Search subscribers by name...")"
                    value="@SearchTerm"
                    @oninput="OnSearchTermInput" />
         </div>
-        <select class="min-w-56 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                value="@AreaFilter"
-                @onchange="OnAreaFilterChanged">
-            <option value="">All Areas</option>
-            @foreach (var area in Areas)
-            {
-                <option value="@area.Id">@area.Name</option>
-            }
-        </select>
+        <div class="min-w-full xl:min-w-56">
+            <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                    value="@AreaFilter"
+                    @onchange="OnAreaFilterChanged">
+                <option value="">All areas</option>
+                @foreach (var area in Areas)
+                {
+                    <option value="@area.Id">@area.Name</option>
+                }
+            </select>
+        </div>
         <button type="button"
                 class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
-                style="box-shadow: 0 0 16px rgba(230,196,58,0.25);"
-                @onclick="OnCreate">+ Add Subscriber</button>
+                style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
+                @onclick="OnCreate">
+            + Add Subscriber
+        </button>
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
         <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                 value="@PlanFilter"
                 @onchange="OnPlanFilterChanged">
-            <option value="">All Plans</option>
+            <option value="">All plan types</option>
             <option value="@PlanType.Ampere">Ampere</option>
             <option value="@PlanType.Kilowatt">Kilowatt</option>
             <option value="@PlanType.FixedKilowatt">Fixed Kilowatt</option>
@@ -42,7 +46,7 @@
         <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                 value="@RelationFilter"
                 @onchange="OnRelationFilterChanged">
-            <option value="">All Relations</option>
+            <option value="">All relations</option>
             <option value="@CustomerRelation.Friend">Friend</option>
             <option value="@CustomerRelation.Family">Family</option>
             <option value="@CustomerRelation.Owner">Owner</option>
@@ -50,20 +54,16 @@
         <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                 value="@StatusFilter"
                 @onchange="OnStatusFilterChanged">
-            <option value="">All Statuses</option>
+            <option value="">All statuses</option>
             <option value="@CustomerStatus.Active">Active</option>
             <option value="@CustomerStatus.Suspended">Suspended</option>
             <option value="@CustomerStatus.Terminated">Terminated</option>
         </select>
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                value="@PaymentFilter"
-                @onchange="OnPaymentFilterChanged">
-            <option value="">All Payments</option>
-            <option value="Paid">Paid</option>
-            <option value="Unpaid">Unpaid</option>
-        </select>
-        <span class="text-xs text-muted-foreground">@TotalCount subscriber@(TotalCount != 1 ? "s" : "") found</span>
     </div>
+
+    <p class="text-xs text-muted-foreground">
+        @TotalCount subscriber@(TotalCount != 1 ? "s" : "")
+    </p>
 </div>
 
 @code {
@@ -73,7 +73,6 @@
     [Parameter] public string PlanFilter { get; set; } = "";
     [Parameter] public string RelationFilter { get; set; } = "";
     [Parameter] public string StatusFilter { get; set; } = "";
-    [Parameter] public string PaymentFilter { get; set; } = "";
     [Parameter] public int TotalCount { get; set; }
     [Parameter] public IReadOnlyList<AreaResponse> Areas { get; set; } = [];
     [Parameter] public EventCallback<string> SearchFieldChanged { get; set; }
@@ -82,27 +81,23 @@
     [Parameter] public EventCallback<string> PlanFilterChanged { get; set; }
     [Parameter] public EventCallback<string> RelationFilterChanged { get; set; }
     [Parameter] public EventCallback<string> StatusFilterChanged { get; set; }
-    [Parameter] public EventCallback<string> PaymentFilterChanged { get; set; }
     [Parameter] public EventCallback OnCreate { get; set; }
 
-    private async Task OnSearchFieldChanged(ChangeEventArgs e) =>
-        await SearchFieldChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    private Task OnSearchFieldChanged(ChangeEventArgs e) =>
+        SearchFieldChanged.InvokeAsync(e.Value?.ToString() ?? "");
 
-    private async Task OnSearchTermInput(ChangeEventArgs e) =>
-        await SearchTermChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    private Task OnSearchTermInput(ChangeEventArgs e) =>
+        SearchTermChanged.InvokeAsync(e.Value?.ToString() ?? "");
 
-    private async Task OnAreaFilterChanged(ChangeEventArgs e) =>
-        await AreaFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    private Task OnAreaFilterChanged(ChangeEventArgs e) =>
+        AreaFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
 
-    private async Task OnPlanFilterChanged(ChangeEventArgs e) =>
-        await PlanFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    private Task OnPlanFilterChanged(ChangeEventArgs e) =>
+        PlanFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
 
-    private async Task OnRelationFilterChanged(ChangeEventArgs e) =>
-        await RelationFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    private Task OnRelationFilterChanged(ChangeEventArgs e) =>
+        RelationFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
 
-    private async Task OnStatusFilterChanged(ChangeEventArgs e) =>
-        await StatusFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
-
-    private async Task OnPaymentFilterChanged(ChangeEventArgs e) =>
-        await PaymentFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    private Task OnStatusFilterChanged(ChangeEventArgs e) =>
+        StatusFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
 }
