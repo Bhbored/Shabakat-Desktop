@@ -1,10 +1,12 @@
 @namespace Shabakat.Components.Features.Invoices.Components
 
-<ConfirmDialog Open="Open" Title="Delete Invoice" OnClose="OnClose">
+<ConfirmDialog Open="Open"
+               Title="Delete Invoice"
+               OnClose="OnClose">
     <ChildContent>
         @if (Invoice is not null)
         {
-            <p>Delete invoice #@Invoice.InvoiceNumber for @Invoice.CustomerName? This cannot be undone.</p>
+            <p>Delete invoice #@Invoice.InvoiceNumber. Backend blocks deletion if payments already exist.</p>
         }
     </ChildContent>
     <Footer>

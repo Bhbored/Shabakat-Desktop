@@ -128,6 +128,18 @@
                         </select>
                         <p class="mt-1.5 min-h-10 text-xs text-muted-foreground">Optional.</p>
                     </div>
+                    @if (IsEdit)
+                    {
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-foreground">Status</label>
+                            <select class="@InputClass" @bind="Form.CustomerStatus">
+                                <option value="@CustomerStatus.Active">Active</option>
+                                <option value="@CustomerStatus.Suspended">Suspended</option>
+                                <option value="@CustomerStatus.Terminated">Terminated</option>
+                            </select>
+                            <p class="mt-1.5 min-h-10 text-xs text-muted-foreground">Suspended and terminated subscribers stay in the list but are treated as overdue.</p>
+                        </div>
+                    }
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-foreground">Cable Name</label>
                         <input class="@InputClass" placeholder="C-12" @bind="Form.CableName" />

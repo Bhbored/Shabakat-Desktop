@@ -5,20 +5,24 @@
 @if (_mounted)
 {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 @(_openVisual ? null : "pointer-events-none")"
-         role="alertdialog"
+         role="@Role"
          aria-modal="true">
         <div class="ui-sheet-overlay absolute inset-0 bg-black/50"
              data-state="@StateAttr"
              @onclick="RequestCloseAsync"></div>
 
-        <div class="ui-dialog-panel relative z-10 w-full max-w-md rounded-2xl border border-border bg-card shadow-xl"
+        <div class="ui-dialog-panel relative z-10 max-h-[90vh] w-full overflow-y-auto rounded-2xl border border-border bg-card shadow-xl @MaxWidthClass"
              data-state="@StateAttr"
              @onclick:stopPropagation="true">
             <div class="px-6 py-5">
                 <h2 class="text-lg font-semibold text-foreground">@Title</h2>
+                @if (!string.IsNullOrWhiteSpace(Description))
+                {
+                    <p class="mt-2 text-sm text-muted-foreground">@Description</p>
+                }
                 @if (ChildContent is not null)
                 {
-                    <div class="mt-2 text-sm text-muted-foreground">@ChildContent</div>
+                    <div class="@ContentClass">@ChildContent</div>
                 }
             </div>
             @if (Footer is not null)
@@ -42,6 +46,10 @@
     [Parameter] public bool Open { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string Role { get; set; } = "alertdialog";
+    [Parameter] public string MaxWidthClass { get; set; } = "max-w-md";
+    [Parameter] public string ContentClass { get; set; } = "mt-2 text-sm text-muted-foreground";
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public RenderFragment? Footer { get; set; }
 

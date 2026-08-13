@@ -1,25 +1,31 @@
 @namespace Shabakat.Components.Features.Invoices.Components
 
-<SideSheet Open="Open" Title="Bulk Create Invoices" Description="Generate invoices for eligible customers this period" MaxWidthClass="sm:max-w-md" OnClose="OnClose">
+<ConfirmDialog Open="Open"
+               Title="Bulk Generate Invoices"
+               Description="Create invoices for all eligible active customers for current billing period. This runs on backend billing rules."
+               OnClose="OnClose">
     <ChildContent>
-        <div class="space-y-4">
-            <div>
-                <label class="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Plan Type</label>
-                <select class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
-                        value="@Plan"
-                        @onchange="OnPlanChanged">
-                    <option value="">Ampere &amp; Kilowatt</option>
-                    <option value="@PlanType.Ampere">Ampere only</option>
-                    <option value="@PlanType.Kilowatt">Kilowatt only</option>
-                </select>
-            </div>
-            <div class="flex justify-end gap-2 border-t border-border pt-5">
-                <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
-                <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled="@Saving" @onclick="OnSave">@(Saving ? "Generating..." : "Generate")</button>
-            </div>
+        <div class="space-y-1.5 text-foreground">
+            <label class="text-sm font-medium">Plan Type</label>
+            <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary"
+                    value="@Plan"
+                    @onchange="OnPlanChanged">
+                <option value="">All (Ampere &amp; Kilowatt)</option>
+                <option value="@PlanType.Ampere">Ampere Only</option>
+                <option value="@PlanType.Kilowatt">Kilowatt Only</option>
+            </select>
         </div>
     </ChildContent>
-</SideSheet>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
+        <button type="button"
+                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                disabled="@Saving"
+                @onclick="OnSave">
+            @(Saving ? "Generating..." : "Generate")
+        </button>
+    </Footer>
+</ConfirmDialog>
 
 @code {
     [Parameter] public bool Open { get; set; }

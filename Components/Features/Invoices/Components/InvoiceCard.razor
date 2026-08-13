@@ -1,0 +1,75 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+<tr class="border-b border-border transition-colors hover:bg-muted/30">
+    <td class="px-4 py-3.5 align-middle">
+        <button type="button"
+                class="font-mono text-sm font-semibold text-foreground transition hover:text-primary"
+                @onclick="OnView">
+            #@Invoice.InvoiceNumber
+        </button>
+    </td>
+    <td class="px-4 py-3.5 align-middle">
+        <p class="font-medium text-foreground">@Invoice.CustomerName</p>
+        <p class="text-xs text-muted-foreground">Issued @FormatHelper.Date(Invoice.ConsumptionStart)</p>
+    </td>
+    <td class="px-4 py-3.5 align-middle">
+        <InvoiceStatusBadge Status="@ToBadgeStatus(Invoice.InvoiceStatus)" />
+    </td>
+    <td class="px-4 py-3.5 align-middle">
+        <span class="text-sm text-foreground">@FormatHelper.Date(Invoice.ConsumptionEnd)</span>
+    </td>
+    <td class="px-4 py-3.5 align-middle">
+        <span class="font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(Invoice.TotalAmount)</span>
+    </td>
+    <td class="px-4 py-3.5 align-middle">
+        <span class="font-mono text-sm font-semibold text-primary">@FormatHelper.Currency(Invoice.AmountDue)</span>
+    </td>
+    <td class="px-4 py-3.5 align-middle">
+        <div class="relative flex justify-end">
+            <button type="button"
+                    class="rounded-lg p-1 text-muted-foreground hover:text-foreground"
+                    aria-label="More actions"
+                    @onclick="OnToggleMenu"
+                    @onclick:stopPropagation="true">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </button>
+            @if (MenuOpen)
+            {
+                <div class="absolute end-0 top-full z-30 mt-1 min-w-44 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg"
+                     @onclick:stopPropagation="true">
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-muted" @onclick="OnView">
+                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View invoice
+                    </button>
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-muted" @onclick="OnPay">
+                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        Record Payment
+                    </button>
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-muted" @onclick="OnPrint">
+                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        Print invoice
+                    </button>
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-500 hover:bg-red-500/10" @onclick="OnDelete">
+                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        Delete
+                    </button>
+                </div>
+            }
+        </div>
+    </td>
+</tr>
+
+@code {
+    [Parameter, EditorRequired] public InvoiceSummaryResponse Invoice { get; set; } = null!;
+    [Parameter] public bool MenuOpen { get; set; }
+    [Parameter] public EventCallback OnToggleMenu { get; set; }
+    [Parameter] public EventCallback OnView { get; set; }
+    [Parameter] public EventCallback OnPay { get; set; }
+    [Parameter] public EventCallback OnPrint { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    private static string ToBadgeStatus(string status) =>
+        status.Equals(nameof(InvoiceStatus.PartiallyPaid), StringComparison.OrdinalIgnoreCase)
+            ? "partiallyPaid"
+            : status.ToLowerInvariant();
+}

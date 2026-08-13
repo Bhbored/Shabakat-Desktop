@@ -65,6 +65,8 @@ else
                                         OnToggleMenu="() => OnToggleMenu.InvokeAsync(sub.Id)"
                                         OnView="() => OnView.InvokeAsync(sub)"
                                         OnEdit="() => OnEdit.InvokeAsync(sub)"
+                                        OnSuspend="() => OnSuspend.InvokeAsync(sub)"
+                                        OnActivate="() => OnActivate.InvokeAsync(sub)"
                                         OnDelete="() => OnDelete.InvokeAsync(sub)" />
                     }
                 </tbody>
@@ -104,6 +106,8 @@ else
     [Parameter] public EventCallback<Guid> OnToggleMenu { get; set; }
     [Parameter] public EventCallback<CustomerSummaryResponse> OnView { get; set; }
     [Parameter] public EventCallback<CustomerSummaryResponse> OnEdit { get; set; }
+    [Parameter] public EventCallback<CustomerSummaryResponse> OnSuspend { get; set; }
+    [Parameter] public EventCallback<CustomerSummaryResponse> OnActivate { get; set; }
     [Parameter] public EventCallback<CustomerSummaryResponse> OnDelete { get; set; }
     [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
     [Parameter] public EventCallback OnPrevious { get; set; }

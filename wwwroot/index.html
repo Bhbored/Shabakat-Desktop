@@ -20,6 +20,34 @@
                 }
             } catch (_) { }
         })();
+
+        window.shabakatPrintHtml = function (html) {
+            var iframe = document.createElement('iframe');
+            iframe.setAttribute('aria-hidden', 'true');
+            iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+            document.body.appendChild(iframe);
+            var win = iframe.contentWindow;
+            if (!win) {
+                document.body.removeChild(iframe);
+                return;
+            }
+            win.document.open();
+            win.document.write(html);
+            win.document.close();
+            var cleanup = function () {
+                window.setTimeout(function () {
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                }, 1000);
+            };
+            win.addEventListener('afterprint', cleanup, { once: true });
+            window.setTimeout(function () {
+                win.focus();
+                win.print();
+                cleanup();
+            }, 150);
+        };
     </script>
 </head>
 

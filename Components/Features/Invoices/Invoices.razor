@@ -1,22 +1,23 @@
 ﻿@page "/invoices"
 @inject IInvoiceService InvoiceService
 @inject ICustomerService CustomerService
+@inject IAppPreferencesService PreferencesService
 @inject IToastService Toast
+@inject IJSRuntime Js
 
-<div class="space-y-4">
+<div class="space-y-4" @onclick="CloseMenu">
     <InvoicesToolbar Customers="_customers"
-                     Skipped="_skipped"
-                     @bind-CustomerFilter="_customerFilter"
-                     @bind-StatusFilter="_statusFilter"
-                     @bind-DateFrom="_dateFrom"
-                     @bind-DateTo="_dateTo"
+                     CustomerFilter="@_customerFilter"
+                     StatusFilter="@_statusFilter"
+                     DateFrom="_dateFrom"
+                     DateTo="_dateTo"
                      TotalCount="_totalCount"
-                     ShowSkipped="_showSkipped"
-                     PaidTotal="_paidTotal"
-                     UnpaidTotal="_unpaidTotal"
-                     PartialTotal="_partialTotal"
+                     CustomerFilterChanged="OnCustomerFilterChanged"
+                     StatusFilterChanged="OnStatusFilterChanged"
+                     DateFromChanged="OnDateFromChanged"
+                     DateToChanged="OnDateToChanged"
                      OnFiltersChanged="ReloadFromFiltersAsync"
-                     OnToggleSkipped="ToggleSkipped"
+                     OnResetFilters="ResetFiltersAsync"
                      OnBulkCreate="OpenBulk"
                      OnCreate="OpenCreate" />
 
@@ -24,8 +25,7 @@
                   IsLoading="_loading"
                   OpenMenuId="_openMenuId"
                   PageNumber="_pageNumber"
-                  @bind-PageSize="_pageSize"
-                  @bind-PageSize:after="ReloadFromFiltersAsync"
+                  PageSize="_pageSize"
                   TotalCount="_totalCount"
                   TotalPages="_totalPages"
                   HasPrevious="_hasPrevious"
@@ -33,7 +33,9 @@
                   OnToggleMenu="ToggleMenu"
                   OnView="OpenDetails"
                   OnPay="OpenPay"
+                  OnPrint="PrintInvoiceAsync"
                   OnDelete="OpenDelete"
+                  PageSizeChanged="OnPageSizeChanged"
                   OnPreviousPage="PrevPageAsync"
                   OnNextPage="NextPageAsync" />
 </div>
@@ -42,12 +44,14 @@
                     Customers="_customers"
                     Model="_create"
                     Saving="_saving"
+                    AmpereProrateByDaysEnabled="_ampereProrateByDaysEnabled"
                     OnClose="CloseCreate"
                     OnSave="CreateInvoiceAsync"
                     OnCustomerChanged="OnCreateCustomerChanged" />
 
 <BulkCreateInvoiceSheet Open="_showBulk"
-                        @bind-Plan="_bulkPlan"
+                        Plan="@_bulkPlan"
+                        PlanChanged="OnBulkPlanChanged"
                         Saving="_saving"
                         OnClose="CloseBulk"
                         OnSave="BulkCreateAsync" />
@@ -60,10 +64,13 @@
                  OnSave="SavePaymentAsync" />
 
 <InvoiceDetailsSheet Open="_showDetails"
+                     IsLoading="_detailsLoading"
                      Invoice="_details"
                      Payments="_payments"
+                     Customer="_detailsCustomer"
                      OnClose="CloseDetails"
-                     OnRecordPayment="OpenPayFromDetails" />
+                     OnRecordPayment="OpenPayFromDetails"
+                     OnPrint="PrintDetailsAsync" />
 
 <DeleteInvoiceDialog Open="@(_confirmDelete is not null)"
                      Invoice="_confirmDelete"
@@ -73,7 +80,6 @@
 @code {
     private readonly List<InvoiceSummaryResponse> _items = [];
     private readonly List<CustomerResponse> _customers = [];
-    private readonly List<InvoiceSkippedResponse> _skipped = [];
     private readonly List<PaymentResponse> _payments = [];
 
     private bool _loading = true;
@@ -82,7 +88,8 @@
     private bool _showBulk;
     private bool _showPay;
     private bool _showDetails;
-    private bool _showSkipped;
+    private bool _detailsLoading;
+    private bool _ampereProrateByDaysEnabled;
     private Guid? _openMenuId;
 
     private string _customerFilter = "";
@@ -96,15 +103,12 @@
     private bool _hasPrevious;
     private bool _hasNext;
 
-    private decimal _paidTotal;
-    private decimal _unpaidTotal;
-    private decimal _partialTotal;
-
     private CreateInvoiceSheet.CreateFormModel _create = new();
     private string _bulkPlan = "";
     private PayInvoiceSheet.PayFormModel _pay = new();
     private InvoiceSummaryResponse? _payInvoice;
     private InvoiceResponse? _details;
+    private CustomerResponse? _detailsCustomer;
     private InvoiceSummaryResponse? _confirmDelete;
 
     protected override async Task OnInitializedAsync()
@@ -112,7 +116,8 @@
         var customers = await UiActions.RunAsync(Toast, () => CustomerService.GetAllUnpagedAsync()) ?? [];
         _customers.Clear();
         _customers.AddRange(customers.OrderBy(c => c.Name));
-        await LoadSkippedAsync();
+        var prefs = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
+        _ampereProrateByDaysEnabled = prefs?.AmpereProrateByDaysEnabled == true;
         await LoadAsync();
     }
 
@@ -153,39 +158,58 @@
             _hasNext = false;
         }
 
-        RecalcSummaryCards();
         _loading = false;
     }
 
-    private void RecalcSummaryCards()
+    private Task OnCustomerFilterChanged(string value)
     {
-        _paidTotal = _items
-            .Where(i => i.InvoiceStatus.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase))
-            .Sum(i => i.TotalAmount);
-        _unpaidTotal = _items
-            .Where(i => i.InvoiceStatus.Equals(nameof(InvoiceStatus.Unpaid), StringComparison.OrdinalIgnoreCase))
-            .Sum(i => i.AmountDue);
-        _partialTotal = _items
-            .Where(i => i.InvoiceStatus.Equals(nameof(InvoiceStatus.PartiallyPaid), StringComparison.OrdinalIgnoreCase))
-            .Sum(i => i.AmountDue);
+        _customerFilter = value;
+        return Task.CompletedTask;
     }
 
-    private async Task LoadSkippedAsync()
+    private Task OnStatusFilterChanged(string value)
     {
-        var skipped = await UiActions.RunAsync(Toast, () => InvoiceService.GetSkippedAsync()) ?? [];
-        _skipped.Clear();
-        _skipped.AddRange(skipped);
+        _statusFilter = value;
+        return Task.CompletedTask;
     }
 
-    private async Task ToggleSkipped()
+    private Task OnDateFromChanged(DateTime? value)
     {
-        _showSkipped = !_showSkipped;
-        if (_showSkipped)
-            await LoadSkippedAsync();
+        _dateFrom = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnDateToChanged(DateTime? value)
+    {
+        _dateTo = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnBulkPlanChanged(string value)
+    {
+        _bulkPlan = value;
+        return Task.CompletedTask;
     }
 
     private async Task ReloadFromFiltersAsync()
     {
+        _pageNumber = 1;
+        await LoadAsync();
+    }
+
+    private async Task ResetFiltersAsync()
+    {
+        _customerFilter = "";
+        _statusFilter = "";
+        _dateFrom = null;
+        _dateTo = null;
+        _pageNumber = 1;
+        await LoadAsync();
+    }
+
+    private async Task OnPageSizeChanged(int size)
+    {
+        _pageSize = size;
         _pageNumber = 1;
         await LoadAsync();
     }
@@ -204,6 +228,8 @@
         await LoadAsync();
     }
 
+    private void CloseMenu() => _openMenuId = null;
+
     private void ToggleMenu(Guid id) => _openMenuId = _openMenuId == id ? null : id;
 
     private void OpenCreate()
@@ -217,19 +243,20 @@
 
     private void OnCreateCustomerChanged()
     {
-        _create.BilledDays = null;
+        _create.BilledFrom = DateTime.Today;
+        _create.BilledTo = CreateInvoiceSheet.CreateFormModel.EndOfMonth().ToDateTime(TimeOnly.MinValue);
         _create.PaymentAmount = null;
         _create.KilowattAmount = null;
         _create.Notes = "";
         _create.FixedMode = "payment";
-        _create.PaymentMethod = PaymentMethod.Cash;
+        _create.PaymentMethod = "";
     }
 
     private async Task CreateInvoiceAsync()
     {
         if (!Guid.TryParse(_create.CustomerId, out var customerId))
         {
-            Toast.Error("Select a customer.");
+            Toast.Error("Customer is required.");
             return;
         }
 
@@ -240,8 +267,18 @@
         PaymentMethod? paymentMethod = null;
         string? notes = null;
 
-        if (customer?.Plan.Equals(nameof(PlanType.Ampere), StringComparison.OrdinalIgnoreCase) == true)
-            billedDays = _create.BilledDays is > 0 ? _create.BilledDays : null;
+        if (_ampereProrateByDaysEnabled
+            && customer?.Plan.Equals(nameof(PlanType.Ampere), StringComparison.OrdinalIgnoreCase) == true)
+        {
+            var days = CreateInvoiceSheet.CalcBilledDays(_create.BilledFrom, _create.BilledTo);
+            if (days <= 0)
+            {
+                Toast.Error("The 'To' date must be on or after the 'From' date.");
+                return;
+            }
+
+            billedDays = days;
+        }
 
         if (customer?.Plan.Equals(nameof(PlanType.FixedKilowatt), StringComparison.OrdinalIgnoreCase) == true)
         {
@@ -249,7 +286,14 @@
                 paymentAmount = _create.PaymentAmount;
             else
                 kilowattAmount = _create.KilowattAmount;
-            paymentMethod = _create.PaymentMethod;
+
+            if (!Enum.TryParse<PaymentMethod>(_create.PaymentMethod, out var method))
+            {
+                Toast.Error("Payment method is required.");
+                return;
+            }
+
+            paymentMethod = method;
             notes = string.IsNullOrWhiteSpace(_create.Notes) ? null : _create.Notes.Trim();
         }
 
@@ -268,12 +312,11 @@
                     Notes: notes));
                 succeeded = true;
             },
-            "Invoice created");
+            "Invoice created successfully.");
         _saving = false;
         if (!succeeded) return;
         CloseCreate();
         await LoadAsync();
-        await LoadSkippedAsync();
     }
 
     private void OpenBulk()
@@ -296,13 +339,13 @@
             Toast.Success(result.Message);
             CloseBulk();
             await LoadAsync();
-            await LoadSkippedAsync();
         }
     }
 
     private void OpenPay(InvoiceSummaryResponse inv)
     {
         _openMenuId = null;
+        _showDetails = false;
         _payInvoice = inv;
         _pay = new PayInvoiceSheet.PayFormModel
         {
@@ -316,26 +359,7 @@
     private void OpenPayFromDetails()
     {
         if (_details is null) return;
-        _payInvoice = new InvoiceSummaryResponse(
-            _details.Id,
-            _details.InvoiceNumber,
-            _details.CustomerName,
-            _details.InvoiceStatus,
-            _details.ConsumptionStart,
-            _details.ConsumptionEnd,
-            _details.TotalAmount,
-            _details.PaidAmount,
-            _details.AmountDue,
-            _details.BilledConsumption,
-            _details.CreatedAt);
-        _pay = new PayInvoiceSheet.PayFormModel
-        {
-            Amount = _details.AmountDue,
-            PaymentMethod = PaymentMethod.Cash,
-            Notes = ""
-        };
-        _showDetails = false;
-        _showPay = true;
+        OpenPay(ToSummary(_details));
     }
 
     private void ClosePay()
@@ -366,7 +390,7 @@
                     Notes: string.IsNullOrWhiteSpace(_pay.Notes) ? null : _pay.Notes.Trim()));
                 succeeded = true;
             },
-            "Payment recorded");
+            "Payment recorded successfully.");
         _saving = false;
         if (!succeeded) return;
         ClosePay();
@@ -376,20 +400,67 @@
     private async Task OpenDetails(InvoiceSummaryResponse inv)
     {
         _openMenuId = null;
+        _showDetails = true;
+        _detailsLoading = true;
+        _details = null;
+        _detailsCustomer = null;
+        _payments.Clear();
+
         var detail = await UiActions.RunAsync(Toast, () => InvoiceService.GetByIdAsync(inv.Id));
-        if (detail is null) return;
+        if (detail is null)
+        {
+            _detailsLoading = false;
+            _showDetails = false;
+            return;
+        }
+
         _details = detail;
+        _detailsCustomer = detail.CustomerId is { } customerId
+            ? _customers.FirstOrDefault(c => c.Id == customerId)
+            : null;
         var payments = await UiActions.RunAsync(Toast, () => InvoiceService.GetPaymentsAsync(inv.Id)) ?? detail.Payments;
         _payments.Clear();
         _payments.AddRange(payments);
-        _showDetails = true;
+        _detailsLoading = false;
     }
 
     private void CloseDetails()
     {
         _showDetails = false;
         _details = null;
+        _detailsCustomer = null;
         _payments.Clear();
+    }
+
+    private async Task PrintInvoiceAsync(InvoiceSummaryResponse inv)
+    {
+        _openMenuId = null;
+        var detail = await UiActions.RunAsync(Toast, () => InvoiceService.GetByIdAsync(inv.Id));
+        if (detail is null)
+        {
+            Toast.Error("Unable to print invoice.");
+            return;
+        }
+
+        await PrintHtmlAsync(detail);
+    }
+
+    private async Task PrintDetailsAsync()
+    {
+        if (_details is null) return;
+        await PrintHtmlAsync(_details);
+    }
+
+    private async Task PrintHtmlAsync(InvoiceResponse invoice)
+    {
+        try
+        {
+            await Js.InvokeVoidAsync("shabakatPrintHtml", InvoicePrintHtml.Build(invoice));
+        }
+        catch
+        {
+            Toast.Error("Unable to print invoice.");
+        }
     }
 
     private void OpenDelete(InvoiceSummaryResponse inv)
@@ -409,10 +480,24 @@
         {
             await InvoiceService.DeleteAsync(id);
             succeeded = true;
-        }, "Invoice deleted");
+        }, "Invoice deleted successfully.");
         if (!succeeded) return;
         _confirmDelete = null;
         if (_details?.Id == id) CloseDetails();
         await LoadAsync();
     }
+
+    private static InvoiceSummaryResponse ToSummary(InvoiceResponse details) =>
+        new(
+            details.Id,
+            details.InvoiceNumber,
+            details.CustomerName,
+            details.InvoiceStatus,
+            details.ConsumptionStart,
+            details.ConsumptionEnd,
+            details.TotalAmount,
+            details.PaidAmount,
+            details.AmountDue,
+            details.BilledConsumption,
+            details.CreatedAt);
 }

@@ -36,6 +36,8 @@
                      OnToggleMenu="ToggleMenu"
                      OnView="OpenDetails"
                      OnEdit="OpenEdit"
+                     OnSuspend="OpenSuspend"
+                     OnActivate="OpenActivate"
                      OnDelete="OpenDelete"
                      PageSizeChanged="OnPageSizeChanged"
                      OnPrevious="PrevPageAsync"
@@ -82,6 +84,12 @@
                         OnClose="CloseDelete"
                         OnConfirm="ConfirmDeleteAsync" />
 
+<SuspendSubscriberDialog Open="@(_confirmStatus is not null)"
+                         Subscriber="_confirmStatus"
+                         IsActivate="_statusActivate"
+                         OnClose="CloseStatus"
+                         OnConfirm="ConfirmStatusAsync" />
+
 @code {
     private readonly List<CustomerSummaryResponse> _items = [];
     private readonly List<AreaResponse> _areas = [];
@@ -102,6 +110,8 @@
     private Guid? _openMenuId;
     private CustomerResponse? _details;
     private CustomerSummaryResponse? _confirmDelete;
+    private CustomerSummaryResponse? _confirmStatus;
+    private bool _statusActivate;
     private MeterReadingResponse? _readingToDelete;
 
     private string _searchField = "name";
@@ -507,6 +517,48 @@
     }
 
     private void CloseDelete() => _confirmDelete = null;
+
+    private void OpenSuspend(CustomerSummaryResponse sub)
+    {
+        CloseMenu();
+        _statusActivate = false;
+        _confirmStatus = sub;
+    }
+
+    private void OpenActivate(CustomerSummaryResponse sub)
+    {
+        CloseMenu();
+        _statusActivate = true;
+        _confirmStatus = sub;
+    }
+
+    private void CloseStatus() => _confirmStatus = null;
+
+    private async Task ConfirmStatusAsync()
+    {
+        if (_confirmStatus is null) return;
+
+        var id = _confirmStatus.Id;
+        if (_statusActivate)
+        {
+            var updated = await UiActions.RunAsync(
+                Toast,
+                () => CustomerService.UpdateAsync(id, new UpdateCustomerRequest(CustomerStatus: CustomerStatus.Active)),
+                "Subscriber activated.");
+            if (updated is null) return;
+        }
+        else
+        {
+            var result = await UiActions.RunAsync(
+                Toast,
+                () => CustomerService.SuspendAsync(new SuspendCustomersRequest([id])));
+            if (result is null) return;
+            Toast.Success(result.Message);
+        }
+
+        _confirmStatus = null;
+        await LoadAsync();
+    }
 
     private async Task ConfirmDeleteAsync()
     {
