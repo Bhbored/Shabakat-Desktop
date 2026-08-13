@@ -23,6 +23,7 @@ public class AppDbContext : DbContext
     public DbSet<AmpereSchedule> AmpereSchedules => Set<AmpereSchedule>();
     public DbSet<InvoiceSkip> InvoiceSkips => Set<InvoiceSkip>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<AuditLogDetails> AuditLogDetails => Set<AuditLogDetails>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

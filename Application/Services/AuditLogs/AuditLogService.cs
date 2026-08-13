@@ -25,16 +25,25 @@ public sealed class AuditLogService : IAuditLogService
     {
         try
         {
+            var auditLogId = Guid.NewGuid();
             var auditLog = new AuditLog
             {
-                Id = Guid.NewGuid(),
+                Id = auditLogId,
                 Action = entry.Action,
                 EntityType = entry.EntityType,
                 EntityId = entry.EntityId,
                 Summary = entry.Summary,
-                Details = entry.Details,
                 Status = AuditLogStatus.Success,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                Details = (entry.Details ?? [])
+                    .Select(d => new AuditLogDetails
+                    {
+                        Id = Guid.NewGuid(),
+                        AuditLogId = auditLogId,
+                        Label = d.Label,
+                        Value = d.Value
+                    })
+                    .ToList()
             };
 
             await _auditLogRepository.AddAsync(auditLog);
@@ -73,7 +82,9 @@ public sealed class AuditLogService : IAuditLogService
             Action: log.Action.ToString(),
             Status: log.Status.ToString(),
             Summary: log.Summary,
-            Details: log.Details,
+            Details: log.Details
+                .Select(d => new AuditLogDetailItem(d.Label, d.Value))
+                .ToList(),
             EntityType: log.EntityType?.ToString(),
             EntityId: log.EntityId,
             ErrorMessage: log.ErrorMessage,

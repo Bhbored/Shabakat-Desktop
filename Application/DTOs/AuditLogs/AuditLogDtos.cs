@@ -2,12 +2,14 @@ using Shabakat.Domain.Enums;
 
 namespace Shabakat.Application.DTOs.AuditLogs;
 
+public record AuditLogDetailItem(string Label, string Value);
+
 public record AuditLogResponse(
     Guid Id,
     string Action,
     string Status,
     string Summary,
-    string? Details,
+    IReadOnlyList<AuditLogDetailItem> Details,
     string? EntityType,
     Guid? EntityId,
     string? ErrorMessage,
@@ -18,4 +20,4 @@ public record AuditLogWriteRequest(
     string Summary,
     AuditEntityType? EntityType = null,
     Guid? EntityId = null,
-    string? Details = null);
+    IReadOnlyList<AuditLogDetailItem>? Details = null);

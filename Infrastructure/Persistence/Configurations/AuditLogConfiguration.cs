@@ -31,8 +31,10 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         builder.Property(e => e.ErrorMessage)
             .HasMaxLength(1000);
 
-        builder.Property(e => e.Details)
-            .HasColumnType("TEXT");
+        builder.HasMany(e => e.Details)
+            .WithOne(d => d.AuditLog)
+            .HasForeignKey(d => d.AuditLogId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(e => e.CreatedAt);
         builder.HasIndex(e => new { e.Action, e.CreatedAt });

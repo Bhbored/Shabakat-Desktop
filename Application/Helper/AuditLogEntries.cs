@@ -1,4 +1,4 @@
-using System.Text.Json;
+using System.Globalization;
 using Shabakat.Application.DTOs.AuditLogs;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Enums;
@@ -13,13 +13,11 @@ public static class AuditLogEntries
             Summary: $"Customer '{customer.Name}' created",
             EntityType: AuditEntityType.Customer,
             EntityId: customer.Id,
-            Details: Format(new Dictionary<string, object?>
-            {
-                ["name"] = customer.Name,
-                ["plan"] = customer.Plan.ToString(),
-                ["phone"] = customer.Phone,
-                ["customerType"] = customer.CustomerType.ToString()
-            }));
+            Details: Items(
+                ("Name", customer.Name),
+                ("Plan", customer.Plan.ToString()),
+                ("Phone", customer.Phone),
+                ("Customer Type", customer.CustomerType.ToString())));
 
     public static AuditLogWriteRequest ExpenseCreated(Expenses expense) =>
         new(
@@ -27,13 +25,11 @@ public static class AuditLogEntries
             Summary: $"Expense recorded ({expense.ExpenseType})",
             EntityType: AuditEntityType.Expense,
             EntityId: expense.Id,
-            Details: Format(new Dictionary<string, object?>
-            {
-                ["expenseType"] = expense.ExpenseType.ToString(),
-                ["amount"] = expense.Amount,
-                ["expenseDate"] = expense.ExpenseDate,
-                ["label"] = expense.Label
-            }));
+            Details: Items(
+                ("Expense Type", expense.ExpenseType.ToString()),
+                ("Amount", Text(expense.Amount)),
+                ("Expense Date", Text(expense.ExpenseDate)),
+                ("Label", expense.Label)));
 
     public static AuditLogWriteRequest InvoiceCreated(
         Invoice invoice,
@@ -44,26 +40,22 @@ public static class AuditLogEntries
             Summary: $"Invoice #{invoice.InvoiceNumber} created for {customerName}",
             EntityType: AuditEntityType.Invoice,
             EntityId: invoice.Id,
-            Details: Format(new Dictionary<string, object?>
-            {
-                ["invoiceNumber"] = invoice.InvoiceNumber,
-                ["customerName"] = customerName,
-                ["plan"] = plan,
-                ["totalAmount"] = invoice.TotalAmount,
-                ["consumptionStart"] = invoice.IssueDate,
-                ["consumptionEnd"] = invoice.DueDate
-            }));
+            Details: Items(
+                ("Invoice Number", Text(invoice.InvoiceNumber)),
+                ("Customer Name", customerName),
+                ("Plan", plan),
+                ("Total Amount", Text(invoice.TotalAmount)),
+                ("Consumption Start", Text(invoice.IssueDate)),
+                ("Consumption End", Text(invoice.DueDate))));
 
     public static AuditLogWriteRequest InvoiceBulkCreated(int created, int skipped) =>
         new(
             Action: AuditAction.InvoiceBulkCreated,
             Summary: $"Bulk invoices: {created} created, {skipped} skipped",
             EntityType: AuditEntityType.Invoice,
-            Details: Format(new Dictionary<string, object?>
-            {
-                ["created"] = created,
-                ["skipped"] = skipped
-            }));
+            Details: Items(
+                ("Created", Text(created)),
+                ("Skipped", Text(skipped))));
 
     public static AuditLogWriteRequest InvoicePaymentRecorded(
         Invoice invoice,
@@ -74,14 +66,12 @@ public static class AuditLogEntries
             Summary: $"Payment of {amount:F4} recorded on invoice #{invoice.InvoiceNumber}",
             EntityType: AuditEntityType.Payment,
             EntityId: invoice.Id,
-            Details: Format(new Dictionary<string, object?>
-            {
-                ["invoiceNumber"] = invoice.InvoiceNumber,
-                ["amount"] = amount,
-                ["paymentMethod"] = method.ToString(),
-                ["totalAmount"] = invoice.TotalAmount,
-                ["paidAmount"] = invoice.PaidAmount
-            }));
+            Details: Items(
+                ("Invoice Number", Text(invoice.InvoiceNumber)),
+                ("Amount", Text(amount)),
+                ("Payment Method", method.ToString()),
+                ("Total Amount", Text(invoice.TotalAmount)),
+                ("Paid Amount", Text(invoice.PaidAmount))));
 
     public static AuditLogWriteRequest InvoiceFixedKilowattCharge(
         Invoice invoice,
@@ -93,20 +83,25 @@ public static class AuditLogEntries
             Summary: $"Fixed kilowatt charge for {customerName} (invoice #{invoice.InvoiceNumber})",
             EntityType: AuditEntityType.Invoice,
             EntityId: invoice.Id,
-            Details: Format(new Dictionary<string, object?>
-            {
-                ["invoiceNumber"] = invoice.InvoiceNumber,
-                ["customerName"] = customerName,
-                ["paymentAmount"] = paymentAmount,
-                ["billedConsumption"] = billedConsumption,
-                ["totalAmount"] = invoice.TotalAmount
-            }));
+            Details: Items(
+                ("Invoice Number", Text(invoice.InvoiceNumber)),
+                ("Customer Name", customerName),
+                ("Payment Amount", Text(paymentAmount)),
+                ("Billed Consumption", Text(billedConsumption)),
+                ("Total Amount", Text(invoice.TotalAmount))));
 
-    private static string? Format(IReadOnlyDictionary<string, object?> parameters)
-    {
-        if (parameters.Count == 0)
-            return null;
+    private static IReadOnlyList<AuditLogDetailItem> Items(params (string Label, string? Value)[] entries) =>
+        entries
+            .Where(e => !string.IsNullOrWhiteSpace(e.Value))
+            .Select(e => new AuditLogDetailItem(e.Label, e.Value!))
+            .ToList();
 
-        return JsonSerializer.Serialize(parameters);
-    }
+    private static string Text(decimal value) =>
+        value.ToString("0.####", CultureInfo.InvariantCulture);
+
+    private static string Text(int value) =>
+        value.ToString(CultureInfo.InvariantCulture);
+
+    private static string Text(DateOnly value) =>
+        value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 }

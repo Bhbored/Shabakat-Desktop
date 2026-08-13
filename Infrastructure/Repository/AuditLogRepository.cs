@@ -38,7 +38,7 @@ public sealed class AuditLogRepository : IAuditLogRepository
     public async Task<(IEnumerable<AuditLog> Items, int TotalCount)> GetAllPagedAsync(
         AuditLogFilterRequest filter)
     {
-        var query = _db.AuditLogs.AsQueryable();
+        var query = _db.AuditLogs.Include(a => a.Details).AsQueryable();
 
         if (filter.Action.HasValue)
             query = query.Where(a => a.Action == filter.Action.Value);
