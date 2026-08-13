@@ -1,0 +1,22 @@
+@namespace Shabakat.Components.Features.Home.Components
+
+<section class="rounded-2xl border border-border bg-card p-5">
+    <div class="flex items-start justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">@Label</p>
+            <p class="mt-2 font-mono text-3xl font-bold @AccentClass">@Value</p>
+            <p class="mt-1 text-xs text-muted-foreground">@Hint</p>
+        </div>
+        <div class="rounded-xl bg-white/[0.04] p-2.5 @AccentClass">
+            @Icon
+        </div>
+    </div>
+</section>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public string Hint { get; set; } = "";
+    [Parameter] public string AccentClass { get; set; } = "text-foreground";
+    [Parameter] public RenderFragment? Icon { get; set; }
+}

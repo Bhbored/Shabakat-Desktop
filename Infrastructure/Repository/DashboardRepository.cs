@@ -102,7 +102,7 @@ public sealed class DashboardRepository : IDashboardRepository
             .AsNoTracking()
             .Include(i => i.Customer)
             .Where(i => i.InvoiceStatus == InvoiceStatus.Paid)
-            .OrderByDescending(i => i.UpdatedAt)
+            .OrderByDescending(i => i.CreatedAt)
             .Take(take)
             .ToListAsync();
 

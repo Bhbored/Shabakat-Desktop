@@ -1,0 +1,109 @@
+@namespace Shabakat.Components.Features.Home.Components
+@inject IJSRuntime Js
+@implements IAsyncDisposable
+
+<section class="rounded-2xl border border-border bg-card p-5">
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h2 class="text-lg font-semibold text-foreground">Finance Snapshot</h2>
+            <p class="text-xs text-muted-foreground">All-time billing, collection, expense, and net totals for the current company.</p>
+        </div>
+        <div class="flex items-center gap-5 text-xs text-muted-foreground">
+            <span class="flex items-center gap-1.5">
+                <span class="h-2 w-2 rounded-full bg-primary"></span>
+                Revenue vs cash flow
+            </span>
+        </div>
+    </div>
+
+    <div class="relative h-60 w-full">
+        <canvas id="@_canvasId"></canvas>
+    </div>
+
+    <div class="mt-5 grid gap-3 md:grid-cols-4">
+        @foreach (var item in ExpenseItems)
+        {
+            <div class="rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">@item.Label</p>
+                <p class="mt-1 font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(item.Value)</p>
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    private static readonly string[] ChartColors = ["#f5c000", "#22c55e", "#fb7185", "#60a5fa", "#c084fc"];
+    private readonly string _canvasId = $"dashboard-chart-{Guid.NewGuid():N}";
+    private string? _lastFingerprint;
+    private bool _hasChart;
+
+    [Parameter] public DashboardSummaryResponse? Summary { get; set; }
+
+    private IEnumerable<(string Label, decimal Value)> ExpenseItems =>
+        Summary is null
+            ? []
+            : [
+                ("Fuel", Summary.ExpensesByType.Fuel),
+                ("Maintenance", Summary.ExpensesByType.Maintenance),
+                ("Employees", Summary.ExpensesByType.Employees),
+                ("Other", Summary.ExpensesByType.Other)
+            ];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Summary is null)
+            return;
+
+        var fingerprint = $"{Summary.TotalBilledAllTime}|{Summary.TotalCollectedAllTime}|{Summary.TotalOutstandingAllTime}|{Summary.TotalExpensesAllTime}|{Summary.NetIncomeAllTime}";
+        if (fingerprint == _lastFingerprint)
+            return;
+
+        _lastFingerprint = fingerprint;
+        await RenderChartAsync();
+    }
+
+    private async Task RenderChartAsync()
+    {
+        if (Summary is null)
+            return;
+
+        string[] labels = ["Billed", "Collected", "Outstanding", "Expenses", "Net"];
+        double[] values =
+        [
+            (double)Summary.TotalBilledAllTime,
+            (double)Summary.TotalCollectedAllTime,
+            (double)Summary.TotalOutstandingAllTime,
+            (double)Summary.TotalExpensesAllTime,
+            (double)Summary.NetIncomeAllTime
+        ];
+
+        try
+        {
+            var ok = await Js.InvokeAsync<bool>("shabakatDashboardChart.render", _canvasId, labels, values, ChartColors);
+            _hasChart = ok;
+            if (!ok)
+                _lastFingerprint = null;
+        }
+        catch (JSException)
+        {
+            _lastFingerprint = null;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!_hasChart)
+            return;
+
+        try
+        {
+            await Js.InvokeVoidAsync("shabakatDashboardChart.destroy", _canvasId);
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (JSException)
+        {
+        }
+    }
+}
