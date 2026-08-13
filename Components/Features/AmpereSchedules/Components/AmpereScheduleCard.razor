@@ -1,0 +1,87 @@
+@namespace Shabakat.Components.Features.AmpereSchedules.Components
+
+<section class="rounded-2xl border border-border bg-card/80 p-5 transition-colors hover:bg-card">
+    <div class="flex items-start gap-4">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+             style="background-color: @FormatHelper.AvatarColor(Schedule.Name)">
+            @FormatHelper.Initials(Schedule.Name)
+        </div>
+
+        <button type="button"
+                class="min-w-0 flex-1 text-left"
+                @onclick="OnView">
+            <p class="truncate text-base font-semibold text-foreground">@Schedule.Name</p>
+            <p class="mt-1 text-sm text-muted-foreground">@Schedule.HoursPerDay hours/day</p>
+
+            <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1">
+                    <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    @Schedule.CustomerCount subscriber@(Schedule.CustomerCount != 1 ? "s" : "")
+                </span>
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1">
+                    <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    @FormatHelper.Currency(Schedule.PricePerAmp)/A
+                </span>
+            </div>
+
+            <div class="mt-4 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
+                <div class="rounded-xl border border-border bg-muted/50 px-3 py-2">
+                    <div class="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                        <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Hours / day
+                    </div>
+                    <p class="truncate text-sm text-foreground">@Schedule.HoursPerDay hours/day</p>
+                </div>
+                <div class="rounded-xl border border-border bg-muted/50 px-3 py-2">
+                    <div class="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                        <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        Created
+                    </div>
+                    <p class="text-sm text-foreground">@FormatHelper.Date(Schedule.CreatedAt)</p>
+                </div>
+            </div>
+        </button>
+
+        <div class="relative shrink-0">
+            <button type="button"
+                    class="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    aria-label="Actions"
+                    @onclick="OnToggleMenu"
+                    @onclick:stopPropagation="true">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </button>
+            @if (MenuOpen)
+            {
+                <div class="absolute end-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg"
+                     @onclick:stopPropagation="true">
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted" @onclick="OnView">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View details
+                    </button>
+                    <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted" @onclick="OnEdit">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                        Edit
+                    </button>
+                    @if (Schedule.CanBeDeleted)
+                    {
+                        <button type="button"
+                                class="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-500/10"
+                                @onclick="OnDelete">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            Delete
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public AmpereScheduleResponse Schedule { get; set; } = null!;
+    [Parameter] public bool MenuOpen { get; set; }
+    [Parameter] public EventCallback OnToggleMenu { get; set; }
+    [Parameter] public EventCallback OnView { get; set; }
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+}

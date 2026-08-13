@@ -1,0 +1,63 @@
+@page "/settings/ampere-proration"
+@inject IAppPreferencesService PreferencesService
+@inject IToastService Toast
+@inject NavigationManager Navigation
+
+<SettingsScaffold Title="Ampere Proration">
+    <div class="space-y-4">
+        @if (_loading)
+        {
+            <p class="text-sm text-muted-foreground">Loading company preferences...</p>
+        }
+        else
+        {
+            <div class="rounded-2xl border border-border bg-background px-4 py-4">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <p class="text-sm font-medium text-foreground">Ampere Proration</p>
+                        <p class="text-sm text-muted-foreground">Prorate ampere charges by days remaining in the billing cycle.</p>
+                    </div>
+                    <label class="relative inline-flex cursor-pointer items-center">
+                        <input type="checkbox" class="peer sr-only" @bind="_enabled" />
+                        <span class="h-6 w-11 rounded-full bg-muted transition peer-checked:bg-primary after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-card after:transition-all peer-checked:after:translate-x-full"></span>
+                    </label>
+                </div>
+            </div>
+            <p class="text-sm leading-6 text-muted-foreground">When enabled, ampere invoices can charge for a partial month using billed days.</p>
+            <button type="button"
+                    class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+                    disabled="@_saving"
+                    @onclick="SaveAsync">
+                @(_saving ? "Saving..." : "Save")
+            </button>
+        }
+    </div>
+</SettingsScaffold>
+
+@code {
+    private bool _loading = true;
+    private bool _saving;
+    private GetPreferencesResponse? _existing;
+    private bool _enabled;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _existing = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
+        _enabled = PreferencesMapper.FromExistingOrDefaults(_existing).AmpereProrateByDaysEnabled;
+        _loading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        var request = PreferencesMapper.FromExistingOrDefaults(_existing) with { AmpereProrateByDaysEnabled = _enabled };
+        var ok = false;
+        await UiActions.RunAsync(Toast, async () =>
+        {
+            await PreferencesService.UpsertAsync(request);
+            ok = true;
+        }, "Preferences saved.");
+        _saving = false;
+        if (ok) Navigation.NavigateTo("settings");
+    }
+}

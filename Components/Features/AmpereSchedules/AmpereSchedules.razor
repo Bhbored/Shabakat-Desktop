@@ -1,0 +1,248 @@
+@page "/ampere-schedules"
+@inject IAmpereScheduleService AmpereScheduleService
+@inject ICustomerService CustomerService
+@inject IToastService Toast
+
+<div class="space-y-4" @onclick="CloseMenu">
+    <AmpereSchedulesToolbar Search="@_searchTerm"
+                            Total="_filtered.Count"
+                            Disabled="_loading"
+                            SearchChanged="OnSearchChanged"
+                            OnCreate="OpenCreate" />
+
+    <AmpereSchedulesList Schedules="_filtered"
+                         IsLoading="_loading"
+                         OpenMenuId="_menuId"
+                         OnToggleMenu="ToggleMenu"
+                         OnView="OpenDetails"
+                         OnEdit="OpenEdit"
+                         OnDelete="OpenDelete" />
+</div>
+
+<AmpereScheduleDetailsSheet Open="_showDetails"
+                            Schedule="_selected"
+                            SubscribersPage="_subscribersPage"
+                            SubscribersLoading="_subscribersLoading"
+                            OnClose="CloseDetails"
+                            OnSubscribersPageChanged="LoadSubscribersPageAsync" />
+
+<AmpereScheduleFormSheet Open="_showForm"
+                         IsEdit="@(_editingId is not null)"
+                         InitialName="@_formName"
+                         InitialHoursPerDay="_formHoursPerDay"
+                         InitialPricePerAmp="_formPricePerAmp"
+                         InitialResidentialPricePerAmp="_formResidentialPricePerAmp"
+                         InitialCommercialPricePerAmp="_formCommercialPricePerAmp"
+                         InitialIndustrialPricePerAmp="_formIndustrialPricePerAmp"
+                         Saving="_saving"
+                         OnClose="CloseForm"
+                         OnSave="SaveAsync" />
+
+<DeleteAmpereScheduleDialog Open="_showDelete"
+                            Schedule="_pendingDelete"
+                            Saving="_saving"
+                            OnClose="CloseDelete"
+                            OnConfirm="ConfirmDeleteAsync" />
+
+@code {
+    private readonly List<AmpereScheduleResponse> _items = [];
+    private List<AmpereScheduleResponse> _filtered = [];
+    private string _searchTerm = "";
+    private string _formName = "";
+    private int _formHoursPerDay = 8;
+    private decimal _formPricePerAmp;
+    private decimal _formResidentialPricePerAmp;
+    private decimal _formCommercialPricePerAmp;
+    private decimal _formIndustrialPricePerAmp;
+    private bool _loading = true;
+    private bool _saving;
+    private bool _showForm;
+    private bool _showDetails;
+    private bool _showDelete;
+    private Guid? _editingId;
+    private Guid? _menuId;
+    private AmpereScheduleResponse? _selected;
+    private AmpereScheduleResponse? _pendingDelete;
+
+    private bool _subscribersLoading;
+    private int _subscriberPage = 1;
+    private PagedResponse<CustomerSummaryResponse>? _subscribersPage;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        var result = await UiActions.RunAsync(Toast, () => AmpereScheduleService.GetAllAsync());
+        _items.Clear();
+        if (result is not null)
+            _items.AddRange(result.OrderBy(s => s.HoursPerDay).ThenBy(s => s.Name));
+        ApplyFilter();
+        _loading = false;
+    }
+
+    private void OnSearchChanged(string value)
+    {
+        _searchTerm = value;
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        var term = _searchTerm.Trim();
+        if (string.IsNullOrEmpty(term))
+        {
+            _filtered = _items.ToList();
+            return;
+        }
+
+        _filtered = _items.Where(s =>
+            s.Name.Contains(term, StringComparison.OrdinalIgnoreCase)
+            || s.HoursPerDay.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)
+            || s.PricePerAmp.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    private void ToggleMenu(Guid id) => _menuId = _menuId == id ? null : id;
+    private void CloseMenu() => _menuId = null;
+
+    private async Task OpenDetails(AmpereScheduleResponse schedule)
+    {
+        CloseMenu();
+        _selected = schedule;
+        _showDetails = true;
+        _subscriberPage = 1;
+        await LoadSubscribersPageAsync(1);
+    }
+
+    private void CloseDetails()
+    {
+        _showDetails = false;
+        _selected = null;
+        _subscribersPage = null;
+    }
+
+    private async Task LoadSubscribersPageAsync(int page)
+    {
+        if (_selected is null || page < 1) return;
+        _subscribersLoading = true;
+        _subscriberPage = page;
+        _subscribersPage = await UiActions.RunAsync(
+            Toast,
+            () => CustomerService.GetAllAsync(new CustomerFilterRequest(
+                AmpereScheduleId: _selected.Id,
+                PageNumber: page,
+                PageSize: 10)));
+        _subscribersLoading = false;
+    }
+
+    private void OpenCreate()
+    {
+        CloseMenu();
+        _editingId = null;
+        ResetFormSeed();
+        _showForm = true;
+    }
+
+    private void OpenEdit(AmpereScheduleResponse schedule)
+    {
+        CloseMenu();
+        _editingId = schedule.Id;
+        _formName = schedule.Name;
+        _formHoursPerDay = schedule.HoursPerDay;
+        _formPricePerAmp = schedule.PricePerAmp;
+        _formResidentialPricePerAmp = schedule.ResidentialPricePerAmp;
+        _formCommercialPricePerAmp = schedule.CommercialPricePerAmp;
+        _formIndustrialPricePerAmp = schedule.IndustrialPricePerAmp;
+        _showForm = true;
+    }
+
+    private void ResetFormSeed()
+    {
+        _formName = "";
+        _formHoursPerDay = 8;
+        _formPricePerAmp = 0;
+        _formResidentialPricePerAmp = 0;
+        _formCommercialPricePerAmp = 0;
+        _formIndustrialPricePerAmp = 0;
+    }
+
+    private void CloseForm()
+    {
+        if (_saving) return;
+        _showForm = false;
+        _editingId = null;
+    }
+
+    private void OpenDelete(AmpereScheduleResponse schedule)
+    {
+        CloseMenu();
+        if (!schedule.CanBeDeleted || schedule.CustomerCount > 0)
+        {
+            Toast.Error("Cannot delete an ampere schedule that has customers assigned to it.");
+            return;
+        }
+
+        _pendingDelete = schedule;
+        _showDelete = true;
+    }
+
+    private void CloseDelete()
+    {
+        if (_saving) return;
+        _showDelete = false;
+        _pendingDelete = null;
+    }
+
+    private async Task SaveAsync(CreateAmpereScheduleRequest request)
+    {
+        if (_saving) return;
+        _saving = true;
+
+        var ok = false;
+        if (_editingId is null)
+        {
+            var created = await UiActions.RunAsync(
+                Toast,
+                () => AmpereScheduleService.CreateAsync(request),
+                "Ampere schedule created.");
+            ok = created is not null;
+        }
+        else
+        {
+            var updated = await UiActions.RunAsync(
+                Toast,
+                () => AmpereScheduleService.UpdateAsync(_editingId.Value, new UpdateAmpereScheduleRequest(
+                    request.Name,
+                    request.HoursPerDay,
+                    request.PricePerAmp,
+                    request.ResidentialPricePerAmp,
+                    request.CommercialPricePerAmp,
+                    request.IndustrialPricePerAmp)),
+                "Ampere schedule updated.");
+            ok = updated is not null;
+        }
+
+        _saving = false;
+        if (!ok) return;
+
+        _showForm = false;
+        _editingId = null;
+        await LoadAsync();
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (_pendingDelete is null || _saving) return;
+        _saving = true;
+
+        await UiActions.RunAsync(
+            Toast,
+            () => AmpereScheduleService.DeleteAsync(_pendingDelete.Id),
+            "Ampere schedule deleted.");
+
+        _saving = false;
+        _showDelete = false;
+        _pendingDelete = null;
+        await LoadAsync();
+    }
+}

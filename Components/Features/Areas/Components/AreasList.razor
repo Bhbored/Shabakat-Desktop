@@ -1,0 +1,38 @@
+@namespace Shabakat.Components.Features.Areas.Components
+
+@if (IsLoading)
+{
+    <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
+        Loading areas...
+    </section>
+}
+else if (Areas.Count == 0)
+{
+    <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
+        No areas found.
+    </section>
+}
+else
+{
+    <div class="grid gap-4 xl:grid-cols-2">
+        @foreach (var area in Areas)
+        {
+            <AreaCard Area="area"
+                      MenuOpen="@(OpenMenuId == area.Id)"
+                      OnToggleMenu="() => OnToggleMenu.InvokeAsync(area.Id)"
+                      OnView="() => OnView.InvokeAsync(area)"
+                      OnEdit="() => OnEdit.InvokeAsync(area)"
+                      OnDelete="() => OnDelete.InvokeAsync(area)" />
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<AreaResponse> Areas { get; set; } = [];
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public Guid? OpenMenuId { get; set; }
+    [Parameter] public EventCallback<Guid> OnToggleMenu { get; set; }
+    [Parameter] public EventCallback<AreaResponse> OnView { get; set; }
+    [Parameter] public EventCallback<AreaResponse> OnEdit { get; set; }
+    [Parameter] public EventCallback<AreaResponse> OnDelete { get; set; }
+}

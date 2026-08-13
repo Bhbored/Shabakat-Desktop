@@ -1,0 +1,57 @@
+@page "/settings/trigger-date"
+@inject IAppPreferencesService PreferencesService
+@inject IToastService Toast
+@inject NavigationManager Navigation
+
+<SettingsScaffold Title="Trigger Date">
+    <div class="space-y-4">
+        @if (_loading)
+        {
+            <p class="text-sm text-muted-foreground">Loading company preferences...</p>
+        }
+        else
+        {
+            <label class="space-y-2 block">
+                <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Day of month</span>
+                <input type="number" min="1" max="31"
+                       class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                       @bind="_triggerDate" />
+            </label>
+            <p class="text-sm leading-6 text-muted-foreground">Day of the month used to trigger payment reminders.</p>
+            <button type="button"
+                    class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+                    disabled="@_saving"
+                    @onclick="SaveAsync">
+                @(_saving ? "Saving..." : "Save")
+            </button>
+        }
+    </div>
+</SettingsScaffold>
+
+@code {
+    private bool _loading = true;
+    private bool _saving;
+    private GetPreferencesResponse? _existing;
+    private int _triggerDate = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _existing = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
+        _triggerDate = PreferencesMapper.FromExistingOrDefaults(_existing).TriggerDate;
+        _loading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        var request = PreferencesMapper.FromExistingOrDefaults(_existing) with { TriggerDate = _triggerDate };
+        var ok = false;
+        await UiActions.RunAsync(Toast, async () =>
+        {
+            await PreferencesService.UpsertAsync(request);
+            ok = true;
+        }, "Preferences saved.");
+        _saving = false;
+        if (ok) Navigation.NavigateTo("settings");
+    }
+}

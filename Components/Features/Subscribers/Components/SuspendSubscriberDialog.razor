@@ -1,0 +1,38 @@
+@namespace Shabakat.Components.Features.Subscribers.Components
+
+<ConfirmDialog Open="Open"
+               Title="@(IsActivate ? "Activate Subscriber" : "Suspend Subscriber")"
+               OnClose="OnClose">
+    <ChildContent>
+        @if (Subscriber is not null)
+        {
+            @if (IsActivate)
+            {
+                <p>Activate <span class="font-medium text-foreground">@Subscriber.Name</span>? They will be billed as an active subscriber again.</p>
+            }
+            else
+            {
+                <p>Suspend <span class="font-medium text-foreground">@Subscriber.Name</span>? They will no longer be billed as active.</p>
+            }
+        }
+    </ChildContent>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
+        @if (IsActivate)
+        {
+            <button type="button" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground" @onclick="OnConfirm">Activate</button>
+        }
+        else
+        {
+            <button type="button" class="rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-medium text-white" @onclick="OnConfirm">Suspend</button>
+        }
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public CustomerSummaryResponse? Subscriber { get; set; }
+    [Parameter] public bool IsActivate { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
+}

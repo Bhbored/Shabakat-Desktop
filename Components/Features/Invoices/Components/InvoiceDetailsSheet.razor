@@ -1,0 +1,169 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+<SideSheet Open="Open"
+           Title="@(Invoice is null ? "Invoice Details" : $"Invoice # {Invoice.InvoiceNumber}")"
+           Description="Review billing totals, payment history, and print server-backed invoice data."
+           MaxWidthClass="sm:max-w-2xl"
+           OnClose="OnClose">
+    @if (IsLoading)
+    {
+        <div class="space-y-4">
+            <div class="h-7 w-44 animate-pulse rounded bg-muted"></div>
+            <div class="grid gap-4 md:grid-cols-3">
+                @for (var i = 0; i < 3; i++)
+                {
+                    <div class="rounded-2xl border border-border bg-card p-4">
+                        <div class="h-3 w-20 animate-pulse rounded bg-muted"></div>
+                        <div class="mt-3 h-7 w-24 animate-pulse rounded bg-muted"></div>
+                    </div>
+                }
+            </div>
+            <div class="h-48 w-full animate-pulse rounded-2xl bg-muted"></div>
+            <div class="h-48 w-full animate-pulse rounded-2xl bg-muted"></div>
+        </div>
+    }
+    else if (Invoice is not null)
+    {
+        <div class="space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <p class="text-lg font-semibold text-foreground">@Invoice.CustomerName</p>
+                    <p class="text-sm text-muted-foreground">Created @FormatHelper.Date(Invoice.CreatedAt)</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <InvoiceStatusBadge Status="@ToBadgeStatus(Invoice.InvoiceStatus)" />
+                    <button type="button"
+                            class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted"
+                            @onclick="OnPrint">
+                        Print
+                    </button>
+                    @if (!Invoice.InvoiceStatus.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase))
+                    {
+                        <button type="button"
+                                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                                @onclick="OnRecordPayment">
+                            Record Payment
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-3">
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Total Amount</p>
+                    <p class="mt-2 text-xl font-semibold text-foreground">@FormatHelper.Currency(Invoice.TotalAmount)</p>
+                </div>
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Paid Amount</p>
+                    <p class="mt-2 text-xl font-semibold text-foreground">@FormatHelper.Currency(Invoice.PaidAmount)</p>
+                </div>
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Amount Due</p>
+                    <p class="mt-2 text-xl font-semibold text-foreground">@FormatHelper.Currency(Invoice.AmountDue)</p>
+                </div>
+            </div>
+
+            @if (Breakdown is not null)
+            {
+                var breakdown = Breakdown.Value;
+                <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
+                    <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Breakdown</h3>
+                    <InvoiceDetailRow Label="Charge" Value="@FormatHelper.Currency(breakdown.Charge)">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                    </InvoiceDetailRow>
+                    <InvoiceDetailRow Label="Fixed Charge" Value="@FormatHelper.Currency(breakdown.FixedCharge)">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                    </InvoiceDetailRow>
+                    <InvoiceDetailRow Label="@TvaLabel" Value="@FormatHelper.Currency(breakdown.TvaAmount)">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20"/><path d="M4 22h16"/><path d="M8 18V8"/><path d="m8 8 4 4 4-4"/><path d="M16 18V8"/></svg>
+                    </InvoiceDetailRow>
+                </div>
+            }
+
+            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
+                <InvoiceDetailRow Label="Invoice Number" Value="@($"#{Invoice.InvoiceNumber}")">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20"/><path d="M4 22h16"/><path d="M8 18V8"/><path d="m8 8 4 4 4-4"/><path d="M16 18V8"/></svg>
+                </InvoiceDetailRow>
+                <InvoiceDetailRow Label="Issue Date" Value="@FormatHelper.Date(Invoice.ConsumptionStart)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </InvoiceDetailRow>
+                <InvoiceDetailRow Label="Due Date" Value="@FormatHelper.Date(Invoice.ConsumptionEnd)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </InvoiceDetailRow>
+                <InvoiceDetailRow Label="Last Updated" Value="@FormatHelper.Date(Invoice.UpdatedAt)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </InvoiceDetailRow>
+            </div>
+
+            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Payments</h3>
+                    <span class="text-xs text-muted-foreground">@Payments.Count payment@(Payments.Count == 1 ? "" : "s")</span>
+                </div>
+
+                @if (Payments.Count == 0)
+                {
+                    <p class="rounded-xl border border-border bg-muted/20 px-3 py-6 text-sm text-muted-foreground">
+                        No payments recorded yet.
+                    </p>
+                }
+                else
+                {
+                    <div class="space-y-3">
+                        @foreach (var payment in Payments)
+                        {
+                            <div class="rounded-2xl border border-border bg-muted/20 px-4 py-3">
+                                <div class="flex flex-wrap items-start justify-between gap-3">
+                                    <div>
+                                        <p class="font-medium text-foreground">@FormatHelper.Currency(payment.Amount)</p>
+                                        <p class="text-xs text-muted-foreground">@FormatHelper.Date(payment.PaymentDate)</p>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                                        @PaymentMethodLabel(payment.PaymentMethod)
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(payment.Notes))
+                                {
+                                    <p class="mt-2 text-sm text-muted-foreground">@payment.Notes</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</SideSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public InvoiceResponse? Invoice { get; set; }
+    [Parameter] public IReadOnlyList<PaymentResponse> Payments { get; set; } = [];
+    [Parameter] public CustomerResponse? Customer { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnRecordPayment { get; set; }
+    [Parameter] public EventCallback OnPrint { get; set; }
+
+    private (decimal Charge, decimal FixedCharge, decimal TvaAmount, decimal TvaRate)? Breakdown =>
+        Invoice is null
+            ? null
+            : InvoiceBreakdown.Compute(
+                Invoice.TotalAmount,
+                Invoice.FixedCharge,
+                Invoice.TVA,
+                Customer?.Plan,
+                Customer?.PlanValue ?? 0);
+
+    private string TvaLabel =>
+        Invoice is null ? "TVA" : $"TVA ({FormatHelper.Number(Invoice.TVA)}%)";
+
+    private static string ToBadgeStatus(string status) =>
+        status.Equals(nameof(InvoiceStatus.PartiallyPaid), StringComparison.OrdinalIgnoreCase)
+            ? "partiallyPaid"
+            : status.ToLowerInvariant();
+
+    private static string PaymentMethodLabel(string method) =>
+        method.Equals(nameof(PaymentMethod.Wish), StringComparison.OrdinalIgnoreCase) ? "Wish" : "Cash";
+}

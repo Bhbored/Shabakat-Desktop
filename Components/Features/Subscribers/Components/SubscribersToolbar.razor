@@ -1,0 +1,103 @@
+@namespace Shabakat.Components.Features.Subscribers.Components
+
+<div class="space-y-4">
+    <div class="flex flex-wrap items-center gap-3 xl:flex-nowrap">
+        <div class="flex min-w-72 flex-1 gap-2">
+            <select class="w-36 shrink-0 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                    value="@SearchField"
+                    @onchange="OnSearchFieldChanged">
+                <option value="name">Name</option>
+                <option value="phone">Phone</option>
+            </select>
+            <input type="text"
+                   class="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none transition focus:border-primary"
+                   placeholder="@(SearchField == "phone" ? "Search subscribers by phone..." : "Search subscribers by name...")"
+                   value="@SearchTerm"
+                   @oninput="OnSearchTermInput" />
+        </div>
+        <div class="min-w-full xl:min-w-56">
+            <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                    value="@AreaFilter"
+                    @onchange="OnAreaFilterChanged">
+                <option value="">All areas</option>
+                @foreach (var area in Areas)
+                {
+                    <option value="@area.Id">@area.Name</option>
+                }
+            </select>
+        </div>
+        <button type="button"
+                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
+                @onclick="OnCreate">
+            + Add Subscriber
+        </button>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                value="@PlanFilter"
+                @onchange="OnPlanFilterChanged">
+            <option value="">All plan types</option>
+            <option value="@PlanType.Ampere">Ampere</option>
+            <option value="@PlanType.Kilowatt">Kilowatt</option>
+            <option value="@PlanType.FixedKilowatt">Fixed Kilowatt</option>
+        </select>
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                value="@RelationFilter"
+                @onchange="OnRelationFilterChanged">
+            <option value="">All relations</option>
+            <option value="@CustomerRelation.Friend">Friend</option>
+            <option value="@CustomerRelation.Family">Family</option>
+            <option value="@CustomerRelation.Owner">Owner</option>
+        </select>
+        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                value="@StatusFilter"
+                @onchange="OnStatusFilterChanged">
+            <option value="">All statuses</option>
+            <option value="@CustomerStatus.Active">Active</option>
+            <option value="@CustomerStatus.Suspended">Suspended</option>
+            <option value="@CustomerStatus.Terminated">Terminated</option>
+        </select>
+    </div>
+
+    <p class="text-xs text-muted-foreground">
+        @TotalCount subscriber@(TotalCount != 1 ? "s" : "")
+    </p>
+</div>
+
+@code {
+    [Parameter] public string SearchField { get; set; } = "name";
+    [Parameter] public string SearchTerm { get; set; } = "";
+    [Parameter] public string AreaFilter { get; set; } = "";
+    [Parameter] public string PlanFilter { get; set; } = "";
+    [Parameter] public string RelationFilter { get; set; } = "";
+    [Parameter] public string StatusFilter { get; set; } = "";
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public IReadOnlyList<AreaResponse> Areas { get; set; } = [];
+    [Parameter] public EventCallback<string> SearchFieldChanged { get; set; }
+    [Parameter] public EventCallback<string> SearchTermChanged { get; set; }
+    [Parameter] public EventCallback<string> AreaFilterChanged { get; set; }
+    [Parameter] public EventCallback<string> PlanFilterChanged { get; set; }
+    [Parameter] public EventCallback<string> RelationFilterChanged { get; set; }
+    [Parameter] public EventCallback<string> StatusFilterChanged { get; set; }
+    [Parameter] public EventCallback OnCreate { get; set; }
+
+    private Task OnSearchFieldChanged(ChangeEventArgs e) =>
+        SearchFieldChanged.InvokeAsync(e.Value?.ToString() ?? "");
+
+    private Task OnSearchTermInput(ChangeEventArgs e) =>
+        SearchTermChanged.InvokeAsync(e.Value?.ToString() ?? "");
+
+    private Task OnAreaFilterChanged(ChangeEventArgs e) =>
+        AreaFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+
+    private Task OnPlanFilterChanged(ChangeEventArgs e) =>
+        PlanFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+
+    private Task OnRelationFilterChanged(ChangeEventArgs e) =>
+        RelationFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+
+    private Task OnStatusFilterChanged(ChangeEventArgs e) =>
+        StatusFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+}

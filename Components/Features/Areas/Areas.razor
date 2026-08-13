@@ -1,0 +1,183 @@
+@page "/areas"
+@inject IAreaService AreaService
+@inject IToastService Toast
+
+<div class="space-y-4" @onclick="CloseMenu">
+    <AreasToolbar Search="@_searchTerm"
+                  Total="_filtered.Count"
+                  Disabled="_loading"
+                  SearchChanged="OnSearchChanged"
+                  OnCreate="OpenCreate" />
+
+    <AreasList Areas="_filtered"
+               IsLoading="_loading"
+               OpenMenuId="_menuAreaId"
+               OnToggleMenu="ToggleMenu"
+               OnView="OpenDetails"
+               OnEdit="OpenEdit"
+               OnDelete="OpenDelete" />
+</div>
+
+<AreaDetailsSheet Open="_showDetails" Area="_selected" OnClose="CloseDetails" />
+
+<AreaFormSheet Open="_showForm"
+               IsEdit="@(_editingId is not null)"
+               InitialName="@_formName"
+               Saving="_saving"
+               OnClose="CloseForm"
+               OnSave="SaveAsync" />
+
+<DeleteAreaDialog Open="_showDelete"
+                  Area="_pendingDelete"
+                  Saving="_saving"
+                  OnClose="CloseDelete"
+                  OnConfirm="ConfirmDeleteAsync" />
+
+@code {
+    private readonly List<AreaResponse> _items = [];
+    private List<AreaResponse> _filtered = [];
+    private string _searchTerm = "";
+    private string _formName = "";
+    private bool _loading = true;
+    private bool _saving;
+    private bool _showForm;
+    private bool _showDetails;
+    private bool _showDelete;
+    private Guid? _editingId;
+    private Guid? _menuAreaId;
+    private AreaResponse? _selected;
+    private AreaResponse? _pendingDelete;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        var result = await UiActions.RunAsync(Toast, () => AreaService.GetAllAsync());
+        _items.Clear();
+        if (result is not null)
+            _items.AddRange(result.OrderBy(a => a.Name));
+        ApplyFilter();
+        _loading = false;
+    }
+
+    private void OnSearchChanged(string value)
+    {
+        _searchTerm = value;
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        var term = _searchTerm.Trim();
+        _filtered = string.IsNullOrEmpty(term)
+            ? _items.ToList()
+            : _items.Where(a => a.Name.Contains(term, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    private void ToggleMenu(Guid id) => _menuAreaId = _menuAreaId == id ? null : id;
+    private void CloseMenu() => _menuAreaId = null;
+
+    private void OpenDetails(AreaResponse area)
+    {
+        CloseMenu();
+        _selected = area;
+        _showDetails = true;
+    }
+
+    private void CloseDetails()
+    {
+        _showDetails = false;
+        _selected = null;
+    }
+
+    private void OpenCreate()
+    {
+        CloseMenu();
+        _editingId = null;
+        _formName = "";
+        _showForm = true;
+    }
+
+    private void OpenEdit(AreaResponse area)
+    {
+        CloseMenu();
+        _editingId = area.Id;
+        _formName = area.Name;
+        _showForm = true;
+    }
+
+    private void CloseForm()
+    {
+        if (_saving) return;
+        _showForm = false;
+        _editingId = null;
+    }
+
+    private void OpenDelete(AreaResponse area)
+    {
+        CloseMenu();
+        if (area.CustomerCount > 0)
+        {
+            Toast.Error("Cannot delete an area that has customers assigned to it.");
+            return;
+        }
+
+        _pendingDelete = area;
+        _showDelete = true;
+    }
+
+    private void CloseDelete()
+    {
+        if (_saving) return;
+        _showDelete = false;
+        _pendingDelete = null;
+    }
+
+    private async Task SaveAsync(string name)
+    {
+        if (_saving) return;
+        _saving = true;
+
+        var ok = false;
+        if (_editingId is null)
+        {
+            var created = await UiActions.RunAsync(
+                Toast,
+                () => AreaService.CreateAsync(new CreateAreaRequest(name)),
+                "Area created.");
+            ok = created is not null;
+        }
+        else
+        {
+            var updated = await UiActions.RunAsync(
+                Toast,
+                () => AreaService.UpdateAsync(_editingId.Value, new UpdateAreaRequest(name)),
+                "Area updated.");
+            ok = updated is not null;
+        }
+
+        _saving = false;
+        if (!ok) return;
+
+        _showForm = false;
+        _editingId = null;
+        await LoadAsync();
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (_pendingDelete is null || _saving) return;
+        _saving = true;
+
+        await UiActions.RunAsync(
+            Toast,
+            () => AreaService.DeleteAsync(_pendingDelete.Id),
+            "Area deleted.");
+
+        _saving = false;
+        _showDelete = false;
+        _pendingDelete = null;
+        await LoadAsync();
+    }
+}

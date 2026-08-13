@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.DTOs.Dashboard;
+using Shabakat.Application.DTOs.Invoices;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Enums;
 using Shabakat.Infrastructure.Persistence;
@@ -94,6 +95,47 @@ public sealed class DashboardRepository : IDashboardRepository
         var query = ApplyInvoicePeriodFilter(_db.Invoices.AsQueryable(), periodStart, periodEndExclusive);
         return await query.SumAsync(i => i.PaidAmount);
     }
+
+    public async Task<IReadOnlyList<InvoiceSummaryResponse>> GetRecentlyPaidAsync(int take = 5)
+    {
+        var items = await _db.Invoices
+            .AsNoTracking()
+            .Include(i => i.Customer)
+            .Where(i => i.InvoiceStatus == InvoiceStatus.Paid)
+            .OrderByDescending(i => i.CreatedAt)
+            .Take(take)
+            .ToListAsync();
+
+        return items.Select(MapSummary).ToList();
+    }
+
+    public async Task<IReadOnlyList<InvoiceSummaryResponse>> GetUpcomingDueAsync(int take = 5)
+    {
+        var items = await _db.Invoices
+            .AsNoTracking()
+            .Include(i => i.Customer)
+            .Where(i => i.InvoiceStatus == InvoiceStatus.Unpaid
+                     || i.InvoiceStatus == InvoiceStatus.PartiallyPaid)
+            .OrderBy(i => i.DueDate)
+            .Take(take)
+            .ToListAsync();
+
+        return items.Select(MapSummary).ToList();
+    }
+
+    private static InvoiceSummaryResponse MapSummary(Invoice i) =>
+        new(
+            Id: i.Id,
+            InvoiceNumber: i.InvoiceNumber,
+            CustomerName: i.Customer?.Name ?? string.Empty,
+            InvoiceStatus: i.InvoiceStatus.ToString(),
+            ConsumptionStart: i.IssueDate,
+            ConsumptionEnd: i.DueDate,
+            TotalAmount: i.TotalAmount,
+            PaidAmount: i.PaidAmount,
+            AmountDue: i.AmountDue,
+            BilledConsumption: i.BilledConsumption,
+            CreatedAt: i.CreatedAt);
 
     private static IQueryable<Invoice> ApplyInvoicePeriodFilter(
         IQueryable<Invoice> query,

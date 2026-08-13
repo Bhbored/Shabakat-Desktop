@@ -1,0 +1,21 @@
+@namespace Shabakat.Components.Features.Subscribers.Components
+
+<ConfirmDialog Open="Open" Title="Delete Meter Reading" OnClose="OnClose">
+    <ChildContent>
+        <p>
+            Delete <span class="font-medium text-foreground">@(string.IsNullOrWhiteSpace(ReadingLabel) ? "this reading" : ReadingLabel)</span>?
+            Use this only to correct a mistaken entry before recording the right one.
+        </p>
+    </ChildContent>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted" @onclick="OnClose">Cancel</button>
+        <button type="button" class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500/90" @onclick="OnConfirm">Delete</button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public string ReadingLabel { get; set; } = "";
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
+}

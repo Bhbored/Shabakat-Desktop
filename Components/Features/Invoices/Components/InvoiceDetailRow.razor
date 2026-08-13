@@ -1,0 +1,17 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+<div class="flex items-start gap-3">
+    <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
+        @ChildContent
+    </div>
+    <div>
+        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@Label</p>
+        <p class="mt-1 text-sm text-foreground">@Value</p>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

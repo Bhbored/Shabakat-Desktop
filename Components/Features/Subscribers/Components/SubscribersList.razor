@@ -1,0 +1,121 @@
+@namespace Shabakat.Components.Features.Subscribers.Components
+
+@if (IsLoading)
+{
+    <section class="rounded-2xl border border-border bg-card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[860px]">
+                <thead>
+                    <tr class="border-b border-border">
+                        @for (var i = 0; i < 6; i++)
+                        {
+                            <th class="px-4 py-3.5"><div class="h-4 w-24 animate-pulse rounded bg-muted"></div></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var r = 0; r < 6; r++)
+                    {
+                        <tr class="border-b border-border">
+                            @for (var c = 0; c < 6; c++)
+                            {
+                                <td class="px-4 py-3.5"><div class="h-4 w-full animate-pulse rounded bg-muted"></div></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="flex flex-col gap-3 border-t border-border px-4 py-3 md:flex-row md:items-center md:justify-between">
+            <div class="h-4 w-40 animate-pulse rounded bg-muted"></div>
+            <div class="flex items-center gap-2 self-end md:self-auto">
+                <div class="h-9 w-28 animate-pulse rounded-xl bg-muted"></div>
+                <div class="h-9 w-24 animate-pulse rounded-xl bg-muted"></div>
+            </div>
+        </div>
+    </section>
+}
+else
+{
+    <section class="rounded-2xl border border-border bg-card">
+        @if (Items.Count == 0)
+        {
+            <div class="px-4 py-10 text-sm text-muted-foreground">No subscribers matched the current filters.</div>
+        }
+        else
+        {
+            <table class="w-full min-w-[860px]">
+                <thead>
+                    <tr class="border-b border-border">
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Name</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Phone Number</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Area</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Plan</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Since</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Status</th>
+                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount Due</th>
+                        <th class="px-4 py-3.5"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var sub in Items)
+                    {
+                        <SubscriberCard Subscriber="sub"
+                                        MenuOpen="@(OpenMenuId == sub.Id)"
+                                        OnToggleMenu="() => OnToggleMenu.InvokeAsync(sub.Id)"
+                                        OnView="() => OnView.InvokeAsync(sub)"
+                                        OnEdit="() => OnEdit.InvokeAsync(sub)"
+                                        OnSuspend="() => OnSuspend.InvokeAsync(sub)"
+                                        OnActivate="() => OnActivate.InvokeAsync(sub)"
+                                        OnDelete="() => OnDelete.InvokeAsync(sub)" />
+                    }
+                </tbody>
+            </table>
+
+            <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+                <span>
+                    Showing @((PageNumber - 1) * PageSize + 1)–@Math.Min(PageNumber * PageSize, TotalCount) of @TotalCount
+                </span>
+                <div class="flex items-center gap-2 self-end md:self-auto">
+                    <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm"
+                            value="@PageSize"
+                            @onchange="OnPageSizeChanged">
+                        <option value="10">10 / page</option>
+                        <option value="20">20 / page</option>
+                        <option value="50">50 / page</option>
+                    </select>
+                    <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasPrevious)" @onclick="OnPrevious">Previous</button>
+                    <span class="min-w-24 text-center">Page @PageNumber of @Math.Max(1, TotalPages)</span>
+                    <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasNext)" @onclick="OnNext">Next</button>
+                </div>
+            </div>
+        }
+    </section>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<CustomerSummaryResponse> Items { get; set; } = [];
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public Guid? OpenMenuId { get; set; }
+    [Parameter] public int PageNumber { get; set; } = 1;
+    [Parameter] public int PageSize { get; set; } = 10;
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+    [Parameter] public bool HasPrevious { get; set; }
+    [Parameter] public bool HasNext { get; set; }
+    [Parameter] public EventCallback<Guid> OnToggleMenu { get; set; }
+    [Parameter] public EventCallback<CustomerSummaryResponse> OnView { get; set; }
+    [Parameter] public EventCallback<CustomerSummaryResponse> OnEdit { get; set; }
+    [Parameter] public EventCallback<CustomerSummaryResponse> OnSuspend { get; set; }
+    [Parameter] public EventCallback<CustomerSummaryResponse> OnActivate { get; set; }
+    [Parameter] public EventCallback<CustomerSummaryResponse> OnDelete { get; set; }
+    [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+    [Parameter] public EventCallback OnNext { get; set; }
+
+    private async Task OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), out var size)) return;
+        await PageSizeChanged.InvokeAsync(size);
+    }
+}

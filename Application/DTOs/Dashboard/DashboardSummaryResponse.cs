@@ -1,3 +1,5 @@
+using Shabakat.Application.DTOs.Invoices;
+
 namespace Shabakat.Application.DTOs.Dashboard;
 
 public record DashboardSummaryResponse(
@@ -9,4 +11,6 @@ public record DashboardSummaryResponse(
     decimal NetIncomeAllTime,
     CustomerOverview Customers,
     InvoiceOverview Invoices,
-    ExpensesByType ExpensesByType);
+    ExpensesByType ExpensesByType,
+    IReadOnlyList<InvoiceSummaryResponse> RecentlyPaid,
+    IReadOnlyList<InvoiceSummaryResponse> UpcomingDue);

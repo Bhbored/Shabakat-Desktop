@@ -1,0 +1,120 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+<div class="space-y-4">
+    <div class="flex flex-wrap items-end gap-3">
+        <div class="min-w-64 flex-1">
+            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Customer</label>
+            <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                    value="@CustomerFilter"
+                    @onchange="OnCustomerFilterChanged">
+                <option value="">All customers</option>
+                @foreach (var cust in Customers)
+                {
+                    <option value="@cust.Id">@cust.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="min-w-48">
+            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Status</label>
+            <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                    value="@StatusFilter"
+                    @onchange="OnStatusFilterChanged">
+                <option value="">All statuses</option>
+                <option value="@InvoiceStatus.Unpaid">Unpaid</option>
+                <option value="@InvoiceStatus.PartiallyPaid">Partially paid</option>
+                <option value="@InvoiceStatus.Paid">Paid</option>
+            </select>
+        </div>
+
+        <div class="min-w-44">
+            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Issue Date From</label>
+            <input type="date"
+                   class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                   value="@DateFromText"
+                   @onchange="OnDateFromChanged" />
+        </div>
+
+        <div class="min-w-44">
+            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Issue Date To</label>
+            <input type="date"
+                   class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+                   value="@DateToText"
+                   @onchange="OnDateToChanged" />
+        </div>
+
+        <button type="button"
+                class="rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground hover:bg-muted"
+                @onclick="OnResetFilters">
+            Reset
+        </button>
+
+        <button type="button"
+                class="rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground hover:bg-muted"
+                @onclick="OnBulkCreate">
+            Bulk Generate
+        </button>
+
+        <button type="button"
+                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
+                @onclick="OnCreate">
+            Create Invoice
+        </button>
+    </div>
+
+    <p class="text-xs text-muted-foreground">
+        @TotalCount invoice@(TotalCount == 1 ? "" : "s")
+    </p>
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<CustomerResponse> Customers { get; set; } = [];
+    [Parameter] public string CustomerFilter { get; set; } = "";
+    [Parameter] public EventCallback<string> CustomerFilterChanged { get; set; }
+    [Parameter] public string StatusFilter { get; set; } = "";
+    [Parameter] public EventCallback<string> StatusFilterChanged { get; set; }
+    [Parameter] public DateTime? DateFrom { get; set; }
+    [Parameter] public EventCallback<DateTime?> DateFromChanged { get; set; }
+    [Parameter] public DateTime? DateTo { get; set; }
+    [Parameter] public EventCallback<DateTime?> DateToChanged { get; set; }
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public EventCallback OnFiltersChanged { get; set; }
+    [Parameter] public EventCallback OnResetFilters { get; set; }
+    [Parameter] public EventCallback OnBulkCreate { get; set; }
+    [Parameter] public EventCallback OnCreate { get; set; }
+
+    private string DateFromText => DateFrom?.ToString("yyyy-MM-dd") ?? "";
+    private string DateToText => DateTo?.ToString("yyyy-MM-dd") ?? "";
+
+    private async Task OnCustomerFilterChanged(ChangeEventArgs e)
+    {
+        await CustomerFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task OnStatusFilterChanged(ChangeEventArgs e)
+    {
+        await StatusFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task OnDateFromChanged(ChangeEventArgs e)
+    {
+        await DateFromChanged.InvokeAsync(ParseDate(e.Value?.ToString()));
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task OnDateToChanged(ChangeEventArgs e)
+    {
+        await DateToChanged.InvokeAsync(ParseDate(e.Value?.ToString()));
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private static DateTime? ParseDate(string? text) =>
+        string.IsNullOrWhiteSpace(text)
+            ? null
+            : DateTime.TryParseExact(text, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var d)
+                ? d
+                : null;
+}

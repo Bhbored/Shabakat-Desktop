@@ -1,0 +1,85 @@
+@namespace Shabakat.Components.Features.Expenses.Components
+
+<SideSheet Open="Open"
+           Title="@(string.IsNullOrWhiteSpace(Expense?.Label) ? "Expense Details" : Expense.Label)"
+           Description="Review expense amount, category, notes, and audit timestamps."
+           MaxWidthClass="sm:max-w-xl"
+           OnClose="OnClose">
+    @if (IsLoading)
+    {
+        <div class="space-y-4">
+            <div class="grid gap-4 md:grid-cols-2">
+                @for (var i = 0; i < 2; i++)
+                {
+                    <div class="rounded-2xl border border-border bg-card p-4">
+                        <div class="h-4 w-20 animate-pulse rounded bg-muted"></div>
+                        <div class="mt-3 h-8 w-24 animate-pulse rounded bg-muted"></div>
+                    </div>
+                }
+            </div>
+            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
+                @for (var i = 0; i < 6; i++)
+                {
+                    <div class="flex items-start gap-3">
+                        <div class="h-9 w-9 animate-pulse rounded-lg bg-muted"></div>
+                        <div class="space-y-2">
+                            <div class="h-3 w-24 animate-pulse rounded bg-muted"></div>
+                            <div class="h-4 w-40 animate-pulse rounded bg-muted"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (Expense is not null)
+    {
+        <div class="space-y-4">
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Amount</p>
+                    <p class="mt-2 text-xl font-semibold text-foreground">@FormatHelper.Currency(Expense.Amount)</p>
+                </div>
+                <div class="rounded-2xl border border-border bg-card p-4">
+                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Type</p>
+                    <p class="mt-2 text-xl font-semibold text-foreground">@Expense.ExpenseType</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
+                <ExpenseDetailRow Label="Category">
+                    <ChildContent>
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 16 6 6"/><circle cx="16" cy="9" r="2.9"/><circle cx="6" cy="5" r="3"/></svg>
+                    </ChildContent>
+                    <ValueContent>
+                        <ExpenseTypeBadge Category="@Expense.ExpenseType" />
+                    </ValueContent>
+                </ExpenseDetailRow>
+                <ExpenseDetailRow Label="Amount" Value="@FormatHelper.Currency(Expense.Amount)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                </ExpenseDetailRow>
+                <ExpenseDetailRow Label="Expense Date" Value="@FormatHelper.Date(Expense.ExpenseDate)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </ExpenseDetailRow>
+                <ExpenseDetailRow Label="Label" Value="@(string.IsNullOrWhiteSpace(Expense.Label) ? "Not set" : Expense.Label)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                </ExpenseDetailRow>
+                <ExpenseDetailRow Label="Notes" Value="@(string.IsNullOrWhiteSpace(Expense.Notes) ? "No notes" : Expense.Notes)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect x="8" y="4" width="14" height="16" rx="2"/></svg>
+                </ExpenseDetailRow>
+                <ExpenseDetailRow Label="Created" Value="@FormatHelper.Date(Expense.CreatedAt)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </ExpenseDetailRow>
+                <ExpenseDetailRow Label="Updated" Value="@FormatHelper.Date(Expense.UpdatedAt)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </ExpenseDetailRow>
+            </div>
+        </div>
+    }
+</SideSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public ExpenseResponse? Expense { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+}

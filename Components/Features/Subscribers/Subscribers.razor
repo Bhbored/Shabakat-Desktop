@@ -1,0 +1,581 @@
+@page "/subscribers"
+@inject ICustomerService CustomerService
+@inject IMeterReadingService MeterReadingService
+@inject IAreaService AreaService
+@inject IDistributionBoxService BoxService
+@inject IAmpereScheduleService AmpereScheduleService
+@inject IAppPreferencesService PreferencesService
+@inject IToastService Toast
+
+<div class="space-y-4" @onclick="CloseMenu">
+    <SubscribersToolbar SearchField="@_searchField"
+                        SearchTerm="@_searchTerm"
+                        AreaFilter="@_areaFilter"
+                        PlanFilter="@_planFilter"
+                        RelationFilter="@_relationFilter"
+                        StatusFilter="@_statusFilter"
+                        TotalCount="_totalCount"
+                        Areas="_areas"
+                        SearchFieldChanged="OnSearchFieldChanged"
+                        SearchTermChanged="OnSearchTermChanged"
+                        AreaFilterChanged="OnAreaFilterChanged"
+                        PlanFilterChanged="OnPlanFilterChanged"
+                        RelationFilterChanged="OnRelationFilterChanged"
+                        StatusFilterChanged="OnStatusFilterChanged"
+                        OnCreate="OpenCreate" />
+
+    <SubscribersList Items="_items"
+                     IsLoading="_loading"
+                     OpenMenuId="_openMenuId"
+                     PageNumber="_pageNumber"
+                     PageSize="_pageSize"
+                     TotalCount="_totalCount"
+                     TotalPages="_totalPages"
+                     HasPrevious="_hasPrevious"
+                     HasNext="_hasNext"
+                     OnToggleMenu="ToggleMenu"
+                     OnView="OpenDetails"
+                     OnEdit="OpenEdit"
+                     OnSuspend="OpenSuspend"
+                     OnActivate="OpenActivate"
+                     OnDelete="OpenDelete"
+                     PageSizeChanged="OnPageSizeChanged"
+                     OnPrevious="PrevPageAsync"
+                     OnNext="NextPageAsync" />
+</div>
+
+<SubscriberFormSheet Open="_showForm"
+                     IsEdit="@(_editingId.HasValue)"
+                     Saving="_saving"
+                     AmpereSchedulePricingEnabled="_ampereSchedulePricingEnabled"
+                     ShowInitialMeterReading="_showInitialMeterReading"
+                     Form="_form"
+                     Areas="_areas"
+                     FilteredBoxes="FilteredBoxes"
+                     Schedules="_schedules"
+                     OnClose="CloseForm"
+                     OnSave="SaveFormAsync"
+                     OnPlanChanged="OnPlanChanged"
+                     OnAreaChanged="OnAreaChanged" />
+
+<SubscriberDetailsSheet Open="_showDetails"
+                        IsLoading="_detailsLoading"
+                        Details="_details"
+                        MeterReadings="_meterReadings"
+                        OnClose="CloseDetails"
+                        OnAddReading="OpenMeterReading"
+                        OnDeleteReading="OpenDeleteReading" />
+
+<MeterReadingSheet Open="_showMeterDialog"
+                   CustomerName="@(_details?.Name ?? "")"
+                   Saving="_savingMeter"
+                   @bind-MeterValue="_meterValue"
+                   @bind-MeterDate="_meterDate"
+                   OnClose="CloseMeterReading"
+                   OnSave="SaveMeterReadingAsync" />
+
+<DeleteMeterReadingDialog Open="@(_readingToDelete is not null)"
+                          ReadingLabel="@_readingToDeleteLabel"
+                          OnClose="CloseDeleteReading"
+                          OnConfirm="ConfirmDeleteReadingAsync" />
+
+<DeleteSubscriberDialog Open="@(_confirmDelete is not null)"
+                        Subscriber="_confirmDelete"
+                        OnClose="CloseDelete"
+                        OnConfirm="ConfirmDeleteAsync" />
+
+<SuspendSubscriberDialog Open="@(_confirmStatus is not null)"
+                         Subscriber="_confirmStatus"
+                         IsActivate="_statusActivate"
+                         OnClose="CloseStatus"
+                         OnConfirm="ConfirmStatusAsync" />
+
+@code {
+    private readonly List<CustomerSummaryResponse> _items = [];
+    private readonly List<AreaResponse> _areas = [];
+    private readonly List<DistributionBoxResponse> _boxes = [];
+    private readonly List<AmpereScheduleResponse> _schedules = [];
+    private readonly List<MeterReadingResponse> _meterReadings = [];
+
+    private bool _loading = true;
+    private bool _saving;
+    private bool _savingMeter;
+    private bool _showForm;
+    private bool _showDetails;
+    private bool _detailsLoading;
+    private bool _showMeterDialog;
+    private bool _ampereSchedulePricingEnabled;
+    private bool _showInitialMeterReading;
+    private Guid? _editingId;
+    private Guid? _openMenuId;
+    private CustomerResponse? _details;
+    private CustomerSummaryResponse? _confirmDelete;
+    private CustomerSummaryResponse? _confirmStatus;
+    private bool _statusActivate;
+    private MeterReadingResponse? _readingToDelete;
+
+    private string _searchField = "name";
+    private string _searchTerm = "";
+    private string _areaFilter = "";
+    private string _planFilter = "";
+    private string _relationFilter = "";
+    private string _statusFilter = "";
+    private int _pageNumber = 1;
+    private int _pageSize = 10;
+    private int _totalCount;
+    private int _totalPages;
+    private bool _hasPrevious;
+    private bool _hasNext;
+
+    private SubscriberFormModel _form = new();
+    private decimal _meterValue;
+    private DateTime? _meterDate;
+
+    private IEnumerable<DistributionBoxResponse> FilteredBoxes =>
+        string.IsNullOrEmpty(_form.AreaId)
+            ? _boxes
+            : _boxes.Where(b => b.AreaId.ToString() == _form.AreaId);
+
+    private string _readingToDeleteLabel =>
+        _readingToDelete is null ? "" : $"Reading {FormatHelper.Number(_readingToDelete.ReadingValue)}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLookupsAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadLookupsAsync()
+    {
+        var areas = await UiActions.RunAsync(Toast, () => AreaService.GetAllAsync()) ?? [];
+        var boxes = await UiActions.RunAsync(Toast, () => BoxService.GetAllUnpagedAsync()) ?? [];
+        var schedules = await UiActions.RunAsync(Toast, () => AmpereScheduleService.GetAllAsync()) ?? [];
+        var prefs = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
+        _ampereSchedulePricingEnabled = prefs?.AmpereSchedulePricingEnabled == true;
+        _areas.Clear();
+        _areas.AddRange(areas);
+        _boxes.Clear();
+        _boxes.AddRange(boxes);
+        _schedules.Clear();
+        _schedules.AddRange(schedules);
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _openMenuId = null;
+
+        Guid? areaId = Guid.TryParse(_areaFilter, out var a) ? a : null;
+        PlanType? plan = Enum.TryParse<PlanType>(_planFilter, out var p) ? p : null;
+        CustomerRelation? relation = Enum.TryParse<CustomerRelation>(_relationFilter, out var r) ? r : null;
+        CustomerStatus? status = Enum.TryParse<CustomerStatus>(_statusFilter, out var s) ? s : null;
+
+        var name = _searchField == "name" && !string.IsNullOrWhiteSpace(_searchTerm) ? _searchTerm.Trim() : null;
+        var phone = _searchField == "phone" && !string.IsNullOrWhiteSpace(_searchTerm) ? _searchTerm.Trim() : null;
+
+        var filter = new CustomerFilterRequest(
+            Name: name,
+            Phone: phone,
+            AreaId: areaId,
+            PlanType: plan,
+            CustomerRelation: relation,
+            CustomerStatus: status,
+            PageNumber: _pageNumber,
+            PageSize: _pageSize);
+
+        var page = await UiActions.RunAsync(Toast, () => CustomerService.GetAllAsync(filter));
+        _items.Clear();
+        if (page is not null)
+        {
+            _items.AddRange(page.Data);
+            _totalCount = page.TotalCount;
+            _totalPages = page.TotalPages;
+            _hasPrevious = page.HasPreviousPage;
+            _hasNext = page.HasNextPage;
+            _pageNumber = page.PageNumber;
+        }
+        else
+        {
+            _totalCount = 0;
+            _totalPages = 0;
+            _hasPrevious = false;
+            _hasNext = false;
+        }
+
+        _loading = false;
+    }
+
+    private async Task ReloadFromFiltersAsync()
+    {
+        _pageNumber = 1;
+        await LoadAsync();
+    }
+
+    private async Task OnSearchFieldChanged(string value)
+    {
+        _searchField = value;
+        await ReloadFromFiltersAsync();
+    }
+
+    private async Task OnSearchTermChanged(string value)
+    {
+        _searchTerm = value;
+        await ReloadFromFiltersAsync();
+    }
+
+    private async Task OnAreaFilterChanged(string value)
+    {
+        _areaFilter = value;
+        await ReloadFromFiltersAsync();
+    }
+
+    private async Task OnPlanFilterChanged(string value)
+    {
+        _planFilter = value;
+        await ReloadFromFiltersAsync();
+    }
+
+    private async Task OnRelationFilterChanged(string value)
+    {
+        _relationFilter = value;
+        await ReloadFromFiltersAsync();
+    }
+
+    private async Task OnStatusFilterChanged(string value)
+    {
+        _statusFilter = value;
+        await ReloadFromFiltersAsync();
+    }
+
+    private async Task OnPageSizeChanged(int size)
+    {
+        _pageSize = size;
+        await ReloadFromFiltersAsync();
+    }
+
+    private async Task NextPageAsync()
+    {
+        if (!_hasNext) return;
+        _pageNumber++;
+        await LoadAsync();
+    }
+
+    private async Task PrevPageAsync()
+    {
+        if (!_hasPrevious) return;
+        _pageNumber--;
+        await LoadAsync();
+    }
+
+    private void ToggleMenu(Guid id) => _openMenuId = _openMenuId == id ? null : id;
+    private void CloseMenu() => _openMenuId = null;
+
+    private void OpenCreate()
+    {
+        CloseMenu();
+        _editingId = null;
+        _showInitialMeterReading = true;
+        _form = new SubscriberFormModel
+        {
+            CustomerType = CustomerType.Residential,
+            Plan = PlanType.Ampere,
+            PlanValue = 5,
+            SubscriptionDate = DateTime.Today,
+            CustomerStatus = CustomerStatus.Active
+        };
+        _showForm = true;
+    }
+
+    private async Task OpenEdit(CustomerSummaryResponse sub)
+    {
+        CloseMenu();
+        var detail = await UiActions.RunAsync(Toast, () => CustomerService.GetByIdAsync(sub.Id));
+        if (detail is null) return;
+        FillForm(detail);
+        _editingId = detail.Id;
+        _showDetails = false;
+        _showInitialMeterReading = await ShouldShowInitialMeterReadingAsync(detail);
+        _showForm = true;
+    }
+
+    private async Task<bool> ShouldShowInitialMeterReadingAsync(CustomerResponse detail)
+    {
+        if (!detail.Plan.Equals(nameof(PlanType.Kilowatt), StringComparison.OrdinalIgnoreCase)
+            && !detail.Plan.Equals(nameof(PlanType.FixedKilowatt), StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var readings = await UiActions.RunAsync(Toast, () => MeterReadingService.GetAllForCustomerAsync(detail.Id)) ?? [];
+        return !readings.Any();
+    }
+
+    private void FillForm(CustomerResponse detail)
+    {
+        var areaId = _areas.FirstOrDefault(a => a.Name == detail.AreaName)?.Id;
+        _form = new SubscriberFormModel
+        {
+            Name = detail.Name,
+            Phone = detail.Phone ?? "",
+            Address = detail.Address ?? "",
+            Building = detail.Building ?? "",
+            Floor = detail.Floor ?? "",
+            CableName = detail.CableName ?? "",
+            AreaId = areaId?.ToString() ?? "",
+            BoxId = detail.BoxId?.ToString() ?? "",
+            AmpereScheduleId = detail.AmpereScheduleId?.ToString() ?? "",
+            CustomerType = Enum.TryParse<CustomerType>(detail.CustomerType, out var ct) ? ct : CustomerType.Residential,
+            Plan = Enum.TryParse<PlanType>(detail.Plan, out var plan) ? plan : PlanType.Ampere,
+            PlanValue = detail.PlanValue,
+            InitialMeterReading = detail.InitialMeterReading,
+            CustomerRelation = Enum.TryParse<CustomerRelation>(detail.CustomerRelation, out var rel) ? rel.ToString() : "",
+            CustomerStatus = Enum.TryParse<CustomerStatus>(detail.CustomerStatus, out var st) ? st : CustomerStatus.Active,
+            UsePricingOverride = detail.HasPricingOverride,
+            OverridePrice = detail.PricingOverride?.Price,
+            OverrideFixedCharge = detail.PricingOverride?.FixedCharge,
+            OverrideTva = detail.PricingOverride?.TVA,
+            HadPricingOverride = detail.HasPricingOverride
+        };
+    }
+
+    private void CloseForm()
+    {
+        _showForm = false;
+        _editingId = null;
+    }
+
+    private void OnPlanChanged()
+    {
+        if (_form.Plan != PlanType.Ampere)
+            _form.AmpereScheduleId = "";
+        if (_form.Plan is not (PlanType.Kilowatt or PlanType.FixedKilowatt))
+            _form.InitialMeterReading = null;
+    }
+
+    private void OnAreaChanged() => _form.BoxId = "";
+
+    private async Task SaveFormAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_form.Name))
+        {
+            Toast.Error("Name is required.");
+            return;
+        }
+        if (_form.PlanValue <= 0)
+        {
+            Toast.Error("Plan value must be greater than zero.");
+            return;
+        }
+
+        _saving = true;
+        Guid? areaId = Guid.TryParse(_form.AreaId, out var a) ? a : null;
+        Guid? boxId = Guid.TryParse(_form.BoxId, out var b) ? b : null;
+        Guid? scheduleId = Guid.TryParse(_form.AmpereScheduleId, out var s) ? s : null;
+        CustomerRelation? relation = Enum.TryParse<CustomerRelation>(_form.CustomerRelation, out var rel) ? rel : null;
+        CustomerPricingOverrideDto? overrideDto = _form.UsePricingOverride
+            ? new CustomerPricingOverrideDto(_form.OverridePrice, _form.OverrideFixedCharge, _form.OverrideTva)
+            : null;
+
+        if (_editingId is null)
+        {
+            DateOnly? subDate = _form.SubscriptionDate.HasValue
+                ? DateOnly.FromDateTime(_form.SubscriptionDate.Value)
+                : null;
+
+            var request = new CreateCustomerRequest(
+                Name: _form.Name.Trim(),
+                Phone: NullIfEmpty(_form.Phone),
+                Address: NullIfEmpty(_form.Address),
+                Building: NullIfEmpty(_form.Building),
+                Floor: NullIfEmpty(_form.Floor),
+                CableName: NullIfEmpty(_form.CableName),
+                BoxId: boxId,
+                AmpereScheduleId: scheduleId,
+                AreaId: areaId,
+                CustomerType: _form.CustomerType,
+                Plan: _form.Plan,
+                PlanValue: _form.PlanValue,
+                SubscriptionDate: subDate,
+                CustomerRelation: relation,
+                PricingOverride: overrideDto,
+                InitialMeterReading: _form.InitialMeterReading);
+
+            var created = await UiActions.RunAsync(Toast, () => CustomerService.CreateAsync(request), "Subscriber created");
+            if (created is not null)
+            {
+                CloseForm();
+                await LoadAsync();
+            }
+        }
+        else
+        {
+            var request = new UpdateCustomerRequest(
+                Name: _form.Name.Trim(),
+                Phone: NullIfEmpty(_form.Phone),
+                AreaId: areaId,
+                Address: NullIfEmpty(_form.Address),
+                Building: NullIfEmpty(_form.Building),
+                Floor: NullIfEmpty(_form.Floor),
+                CableName: NullIfEmpty(_form.CableName),
+                BoxId: boxId,
+                AmpereScheduleId: scheduleId,
+                CustomerType: _form.CustomerType,
+                Plan: _form.Plan,
+                PlanValue: _form.PlanValue,
+                CustomerStatus: _form.CustomerStatus,
+                CustomerRelation: relation,
+                PricingOverride: overrideDto,
+                ClearPricingOverride: _form.HadPricingOverride && !_form.UsePricingOverride,
+                InitialMeterReading: _form.InitialMeterReading);
+
+            var updated = await UiActions.RunAsync(Toast, () => CustomerService.UpdateAsync(_editingId.Value, request), "Subscriber updated");
+            if (updated is not null)
+            {
+                CloseForm();
+                await LoadAsync();
+            }
+        }
+
+        _saving = false;
+    }
+
+    private async Task OpenDetails(CustomerSummaryResponse sub)
+    {
+        CloseMenu();
+        _showDetails = true;
+        _detailsLoading = true;
+        _details = null;
+        _meterReadings.Clear();
+
+        var detail = await UiActions.RunAsync(Toast, () => CustomerService.GetByIdAsync(sub.Id));
+        _details = detail;
+        if (detail is not null
+            && detail.Plan.Equals(nameof(PlanType.Kilowatt), StringComparison.OrdinalIgnoreCase))
+        {
+            var readings = await UiActions.RunAsync(Toast, () => MeterReadingService.GetAllForCustomerAsync(detail.Id)) ?? [];
+            _meterReadings.AddRange(readings);
+        }
+
+        _detailsLoading = false;
+    }
+
+    private void CloseDetails()
+    {
+        _showDetails = false;
+        _details = null;
+        _meterReadings.Clear();
+        _readingToDelete = null;
+        _showMeterDialog = false;
+    }
+
+    private void OpenMeterReading()
+    {
+        _meterValue = 0;
+        _meterDate = null;
+        _showMeterDialog = true;
+    }
+
+    private void CloseMeterReading() => _showMeterDialog = false;
+
+    private async Task SaveMeterReadingAsync()
+    {
+        if (_details is null || _savingMeter) return;
+        _savingMeter = true;
+        DateOnly? date = _meterDate.HasValue ? DateOnly.FromDateTime(_meterDate.Value) : null;
+        var created = await UiActions.RunAsync(
+            Toast,
+            () => MeterReadingService.CreateAsync(_details.Id, new CreateMeterReadingRequest(_meterValue, date)),
+            "Meter reading created successfully.");
+        _savingMeter = false;
+        if (created is null) return;
+
+        _showMeterDialog = false;
+        await ReloadMeterReadingsAsync();
+    }
+
+    private void OpenDeleteReading(MeterReadingResponse reading) => _readingToDelete = reading;
+    private void CloseDeleteReading() => _readingToDelete = null;
+
+    private async Task ConfirmDeleteReadingAsync()
+    {
+        if (_details is null || _readingToDelete is null) return;
+        await UiActions.RunAsync(Toast, () => MeterReadingService.DeleteAsync(_details.Id, _readingToDelete.Id), "Meter reading deleted successfully.");
+        _readingToDelete = null;
+        await ReloadMeterReadingsAsync();
+    }
+
+    private async Task ReloadMeterReadingsAsync()
+    {
+        if (_details is null) return;
+        var readings = await UiActions.RunAsync(Toast, () => MeterReadingService.GetAllForCustomerAsync(_details.Id)) ?? [];
+        _meterReadings.Clear();
+        _meterReadings.AddRange(readings);
+    }
+
+    private void OpenDelete(CustomerSummaryResponse sub)
+    {
+        CloseMenu();
+        _confirmDelete = sub;
+    }
+
+    private void CloseDelete() => _confirmDelete = null;
+
+    private void OpenSuspend(CustomerSummaryResponse sub)
+    {
+        CloseMenu();
+        _statusActivate = false;
+        _confirmStatus = sub;
+    }
+
+    private void OpenActivate(CustomerSummaryResponse sub)
+    {
+        CloseMenu();
+        _statusActivate = true;
+        _confirmStatus = sub;
+    }
+
+    private void CloseStatus() => _confirmStatus = null;
+
+    private async Task ConfirmStatusAsync()
+    {
+        if (_confirmStatus is null) return;
+
+        var id = _confirmStatus.Id;
+        if (_statusActivate)
+        {
+            var updated = await UiActions.RunAsync(
+                Toast,
+                () => CustomerService.UpdateAsync(id, new UpdateCustomerRequest(CustomerStatus: CustomerStatus.Active)),
+                "Subscriber activated.");
+            if (updated is null) return;
+        }
+        else
+        {
+            var result = await UiActions.RunAsync(
+                Toast,
+                () => CustomerService.SuspendAsync(new SuspendCustomersRequest([id])));
+            if (result is null) return;
+            Toast.Success(result.Message);
+        }
+
+        _confirmStatus = null;
+        await LoadAsync();
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (_confirmDelete is null) return;
+        var id = _confirmDelete.Id;
+        var succeeded = false;
+        await UiActions.RunAsync(Toast, async () =>
+        {
+            await CustomerService.DeleteAsync(id);
+            succeeded = true;
+        }, "Subscriber deleted successfully.");
+        if (!succeeded) return;
+        _confirmDelete = null;
+        if (_details?.Id == id) CloseDetails();
+        await LoadAsync();
+    }
+
+    private static string? NullIfEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+}

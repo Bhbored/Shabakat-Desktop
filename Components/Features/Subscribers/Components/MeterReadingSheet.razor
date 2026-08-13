@@ -1,0 +1,51 @@
+@namespace Shabakat.Components.Features.Subscribers.Components
+
+<ConfirmDialog Open="Open" Title="Add Meter Reading" OnClose="OnClose">
+    <ChildContent>
+        <p class="mb-4">Record one monthly meter reading for @(string.IsNullOrWhiteSpace(CustomerName) ? "this subscriber" : CustomerName).</p>
+        <div class="space-y-4 text-start">
+            <div>
+                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Reading Value</label>
+                <input type="number"
+                       step="0.01"
+                       min="0"
+                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                       @bind="MeterValue"
+                       @bind:after="NotifyMeterValueAsync" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Reading Date</label>
+                <input type="date"
+                       class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                       @bind="MeterDate"
+                       @bind:format="yyyy-MM-dd"
+                       @bind:after="NotifyMeterDateAsync" />
+                <p class="mt-2 text-xs text-muted-foreground">Optional. Backend defaults to today and blocks duplicate calendar months.</p>
+            </div>
+        </div>
+    </ChildContent>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted" @onclick="OnClose">Cancel</button>
+        <button type="button"
+                class="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                disabled="@Saving"
+                @onclick="OnSave">
+            @(Saving ? "Saving..." : "Save Reading")
+        </button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public string CustomerName { get; set; } = "";
+    [Parameter] public bool Saving { get; set; }
+    [Parameter] public decimal MeterValue { get; set; }
+    [Parameter] public DateTime? MeterDate { get; set; }
+    [Parameter] public EventCallback<decimal> MeterValueChanged { get; set; }
+    [Parameter] public EventCallback<DateTime?> MeterDateChanged { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private Task NotifyMeterValueAsync() => MeterValueChanged.InvokeAsync(MeterValue);
+    private Task NotifyMeterDateAsync() => MeterDateChanged.InvokeAsync(MeterDate);
+}

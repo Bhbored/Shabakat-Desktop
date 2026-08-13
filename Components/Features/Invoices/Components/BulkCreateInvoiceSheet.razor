@@ -1,0 +1,40 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+
+<ConfirmDialog Open="Open"
+               Title="Bulk Generate Invoices"
+               Description="Create invoices for all eligible active customers for current billing period. This runs on backend billing rules."
+               OnClose="OnClose">
+    <ChildContent>
+        <div class="space-y-1.5 text-foreground">
+            <label class="text-sm font-medium">Plan Type</label>
+            <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary"
+                    value="@Plan"
+                    @onchange="OnPlanChanged">
+                <option value="">All (Ampere &amp; Kilowatt)</option>
+                <option value="@PlanType.Ampere">Ampere Only</option>
+                <option value="@PlanType.Kilowatt">Kilowatt Only</option>
+            </select>
+        </div>
+    </ChildContent>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
+        <button type="button"
+                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                disabled="@Saving"
+                @onclick="OnSave">
+            @(Saving ? "Generating..." : "Generate")
+        </button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public string Plan { get; set; } = "";
+    [Parameter] public EventCallback<string> PlanChanged { get; set; }
+    [Parameter] public bool Saving { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private Task OnPlanChanged(ChangeEventArgs e) =>
+        PlanChanged.InvokeAsync(e.Value?.ToString() ?? "");
+}

@@ -298,7 +298,19 @@ public sealed class CustomerService : ICustomerService
                 : null,
             TotalBilled: c.Invoices.Sum(i => i.TotalAmount),
             TotalPaid: c.Invoices.Sum(i => i.PaidAmount),
-            TotalOutstanding: c.Invoices.Sum(i => i.AmountDue));
+            TotalOutstanding: c.Invoices.Sum(i => i.AmountDue),
+            PaidThisMonth: HasPaidThisMonth(c));
+    }
+
+    private static bool HasPaidThisMonth(Customer customer)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var monthStart = new DateOnly(today.Year, today.Month, 1);
+        var monthEnd = monthStart.AddMonths(1);
+        return customer.Invoices.Any(i =>
+            i.IssueDate >= monthStart &&
+            i.IssueDate < monthEnd &&
+            i.InvoiceStatus == InvoiceStatus.Paid);
     }
 
     private static void ValidatePricingOverride(CustomerPricingOverrideDto? dto)

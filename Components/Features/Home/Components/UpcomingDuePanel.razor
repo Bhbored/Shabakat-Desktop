@@ -1,0 +1,83 @@
+@namespace Shabakat.Components.Features.Home.Components
+
+<section class="rounded-2xl border border-border bg-card p-5 lg:col-span-2">
+    @if (IsLoading)
+    {
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-foreground">Upcoming Due</h2>
+            <div class="h-6 w-16 animate-pulse rounded-full bg-muted"></div>
+        </div>
+        <div class="space-y-3">
+            @for (var i = 0; i < 5; i++)
+            {
+                <div class="flex items-center gap-3 border-b border-border py-3 last:border-b-0">
+                    <div class="h-9 w-9 animate-pulse rounded-full bg-muted"></div>
+                    <div class="min-w-0 flex-1 space-y-2">
+                        <div class="h-4 w-32 animate-pulse rounded bg-muted"></div>
+                        <div class="mt-2 h-3 w-24 animate-pulse rounded bg-muted"></div>
+                    </div>
+                    <div class="space-y-2 text-right">
+                        <div class="ml-auto h-4 w-20 animate-pulse rounded bg-muted"></div>
+                        <div class="mt-2 ml-auto h-3 w-16 animate-pulse rounded bg-muted"></div>
+                    </div>
+                    <div class="h-6 w-16 animate-pulse rounded-full bg-muted"></div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-foreground">Upcoming Due</h2>
+            <span class="rounded-full border border-red-400/20 bg-red-400/10 px-2 py-0.5 text-xs font-medium text-red-400">
+                @Items.Count pending
+            </span>
+        </div>
+
+        @if (Items.Count == 0)
+        {
+            <p class="rounded-xl border border-border bg-white/[0.02] px-3 py-6 text-sm text-muted-foreground">
+                No unpaid or partially paid invoices found.
+            </p>
+        }
+        else
+        {
+            <div>
+                @foreach (var invoice in Items)
+                {
+                    <div class="flex items-center gap-3 border-b border-border py-3 last:border-b-0">
+                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                             style="background-color: @FormatHelper.AvatarColor(invoice.CustomerName)">
+                            @FormatHelper.Initials(invoice.CustomerName)
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-medium text-foreground">@invoice.CustomerName</p>
+                            <p class="text-xs text-muted-foreground">Due @FormatHelper.Date(invoice.ConsumptionEnd)</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(invoice.AmountDue)</span>
+                            <InvoiceStatusBadge Status="@ResolveStatus(invoice.ConsumptionEnd)" />
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <a href="subscribers"
+           class="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+           style="box-shadow: 0 0 16px rgba(245,192,0,0.2);">
+            Review balances
+        </a>
+    }
+</section>
+
+@code {
+    [Parameter] public IReadOnlyList<InvoiceSummaryResponse> Items { get; set; } = [];
+    [Parameter] public bool IsLoading { get; set; }
+
+    private static string ResolveStatus(DateOnly dueDate)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        return dueDate < today ? "overdue" : "unpaid";
+    }
+}

@@ -1,0 +1,23 @@
+@namespace Shabakat.Components.Features.Subscribers.Components
+
+<ConfirmDialog Open="Open"
+               Title="Delete Subscriber"
+               OnClose="OnClose">
+    <ChildContent>
+        @if (Subscriber is not null)
+        {
+            <p>Delete <span class="font-medium text-foreground">@Subscriber.Name</span>? This cannot be undone.</p>
+        }
+    </ChildContent>
+    <Footer>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
+        <button type="button" class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white" @onclick="OnConfirm">Delete</button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public CustomerSummaryResponse? Subscriber { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
+}

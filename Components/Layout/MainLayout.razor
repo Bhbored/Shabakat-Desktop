@@ -1,9 +1,13 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 @inject NavigationManager NavigationManager
+@inject IAppUserService AppUserService
+@inject IThemeService ThemeService
+@inject IJSRuntime Js
 
 <div class="flex min-h-dvh bg-background">
     <aside class="w-[250px] shrink-0 hidden md:flex md:flex-col md:sticky md:top-0 md:h-screen border-r border-border bg-sidebar">
-        <NavMenu />
+        <NavMenu DisplayName="@_displayName" Initials="@_initials" />
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
@@ -17,15 +21,15 @@
 
             <div class="min-w-0 flex-1">
                 <h1 class="truncate text-base font-semibold text-foreground">@CurrentPageTitle</h1>
-                <p class="hidden text-xs text-muted-foreground sm:block">Welcome back, Admin · Shabakat</p>
+                <p class="hidden text-xs text-muted-foreground sm:block">@CurrentPageSubtitle</p>
             </div>
 
             <div class="flex items-center gap-2">
-                <div class="relative hidden md:block">
+                <a href="subscribers" class="relative hidden md:flex items-center">
                     <svg class="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input type="text" placeholder="Quick search subscribers..." class="w-60 rounded-xl border border-border bg-secondary py-2 pe-4 ps-9 text-sm text-foreground outline-none transition focus:border-primary" />
-                </div>
-                <div class="flex h-8 w-8 items-center justify-center rounded-full text-white text-xs font-semibold" style="background-color: #7c3aed;">AS</div>
+                    <span class="w-60 rounded-xl border border-border bg-secondary py-2 pe-4 ps-9 text-sm text-muted-foreground">Quick search subscribers...</span>
+                </a>
+                <div class="flex h-8 w-8 items-center justify-center rounded-full text-white text-xs font-semibold" style="background-color: @FormatHelper.AvatarColor(_displayName);">@_initials</div>
             </div>
         </header>
 
@@ -35,13 +39,14 @@
     </div>
 
     <BottomNavigation />
+    <Toaster />
 
     @if (_mobileNavOpen)
     {
         <div class="md:hidden fixed inset-0 z-50">
             <div class="fixed inset-0 bg-black/50" @onclick="ToggleMobileNav"></div>
             <aside class="fixed inset-y-0 left-0 w-[280px] bg-sidebar border-r border-sidebar-border shadow-xl flex flex-col">
-                <NavMenu />
+                <NavMenu DisplayName="@_displayName" Initials="@_initials" OnNavigate="CloseMobileNav" />
             </aside>
         </div>
     }
@@ -49,24 +54,75 @@
 
 @code {
     private bool _mobileNavOpen;
+    private string _displayName = "Admin";
+    private string _initials = "AD";
 
-    private string CurrentPageTitle => GetPageTitle();
-
-    private string GetPageTitle()
+    protected override async Task OnInitializedAsync()
     {
-        var uri = NavigationManager.Uri;
-        if (uri.Contains("/areas")) return "Areas";
-        if (uri.Contains("/ampere-schedules")) return "Ampere Schedules";
-        if (uri.Contains("/boxes")) return "Boxes";
-        if (uri.Contains("/subscribers")) return "Subscribers";
-        if (uri.Contains("/invoices")) return "Invoices";
-        if (uri.Contains("/expenses")) return "Expenses";
-        if (uri.Contains("/settings")) return "Settings";
-        return "Dashboard";
+        ThemeService.Changed += OnThemeChanged;
+        await ApplyThemeAsync();
+
+        var profile = await AppUserService.GetAsync();
+        if (profile is not null && !string.IsNullOrWhiteSpace(profile.FullName))
+        {
+            _displayName = profile.FullName;
+            _initials = FormatHelper.Initials(profile.FullName);
+        }
     }
 
-    private void ToggleMobileNav()
+    private void OnThemeChanged() => _ = InvokeAsync(ApplyThemeAsync);
+
+    private async Task ApplyThemeAsync()
     {
-        _mobileNavOpen = !_mobileNavOpen;
+        var theme = ThemeService.ResolvedTheme;
+        await Js.InvokeVoidAsync("eval", $@"
+            document.documentElement.setAttribute('data-theme', '{theme}');
+            try {{ localStorage.setItem('shabakat-theme-ui', '{theme}'); }} catch (_) {{}}
+        ");
     }
+
+    private string CurrentPageTitle => CurrentPageCopy.Title;
+    private string CurrentPageSubtitle => CurrentPageCopy.Subtitle;
+
+    private (string Title, string Subtitle) CurrentPageCopy
+    {
+        get
+        {
+            var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            var query = relative.IndexOf('?', StringComparison.Ordinal);
+            if (query >= 0)
+                relative = relative[..query];
+
+            return relative.Trim('/').ToLowerInvariant() switch
+            {
+                "areas" => ("Areas", "Organize subscriber groups and manage area assignments"),
+                "ampere-schedules" => ("Ampere Schedules", "Manage ampere supply-hour tiers and schedule-based pricing"),
+                "boxes" => ("Boxes", "Manage physical distribution boxes linked to company areas"),
+                "subscribers" => ("Subscribers", "Search, sort, and manage monthly accounts"),
+                "invoices" => ("Invoices", "Generate printable billing statements"),
+                "calculator" => ("Fixed kW Calculator", "Preview a fixed kilowatt price without creating an invoice"),
+                "expenses" => ("Expenses", "Track fuel, maintenance, payroll, and other operating costs"),
+                "settings" => ("Settings", "Preferences, pricing, and notification defaults"),
+                "settings/due-date" => ("Due Date", "Choose the invoice due day of month"),
+                "settings/trigger-date" => ("Trigger Date", "Choose the billing reminder day of month"),
+                "settings/trigger-message" => ("Trigger Message", "Update the default billing reminder copy"),
+                "settings/language" => ("Language", "Set the notification language"),
+                "settings/ampere-schedule-pricing" => ("Ampere Schedule Pricing", "Enable or disable schedule-based ampere pricing"),
+                "settings/ampere-proration" => ("Ampere Proration", "Charge ampere subscribers proportionally by days of service"),
+                "settings/whatsapp" => ("WhatsApp Connection", "Manage QR pairing and live Evolution API session state"),
+                "settings/company-logo" => ("Company Logo", "Upload or replace the company logo used on invoices"),
+                "settings/pricing/price-per-kilowatt" => ("Price per Kilowatt", "Edit default and customer-type kilowatt pricing"),
+                "settings/pricing/price-per-amp" => ("Price per Amp", "Edit default and customer-type amp pricing"),
+                "settings/pricing/fixed-charge" => ("Fixed Charge", "Edit fixed charges by tier"),
+                "settings/pricing/tva" => ("TVA (%)", "Edit tax values by tier"),
+                _ => ("Dashboard", "All-time operations snapshot for Shabakat")
+            };
+        }
+    }
+
+    private void ToggleMobileNav() => _mobileNavOpen = !_mobileNavOpen;
+
+    private void CloseMobileNav() => _mobileNavOpen = false;
+
+    public void Dispose() => ThemeService.Changed -= OnThemeChanged;
 }

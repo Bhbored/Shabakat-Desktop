@@ -1,0 +1,109 @@
+@using Shabakat.Application.Contracts.Services
+@inject IToastService ToastService
+@implements IDisposable
+
+<div class="pointer-events-none fixed inset-x-0 top-4 z-[100] flex flex-col items-end gap-2 px-4 sm:px-6">
+    @foreach (var toast in _messages)
+    {
+        <div class="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl border px-4 py-3 shadow-lg @GetClasses(toast.Variant)"
+             role="status"
+             aria-live="polite">
+            <div class="mt-0.5 shrink-0">
+                @((MarkupString)GetIcon(toast.Variant))
+            </div>
+            <p class="min-w-0 flex-1 text-sm font-medium leading-5">@toast.Text</p>
+            <button type="button"
+                    class="shrink-0 rounded-lg p-1 opacity-70 hover:opacity-100"
+                    aria-label="Dismiss"
+                    @onclick="() => Dismiss(toast.Id)">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ToastMessage> _messages = [];
+    private readonly Dictionary<Guid, CancellationTokenSource> _timers = new();
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnChanged += HandleChanged;
+        Refresh();
+    }
+
+    private void HandleChanged()
+    {
+        _ = InvokeAsync(() =>
+        {
+            Refresh();
+            StateHasChanged();
+        });
+    }
+
+    private void Refresh()
+    {
+        var current = ToastService.Messages.ToList();
+        _messages = current;
+
+        foreach (var toast in current)
+        {
+            if (_timers.ContainsKey(toast.Id))
+                continue;
+
+            var cts = new CancellationTokenSource();
+            _timers[toast.Id] = cts;
+            _ = AutoDismissAsync(toast.Id, cts.Token);
+        }
+
+        foreach (var id in _timers.Keys.Except(current.Select(m => m.Id)).ToList())
+        {
+            if (_timers.Remove(id, out var cts))
+            {
+                cts.Cancel();
+                cts.Dispose();
+            }
+        }
+    }
+
+    private async Task AutoDismissAsync(Guid id, CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(4500, token);
+            ToastService.Dismiss(id);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private void Dismiss(Guid id) => ToastService.Dismiss(id);
+
+    private static string GetClasses(ToastVariant variant) => variant switch
+    {
+        ToastVariant.Success => "border-emerald-500/20 bg-emerald-50 text-emerald-900",
+        ToastVariant.Error => "border-red-500/20 bg-red-50 text-red-900",
+        ToastVariant.Warning => "border-amber-500/20 bg-amber-50 text-amber-950",
+        _ => "border-border bg-card text-foreground"
+    };
+
+    private static string GetIcon(ToastVariant variant) => variant switch
+    {
+        ToastVariant.Success => """<svg class="h-4 w-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>""",
+        ToastVariant.Error => """<svg class="h-4 w-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>""",
+        ToastVariant.Warning => """<svg class="h-4 w-4 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>""",
+        _ => """<svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>"""
+    };
+
+    public void Dispose()
+    {
+        ToastService.OnChanged -= HandleChanged;
+        foreach (var cts in _timers.Values)
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
+        _timers.Clear();
+    }
+}

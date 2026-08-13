@@ -1,0 +1,230 @@
+@page "/boxes"
+@inject IDistributionBoxService DistributionBoxService
+@inject IAreaService AreaService
+@inject ICustomerService CustomerService
+@inject IToastService Toast
+
+<div class="space-y-4" @onclick="CloseMenu">
+    <BoxesToolbar Search="@_searchTerm"
+                  AreaFilter="@_areaFilter"
+                  Areas="_areas"
+                  Total="_filtered.Count"
+                  Disabled="@(_loading || _areas.Count == 0)"
+                  SearchChanged="OnSearchChanged"
+                  AreaFilterChanged="OnAreaFilterChanged"
+                  OnCreate="OpenCreate" />
+
+    <BoxesList Boxes="_filtered"
+               IsLoading="_loading"
+               OpenMenuId="_menuBoxId"
+               OnToggleMenu="ToggleMenu"
+               OnView="OpenDetails"
+               OnEdit="OpenEdit" />
+</div>
+
+<BoxDetailsSheet Open="_showDetails"
+                 Box="_selected"
+                 SubscribersPage="_subscribersPage"
+                 SubscribersLoading="_subscribersLoading"
+                 OnClose="CloseDetails"
+                 OnSubscribersPageChanged="LoadSubscribersPageAsync" />
+
+<BoxFormSheet Open="_showForm"
+              IsEdit="@(_editingId is not null)"
+              InitialName="@_formName"
+              InitialAreaId="_formAreaId"
+              InitialLocationNote="@_formLocationNote"
+              InitialNotes="@_formNotes"
+              Areas="_areas"
+              Saving="_saving"
+              OnClose="CloseForm"
+              OnSave="SaveAsync" />
+
+@code {
+    private readonly List<DistributionBoxResponse> _items = [];
+    private readonly List<AreaResponse> _areas = [];
+    private List<DistributionBoxResponse> _filtered = [];
+    private string _searchTerm = "";
+    private string _areaFilter = "";
+    private string _formName = "";
+    private Guid _formAreaId;
+    private string _formLocationNote = "";
+    private string _formNotes = "";
+    private bool _loading = true;
+    private bool _saving;
+    private bool _showForm;
+    private bool _showDetails;
+    private Guid? _editingId;
+    private Guid? _menuBoxId;
+    private DistributionBoxResponse? _selected;
+
+    private bool _subscribersLoading;
+    private PagedResponse<CustomerSummaryResponse>? _subscribersPage;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+
+        var areas = await UiActions.RunAsync(Toast, () => AreaService.GetAllAsync());
+        var boxes = await UiActions.RunAsync(Toast, () => DistributionBoxService.GetAllUnpagedAsync());
+
+        _areas.Clear();
+        if (areas is not null)
+            _areas.AddRange(areas.OrderBy(a => a.Name));
+
+        _items.Clear();
+        if (boxes is not null)
+            _items.AddRange(boxes.OrderBy(b => b.Name));
+
+        ApplyFilter();
+        _loading = false;
+    }
+
+    private void OnSearchChanged(string value)
+    {
+        _searchTerm = value;
+        ApplyFilter();
+    }
+
+    private void OnAreaFilterChanged(string value)
+    {
+        _areaFilter = value;
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        IEnumerable<DistributionBoxResponse> query = _items;
+
+        if (Guid.TryParse(_areaFilter, out var areaId))
+            query = query.Where(b => b.AreaId == areaId);
+
+        var term = _searchTerm.Trim();
+        if (!string.IsNullOrEmpty(term))
+        {
+            query = query.Where(b =>
+                b.Name.Contains(term, StringComparison.OrdinalIgnoreCase)
+                || b.AreaName.Contains(term, StringComparison.OrdinalIgnoreCase)
+                || (b.LocationNote?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (b.Notes?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        _filtered = query.ToList();
+    }
+
+    private void ToggleMenu(Guid id) => _menuBoxId = _menuBoxId == id ? null : id;
+    private void CloseMenu() => _menuBoxId = null;
+
+    private async Task OpenDetails(DistributionBoxResponse box)
+    {
+        CloseMenu();
+        _selected = box;
+        _showDetails = true;
+        await LoadSubscribersPageAsync(1);
+    }
+
+    private void CloseDetails()
+    {
+        _showDetails = false;
+        _selected = null;
+        _subscribersPage = null;
+    }
+
+    private async Task LoadSubscribersPageAsync(int page)
+    {
+        if (_selected is null || page < 1) return;
+        _subscribersLoading = true;
+        _subscribersPage = await UiActions.RunAsync(
+            Toast,
+            () => CustomerService.GetAllAsync(new CustomerFilterRequest(
+                BoxId: _selected.Id,
+                PageNumber: page,
+                PageSize: 10)));
+        _subscribersLoading = false;
+    }
+
+    private void OpenCreate()
+    {
+        CloseMenu();
+        if (_areas.Count == 0)
+        {
+            Toast.Error("Create an area before adding a distribution box.");
+            return;
+        }
+
+        _editingId = null;
+        _formName = "";
+        _formAreaId = _areas[0].Id;
+        _formLocationNote = "";
+        _formNotes = "";
+        _showForm = true;
+    }
+
+    private void OpenEdit(DistributionBoxResponse box)
+    {
+        CloseMenu();
+        _editingId = box.Id;
+        _formName = box.Name;
+        _formAreaId = box.AreaId;
+        _formLocationNote = box.LocationNote ?? "";
+        _formNotes = box.Notes ?? "";
+        _showForm = true;
+    }
+
+    private void CloseForm()
+    {
+        if (_saving) return;
+        _showForm = false;
+        _editingId = null;
+    }
+
+    private async Task SaveAsync(BoxFormSheet.BoxFormValues form)
+    {
+        if (_saving) return;
+
+        if (form.AreaId == Guid.Empty)
+        {
+            Toast.Error("Please select an area.");
+            return;
+        }
+
+        _saving = true;
+        var location = string.IsNullOrWhiteSpace(form.LocationNote) ? null : form.LocationNote.Trim();
+        var notes = string.IsNullOrWhiteSpace(form.Notes) ? null : form.Notes.Trim();
+
+        var ok = false;
+        if (_editingId is null)
+        {
+            var created = await UiActions.RunAsync(
+                Toast,
+                () => DistributionBoxService.CreateAsync(new CreateDistributionBoxRequest(
+                    form.Name,
+                    form.AreaId,
+                    location,
+                    notes)),
+                "Distribution box created.");
+            ok = created is not null;
+        }
+        else
+        {
+            var updated = await UiActions.RunAsync(
+                Toast,
+                () => DistributionBoxService.UpdateAsync(_editingId.Value, new UpdateDistributionBoxRequest(
+                    form.Name,
+                    form.AreaId,
+                    location,
+                    notes)),
+                "Distribution box updated.");
+            ok = updated is not null;
+        }
+
+        _saving = false;
+        if (!ok) return;
+
+        _showForm = false;
+        _editingId = null;
+        await LoadAsync();
+    }
+}

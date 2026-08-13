@@ -1,0 +1,60 @@
+@page "/settings/trigger-message"
+@inject IAppPreferencesService PreferencesService
+@inject IToastService Toast
+@inject NavigationManager Navigation
+
+<SettingsScaffold Title="Trigger Message">
+    <div class="space-y-4">
+        @if (_loading)
+        {
+            <p class="text-sm text-muted-foreground">Loading company preferences...</p>
+        }
+        else
+        {
+            <label class="space-y-2 block">
+                <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Message template</span>
+                <textarea rows="5" maxlength="1000"
+                          class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary min-h-32"
+                          @bind="_triggerMessage"></textarea>
+            </label>
+            <p class="text-sm leading-6 text-muted-foreground">Available variables: @("{Name}"), @("{Number}"), @("{Amount}"), @("{DueDate}")</p>
+            <button type="button"
+                    class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+                    disabled="@_saving"
+                    @onclick="SaveAsync">
+                @(_saving ? "Saving..." : "Save")
+            </button>
+        }
+    </div>
+</SettingsScaffold>
+
+@code {
+    private bool _loading = true;
+    private bool _saving;
+    private GetPreferencesResponse? _existing;
+    private string? _triggerMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _existing = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
+        _triggerMessage = PreferencesMapper.FromExistingOrDefaults(_existing).TriggerMessage;
+        _loading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        var request = PreferencesMapper.FromExistingOrDefaults(_existing) with
+        {
+            TriggerMessage = string.IsNullOrWhiteSpace(_triggerMessage) ? null : _triggerMessage
+        };
+        var ok = false;
+        await UiActions.RunAsync(Toast, async () =>
+        {
+            await PreferencesService.UpsertAsync(request);
+            ok = true;
+        }, "Preferences saved.");
+        _saving = false;
+        if (ok) Navigation.NavigateTo("settings");
+    }
+}

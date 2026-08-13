@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Restore
-        run: dotnet restore Shabakat.csproj
+        run: dotnet restore Shabakat.csproj -r win-x64
 
       - name: Build
-        run: dotnet build Shabakat.csproj -c Release --no-restore
+        run: dotnet build Shabakat.csproj -c Release -r win-x64 --no-restore
