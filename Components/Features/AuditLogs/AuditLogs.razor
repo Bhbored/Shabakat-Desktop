@@ -1,0 +1,167 @@
+@page "/audit"
+@inject IAuditLogService AuditLogService
+@inject IToastService Toast
+
+<div class="space-y-4">
+    <AuditToolbar ActionFilterKey="@_actionFilterKey"
+                  ActionFilterKeyChanged="OnActionFilterChangedAsync"
+                  StatusFilterKey="@_statusFilterKey"
+                  StatusFilterKeyChanged="OnStatusFilterChangedAsync"
+                  DateFrom="_dateFrom"
+                  DateFromChanged="OnDateFromChangedAsync"
+                  DateTo="_dateTo"
+                  DateToChanged="OnDateToChangedAsync"
+                  TotalCount="_totalCount"
+                  OnResetFilters="ResetFiltersAsync" />
+
+    <AuditList Items="_items"
+               IsLoading="_loading"
+               TotalCount="_totalCount"
+               PageNumber="_pageNumber"
+               TotalPages="_totalPages"
+               PageSize="_pageSize"
+               HasPrevious="_hasPrevious"
+               HasNext="_hasNext"
+               PageSizeChanged="OnPageSizeChangedAsync"
+               OnPrevPage="PrevPageAsync"
+               OnNextPage="NextPageAsync"
+               OnView="OpenDetails" />
+</div>
+
+<AuditDetailsSheet Open="@(_selected is not null)"
+                   Entry="_selected"
+                   OnClose="CloseDetails" />
+
+@code {
+    private bool _loading = true;
+    private string _actionFilterKey = "";
+    private string _statusFilterKey = "";
+    private DateOnly? _dateFrom;
+    private DateOnly? _dateTo;
+    private int _pageNumber = 1;
+    private int _pageSize = 20;
+    private int _totalPages = 1;
+    private int _totalCount;
+    private bool _hasPrevious;
+    private bool _hasNext;
+    private List<AuditLogResponse> _items = [];
+    private AuditLogResponse? _selected;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private AuditLogFilterRequest BuildFilter()
+    {
+        AuditAction? action = null;
+        if (!string.IsNullOrWhiteSpace(_actionFilterKey) &&
+            Enum.TryParse<AuditAction>(_actionFilterKey, out var parsedAction))
+        {
+            action = parsedAction;
+        }
+
+        AuditLogStatus? status = null;
+        if (!string.IsNullOrWhiteSpace(_statusFilterKey) &&
+            Enum.TryParse<AuditLogStatus>(_statusFilterKey, out var parsedStatus))
+        {
+            status = parsedStatus;
+        }
+
+        DateTime? createdFrom = _dateFrom?.ToDateTime(TimeOnly.MinValue);
+        DateTime? createdTo = _dateTo?.ToDateTime(new TimeOnly(23, 59, 59, 999));
+
+        return new AuditLogFilterRequest(
+            Action: action,
+            Status: status,
+            CreatedFrom: createdFrom,
+            CreatedTo: createdTo,
+            PageNumber: _pageNumber,
+            PageSize: _pageSize);
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        var result = await UiActions.RunAsync(Toast, () => AuditLogService.GetAllAsync(BuildFilter()));
+        if (result is not null)
+        {
+            _items = result.Data.ToList();
+            _totalCount = result.TotalCount;
+            _totalPages = Math.Max(1, result.TotalPages);
+            _pageNumber = result.PageNumber;
+            _pageSize = result.PageSize;
+            _hasPrevious = result.HasPreviousPage;
+            _hasNext = result.HasNextPage;
+        }
+        else
+        {
+            _items = [];
+            _totalCount = 0;
+            _totalPages = 1;
+            _hasPrevious = false;
+            _hasNext = false;
+        }
+
+        _loading = false;
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        _pageNumber = 1;
+        await LoadAsync();
+    }
+
+    private async Task OnActionFilterChangedAsync(string value)
+    {
+        _actionFilterKey = value;
+        await ApplyFiltersAsync();
+    }
+
+    private async Task OnStatusFilterChangedAsync(string value)
+    {
+        _statusFilterKey = value;
+        await ApplyFiltersAsync();
+    }
+
+    private async Task OnDateFromChangedAsync(DateOnly? value)
+    {
+        _dateFrom = value;
+        await ApplyFiltersAsync();
+    }
+
+    private async Task OnDateToChangedAsync(DateOnly? value)
+    {
+        _dateTo = value;
+        await ApplyFiltersAsync();
+    }
+
+    private async Task ResetFiltersAsync()
+    {
+        _actionFilterKey = "";
+        _statusFilterKey = "";
+        _dateFrom = null;
+        _dateTo = null;
+        await ApplyFiltersAsync();
+    }
+
+    private async Task OnPageSizeChangedAsync(int pageSize)
+    {
+        _pageSize = pageSize;
+        await ApplyFiltersAsync();
+    }
+
+    private async Task PrevPageAsync()
+    {
+        if (!_hasPrevious) return;
+        _pageNumber--;
+        await LoadAsync();
+    }
+
+    private async Task NextPageAsync()
+    {
+        if (!_hasNext) return;
+        _pageNumber++;
+        await LoadAsync();
+    }
+
+    private void OpenDetails(AuditLogResponse entry) => _selected = entry;
+    private void CloseDetails() => _selected = null;
+}

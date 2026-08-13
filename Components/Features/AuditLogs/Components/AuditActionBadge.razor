@@ -1,0 +1,9 @@
+@namespace Shabakat.Components.Features.AuditLogs.Components
+
+<span class="inline-flex items-center rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs font-semibold text-foreground">
+    @AuditLabels.Action(Action)
+</span>
+
+@code {
+    [Parameter] public string Action { get; set; } = "";
+}

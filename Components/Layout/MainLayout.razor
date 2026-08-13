@@ -29,6 +29,12 @@
                     <svg class="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <span class="w-60 rounded-xl border border-border bg-secondary py-2 pe-4 ps-9 text-sm text-muted-foreground">Quick search subscribers...</span>
                 </a>
+                <a href="audit"
+                   class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                   title="Audit logs"
+                   aria-label="Open audit logs">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                </a>
                 <div class="flex h-8 w-8 items-center justify-center rounded-full text-white text-xs font-semibold" style="background-color: @FormatHelper.AvatarColor(_displayName);">@_initials</div>
             </div>
         </header>
@@ -102,6 +108,7 @@
                 "invoices" => ("Invoices", "Generate printable billing statements"),
                 "calculator" => ("Fixed kW Calculator", "Preview a fixed kilowatt price without creating an invoice"),
                 "expenses" => ("Expenses", "Track fuel, maintenance, payroll, and other operating costs"),
+                "audit" => ("Audit Logs", "Review recorded system actions, status, and detail fields"),
                 "settings" => ("Settings", "Preferences, pricing, and notification defaults"),
                 "settings/due-date" => ("Due Date", "Choose the invoice due day of month"),
                 "settings/trigger-date" => ("Trigger Date", "Choose the billing reminder day of month"),

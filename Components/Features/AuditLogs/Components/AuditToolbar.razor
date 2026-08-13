@@ -1,0 +1,90 @@
+@namespace Shabakat.Components.Features.AuditLogs.Components
+
+<div class="space-y-4">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <label class="w-full sm:w-56">
+                <span class="sr-only">Action</span>
+                <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                        value="@ActionFilterKey"
+                        @onchange="OnActionChanged">
+                    <option value="">All actions</option>
+                    @foreach (var action in Enum.GetValues<AuditAction>())
+                    {
+                        <option value="@action">@AuditLabels.Action(action)</option>
+                    }
+                </select>
+            </label>
+            <label class="w-full sm:w-44">
+                <span class="sr-only">Status</span>
+                <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                        value="@StatusFilterKey"
+                        @onchange="OnStatusChanged">
+                    <option value="">All statuses</option>
+                    <option value="@AuditLogStatus.Success">Success</option>
+                    <option value="@AuditLogStatus.Failed">Failed</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:justify-end">
+            <label class="min-w-40">
+                <span class="sr-only">Date from</span>
+                <input type="date"
+                       class="h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition focus:border-primary"
+                       value="@DateFromText"
+                       @onchange="OnDateFromChanged" />
+            </label>
+            <label class="min-w-40">
+                <span class="sr-only">Date to</span>
+                <input type="date"
+                       class="h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition focus:border-primary"
+                       value="@DateToText"
+                       @onchange="OnDateToChanged" />
+            </label>
+            <button type="button"
+                    class="h-11 rounded-xl border border-border bg-card px-4 text-sm text-foreground hover:bg-muted"
+                    @onclick="OnResetFilters">
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <span>@TotalCount event@(TotalCount == 1 ? "" : "s")</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string ActionFilterKey { get; set; } = "";
+    [Parameter] public EventCallback<string> ActionFilterKeyChanged { get; set; }
+    [Parameter] public string StatusFilterKey { get; set; } = "";
+    [Parameter] public EventCallback<string> StatusFilterKeyChanged { get; set; }
+    [Parameter] public DateOnly? DateFrom { get; set; }
+    [Parameter] public EventCallback<DateOnly?> DateFromChanged { get; set; }
+    [Parameter] public DateOnly? DateTo { get; set; }
+    [Parameter] public EventCallback<DateOnly?> DateToChanged { get; set; }
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public EventCallback OnResetFilters { get; set; }
+
+    private string DateFromText => DateFrom?.ToString("yyyy-MM-dd") ?? "";
+    private string DateToText => DateTo?.ToString("yyyy-MM-dd") ?? "";
+
+    private Task OnActionChanged(ChangeEventArgs e) =>
+        ActionFilterKeyChanged.InvokeAsync(e.Value?.ToString() ?? "");
+
+    private Task OnStatusChanged(ChangeEventArgs e) =>
+        StatusFilterKeyChanged.InvokeAsync(e.Value?.ToString() ?? "");
+
+    private Task OnDateFromChanged(ChangeEventArgs e)
+    {
+        DateOnly? value = DateOnly.TryParse(e.Value?.ToString(), out var parsed) ? parsed : null;
+        return DateFromChanged.InvokeAsync(value);
+    }
+
+    private Task OnDateToChanged(ChangeEventArgs e)
+    {
+        DateOnly? value = DateOnly.TryParse(e.Value?.ToString(), out var parsed) ? parsed : null;
+        return DateToChanged.InvokeAsync(value);
+    }
+}

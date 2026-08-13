@@ -1,0 +1,35 @@
+@namespace Shabakat.Components.Features.AuditLogs.Components
+
+<tr class="border-b border-border transition-colors hover:bg-muted/30">
+    <td class="px-4 py-3.5 align-middle">
+        <button type="button"
+                class="text-left transition hover:text-primary"
+                @onclick="OnView">
+            <p class="font-medium text-foreground">@Entry.Summary</p>
+            <p class="mt-0.5 text-xs text-muted-foreground">@FormatHelper.Date(Entry.CreatedAt) · @Entry.CreatedAt.ToString("HH:mm")</p>
+        </button>
+    </td>
+    <td class="px-4 py-3.5 align-middle">
+        <AuditActionBadge Action="@Entry.Action" />
+    </td>
+    <td class="px-4 py-3.5 align-middle">
+        <span class="text-sm text-foreground">@AuditLabels.EntityType(Entry.EntityType)</span>
+    </td>
+    <td class="px-4 py-3.5 align-middle">
+        <AuditStatusBadge Status="@Entry.Status" />
+    </td>
+    <td class="px-4 py-3.5 align-middle">
+        <div class="flex justify-end">
+            <button type="button"
+                    class="rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                    @onclick="OnView">
+                View
+            </button>
+        </div>
+    </td>
+</tr>
+
+@code {
+    [Parameter, EditorRequired] public AuditLogResponse Entry { get; set; } = null!;
+    [Parameter] public EventCallback OnView { get; set; }
+}

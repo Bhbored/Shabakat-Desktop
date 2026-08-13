@@ -1,0 +1,91 @@
+@namespace Shabakat.Components.Features.AuditLogs.Components
+
+<SideSheet Open="Open"
+           Title="Audit Event"
+           Description="Review what changed, when it happened, and the recorded detail fields."
+           MaxWidthClass="sm:max-w-xl"
+           OnClose="OnClose">
+    <TitleIcon>
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+    </TitleIcon>
+    <ChildContent>
+        @if (Entry is null)
+        {
+            <p class="text-sm text-muted-foreground">Select an audit event to review its details.</p>
+        }
+        else
+        {
+            <div class="space-y-4">
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div class="rounded-2xl border border-border bg-card p-4">
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Action</p>
+                        <div class="mt-2"><AuditActionBadge Action="@Entry.Action" /></div>
+                    </div>
+                    <div class="rounded-2xl border border-border bg-card p-4">
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Status</p>
+                        <div class="mt-2"><AuditStatusBadge Status="@Entry.Status" /></div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Summary</p>
+                        <p class="mt-1 text-sm text-foreground">@Entry.Summary</p>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">When</p>
+                            <p class="mt-1 text-sm text-foreground">@FormatHelper.Date(Entry.CreatedAt) · @Entry.CreatedAt.ToString("HH:mm:ss")</p>
+                        </div>
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Entity</p>
+                            <p class="mt-1 text-sm text-foreground">@AuditLabels.EntityType(Entry.EntityType)</p>
+                        </div>
+                    </div>
+                    @if (Entry.EntityId is not null)
+                    {
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Entity Id</p>
+                            <p class="mt-1 break-all font-mono text-xs text-muted-foreground">@Entry.EntityId</p>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Entry.ErrorMessage))
+                    {
+                        <div class="rounded-xl border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+                            @Entry.ErrorMessage
+                        </div>
+                    }
+                </div>
+
+                <div class="space-y-3 rounded-2xl border border-border bg-card p-5">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Details</h3>
+                        <span class="text-xs text-muted-foreground">@Entry.Details.Count field@(Entry.Details.Count == 1 ? "" : "s")</span>
+                    </div>
+                    @if (Entry.Details.Count == 0)
+                    {
+                        <p class="rounded-xl border border-border bg-muted/20 px-3 py-6 text-sm text-muted-foreground">
+                            No detail fields were recorded for this event.
+                        </p>
+                    }
+                    else
+                    {
+                        @foreach (var detail in Entry.Details)
+                        {
+                            <div class="flex items-start justify-between gap-4 border-b border-border py-3 last:border-b-0 last:pb-0 first:pt-0">
+                                <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@detail.Label</p>
+                                <p class="text-right text-sm text-foreground">@detail.Value</p>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    </ChildContent>
+</SideSheet>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public AuditLogResponse? Entry { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+}
