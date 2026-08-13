@@ -262,7 +262,8 @@ public sealed class CustomerService : ICustomerService
             CreatedAt: c.CreatedAt,
             HasPricingOverride: c.HasPricingOverride,
             CustomerRelation: c.CustomerRelation?.ToString(),
-            AmountDue: amountDue);
+            AmountDue: amountDue,
+            CanBeDeleted: !c.Invoices.Any());
     }
 
     private static CustomerResponse MapToResponse(Customer c)

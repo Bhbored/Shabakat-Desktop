@@ -176,12 +176,6 @@
     private void OpenDelete(AmpereScheduleResponse schedule)
     {
         CloseMenu();
-        if (!schedule.CanBeDeleted || schedule.CustomerCount > 0)
-        {
-            Toast.Error("Cannot delete an ampere schedule that has customers assigned to it.");
-            return;
-        }
-
         _pendingDelete = schedule;
         _showDelete = true;
     }

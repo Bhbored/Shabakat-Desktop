@@ -135,7 +135,8 @@ public sealed class DashboardRepository : IDashboardRepository
             PaidAmount: i.PaidAmount,
             AmountDue: i.AmountDue,
             BilledConsumption: i.BilledConsumption,
-            CreatedAt: i.CreatedAt);
+            CreatedAt: i.CreatedAt,
+            CanBeDeleted: i.InvoiceStatus == InvoiceStatus.Unpaid);
 
     private static IQueryable<Invoice> ApplyInvoicePeriodFilter(
         IQueryable<Invoice> query,

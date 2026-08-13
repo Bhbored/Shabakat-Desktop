@@ -346,10 +346,10 @@ public sealed class InvoiceService : IInvoiceService
         var invoice = await _invoiceRepository.GetByIdWithPaymentsAsync(id)
             ?? throw new DomainException("Invoice not found.");
 
-        if (invoice.Payments.Any())
+        if (invoice.InvoiceStatus != InvoiceStatus.Unpaid)
         {
             throw new DomainException(
-                "Cannot delete an invoice that has payments recorded against it.");
+                "Only unpaid invoices can be deleted.");
         }
 
         var number = invoice.InvoiceNumber;
@@ -837,7 +837,8 @@ public sealed class InvoiceService : IInvoiceService
             PaidAmount: i.PaidAmount,
             AmountDue: i.AmountDue,
             BilledConsumption: i.BilledConsumption,
-            CreatedAt: i.CreatedAt);
+            CreatedAt: i.CreatedAt,
+            CanBeDeleted: i.InvoiceStatus == InvoiceStatus.Unpaid);
 
     private static InvoiceResponse MapToResponse(Invoice i) =>
         new(

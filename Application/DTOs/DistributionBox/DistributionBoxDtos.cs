@@ -10,6 +10,7 @@ public record DistributionBoxResponse(
     string? LocationNote,
     string? Notes,
     int CustomerCount,
+    bool CanBeDeleted,
     DateTime CreatedAt);
 
 public record CreateDistributionBoxRequest(

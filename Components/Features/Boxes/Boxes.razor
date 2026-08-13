@@ -8,18 +8,28 @@
     <BoxesToolbar Search="@_searchTerm"
                   AreaFilter="@_areaFilter"
                   Areas="_areas"
-                  Total="_filtered.Count"
+                  Total="_totalCount"
                   Disabled="@(_loading || _areas.Count == 0)"
-                  SearchChanged="OnSearchChanged"
-                  AreaFilterChanged="OnAreaFilterChanged"
+                  SearchChanged="OnSearchChangedAsync"
+                  AreaFilterChanged="OnAreaFilterChangedAsync"
                   OnCreate="OpenCreate" />
 
-    <BoxesList Boxes="_filtered"
+    <BoxesList Boxes="_items"
                IsLoading="_loading"
                OpenMenuId="_menuBoxId"
+               TotalCount="_totalCount"
+               PageNumber="_pageNumber"
+               TotalPages="_totalPages"
+               PageSize="_pageSize"
+               HasPrevious="_hasPrevious"
+               HasNext="_hasNext"
+               PageSizeChanged="OnPageSizeChangedAsync"
+               OnPrevPage="PrevPageAsync"
+               OnNextPage="NextPageAsync"
                OnToggleMenu="ToggleMenu"
                OnView="OpenDetails"
-               OnEdit="OpenEdit" />
+               OnEdit="OpenEdit"
+               OnDelete="OpenDelete" />
 </div>
 
 <BoxDetailsSheet Open="_showDetails"
@@ -40,10 +50,15 @@
               OnClose="CloseForm"
               OnSave="SaveAsync" />
 
+<DeleteBoxDialog Open="_showDelete"
+                 Box="_pendingDelete"
+                 Saving="_saving"
+                 OnClose="CloseDelete"
+                 OnConfirm="ConfirmDeleteAsync" />
+
 @code {
     private readonly List<DistributionBoxResponse> _items = [];
     private readonly List<AreaResponse> _areas = [];
-    private List<DistributionBoxResponse> _filtered = [];
     private string _searchTerm = "";
     private string _areaFilter = "";
     private string _formName = "";
@@ -54,64 +69,110 @@
     private bool _saving;
     private bool _showForm;
     private bool _showDetails;
+    private bool _showDelete;
     private Guid? _editingId;
     private Guid? _menuBoxId;
     private DistributionBoxResponse? _selected;
+    private DistributionBoxResponse? _pendingDelete;
+
+    private int _pageNumber = 1;
+    private int _pageSize = 10;
+    private int _totalPages = 1;
+    private int _totalCount;
+    private bool _hasPrevious;
+    private bool _hasNext;
 
     private bool _subscribersLoading;
     private PagedResponse<CustomerSummaryResponse>? _subscribersPage;
 
-    protected override async Task OnInitializedAsync() => await LoadAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAreasAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAreasAsync()
+    {
+        var areas = await UiActions.RunAsync(Toast, () => AreaService.GetAllAsync());
+        _areas.Clear();
+        if (areas is not null)
+            _areas.AddRange(areas.OrderBy(a => a.Name));
+    }
+
+    private DistributionBoxFilterRequest BuildFilter() =>
+        new(
+            AreaId: Guid.TryParse(_areaFilter, out var areaId) ? areaId : null,
+            Name: string.IsNullOrWhiteSpace(_searchTerm) ? null : _searchTerm.Trim(),
+            PageNumber: _pageNumber,
+            PageSize: _pageSize);
 
     private async Task LoadAsync()
     {
         _loading = true;
+        _menuBoxId = null;
 
-        var areas = await UiActions.RunAsync(Toast, () => AreaService.GetAllAsync());
-        var boxes = await UiActions.RunAsync(Toast, () => DistributionBoxService.GetAllUnpagedAsync());
-
-        _areas.Clear();
-        if (areas is not null)
-            _areas.AddRange(areas.OrderBy(a => a.Name));
+        var page = await UiActions.RunAsync(
+            Toast,
+            () => DistributionBoxService.GetAllAsync(BuildFilter()));
 
         _items.Clear();
-        if (boxes is not null)
-            _items.AddRange(boxes.OrderBy(b => b.Name));
+        if (page is not null)
+        {
+            _items.AddRange(page.Data);
+            _totalCount = page.TotalCount;
+            _totalPages = Math.Max(1, page.TotalPages);
+            _pageNumber = page.PageNumber;
+            _hasPrevious = page.HasPreviousPage;
+            _hasNext = page.HasNextPage;
+        }
+        else
+        {
+            _totalCount = 0;
+            _totalPages = 1;
+            _hasPrevious = false;
+            _hasNext = false;
+        }
 
-        ApplyFilter();
         _loading = false;
     }
 
-    private void OnSearchChanged(string value)
+    private async Task ReloadFromFiltersAsync()
+    {
+        _pageNumber = 1;
+        await LoadAsync();
+    }
+
+    private async Task OnSearchChangedAsync(string value)
     {
         _searchTerm = value;
-        ApplyFilter();
+        await ReloadFromFiltersAsync();
     }
 
-    private void OnAreaFilterChanged(string value)
+    private async Task OnAreaFilterChangedAsync(string value)
     {
         _areaFilter = value;
-        ApplyFilter();
+        await ReloadFromFiltersAsync();
     }
 
-    private void ApplyFilter()
+    private async Task OnPageSizeChangedAsync(int size)
     {
-        IEnumerable<DistributionBoxResponse> query = _items;
+        _pageSize = size;
+        _pageNumber = 1;
+        await LoadAsync();
+    }
 
-        if (Guid.TryParse(_areaFilter, out var areaId))
-            query = query.Where(b => b.AreaId == areaId);
+    private async Task PrevPageAsync()
+    {
+        if (!_hasPrevious) return;
+        _pageNumber--;
+        await LoadAsync();
+    }
 
-        var term = _searchTerm.Trim();
-        if (!string.IsNullOrEmpty(term))
-        {
-            query = query.Where(b =>
-                b.Name.Contains(term, StringComparison.OrdinalIgnoreCase)
-                || b.AreaName.Contains(term, StringComparison.OrdinalIgnoreCase)
-                || (b.LocationNote?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
-                || (b.Notes?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false));
-        }
-
-        _filtered = query.ToList();
+    private async Task NextPageAsync()
+    {
+        if (!_hasNext) return;
+        _pageNumber++;
+        await LoadAsync();
     }
 
     private void ToggleMenu(Guid id) => _menuBoxId = _menuBoxId == id ? null : id;
@@ -180,6 +241,20 @@
         _editingId = null;
     }
 
+    private void OpenDelete(DistributionBoxResponse box)
+    {
+        CloseMenu();
+        _pendingDelete = box;
+        _showDelete = true;
+    }
+
+    private void CloseDelete()
+    {
+        if (_saving) return;
+        _showDelete = false;
+        _pendingDelete = null;
+    }
+
     private async Task SaveAsync(BoxFormSheet.BoxFormValues form)
     {
         if (_saving) return;
@@ -225,6 +300,24 @@
 
         _showForm = false;
         _editingId = null;
+        await LoadAsync();
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (_pendingDelete is null || _saving) return;
+        _saving = true;
+
+        await UiActions.RunAsync(
+            Toast,
+            () => DistributionBoxService.DeleteAsync(_pendingDelete.Id),
+            "Distribution box deleted.");
+
+        _saving = false;
+        _showDelete = false;
+        if (_selected?.Id == _pendingDelete.Id)
+            CloseDetails();
+        _pendingDelete = null;
         await LoadAsync();
     }
 }

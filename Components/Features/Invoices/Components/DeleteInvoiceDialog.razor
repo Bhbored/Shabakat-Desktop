@@ -6,7 +6,7 @@
     <ChildContent>
         @if (Invoice is not null)
         {
-            <p>Delete invoice #@Invoice.InvoiceNumber. Backend blocks deletion if payments already exist.</p>
+            <p>Delete invoice #@Invoice.InvoiceNumber? This cannot be undone.</p>
         }
     </ChildContent>
     <Footer>

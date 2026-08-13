@@ -116,14 +116,18 @@ public sealed class DistributionBoxService : IDistributionBoxService
             ?? throw new DomainException("Area not found.");
     }
 
-    private static DistributionBoxResponse MapToResponse(Domain.Entities.DistributionBox box) =>
-        new(
+    private static DistributionBoxResponse MapToResponse(Domain.Entities.DistributionBox box)
+    {
+        var customerCount = box.Customers?.Count ?? 0;
+        return new(
             Id: box.Id,
             Name: box.Name,
             AreaId: box.AreaId,
             AreaName: box.Area?.Name ?? string.Empty,
             LocationNote: box.LocationNote,
             Notes: box.Notes,
-            CustomerCount: box.Customers?.Count ?? 0,
+            CustomerCount: customerCount,
+            CanBeDeleted: customerCount == 0,
             CreatedAt: box.CreatedAt);
+    }
 }

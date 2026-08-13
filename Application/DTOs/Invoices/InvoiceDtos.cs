@@ -34,7 +34,8 @@ public record InvoiceSummaryResponse(
     decimal PaidAmount,
     decimal AmountDue,
     decimal? BilledConsumption,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    bool CanBeDeleted);
 
 public record CreateInvoiceRequest(
     [Required] Guid CustomerId,

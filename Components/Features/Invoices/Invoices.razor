@@ -499,5 +499,8 @@
             details.PaidAmount,
             details.AmountDue,
             details.BilledConsumption,
-            details.CreatedAt);
+            details.CreatedAt,
+            CanBeDeleted: details.InvoiceStatus.Equals(
+                nameof(InvoiceStatus.Unpaid),
+                StringComparison.OrdinalIgnoreCase));
 }

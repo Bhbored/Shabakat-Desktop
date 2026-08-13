@@ -36,15 +36,43 @@ else if (Boxes.Count == 0)
 }
 else
 {
-    <div class="grid gap-4 xl:grid-cols-2">
-        @foreach (var box in Boxes)
-        {
-            <BoxCard Box="box"
-                     MenuOpen="@(OpenMenuId == box.Id)"
-                     OnToggleMenu="() => OnToggleMenu.InvokeAsync(box.Id)"
-                     OnView="() => OnView.InvokeAsync(box)"
-                     OnEdit="() => OnEdit.InvokeAsync(box)" />
-        }
+    <div class="space-y-4">
+        <div class="grid gap-4 xl:grid-cols-2">
+            @foreach (var box in Boxes)
+            {
+                <BoxCard Box="box"
+                         MenuOpen="@(OpenMenuId == box.Id)"
+                         OnToggleMenu="() => OnToggleMenu.InvokeAsync(box.Id)"
+                         OnView="() => OnView.InvokeAsync(box)"
+                         OnEdit="() => OnEdit.InvokeAsync(box)"
+                         OnDelete="() => OnDelete.InvokeAsync(box)" />
+            }
+        </div>
+
+        <div class="flex flex-col gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+            <span>
+                @if (TotalCount == 0)
+                {
+                    @:Showing 0 of 0
+                }
+                else
+                {
+                    @:Showing @((PageNumber - 1) * PageSize + 1) - @Math.Min(PageNumber * PageSize, TotalCount) of @TotalCount
+                }
+            </span>
+            <div class="flex items-center gap-2 self-end md:self-auto">
+                <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm"
+                        value="@PageSize"
+                        @onchange="OnPageSizeChanged">
+                    <option value="10">10 / page</option>
+                    <option value="20">20 / page</option>
+                    <option value="50">50 / page</option>
+                </select>
+                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasPrevious)" @onclick="OnPrevPage">Previous</button>
+                <span class="min-w-24 text-center">Page @PageNumber of @Math.Max(1, TotalPages)</span>
+                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasNext)" @onclick="OnNextPage">Next</button>
+            </div>
+        </div>
     </div>
 }
 
@@ -52,7 +80,23 @@ else
     [Parameter] public IReadOnlyList<DistributionBoxResponse> Boxes { get; set; } = [];
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public Guid? OpenMenuId { get; set; }
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public int PageNumber { get; set; } = 1;
+    [Parameter] public int TotalPages { get; set; } = 1;
+    [Parameter] public int PageSize { get; set; } = 10;
+    [Parameter] public bool HasPrevious { get; set; }
+    [Parameter] public bool HasNext { get; set; }
+    [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
+    [Parameter] public EventCallback OnPrevPage { get; set; }
+    [Parameter] public EventCallback OnNextPage { get; set; }
     [Parameter] public EventCallback<Guid> OnToggleMenu { get; set; }
     [Parameter] public EventCallback<DistributionBoxResponse> OnView { get; set; }
     [Parameter] public EventCallback<DistributionBoxResponse> OnEdit { get; set; }
+    [Parameter] public EventCallback<DistributionBoxResponse> OnDelete { get; set; }
+
+    private async Task OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var size))
+            await PageSizeChanged.InvokeAsync(size);
+    }
 }

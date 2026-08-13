@@ -52,7 +52,8 @@ public record CustomerSummaryResponse(
     DateTime CreatedAt,
     bool HasPricingOverride,
     string? CustomerRelation,
-    decimal AmountDue);
+    decimal AmountDue,
+    bool CanBeDeleted);
 
 public record CreateCustomerRequest(
     [Required][MaxLength(200)] string Name,

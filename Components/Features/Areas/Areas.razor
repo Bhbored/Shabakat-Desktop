@@ -117,12 +117,6 @@
     private void OpenDelete(AreaResponse area)
     {
         CloseMenu();
-        if (area.CustomerCount > 0)
-        {
-            Toast.Error("Cannot delete an area that has customers assigned to it.");
-            return;
-        }
-
         _pendingDelete = area;
         _showDelete = true;
     }
