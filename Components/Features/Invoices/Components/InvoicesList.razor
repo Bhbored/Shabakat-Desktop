@@ -46,8 +46,7 @@ else if (Items.Count == 0)
 else
 {
     <section class="rounded-2xl border border-border bg-card">
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[840px]">
+        <table class="w-full min-w-[840px]">
                 <thead>
                     <tr class="border-b border-border">
                         <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Invoice #</th>
@@ -72,7 +71,6 @@ else
                     }
                 </tbody>
             </table>
-        </div>
 
         <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
             <span>Showing @((PageNumber - 1) * PageSize + 1) - @Math.Min(PageNumber * PageSize, TotalCount) of @TotalCount</span>

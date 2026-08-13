@@ -2,22 +2,15 @@
 
 <ConfirmDialog Open="Open"
                Title="Delete Expense"
+               Description="@DeleteDescription"
                OnClose="OnClose">
-    <ChildContent>
-        @if (Expense is not null)
-        {
-            <p>
-                Delete @Expense.ExpenseType expense of @FormatHelper.Currency(Expense.Amount) on @FormatHelper.Date(Expense.ExpenseDate)?
-            </p>
-        }
-    </ChildContent>
     <Footer>
         <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="OnClose">Cancel</button>
         <button type="button"
-                class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+                class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500/90 disabled:opacity-50"
                 disabled="@Saving"
                 @onclick="OnConfirm">
-            @(Saving ? "Deleting..." : "Delete")
+            @(Saving ? "Deleting..." : "Delete expense")
         </button>
     </Footer>
 </ConfirmDialog>
@@ -28,4 +21,13 @@
     [Parameter] public bool Saving { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnConfirm { get; set; }
+
+    private string DeleteDescription
+    {
+        get
+        {
+            var name = string.IsNullOrWhiteSpace(Expense?.Label) ? "this expense" : Expense.Label;
+            return $"Delete {name}? This is a soft delete in the backend.";
+        }
+    }
 }

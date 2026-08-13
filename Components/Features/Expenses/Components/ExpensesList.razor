@@ -2,44 +2,76 @@
 
 @if (IsLoading)
 {
-    <p class="text-sm text-muted-foreground">Loading expenses...</p>
-}
-else
-{
-    <section class="rounded-2xl border border-border bg-card overflow-hidden">
+    <section class="rounded-2xl border border-border bg-card">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[760px]">
+            <table class="w-full min-w-[860px]">
                 <thead>
                     <tr class="border-b border-border">
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Date</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Type</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Label</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Notes</th>
-                        <th class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount</th>
-                        <th class="px-4 py-3.5"></th>
+                        @for (var i = 0; i < 6; i++)
+                        {
+                            <th class="px-4 py-3.5"><div class="h-4 w-24 animate-pulse rounded bg-muted"></div></th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Items.Count == 0)
+                    @for (var r = 0; r < 6; r++)
                     {
-                        <tr>
-                            <td colspan="6" class="px-4 py-8 text-center text-sm text-muted-foreground">No expenses found.</td>
+                        <tr class="border-b border-border">
+                            @for (var c = 0; c < 6; c++)
+                            {
+                                <td class="px-4 py-3.5"><div class="h-4 w-full animate-pulse rounded bg-muted"></div></td>
+                            }
                         </tr>
-                    }
-                    else
-                    {
-                        @foreach (var exp in Items)
-                        {
-                            <ExpenseRow Expense="exp"
-                                        OnEdit="() => OnEdit.InvokeAsync(exp)"
-                                        OnDelete="() => OnDelete.InvokeAsync(exp)" />
-                        }
                     }
                 </tbody>
             </table>
         </div>
+        <div class="flex flex-col gap-3 border-t border-border px-4 py-3 md:flex-row md:items-center md:justify-between">
+            <div class="h-4 w-40 animate-pulse rounded bg-muted"></div>
+            <div class="flex items-center gap-2 self-end md:self-auto">
+                <div class="h-9 w-28 animate-pulse rounded-xl bg-muted"></div>
+                <div class="h-9 w-24 animate-pulse rounded-xl bg-muted"></div>
+                <div class="h-4 w-24 animate-pulse rounded bg-muted"></div>
+                <div class="h-9 w-20 animate-pulse rounded-xl bg-muted"></div>
+            </div>
+        </div>
+    </section>
+}
+else if (Items.Count == 0)
+{
+    <section class="rounded-2xl border border-border bg-card">
+        <div class="px-4 py-10 text-sm text-muted-foreground">No expenses matched the current filters.</div>
+    </section>
+}
+else
+{
+    <section class="rounded-2xl border border-border bg-card">
+        <table class="w-full min-w-[860px]">
+            <thead>
+                <tr class="border-b border-border">
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Type</th>
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount</th>
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Expense Date</th>
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Label</th>
+                    <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Notes</th>
+                    <th class="px-4 py-3.5"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var exp in Items)
+                {
+                    <ExpenseRow Expense="exp"
+                                MenuOpen="@(OpenMenuId == exp.Id)"
+                                OnToggleMenu="() => OnToggleMenu.InvokeAsync(exp.Id)"
+                                OnView="() => OnView.InvokeAsync(exp)"
+                                OnEdit="() => OnEdit.InvokeAsync(exp)"
+                                OnDelete="() => OnDelete.InvokeAsync(exp)" />
+                }
+            </tbody>
+        </table>
+
         <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-            <span>@TotalCount expenses found</span>
+            <span>Showing @((PageNumber - 1) * PageSize + 1) - @Math.Min(PageNumber * PageSize, TotalCount) of @TotalCount</span>
             <div class="flex items-center gap-2 self-end md:self-auto">
                 <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm"
                         value="@PageSize"
@@ -48,19 +80,9 @@ else
                     <option value="20">20 / page</option>
                     <option value="50">50 / page</option>
                 </select>
-                <button type="button"
-                        class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40"
-                        disabled="@(!HasPrevious)"
-                        @onclick="OnPrevPage">
-                    Prev
-                </button>
-                <span class="min-w-20 text-center">@PageNumber / @TotalPages</span>
-                <button type="button"
-                        class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40"
-                        disabled="@(!HasNext)"
-                        @onclick="OnNextPage">
-                    Next
-                </button>
+                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasPrevious)" @onclick="OnPrevPage">Previous</button>
+                <span class="min-w-24 text-center">Page @PageNumber of @Math.Max(1, TotalPages)</span>
+                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasNext)" @onclick="OnNextPage">Next</button>
             </div>
         </div>
     </section>
@@ -69,6 +91,7 @@ else
 @code {
     [Parameter] public IReadOnlyList<ExpenseResponse> Items { get; set; } = [];
     [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public Guid? OpenMenuId { get; set; }
     [Parameter] public int TotalCount { get; set; }
     [Parameter] public int PageNumber { get; set; } = 1;
     [Parameter] public int TotalPages { get; set; } = 1;
@@ -78,6 +101,8 @@ else
     [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
     [Parameter] public EventCallback OnPrevPage { get; set; }
     [Parameter] public EventCallback OnNextPage { get; set; }
+    [Parameter] public EventCallback<Guid> OnToggleMenu { get; set; }
+    [Parameter] public EventCallback<ExpenseResponse> OnView { get; set; }
     [Parameter] public EventCallback<ExpenseResponse> OnEdit { get; set; }
     [Parameter] public EventCallback<ExpenseResponse> OnDelete { get; set; }
 

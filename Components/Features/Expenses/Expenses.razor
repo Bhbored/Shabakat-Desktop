@@ -2,22 +2,27 @@
 @inject IExpenseService ExpenseService
 @inject IToastService Toast
 
-<div class="space-y-4">
+<div class="space-y-4" @onclick="CloseMenu">
+    <ExpenseSummaryCards IsLoading="_loading"
+                         TotalAmount="_totalAmount"
+                         TotalCount="_totalCount"
+                         PageAmount="_pageAmount"
+                         CurrentPageCount="_items.Count" />
+
     <ExpensesToolbar TypeFilterKey="@_typeFilterKey"
                      TypeFilterKeyChanged="OnTypeFilterChangedAsync"
                      DateFrom="_dateFrom"
                      DateFromChanged="OnDateFromChangedAsync"
                      DateTo="_dateTo"
                      DateToChanged="OnDateToChangedAsync"
-                     TotalAmount="_totalAmount"
                      TotalCount="_totalCount"
-                     FuelTotal="_fuelTotal"
-                     MaintenanceTotal="_maintenanceTotal"
-                     FuelShareLabel="@FuelShareLabel"
+                     TotalAmount="_totalAmount"
+                     OnResetFilters="ResetFiltersAsync"
                      OnCreate="OpenCreate" />
 
     <ExpensesList Items="_items"
                   IsLoading="_loading"
+                  OpenMenuId="_openMenuId"
                   TotalCount="_totalCount"
                   PageNumber="_pageNumber"
                   TotalPages="_totalPages"
@@ -27,6 +32,8 @@
                   PageSizeChanged="OnPageSizeChangedAsync"
                   OnPrevPage="PrevPageAsync"
                   OnNextPage="NextPageAsync"
+                  OnToggleMenu="ToggleMenu"
+                  OnView="OpenViewAsync"
                   OnEdit="OpenEdit"
                   OnDelete="OpenDelete" />
 </div>
@@ -42,6 +49,11 @@
                   OnClose="CloseForm"
                   OnSave="SaveAsync" />
 
+<ExpenseDetailsSheet Open="_showDetails"
+                     IsLoading="_detailsLoading"
+                     Expense="_viewTarget"
+                     OnClose="CloseDetails" />
+
 <DeleteExpenseDialog Open="@(_deleteTarget is not null)"
                      Expense="_deleteTarget"
                      Saving="_saving"
@@ -52,8 +64,12 @@
     private bool _loading = true;
     private bool _saving;
     private bool _showForm;
+    private bool _showDetails;
+    private bool _detailsLoading;
     private Guid? _editingId;
+    private Guid? _openMenuId;
     private ExpenseResponse? _deleteTarget;
+    private ExpenseResponse? _viewTarget;
 
     private string _typeFilterKey = "";
     private DateOnly? _dateFrom;
@@ -65,8 +81,7 @@
     private bool _hasPrevious;
     private bool _hasNext;
     private decimal _totalAmount;
-    private decimal _fuelTotal;
-    private decimal _maintenanceTotal;
+    private decimal _pageAmount;
     private List<ExpenseResponse> _items = [];
 
     private ExpenseType _formType = ExpenseType.Fuel;
@@ -74,11 +89,6 @@
     private DateOnly _formDate = DateOnly.FromDateTime(DateTime.Today);
     private string? _formLabel;
     private string? _formNotes;
-
-    private string FuelShareLabel =>
-        _totalAmount > 0
-            ? $"{(_fuelTotal / _totalAmount * 100):F1}% of total"
-            : "0%";
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
@@ -110,20 +120,7 @@
             _hasPrevious = result.HasPreviousPage;
             _hasNext = result.HasNextPage;
             _totalAmount = result.TotalAmount;
-
-            IEnumerable<ExpenseResponse> forTotals = result.Data;
-            if (result.TotalCount > result.PageSize)
-            {
-                var all = await UiActions.RunAsync(
-                    Toast,
-                    () => ExpenseService.GetAllAsync(BuildFilter(1, Math.Max(result.TotalCount, 1))));
-                if (all is not null)
-                    forTotals = all.Data;
-            }
-
-            var list = forTotals.ToList();
-            _fuelTotal = list.Where(e => e.ExpenseType == nameof(ExpenseType.Fuel)).Sum(e => e.Amount);
-            _maintenanceTotal = list.Where(e => e.ExpenseType == nameof(ExpenseType.Maintenance)).Sum(e => e.Amount);
+            _pageAmount = _items.Sum(e => e.Amount);
         }
         else
         {
@@ -131,8 +128,7 @@
             _totalCount = 0;
             _totalPages = 1;
             _totalAmount = 0;
-            _fuelTotal = 0;
-            _maintenanceTotal = 0;
+            _pageAmount = 0;
             _hasPrevious = false;
             _hasNext = false;
         }
@@ -164,16 +160,18 @@
         await ApplyFiltersAsync();
     }
 
+    private async Task ResetFiltersAsync()
+    {
+        _typeFilterKey = "";
+        _dateFrom = null;
+        _dateTo = null;
+        await ApplyFiltersAsync();
+    }
+
     private async Task OnPageSizeChangedAsync(int pageSize)
     {
         _pageSize = pageSize;
-        await GoToFirstPageAsync();
-    }
-
-    private async Task GoToFirstPageAsync()
-    {
-        _pageNumber = 1;
-        await LoadAsync();
+        await ApplyFiltersAsync();
     }
 
     private async Task PrevPageAsync()
@@ -190,8 +188,12 @@
         await LoadAsync();
     }
 
+    private void ToggleMenu(Guid id) => _openMenuId = _openMenuId == id ? null : id;
+    private void CloseMenu() => _openMenuId = null;
+
     private void OpenCreate()
     {
+        CloseMenu();
         _editingId = null;
         _formType = ExpenseType.Fuel;
         _formAmount = 0;
@@ -203,6 +205,7 @@
 
     private void OpenEdit(ExpenseResponse exp)
     {
+        CloseMenu();
         _editingId = exp.Id;
         _formType = Enum.TryParse<ExpenseType>(exp.ExpenseType, out var t) ? t : ExpenseType.Other;
         _formAmount = exp.Amount;
@@ -213,6 +216,25 @@
     }
 
     private void CloseForm() => _showForm = false;
+
+    private async Task OpenViewAsync(ExpenseResponse exp)
+    {
+        CloseMenu();
+        _viewTarget = exp;
+        _showDetails = true;
+        _detailsLoading = true;
+        var detail = await UiActions.RunAsync(Toast, () => ExpenseService.GetByIdAsync(exp.Id));
+        if (detail is not null)
+            _viewTarget = detail;
+        _detailsLoading = false;
+    }
+
+    private void CloseDetails()
+    {
+        _showDetails = false;
+        _viewTarget = null;
+        _detailsLoading = false;
+    }
 
     private async Task SaveAsync()
     {
@@ -227,7 +249,7 @@
                     _formDate,
                     _formLabel,
                     _formNotes)),
-                "Expense created.");
+                "Expense created successfully.");
             if (created is not null)
             {
                 _showForm = false;
@@ -244,7 +266,7 @@
                     _formDate,
                     _formLabel,
                     _formNotes)),
-                "Expense updated.");
+                "Expense updated successfully.");
             if (updated is not null)
             {
                 _showForm = false;
@@ -255,7 +277,12 @@
         _saving = false;
     }
 
-    private void OpenDelete(ExpenseResponse exp) => _deleteTarget = exp;
+    private void OpenDelete(ExpenseResponse exp)
+    {
+        CloseMenu();
+        _deleteTarget = exp;
+    }
+
     private void CloseDelete() => _deleteTarget = null;
 
     private async Task ConfirmDeleteAsync()
@@ -265,7 +292,7 @@
         await UiActions.RunAsync(
             Toast,
             () => ExpenseService.DeleteAsync(_deleteTarget.Id),
-            "Expense deleted.");
+            "Expense deleted successfully.");
         _deleteTarget = null;
         _saving = false;
         await LoadAsync();

@@ -81,29 +81,43 @@
         ");
     }
 
-    private string CurrentPageTitle => GetPageTitle();
-    private string CurrentPageSubtitle => GetPageSubtitle();
+    private string CurrentPageTitle => CurrentPageCopy.Title;
+    private string CurrentPageSubtitle => CurrentPageCopy.Subtitle;
 
-    private string GetPageTitle()
+    private (string Title, string Subtitle) CurrentPageCopy
     {
-        var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Trim('/');
-        if (relative.StartsWith("areas", StringComparison.OrdinalIgnoreCase)) return "Areas";
-        if (relative.StartsWith("ampere-schedules", StringComparison.OrdinalIgnoreCase)) return "Ampere Schedules";
-        if (relative.StartsWith("boxes", StringComparison.OrdinalIgnoreCase)) return "Boxes";
-        if (relative.StartsWith("subscribers", StringComparison.OrdinalIgnoreCase)) return "Subscribers";
-        if (relative.StartsWith("invoices", StringComparison.OrdinalIgnoreCase)) return "Invoices";
-        if (relative.StartsWith("calculator", StringComparison.OrdinalIgnoreCase)) return "Fixed kW Calculator";
-        if (relative.StartsWith("expenses", StringComparison.OrdinalIgnoreCase)) return "Expenses";
-        if (relative.StartsWith("settings", StringComparison.OrdinalIgnoreCase)) return "Settings";
-        return "Dashboard";
-    }
+        get
+        {
+            var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            var query = relative.IndexOf('?', StringComparison.Ordinal);
+            if (query >= 0)
+                relative = relative[..query];
 
-    private string GetPageSubtitle()
-    {
-        var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Trim('/');
-        if (relative.StartsWith("calculator", StringComparison.OrdinalIgnoreCase))
-            return "Preview a fixed kilowatt price without creating an invoice";
-        return $"Welcome back, {_displayName} · Shabakat";
+            return relative.Trim('/').ToLowerInvariant() switch
+            {
+                "areas" => ("Areas", "Organize subscriber groups and manage area assignments"),
+                "ampere-schedules" => ("Ampere Schedules", "Manage ampere supply-hour tiers and schedule-based pricing"),
+                "boxes" => ("Boxes", "Manage physical distribution boxes linked to company areas"),
+                "subscribers" => ("Subscribers", "Search, sort, and manage monthly accounts"),
+                "invoices" => ("Invoices", "Generate printable billing statements"),
+                "calculator" => ("Fixed kW Calculator", "Preview a fixed kilowatt price without creating an invoice"),
+                "expenses" => ("Expenses", "Track fuel, maintenance, payroll, and other operating costs"),
+                "settings" => ("Settings", "Preferences, pricing, and notification defaults"),
+                "settings/due-date" => ("Due Date", "Choose the invoice due day of month"),
+                "settings/trigger-date" => ("Trigger Date", "Choose the billing reminder day of month"),
+                "settings/trigger-message" => ("Trigger Message", "Update the default billing reminder copy"),
+                "settings/language" => ("Language", "Set the notification language"),
+                "settings/ampere-schedule-pricing" => ("Ampere Schedule Pricing", "Enable or disable schedule-based ampere pricing"),
+                "settings/ampere-proration" => ("Ampere Proration", "Charge ampere subscribers proportionally by days of service"),
+                "settings/whatsapp" => ("WhatsApp Connection", "Manage QR pairing and live Evolution API session state"),
+                "settings/company-logo" => ("Company Logo", "Upload or replace the company logo used on invoices"),
+                "settings/pricing/price-per-kilowatt" => ("Price per Kilowatt", "Edit default and customer-type kilowatt pricing"),
+                "settings/pricing/price-per-amp" => ("Price per Amp", "Edit default and customer-type amp pricing"),
+                "settings/pricing/fixed-charge" => ("Fixed Charge", "Edit fixed charges by tier"),
+                "settings/pricing/tva" => ("TVA (%)", "Edit tax values by tier"),
+                _ => ("Dashboard", "All-time operations snapshot for Shabakat")
+            };
+        }
     }
 
     private void ToggleMobileNav() => _mobileNavOpen = !_mobileNavOpen;

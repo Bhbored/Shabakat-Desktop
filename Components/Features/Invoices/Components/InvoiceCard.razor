@@ -1,6 +1,6 @@
 @namespace Shabakat.Components.Features.Invoices.Components
 
-<tr class="border-b border-border transition-colors hover:bg-muted/30">
+<tr class="border-b border-border transition-colors hover:bg-muted/30 @(MenuOpen ? "relative z-40" : null)">
     <td class="px-4 py-3.5 align-middle">
         <button type="button"
                 class="font-mono text-sm font-semibold text-foreground transition hover:text-primary"
@@ -35,7 +35,7 @@
             </button>
             @if (MenuOpen)
             {
-                <div class="absolute end-0 top-full z-30 mt-1 min-w-44 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg"
+                <div class="absolute end-0 top-full z-40 mt-1 min-w-44 rounded-xl border border-border bg-popover py-1 shadow-lg"
                      @onclick:stopPropagation="true">
                     <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-muted" @onclick="OnView">
                         <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
