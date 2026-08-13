@@ -73,7 +73,6 @@ public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepo
             i.IssueDate >= periodStart &&
             i.IssueDate <= periodEnd);
 
-    /// <summary>SQLite has no FOR UPDATE — load tracked entity inside the caller's transaction.</summary>
     public async Task<Invoice?> GetByIdForUpdateAsync(Guid id)
         => await _dbSet.FirstOrDefaultAsync(i => i.Id == id);
 }

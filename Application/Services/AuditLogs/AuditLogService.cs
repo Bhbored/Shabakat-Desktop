@@ -56,7 +56,6 @@ public sealed class AuditLogService : IAuditLogService
         }
         catch (Exception ex)
         {
-            // Audit failures must not break the business operation.
             _logger.LogWarning(
                 ex,
                 "Failed to write audit log for {Action}: {Summary}",

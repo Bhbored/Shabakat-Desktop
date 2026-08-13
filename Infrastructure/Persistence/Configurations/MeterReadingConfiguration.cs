@@ -22,7 +22,6 @@ public class MeterReadingConfiguration : IEntityTypeConfiguration<MeterReading>
             .HasForeignKey(e => e.CustomerId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // SQLite: DateOnly is stored as TEXT (YYYY-MM-DD)
         builder.Property<int>("PeriodYearMonth")
             .HasComputedColumnSql(
                 "(CAST(strftime('%Y', \"ReadingDate\") AS INTEGER) * 100 + CAST(strftime('%m', \"ReadingDate\") AS INTEGER))",

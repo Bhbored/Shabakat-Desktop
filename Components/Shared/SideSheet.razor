@@ -1,7 +1,5 @@
 @implements IDisposable
 
-@* Animated side panel. Timed unmount — WebView2 often skips animationend. *@
-
 @if (_mounted)
 {
     <div class="fixed inset-0 z-50 @(_openVisual ? null : "pointer-events-none")"
@@ -81,7 +79,6 @@
     {
         if (Open)
         {
-            // Don't cancel an in-flight close if parent hasn't flipped Open yet.
             if (_closing) return;
 
             _exitCts?.Cancel();
@@ -104,7 +101,6 @@
         _openVisual = false;
         await InvokeAsync(StateHasChanged);
 
-        // Flip parent Open=false immediately so UI state stays in sync.
         if (notifyParent && OnClose.HasDelegate)
             await OnClose.InvokeAsync();
 

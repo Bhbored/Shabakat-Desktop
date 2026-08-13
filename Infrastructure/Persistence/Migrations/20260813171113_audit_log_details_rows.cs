@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Shabakat.Infrastructure.Persistence.Migrations
 {
-    /// <inheritdoc />
     public partial class audit_log_details_rows : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
@@ -41,7 +39,6 @@ namespace Shabakat.Infrastructure.Persistence.Migrations
                 column: "AuditLogId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

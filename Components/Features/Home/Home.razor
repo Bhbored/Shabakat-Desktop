@@ -123,7 +123,6 @@
     private async Task OnPeriodChangedAsync(ChangeEventArgs e)
     {
         _periodKey = e.Value?.ToString() ?? "all";
-        // React only refetches the summary when the period changes; invoice panels stay put.
         await LoadAsync(includePanels: false);
     }
 
