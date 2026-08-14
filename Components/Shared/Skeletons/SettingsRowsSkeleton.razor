@@ -1,0 +1,16 @@
+@namespace Shabakat.Components.Shared.Skeletons
+
+@for (var i = 0; i < Count; i++)
+{
+    <div class="flex items-center gap-3 border-b border-border px-4 py-4 last:border-b-0">
+        <SkeletonBone Class="h-8 w-8 rounded-full" />
+        <div class="min-w-0 flex-1 space-y-2">
+            <SkeletonBone Class="h-4 w-32" />
+            <SkeletonBone Class="h-3 w-28" />
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Count { get; set; } = 6;
+}

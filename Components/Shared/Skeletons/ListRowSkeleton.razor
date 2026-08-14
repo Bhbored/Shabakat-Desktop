@@ -1,0 +1,21 @@
+@namespace Shabakat.Components.Shared.Skeletons
+
+<div class="flex items-center gap-3 border-b border-border py-3 last:border-b-0">
+    <SkeletonBone Class="h-9 w-9 rounded-full" />
+    <div class="min-w-0 flex-1 space-y-2">
+        <SkeletonBone Class="h-4 w-32" />
+        <SkeletonBone Class="h-3 w-24" />
+    </div>
+    <div class="space-y-2 text-right">
+        <SkeletonBone Class="ml-auto h-4 w-20" />
+        <SkeletonBone Class="ml-auto h-3 w-16" />
+    </div>
+    @if (ShowBadge)
+    {
+        <SkeletonBone Class="h-6 w-16 rounded-full" />
+    }
+</div>
+
+@code {
+    [Parameter] public bool ShowBadge { get; set; } = true;
+}

@@ -2,31 +2,7 @@
 
 @if (IsLoading)
 {
-    <section class="rounded-2xl border border-border bg-card">
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[760px]">
-                <thead>
-                    <tr class="border-b border-border">
-                        @for (var i = 0; i < 5; i++)
-                        {
-                            <th class="px-4 py-3.5"><div class="h-4 w-24 animate-pulse rounded bg-muted"></div></th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (var r = 0; r < 6; r++)
-                    {
-                        <tr class="border-b border-border">
-                            @for (var c = 0; c < 5; c++)
-                            {
-                                <td class="px-4 py-3.5"><div class="h-4 w-full animate-pulse rounded bg-muted"></div></td>
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </section>
+    <TableSkeleton Columns="5" Rows="6" MinWidthClass="min-w-[760px]" ShowPager="false" />
 }
 else if (Items.Count == 0)
 {

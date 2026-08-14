@@ -2,40 +2,7 @@
 
 @if (IsLoading)
 {
-    <section class="rounded-2xl border border-border bg-card">
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[840px]">
-                <thead>
-                    <tr class="border-b border-border">
-                        @for (var i = 0; i < 6; i++)
-                        {
-                            <th class="px-4 py-3.5"><div class="h-4 w-24 animate-pulse rounded bg-muted"></div></th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (var r = 0; r < 6; r++)
-                    {
-                        <tr class="border-b border-border">
-                            @for (var c = 0; c < 6; c++)
-                            {
-                                <td class="px-4 py-3.5"><div class="h-4 w-full animate-pulse rounded bg-muted"></div></td>
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        <div class="flex flex-col gap-3 border-t border-border px-4 py-3 md:flex-row md:items-center md:justify-between">
-            <div class="h-4 w-40 animate-pulse rounded bg-muted"></div>
-            <div class="flex items-center gap-2 self-end md:self-auto">
-                <div class="h-9 w-28 animate-pulse rounded-xl bg-muted"></div>
-                <div class="h-9 w-24 animate-pulse rounded-xl bg-muted"></div>
-                <div class="h-4 w-24 animate-pulse rounded bg-muted"></div>
-                <div class="h-9 w-24 animate-pulse rounded-xl bg-muted"></div>
-            </div>
-        </div>
-    </section>
+    <TableSkeleton Columns="6" Rows="6" MinWidthClass="min-w-[840px]" ShowPagerExtras="true" />
 }
 else if (Items.Count == 0)
 {

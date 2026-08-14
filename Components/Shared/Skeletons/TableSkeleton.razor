@@ -1,0 +1,51 @@
+@namespace Shabakat.Components.Shared.Skeletons
+
+<section class="overflow-hidden rounded-2xl border border-border bg-card">
+    <div class="overflow-x-auto">
+        <table class="w-full @MinWidthClass">
+            <thead>
+                <tr class="border-b border-border">
+                    @for (var i = 0; i < Columns; i++)
+                    {
+                        <th class="px-4 py-3.5"><SkeletonBone Class="h-4 w-24" /></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (var r = 0; r < Rows; r++)
+                {
+                    <tr class="border-b border-border">
+                        @for (var c = 0; c < Columns; c++)
+                        {
+                            <td class="px-4 py-3.5"><SkeletonBone Class="h-4 w-full" /></td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (ShowPager)
+    {
+        <div class="flex flex-col gap-3 border-t border-border px-4 py-3 md:flex-row md:items-center md:justify-between">
+            <SkeletonBone Class="h-4 w-40" />
+            <div class="flex items-center gap-2 self-end md:self-auto">
+                <SkeletonBone Class="h-9 w-28 rounded-xl" />
+                <SkeletonBone Class="h-9 w-24 rounded-xl" />
+                @if (ShowPagerExtras)
+                {
+                    <SkeletonBone Class="h-4 w-24" />
+                    <SkeletonBone Class="h-9 w-24 rounded-xl" />
+                }
+            </div>
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter] public int Columns { get; set; } = 6;
+    [Parameter] public int Rows { get; set; } = 6;
+    [Parameter] public string MinWidthClass { get; set; } = "min-w-[860px]";
+    [Parameter] public bool ShowPager { get; set; } = true;
+    [Parameter] public bool ShowPagerExtras { get; set; }
+}

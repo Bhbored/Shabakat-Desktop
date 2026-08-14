@@ -1,0 +1,23 @@
+@namespace Shabakat.Components.Shared.Skeletons
+
+<div class="space-y-4">
+    <SkeletonBone Class="h-7 w-44" />
+    <div class="grid gap-4 md:grid-cols-3">
+        @for (var i = 0; i < StatCount; i++)
+        {
+            <div class="rounded-2xl border border-border bg-card p-4">
+                <SkeletonBone Class="h-3 w-20" />
+                <SkeletonBone Class="mt-3 h-7 w-24" />
+            </div>
+        }
+    </div>
+    @for (var i = 0; i < BlockCount; i++)
+    {
+        <SkeletonBone Class="h-48 w-full rounded-2xl" />
+    }
+</div>
+
+@code {
+    [Parameter] public int StatCount { get; set; } = 3;
+    [Parameter] public int BlockCount { get; set; } = 2;
+}

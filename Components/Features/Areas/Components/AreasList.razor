@@ -2,9 +2,7 @@
 
 @if (IsLoading)
 {
-    <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
-        Loading areas...
-    </section>
+    <EntityCardGridSkeleton Count="4" ShowStatBlocks="false" CardClass="rounded-2xl border border-border bg-card/80 p-5" />
 }
 else if (Areas.Count == 0)
 {

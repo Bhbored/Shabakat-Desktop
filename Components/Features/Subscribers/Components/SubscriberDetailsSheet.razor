@@ -7,7 +7,7 @@
            OnClose="OnClose">
     @if (IsLoading)
     {
-        <p class="text-sm text-muted-foreground">Loading subscriber details...</p>
+        <SheetSkeleton StatCount="3" BlockCount="2" />
     }
     else if (Details is not null)
     {

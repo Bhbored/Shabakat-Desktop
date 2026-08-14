@@ -7,29 +7,7 @@
            OnClose="OnClose">
     @if (IsLoading)
     {
-        <div class="space-y-4">
-            <div class="grid gap-4 md:grid-cols-2">
-                @for (var i = 0; i < 2; i++)
-                {
-                    <div class="rounded-2xl border border-border bg-card p-4">
-                        <div class="h-4 w-20 animate-pulse rounded bg-muted"></div>
-                        <div class="mt-3 h-8 w-24 animate-pulse rounded bg-muted"></div>
-                    </div>
-                }
-            </div>
-            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
-                @for (var i = 0; i < 6; i++)
-                {
-                    <div class="flex items-start gap-3">
-                        <div class="h-9 w-9 animate-pulse rounded-lg bg-muted"></div>
-                        <div class="space-y-2">
-                            <div class="h-3 w-24 animate-pulse rounded bg-muted"></div>
-                            <div class="h-4 w-40 animate-pulse rounded bg-muted"></div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
+        <SheetSkeleton StatCount="2" BlockCount="1" />
     }
     else if (Expense is not null)
     {

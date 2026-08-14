@@ -36,16 +36,7 @@
     <SettingsSection Title="Company Preferences">
         @if (_loading)
         {
-            @for (var i = 0; i < 6; i++)
-            {
-                <div class="flex items-center gap-3 border-b border-border px-4 py-4 last:border-b-0">
-                    <div class="h-8 w-8 animate-pulse rounded-full bg-muted"></div>
-                    <div class="min-w-0 flex-1 space-y-2">
-                        <div class="h-4 w-32 animate-pulse rounded bg-muted"></div>
-                        <div class="h-3 w-28 animate-pulse rounded bg-muted"></div>
-                    </div>
-                </div>
-            }
+            <SettingsRowsSkeleton Count="6" />
         }
         else
         {

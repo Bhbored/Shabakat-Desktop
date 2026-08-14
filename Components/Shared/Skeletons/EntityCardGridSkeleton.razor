@@ -1,0 +1,14 @@
+@namespace Shabakat.Components.Shared.Skeletons
+
+<div class="grid gap-4 xl:grid-cols-2">
+    @for (var i = 0; i < Count; i++)
+    {
+        <EntityCardSkeleton ShowStatBlocks="ShowStatBlocks" CardClass="@CardClass" />
+    }
+</div>
+
+@code {
+    [Parameter] public int Count { get; set; } = 4;
+    [Parameter] public bool ShowStatBlocks { get; set; } = true;
+    [Parameter] public string CardClass { get; set; } = "rounded-2xl border border-border bg-card p-5";
+}

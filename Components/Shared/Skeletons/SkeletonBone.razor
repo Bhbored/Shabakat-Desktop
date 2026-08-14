@@ -1,0 +1,9 @@
+@namespace Shabakat.Components.Shared.Skeletons
+
+<div class="@Css"></div>
+
+@code {
+    [Parameter] public string Class { get; set; } = "h-4 w-24 rounded";
+
+    private string Css => $"animate-pulse bg-muted {Class}".Trim();
+}

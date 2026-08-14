@@ -1,0 +1,30 @@
+@namespace Shabakat.Components.Shared.Skeletons
+
+<section class="@CardClass">
+    <div class="flex items-start gap-4">
+        <SkeletonBone Class="h-10 w-10 rounded-full" />
+        <div class="min-w-0 flex-1 space-y-3">
+            <div>
+                <SkeletonBone Class="h-5 w-40" />
+                <SkeletonBone Class="mt-2 h-4 w-28" />
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <SkeletonBone Class="h-7 w-28 rounded-full" />
+                <SkeletonBone Class="h-7 w-32 rounded-full" />
+            </div>
+            @if (ShowStatBlocks)
+            {
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <SkeletonBone Class="h-16 w-full rounded-xl" />
+                    <SkeletonBone Class="h-16 w-full rounded-xl" />
+                </div>
+            }
+        </div>
+        <SkeletonBone Class="h-9 w-9 rounded-lg" />
+    </div>
+</section>
+
+@code {
+    [Parameter] public bool ShowStatBlocks { get; set; } = true;
+    [Parameter] public string CardClass { get; set; } = "rounded-2xl border border-border bg-card p-5";
+}

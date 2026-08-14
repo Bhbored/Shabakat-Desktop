@@ -1,0 +1,25 @@
+@namespace Shabakat.Components.Shared.Skeletons
+
+<div class="space-y-5">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        @for (var i = 0; i < MetricCount; i++)
+        {
+            <MetricCardSkeleton />
+        }
+    </div>
+    <section class="rounded-2xl border border-border bg-card p-5">
+        <SkeletonBone Class="h-5 w-48" />
+        <SkeletonBone Class="mt-2 h-3 w-72" />
+        <SkeletonBone Class="mt-6 h-60 w-full rounded-2xl" />
+        <div class="mt-5 grid gap-3 md:grid-cols-4">
+            @for (var i = 0; i < 4; i++)
+            {
+                <SkeletonBone Class="h-16 w-full rounded-2xl" />
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    [Parameter] public int MetricCount { get; set; } = 4;
+}
