@@ -13,14 +13,17 @@
                         SearchTerm="@_searchTerm"
                         AreaFilter="@_areaFilter"
                         PlanFilter="@_planFilter"
+                        ScheduleFilter="@_scheduleFilter"
                         RelationFilter="@_relationFilter"
                         StatusFilter="@_statusFilter"
                         TotalCount="_totalCount"
                         Areas="_areas"
+                        Schedules="_schedules"
                         SearchFieldChanged="OnSearchFieldChanged"
                         SearchTermChanged="OnSearchTermChanged"
                         AreaFilterChanged="OnAreaFilterChanged"
                         PlanFilterChanged="OnPlanFilterChanged"
+                        ScheduleFilterChanged="OnScheduleFilterChanged"
                         RelationFilterChanged="OnRelationFilterChanged"
                         StatusFilterChanged="OnStatusFilterChanged"
                         IsExporting="_exporting"
@@ -122,6 +125,7 @@
     private string _searchTerm = "";
     private string _areaFilter = "";
     private string _planFilter = "";
+    private string _scheduleFilter = "";
     private string _relationFilter = "";
     private string _statusFilter = "";
     private int _pageNumber = 1;
@@ -170,6 +174,7 @@
         _openMenuId = null;
 
         Guid? areaId = Guid.TryParse(_areaFilter, out var a) ? a : null;
+        Guid? scheduleId = Guid.TryParse(_scheduleFilter, out var sch) ? sch : null;
         PlanType? plan = Enum.TryParse<PlanType>(_planFilter, out var p) ? p : null;
         CustomerRelation? relation = Enum.TryParse<CustomerRelation>(_relationFilter, out var r) ? r : null;
         CustomerStatus? status = Enum.TryParse<CustomerStatus>(_statusFilter, out var s) ? s : null;
@@ -181,6 +186,7 @@
             Name: name,
             Phone: phone,
             AreaId: areaId,
+            AmpereScheduleId: scheduleId,
             PlanType: plan,
             CustomerRelation: relation,
             CustomerStatus: status,
@@ -269,6 +275,12 @@
     private async Task OnPlanFilterChanged(string value)
     {
         _planFilter = value;
+        await ReloadFromFiltersAsync();
+    }
+
+    private async Task OnScheduleFilterChanged(string value)
+    {
+        _scheduleFilter = value;
         await ReloadFromFiltersAsync();
     }
 
