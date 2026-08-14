@@ -1,13 +1,10 @@
 @namespace Shabakat.Components.Features.AuditLogs.Components
 
-<tr class="border-b border-border transition-colors hover:bg-muted/30">
+<tr class="cursor-pointer border-b border-border transition-colors hover:bg-muted/30"
+    @onclick="OnView">
     <td class="px-4 py-3.5 align-middle">
-        <button type="button"
-                class="text-left transition hover:text-primary"
-                @onclick="OnView">
-            <p class="font-medium text-foreground">@Entry.Summary</p>
-            <p class="mt-0.5 text-xs text-muted-foreground">@FormatHelper.Date(Entry.CreatedAt) · @Entry.CreatedAt.ToString("HH:mm")</p>
-        </button>
+        <p class="font-medium text-foreground">@Entry.Summary</p>
+        <p class="mt-0.5 text-xs text-muted-foreground">@FormatHelper.Date(Entry.CreatedAt) · @Entry.CreatedAt.ToString("HH:mm")</p>
     </td>
     <td class="px-4 py-3.5 align-middle">
         <AuditActionBadge Action="@Entry.Action" />
@@ -21,9 +18,11 @@
     <td class="px-4 py-3.5 align-middle">
         <div class="flex justify-end">
             <button type="button"
-                    class="rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                    @onclick="OnView">
-                View
+                    class="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    aria-label="View audit event"
+                    @onclick="OnView"
+                    @onclick:stopPropagation="true">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
         </div>
     </td>
