@@ -11,5 +11,7 @@ public sealed class AppPreferencesRepository : GenericRepository<AppPreferences>
     public AppPreferencesRepository(AppDbContext db, ILoggerFactory loggerFactory) : base(db, loggerFactory) { }
 
     public async Task<AppPreferences?> GetAsync()
-        => await _dbSet.FirstOrDefaultAsync();
+        => await _dbSet
+            .Include(p => p.CustomerExportColumnPreference)
+            .FirstOrDefaultAsync();
 }

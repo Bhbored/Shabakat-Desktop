@@ -31,5 +31,10 @@ public class AppPreferencesConfiguration : IEntityTypeConfiguration<AppPreferenc
         builder.Property(e => e.IndustrialTVA).HasColumnType("decimal(5,2)");
 
         builder.Property(e => e.Language).HasMaxLength(10);
+
+        builder.HasOne(e => e.CustomerExportColumnPreference)
+            .WithOne()
+            .HasForeignKey<CustomerExportColumnPreference>(e => e.AppPreferencesId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

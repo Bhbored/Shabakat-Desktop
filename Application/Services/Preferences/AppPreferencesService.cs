@@ -49,10 +49,15 @@ public sealed class AppPreferencesService : IAppPreferencesService
 
         if (existing is null)
         {
-            await _preferencesRepository.AddAsync(new AppPreferences().Apply(request));
+            var created = new AppPreferences
+            {
+                CustomerExportColumnPreference = new CustomerExportColumnPreference()
+            }.Apply(request);
+            await _preferencesRepository.AddAsync(created);
         }
         else
         {
+            existing.EnsureExportColumns();
             existing.Apply(request);
             _preferencesRepository.Update(existing);
         }

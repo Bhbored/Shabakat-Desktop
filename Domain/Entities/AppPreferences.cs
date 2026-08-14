@@ -29,4 +29,9 @@ public class AppPreferences : Base
 
     public string Language { get; set; } = "en";
     public int DueDate { get; set; } = 31;
+
+    public CustomerExportColumnPreference? CustomerExportColumnPreference { get; set; }
+
+    public CustomerExportColumnPreference EnsureExportColumns()
+        => CustomerExportColumnPreference ??= new CustomerExportColumnPreference();
 }

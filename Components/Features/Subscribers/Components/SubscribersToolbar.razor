@@ -26,12 +26,32 @@
                 }
             </select>
         </div>
-        <button type="button"
-                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
-                style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
-                @onclick="OnCreate">
-            + Add Subscriber
-        </button>
+        <div class="flex gap-2">
+            <button type="button"
+                    class="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                    disabled="@IsExporting"
+                    @onclick="OnExport">
+                @if (IsExporting)
+                {
+                    <span class="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent"></span>
+                }
+                else
+                {
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                }
+                Export Excel
+            </button>
+            <button type="button"
+                    class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                    style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
+                    @onclick="OnCreate">
+                + Add Subscriber
+            </button>
+        </div>
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
@@ -81,7 +101,9 @@
     [Parameter] public EventCallback<string> PlanFilterChanged { get; set; }
     [Parameter] public EventCallback<string> RelationFilterChanged { get; set; }
     [Parameter] public EventCallback<string> StatusFilterChanged { get; set; }
+    [Parameter] public bool IsExporting { get; set; }
     [Parameter] public EventCallback OnCreate { get; set; }
+    [Parameter] public EventCallback OnExport { get; set; }
 
     private Task OnSearchFieldChanged(ChangeEventArgs e) =>
         SearchFieldChanged.InvokeAsync(e.Value?.ToString() ?? "");

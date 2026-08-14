@@ -1,0 +1,72 @@
+@page "/settings/excel-export"
+@inject ICustomerExportService ExportService
+@inject IToastService Toast
+@inject NavigationManager Navigation
+
+<SettingsScaffold Title="Excel Export Columns">
+    <p class="mb-5 text-sm text-muted-foreground">Choose the customer columns included in Excel exports.</p>
+    @if (_loading)
+    {
+        <p class="text-sm text-muted-foreground">Loading export columns...</p>
+    }
+    else
+    {
+        <div class="divide-y divide-border overflow-hidden rounded-2xl border border-border">
+            @foreach (var column in CustomerExportColumns.All)
+            {
+                var selected = _selected.Contains(column);
+                var disableOff = selected && _selected.Count == 1;
+                <label class="flex cursor-pointer items-center gap-3 px-4 py-3">
+                    <span class="flex-1 text-sm font-medium text-foreground">@CustomerExportColumns.Header(column)</span>
+                    <span class="relative inline-flex cursor-pointer items-center @(disableOff ? "opacity-50" : "")">
+                        <input type="checkbox" class="peer sr-only" checked="@selected" disabled="@disableOff"
+                            @onchange="e => Toggle(column, e.Value is true)" />
+                        <span
+                            class="h-6 w-11 rounded-full bg-muted transition peer-checked:bg-primary after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-card after:transition-all peer-checked:after:translate-x-full"></span>
+                    </span>
+                </label>
+            }
+        </div>
+        <button type="button"
+            class="mt-6 w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+            disabled="@_saving"
+            @onclick="SaveAsync">
+            @(_saving ? "Saving..." : "Save")
+        </button>
+    }
+</SettingsScaffold>
+
+@code {
+    private readonly HashSet<CustomerExportColumn> _selected = [];
+    private bool _loading = true;
+    private bool _saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var columns = await UiActions.RunAsync(Toast, () => ExportService.GetSelectedColumnsAsync());
+        foreach (var column in columns ?? CustomerExportColumns.Default)
+            _selected.Add(column);
+        _loading = false;
+    }
+
+    private void Toggle(CustomerExportColumn column, bool enabled)
+    {
+        if (enabled)
+            _selected.Add(column);
+        else if (_selected.Count > 1)
+            _selected.Remove(column);
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        var ok = false;
+        await UiActions.RunAsync(Toast, async () =>
+        {
+            await ExportService.SaveSelectedColumnsAsync(_selected);
+            ok = true;
+        }, "Export columns saved.");
+        _saving = false;
+        if (ok) Navigation.NavigateTo("settings");
+    }
+}

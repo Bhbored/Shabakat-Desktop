@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
 
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<AppPreferences> AppPreferences => Set<AppPreferences>();
+    public DbSet<CustomerExportColumnPreference> CustomerExportColumnPreferences => Set<CustomerExportColumnPreference>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<Payment> Payments => Set<Payment>();

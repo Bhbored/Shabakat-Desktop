@@ -5,6 +5,7 @@
 @inject IDistributionBoxService BoxService
 @inject IAmpereScheduleService AmpereScheduleService
 @inject IAppPreferencesService PreferencesService
+@inject ICustomerExportService ExportService
 @inject IToastService Toast
 
 <div class="space-y-4" @onclick="CloseMenu">
@@ -22,7 +23,9 @@
                         PlanFilterChanged="OnPlanFilterChanged"
                         RelationFilterChanged="OnRelationFilterChanged"
                         StatusFilterChanged="OnStatusFilterChanged"
-                        OnCreate="OpenCreate" />
+                        IsExporting="_exporting"
+                        OnCreate="OpenCreate"
+                        OnExport="ExportAsync" />
 
     <SubscribersList Items="_items"
                      IsLoading="_loading"
@@ -98,6 +101,7 @@
     private readonly List<MeterReadingResponse> _meterReadings = [];
 
     private bool _loading = true;
+    private bool _exporting;
     private bool _saving;
     private bool _savingMeter;
     private bool _showForm;
@@ -227,6 +231,39 @@
     {
         _areaFilter = value;
         await ReloadFromFiltersAsync();
+    }
+
+    private async Task ExportAsync()
+    {
+        if (_exporting) return;
+        _exporting = true;
+
+        try
+        {
+            Guid[]? areaIds = Guid.TryParse(_areaFilter, out var areaId)
+                ? [areaId]
+                : null;
+
+            var file = await UiActions.RunAsync(
+                Toast,
+                () => ExportService.BuildAsync(
+                    new CustomerExportRequest(areaIds)));
+
+            if (file is null)
+                return;
+
+            var saved = await ExcelFileSaver.SaveAsync(file);
+            if (saved)
+                Toast.Success("Excel export saved.");
+        }
+        catch
+        {
+            Toast.Error("Could not export customers.");
+        }
+        finally
+        {
+            _exporting = false;
+        }
     }
 
     private async Task OnPlanFilterChanged(string value)

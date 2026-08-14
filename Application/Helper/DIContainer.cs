@@ -9,6 +9,7 @@ using Shabakat.Application.Services.Customers;
 using Shabakat.Application.Services.Dashboard;
 using Shabakat.Application.Services.DistributionBoxes;
 using Shabakat.Application.Services.Expense;
+using Shabakat.Application.Services.Export;
 using Shabakat.Application.Services.Invoices;
 using Shabakat.Application.Services.MeterReadings;
 using Shabakat.Application.Services.Preferences;
@@ -43,6 +44,7 @@ public static class DIContainer
         services.AddScoped<IExpenseRepository, ExpenseRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IAppPreferencesRepository, AppPreferencesRepository>();
+        services.AddScoped<ICustomerExportRepository, CustomerExportRepository>();
         services.AddScoped<IDashboardRepository, DashboardRepository>();
 
         return services;
@@ -65,6 +67,8 @@ public static class DIContainer
         services.AddScoped<IExpenseService, ExpenseService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IMeterReadingService, MeterReadingService>();
+        services.AddSingleton<ICustomerExportWorkbookBuilder, ClosedXmlCustomerExportWorkbookBuilder>();
+        services.AddScoped<ICustomerExportService, CustomerExportService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IInvoiceService, InvoiceService>();
 
