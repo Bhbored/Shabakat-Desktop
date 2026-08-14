@@ -1,4 +1,5 @@
 @namespace Shabakat.Components.Features.Invoices.Components
+@inject IInvoiceService InvoiceService
 
 <SideSheet Open="Open"
            Title="@(Invoice is null ? "Invoice Details" : $"Invoice # {Invoice.InvoiceNumber}")"
@@ -63,37 +64,42 @@
                 </div>
             </div>
 
+            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
+                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Consumption Period</h3>
+                <InvoiceDetailRow Label="Consumption Start" Value="@FormatHelper.Date(Invoice.ConsumptionStart)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </InvoiceDetailRow>
+                <InvoiceDetailRow Label="Consumption End" Value="@FormatHelper.Date(Invoice.ConsumptionEnd)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </InvoiceDetailRow>
+            </div>
+
             @if (Breakdown is not null)
             {
                 var breakdown = Breakdown.Value;
                 <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
                     <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Breakdown</h3>
                     <InvoiceDetailRow Label="Charge" Value="@FormatHelper.Currency(breakdown.Charge)">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h6l-2 8 10-12h-6l2-8z"/></svg>
                     </InvoiceDetailRow>
                     <InvoiceDetailRow Label="Fixed Charge" Value="@FormatHelper.Currency(breakdown.FixedCharge)">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
                     </InvoiceDetailRow>
                     <InvoiceDetailRow Label="@TvaLabel" Value="@FormatHelper.Currency(breakdown.TvaAmount)">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20"/><path d="M4 22h16"/><path d="M8 18V8"/><path d="m8 8 4 4 4-4"/><path d="M16 18V8"/></svg>
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
                     </InvoiceDetailRow>
                 </div>
             }
 
-            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
-                <InvoiceDetailRow Label="Invoice Number" Value="@($"#{Invoice.InvoiceNumber}")">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20"/><path d="M4 22h16"/><path d="M8 18V8"/><path d="m8 8 4 4 4-4"/><path d="M16 18V8"/></svg>
-                </InvoiceDetailRow>
-                <InvoiceDetailRow Label="Issue Date" Value="@FormatHelper.Date(Invoice.ConsumptionStart)">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </InvoiceDetailRow>
-                <InvoiceDetailRow Label="Due Date" Value="@FormatHelper.Date(Invoice.ConsumptionEnd)">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </InvoiceDetailRow>
-                <InvoiceDetailRow Label="Last Updated" Value="@FormatHelper.Date(Invoice.UpdatedAt)">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </InvoiceDetailRow>
-            </div>
+            @if (Invoice.BilledConsumption is not null)
+            {
+                <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
+                    <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Billed Consumption</h3>
+                    <InvoiceDetailRow Label="Consumption" Value="@($"{FormatHelper.Number(Invoice.BilledConsumption.Value)} kWh")">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                    </InvoiceDetailRow>
+                </div>
+            }
 
             <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
                 <div class="flex items-center justify-between">
@@ -132,6 +138,16 @@
                     </div>
                 }
             </div>
+
+            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
+                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Record</h3>
+                <InvoiceDetailRow Label="Created" Value="@FormatHelper.Date(Invoice.CreatedAt)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </InvoiceDetailRow>
+                <InvoiceDetailRow Label="Updated" Value="@FormatHelper.Date(Invoice.UpdatedAt)">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                </InvoiceDetailRow>
+            </div>
         </div>
     }
 </SideSheet>
@@ -146,6 +162,10 @@
     [Parameter] public EventCallback OnRecordPayment { get; set; }
     [Parameter] public EventCallback OnPrint { get; set; }
 
+    private bool _includePlanValue;
+    private Guid? _resolvedInvoiceId;
+    private Guid? _resolvedCustomerId;
+
     private (decimal Charge, decimal FixedCharge, decimal TvaAmount, decimal TvaRate)? Breakdown =>
         Invoice is null
             ? null
@@ -153,11 +173,66 @@
                 Invoice.TotalAmount,
                 Invoice.FixedCharge,
                 Invoice.TVA,
-                Customer?.Plan,
-                Customer?.PlanValue ?? 0);
+                Customer?.PlanValue ?? 0,
+                _includePlanValue);
 
     private string TvaLabel =>
-        Invoice is null ? "TVA" : $"TVA ({FormatHelper.Number(Invoice.TVA)}%)";
+        Invoice is null || Invoice.TVA <= 0
+            ? "TVA"
+            : $"TVA ({FormatHelper.Number(Invoice.TVA)}%)";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Invoice is null)
+        {
+            _includePlanValue = false;
+            _resolvedInvoiceId = null;
+            _resolvedCustomerId = null;
+            return;
+        }
+
+        if (_resolvedInvoiceId == Invoice.Id && _resolvedCustomerId == Customer?.Id)
+            return;
+
+        _resolvedInvoiceId = Invoice.Id;
+        _resolvedCustomerId = Customer?.Id;
+        _includePlanValue = await ResolveIncludePlanValueAsync();
+    }
+
+    private async Task<bool> ResolveIncludePlanValueAsync()
+    {
+        if (InvoiceBreakdown.IncludePlanValue(Customer?.Plan))
+            return true;
+
+        if (Invoice is null || Customer is null)
+            return false;
+
+        if (!Customer.Plan.Equals(nameof(PlanType.FixedKilowatt), StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var start = Invoice.ConsumptionStart;
+        var from = new DateOnly(start.Year, start.Month, 1);
+        var to = new DateOnly(start.Year, start.Month, DateTime.DaysInMonth(start.Year, start.Month));
+        var page = await InvoiceService.GetAllAsync(new InvoiceFilterRequest(
+            CustomerId: Customer.Id,
+            ConsumptionStartFrom: from,
+            ConsumptionStartTo: to,
+            PageNumber: 1,
+            PageSize: 100));
+
+        var hasEarlier = page.Data.Any(sibling =>
+        {
+            if (sibling.Id == Invoice.Id)
+                return false;
+            if (sibling.ConsumptionStart.Year != start.Year || sibling.ConsumptionStart.Month != start.Month)
+                return false;
+            if (sibling.InvoiceNumber != Invoice.InvoiceNumber)
+                return sibling.InvoiceNumber < Invoice.InvoiceNumber;
+            return sibling.CreatedAt < Invoice.CreatedAt;
+        });
+
+        return !hasEarlier;
+    }
 
     private static string ToBadgeStatus(string status) =>
         status.Equals(nameof(InvoiceStatus.PartiallyPaid), StringComparison.OrdinalIgnoreCase)

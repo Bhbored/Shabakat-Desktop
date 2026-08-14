@@ -8,12 +8,10 @@ internal static class InvoiceBreakdown
         decimal totalAmount,
         decimal fixedCharge,
         decimal tva,
-        string? plan,
-        decimal planValue)
+        decimal planValue,
+        bool includePlanValue)
     {
-        var extra = plan?.Equals(nameof(PlanType.Kilowatt), StringComparison.OrdinalIgnoreCase) == true
-            ? planValue
-            : 0m;
+        var extra = includePlanValue ? planValue : 0m;
         var taxableTotal = totalAmount - extra;
 
         decimal charge;
@@ -33,4 +31,7 @@ internal static class InvoiceBreakdown
 
         return (charge + extra, fixedCharge, tvaAmount, tva);
     }
+
+    public static bool IncludePlanValue(string? plan) =>
+        plan?.Equals(nameof(PlanType.Kilowatt), StringComparison.OrdinalIgnoreCase) == true;
 }
