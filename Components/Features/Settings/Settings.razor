@@ -55,8 +55,6 @@
             <SettingRowLink Href="settings/pricing/tva" Label="TVA" Value="@(_prefs is null ? NotConfigured : $"{FormatHelper.Number(_prefs.TVA)}%")" IconSvg="@Icons.Percent" />
             <SettingRowLink Href="settings/language" Label="Language" Value="@LanguageLabel(_prefs?.Language)" IconSvg="@Icons.Languages" />
             <SettingRowLink Href="settings/due-date" Label="Due Date" Value="@(_prefs is null ? NotConfigured : DayLabel(_prefs.DueDate))" IconSvg="@Icons.Calendar" />
-            <SettingRowLink Href="settings/trigger-date" Label="Trigger Date" Value="@(_prefs is null ? NotConfigured : DayLabel(_prefs.TriggerDate))" IconSvg="@Icons.Calendar" />
-            <SettingRowLink Href="settings/trigger-message" Label="Trigger Message" Value="@(string.IsNullOrWhiteSpace(_prefs?.TriggerMessage) ? "Not set" : _prefs.TriggerMessage)" IconSvg="@Icons.Message" />
             <SettingRowLink Href="settings/ampere-schedule-pricing" Label="Ampere Schedule Pricing" Value="@EnabledLabel(_prefs?.AmpereSchedulePricingEnabled == true)" IconSvg="@Icons.Zap" />
             <SettingRowLink Href="settings/ampere-proration" Label="Ampere Proration" Value="@EnabledLabel(_prefs?.AmpereProrateByDaysEnabled == true)" IconSvg="@Icons.Percent" />
             <SettingRowLink Href="ampere-schedules" Label="Ampere Schedules" Value="Manage tiers" IconSvg="@Icons.Clock" />
@@ -136,7 +134,6 @@
         public const string Percent = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>""";
         public const string Languages = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>""";
         public const string Calendar = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>""";
-        public const string Message = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>""";
         public const string Clock = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>""";
         public const string Image = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>""";
     }

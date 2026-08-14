@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.DTOs.Dashboard;
 using Shabakat.Application.DTOs.Invoices;
+using Shabakat.Application.Mappers;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Enums;
 using Shabakat.Infrastructure.Persistence;
@@ -106,7 +107,7 @@ public sealed class DashboardRepository : IDashboardRepository
             .Take(take)
             .ToListAsync();
 
-        return items.Select(MapSummary).ToList();
+        return items.Select(i => i.ToSummary()).ToList();
     }
 
     public async Task<IReadOnlyList<InvoiceSummaryResponse>> GetUpcomingDueAsync(int take = 5)
@@ -120,23 +121,8 @@ public sealed class DashboardRepository : IDashboardRepository
             .Take(take)
             .ToListAsync();
 
-        return items.Select(MapSummary).ToList();
+        return items.Select(i => i.ToSummary()).ToList();
     }
-
-    private static InvoiceSummaryResponse MapSummary(Invoice i) =>
-        new(
-            Id: i.Id,
-            InvoiceNumber: i.InvoiceNumber,
-            CustomerName: i.Customer?.Name ?? string.Empty,
-            InvoiceStatus: i.InvoiceStatus.ToString(),
-            ConsumptionStart: i.IssueDate,
-            ConsumptionEnd: i.DueDate,
-            TotalAmount: i.TotalAmount,
-            PaidAmount: i.PaidAmount,
-            AmountDue: i.AmountDue,
-            BilledConsumption: i.BilledConsumption,
-            CreatedAt: i.CreatedAt,
-            CanBeDeleted: i.InvoiceStatus == InvoiceStatus.Unpaid);
 
     private static IQueryable<Invoice> ApplyInvoicePeriodFilter(
         IQueryable<Invoice> query,

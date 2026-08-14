@@ -37,14 +37,14 @@
     protected override async Task OnInitializedAsync()
     {
         _existing = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
-        _dueDate = PreferencesMapper.FromExistingOrDefaults(_existing).DueDate;
+        _dueDate = _existing.FromExistingOrDefaults().DueDate;
         _loading = false;
     }
 
     private async Task SaveAsync()
     {
         _saving = true;
-        var request = PreferencesMapper.FromExistingOrDefaults(_existing) with { DueDate = _dueDate };
+        var request = _existing.FromExistingOrDefaults() with { DueDate = _dueDate };
         var ok = false;
         await UiActions.RunAsync(Toast, async () =>
         {

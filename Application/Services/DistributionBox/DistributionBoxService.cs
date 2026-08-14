@@ -3,6 +3,7 @@ using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.DistributionBox;
 using Shabakat.Application.Helper;
+using Shabakat.Application.Mappers;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Exceptions;
 
@@ -30,7 +31,7 @@ public sealed class DistributionBoxService : IDistributionBoxService
         var (items, totalCount) = await _distributionBoxRepository.GetAllPagedAsync(filter);
 
         return PagedResponse<DistributionBoxResponse>.Create(
-            data: items.Select(MapToResponse),
+            data: items.Select(b => b.ToResponse()),
             totalCount: totalCount,
             pageNumber: filter.PageNumber,
             pageSize: filter.PageSize);
@@ -39,7 +40,7 @@ public sealed class DistributionBoxService : IDistributionBoxService
     public async Task<IEnumerable<DistributionBoxResponse>> GetAllUnpagedAsync()
     {
         var boxes = await _distributionBoxRepository.GetAllWithDetailsAsync();
-        return boxes.Select(MapToResponse);
+        return boxes.Select(b => b.ToResponse());
     }
 
     public async Task<DistributionBoxResponse> CreateAsync(CreateDistributionBoxRequest request)
@@ -66,7 +67,7 @@ public sealed class DistributionBoxService : IDistributionBoxService
             created.Name,
             created.AreaId);
 
-        return MapToResponse(created);
+        return created.ToResponse();
     }
 
     public async Task<DistributionBoxResponse> UpdateAsync(
@@ -89,7 +90,7 @@ public sealed class DistributionBoxService : IDistributionBoxService
             ?? throw new DomainException("Distribution box not found.");
 
         _logger.LogInformation("Updated distribution box {BoxId} ({Name})", updated.Id, updated.Name);
-        return MapToResponse(updated);
+        return updated.ToResponse();
     }
 
     public async Task DeleteAsync(Guid id)
@@ -114,20 +115,5 @@ public sealed class DistributionBoxService : IDistributionBoxService
     {
         _ = await _areaRepository.GetByIdAsync(areaId)
             ?? throw new DomainException("Area not found.");
-    }
-
-    private static DistributionBoxResponse MapToResponse(Domain.Entities.DistributionBox box)
-    {
-        var customerCount = box.Customers?.Count ?? 0;
-        return new(
-            Id: box.Id,
-            Name: box.Name,
-            AreaId: box.AreaId,
-            AreaName: box.Area?.Name ?? string.Empty,
-            LocationNote: box.LocationNote,
-            Notes: box.Notes,
-            CustomerCount: customerCount,
-            CanBeDeleted: customerCount == 0,
-            CreatedAt: box.CreatedAt);
     }
 }

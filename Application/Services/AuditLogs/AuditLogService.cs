@@ -3,6 +3,7 @@ using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.AuditLogs;
 using Shabakat.Application.Helper;
+using Shabakat.Application.Mappers;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Enums;
 
@@ -69,23 +70,9 @@ public sealed class AuditLogService : IAuditLogService
         var (items, totalCount) = await _auditLogRepository.GetAllPagedAsync(filter);
 
         return PagedResponse<AuditLogResponse>.Create(
-            data: items.Select(Map),
+            data: items.Select(l => l.ToResponse()),
             totalCount: totalCount,
             pageNumber: filter.PageNumber,
             pageSize: filter.PageSize);
     }
-
-    private static AuditLogResponse Map(AuditLog log) =>
-        new(
-            Id: log.Id,
-            Action: log.Action.ToString(),
-            Status: log.Status.ToString(),
-            Summary: log.Summary,
-            Details: log.Details
-                .Select(d => new AuditLogDetailItem(d.Label, d.Value))
-                .ToList(),
-            EntityType: log.EntityType?.ToString(),
-            EntityId: log.EntityId,
-            ErrorMessage: log.ErrorMessage,
-            CreatedAt: log.CreatedAt);
 }

@@ -47,14 +47,14 @@
     protected override async Task OnInitializedAsync()
     {
         _existing = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
-        _enabled = PreferencesMapper.FromExistingOrDefaults(_existing).AmpereSchedulePricingEnabled;
+        _enabled = _existing.FromExistingOrDefaults().AmpereSchedulePricingEnabled;
         _loading = false;
     }
 
     private async Task SaveAsync()
     {
         _saving = true;
-        var request = PreferencesMapper.FromExistingOrDefaults(_existing) with { AmpereSchedulePricingEnabled = _enabled };
+        var request = _existing.FromExistingOrDefaults() with { AmpereSchedulePricingEnabled = _enabled };
         var ok = false;
         await UiActions.RunAsync(Toast, async () =>
         {

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Area;
+using Shabakat.Application.Mappers;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Exceptions;
 
@@ -21,7 +22,7 @@ public sealed class AreaService : IAreaService
     public async Task<IEnumerable<AreaResponse>> GetAllAsync()
     {
         var areas = await _areaRepository.GetAllWithCustomerCountAsync();
-        return areas.Select(MapToResponse);
+        return areas.Select(a => a.ToResponse());
     }
 
     public async Task<AreaResponse> CreateAsync(CreateAreaRequest request)
@@ -35,7 +36,7 @@ public sealed class AreaService : IAreaService
         await _areaRepository.SaveChangesAsync();
 
         _logger.LogInformation("Created area {AreaId} ({Name})", area.Id, area.Name);
-        return MapToResponse(area);
+        return area.ToResponse();
     }
 
     public async Task<AreaResponse> UpdateAsync(Guid id, UpdateAreaRequest request)
@@ -49,7 +50,7 @@ public sealed class AreaService : IAreaService
         await _areaRepository.SaveChangesAsync();
 
         _logger.LogInformation("Updated area {AreaId} ({Name})", area.Id, area.Name);
-        return MapToResponse(area);
+        return area.ToResponse();
     }
 
     public async Task DeleteAsync(Guid id)
@@ -69,11 +70,4 @@ public sealed class AreaService : IAreaService
         await _areaRepository.SaveChangesAsync();
         _logger.LogInformation("Deleted area {AreaId} ({Name})", id, name);
     }
-
-    private static AreaResponse MapToResponse(Domain.Entities.Area a) =>
-        new(
-            Id: a.Id,
-            Name: a.Name,
-            CustomerCount: a.Customers?.Count ?? 0,
-            CreatedAt: a.CreatedAt);
 }

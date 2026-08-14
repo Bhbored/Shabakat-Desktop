@@ -19,8 +19,6 @@ public sealed record GetPreferencesResponse(
     decimal IndustrialTVA,
     string Language,
     int DueDate,
-    int TriggerDate,
-    string? TriggerMessage,
     bool AmpereSchedulePricingEnabled,
     bool AmpereProrateByDaysEnabled);
 
@@ -43,7 +41,5 @@ public sealed record UpdatePreferencesRequest(
     decimal IndustrialTVA,
     string Language,
     int DueDate,
-    int TriggerDate,
-    string? TriggerMessage,
     bool AmpereSchedulePricingEnabled,
     bool AmpereProrateByDaysEnabled);

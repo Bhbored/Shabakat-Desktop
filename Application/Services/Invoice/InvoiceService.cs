@@ -4,6 +4,7 @@ using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Invoices;
 using Shabakat.Application.DTOs.Payment;
 using Shabakat.Application.Helper;
+using Shabakat.Application.Mappers;
 using Shabakat.Application.Services.Pricing;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Enums;
@@ -50,7 +51,7 @@ public sealed class InvoiceService : IInvoiceService
         var (items, totalCount) = await _invoiceRepository.GetAllPagedAsync(filter);
 
         return PagedResponse<InvoiceSummaryResponse>.Create(
-            data: items.Select(MapToSummary),
+            data: items.Select(i => i.ToSummary()),
             totalCount: totalCount,
             pageNumber: filter.PageNumber,
             pageSize: filter.PageSize);
@@ -59,7 +60,7 @@ public sealed class InvoiceService : IInvoiceService
     public async Task<IEnumerable<InvoiceResponse>> GetAllUnpagedAsync()
     {
         var items = await _invoiceRepository.GetAllWithCustomerAsync();
-        return items.Select(MapToResponse);
+        return items.Select(i => i.ToResponse());
     }
 
     public async Task<InvoiceResponse> GetByIdAsync(Guid id)
@@ -67,7 +68,7 @@ public sealed class InvoiceService : IInvoiceService
         var invoice = await _invoiceRepository.GetByIdWithPaymentsAsync(id)
             ?? throw new DomainException("Invoice not found.");
 
-        return MapToResponse(invoice);
+        return invoice.ToResponse();
     }
 
     public async Task CreateAsync(CreateInvoiceRequest request)
@@ -338,7 +339,7 @@ public sealed class InvoiceService : IInvoiceService
         await _invoiceRepository.SaveChangesAsync();
 
         _logger.LogInformation("Updated invoice {InvoiceId} (#{InvoiceNumber})", invoice.Id, invoice.InvoiceNumber);
-        return MapToResponse(invoice);
+        return invoice.ToResponse();
     }
 
     public async Task DeleteAsync(Guid id)
@@ -364,13 +365,13 @@ public sealed class InvoiceService : IInvoiceService
             ?? throw new DomainException("Invoice not found.");
 
         var payments = await _paymentRepository.GetByInvoiceIdAsync(invoiceId);
-        return payments.Select(MapPaymentToResponse);
+        return payments.Select(p => p.ToResponse());
     }
 
     public async Task<IEnumerable<PaymentResponse>> GetAllPaymentsUnpagedAsync()
     {
         var payments = await _paymentRepository.GetAllWithCustomerAsync();
-        return payments.Select(MapPaymentToResponse);
+        return payments.Select(p => p.ToResponse());
     }
 
     public async Task<FixedKilowattCalculateResponse> CalculateFixedKilowattAsync(
@@ -824,51 +825,4 @@ public sealed class InvoiceService : IInvoiceService
             Reason = reason
         });
     }
-
-    private static InvoiceSummaryResponse MapToSummary(Invoice i) =>
-        new(
-            Id: i.Id,
-            InvoiceNumber: i.InvoiceNumber,
-            CustomerName: i.Customer?.Name ?? string.Empty,
-            InvoiceStatus: i.InvoiceStatus.ToString(),
-            ConsumptionStart: i.IssueDate,
-            ConsumptionEnd: i.DueDate,
-            TotalAmount: i.TotalAmount,
-            PaidAmount: i.PaidAmount,
-            AmountDue: i.AmountDue,
-            BilledConsumption: i.BilledConsumption,
-            CreatedAt: i.CreatedAt,
-            CanBeDeleted: i.InvoiceStatus == InvoiceStatus.Unpaid);
-
-    private static InvoiceResponse MapToResponse(Invoice i) =>
-        new(
-            Id: i.Id,
-            InvoiceNumber: i.InvoiceNumber,
-            CustomerName: i.Customer?.Name ?? string.Empty,
-            CustomerPhone: i.Customer?.Phone,
-            CustomerId: i.CustomerId,
-            InvoiceStatus: i.InvoiceStatus.ToString(),
-            ConsumptionStart: i.IssueDate,
-            ConsumptionEnd: i.DueDate,
-            FixedCharge: i.FixedCharge,
-            TVA: i.TVA,
-            TotalAmount: i.TotalAmount,
-            PaidAmount: i.PaidAmount,
-            AmountDue: i.AmountDue,
-            BilledConsumption: i.BilledConsumption,
-            CreatedAt: i.CreatedAt,
-            UpdatedAt: i.UpdatedAt,
-            Payments: i.Payments.Select(MapPaymentToResponse));
-
-    private static PaymentResponse MapPaymentToResponse(Payment p) =>
-        new(
-            Id: p.Id,
-            InvoiceId: p.InvoiceId,
-            CustomerName: p.Customer?.Name ?? string.Empty,
-            CustomerId: p.CustomerId,
-            Amount: p.Amount,
-            PaymentMethod: p.PaymentMethod.ToString(),
-            PaymentDate: p.PaymentDate,
-            Notes: p.Notes,
-            CreatedAt: p.CreatedAt);
 }

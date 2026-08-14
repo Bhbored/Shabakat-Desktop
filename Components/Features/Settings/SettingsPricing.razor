@@ -96,7 +96,7 @@
 
     private void LoadValueForTier()
     {
-        var src = PreferencesMapper.FromExistingOrDefaults(_existing);
+        var src = _existing.FromExistingOrDefaults();
         _value = (_fieldKey, _tier) switch
         {
             ("pricePerKilowat", "residential") => src.ResidentialPricePerKilowat,
@@ -126,7 +126,7 @@
     private async Task SaveAsync()
     {
         _saving = true;
-        var baseReq = PreferencesMapper.FromExistingOrDefaults(_existing);
+        var baseReq = _existing.FromExistingOrDefaults();
         var request = (_fieldKey, _tier) switch
         {
             ("pricePerKilowat", "residential") => baseReq with { ResidentialPricePerKilowat = _value },

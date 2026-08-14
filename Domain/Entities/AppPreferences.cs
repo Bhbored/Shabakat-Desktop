@@ -29,6 +29,4 @@ public class AppPreferences : Base
 
     public string Language { get; set; } = "en";
     public int DueDate { get; set; } = 31;
-    public int TriggerDate { get; set; } = 1;
-    public string? TriggerMessage { get; set; }
 }

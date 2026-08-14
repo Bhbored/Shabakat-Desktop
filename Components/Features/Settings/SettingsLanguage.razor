@@ -44,7 +44,7 @@
     protected override async Task OnInitializedAsync()
     {
         _existing = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
-        _language = PreferencesMapper.FromExistingOrDefaults(_existing).Language;
+        _language = _existing.FromExistingOrDefaults().Language;
         _loading = false;
     }
 
@@ -56,7 +56,7 @@
     private async Task SaveAsync()
     {
         _saving = true;
-        var request = PreferencesMapper.FromExistingOrDefaults(_existing) with { Language = _language };
+        var request = _existing.FromExistingOrDefaults() with { Language = _language };
         var ok = false;
         await UiActions.RunAsync(Toast, async () =>
         {

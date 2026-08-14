@@ -31,6 +31,5 @@ public class AppPreferencesConfiguration : IEntityTypeConfiguration<AppPreferenc
         builder.Property(e => e.IndustrialTVA).HasColumnType("decimal(5,2)");
 
         builder.Property(e => e.Language).HasMaxLength(10);
-        builder.Property(e => e.TriggerMessage).HasMaxLength(1000);
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Preferences;
+using Shabakat.Application.Mappers;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Exceptions;
 
@@ -29,7 +30,7 @@ public sealed class AppPreferencesService : IAppPreferencesService
         if (preferences is null)
             return null;
 
-        return MapToResponse(preferences);
+        return preferences.ToResponse();
     }
 
     public async Task UpsertAsync(UpdatePreferencesRequest request)
@@ -48,65 +49,17 @@ public sealed class AppPreferencesService : IAppPreferencesService
 
         if (existing is null)
         {
-            await _preferencesRepository.AddAsync(ApplyRequest(new AppPreferences(), request));
+            await _preferencesRepository.AddAsync(new AppPreferences().Apply(request));
         }
         else
         {
-            ApplyRequest(existing, request);
+            existing.Apply(request);
             _preferencesRepository.Update(existing);
         }
 
         await _preferencesRepository.SaveChangesAsync();
         _logger.LogInformation("{Action} app preferences", isCreate ? "Created" : "Updated");
     }
-
-    private static AppPreferences ApplyRequest(AppPreferences prefs, UpdatePreferencesRequest request)
-    {
-        prefs.PricePerKilowat = request.PricePerKilowat;
-        prefs.PricePerAmp = request.PricePerAmp;
-        prefs.FixedCharge = request.FixedCharge;
-        prefs.TVA = request.TVA;
-
-        prefs.ResidentialPricePerAmp = request.ResidentialPricePerAmp;
-        prefs.ResidentialPricePerKilowat = request.ResidentialPricePerKilowat;
-        prefs.ResidentialFixedCharge = request.ResidentialFixedCharge;
-        prefs.ResidentialTVA = request.ResidentialTVA;
-
-        prefs.CommercialPricePerAmp = request.CommercialPricePerAmp;
-        prefs.CommercialPricePerKilowat = request.CommercialPricePerKilowat;
-        prefs.CommercialFixedCharge = request.CommercialFixedCharge;
-        prefs.CommercialTVA = request.CommercialTVA;
-
-        prefs.IndustrialPricePerAmp = request.IndustrialPricePerAmp;
-        prefs.IndustrialPricePerKilowat = request.IndustrialPricePerKilowat;
-        prefs.IndustrialFixedCharge = request.IndustrialFixedCharge;
-        prefs.IndustrialTVA = request.IndustrialTVA;
-
-        prefs.Language = request.Language.Trim();
-        prefs.DueDate = request.DueDate;
-        prefs.TriggerDate = request.TriggerDate;
-        prefs.TriggerMessage = string.IsNullOrWhiteSpace(request.TriggerMessage)
-            ? null
-            : request.TriggerMessage.Trim();
-        prefs.AmpereSchedulePricingEnabled = request.AmpereSchedulePricingEnabled;
-        prefs.AmpereProrateByDaysEnabled = request.AmpereProrateByDaysEnabled;
-
-        return prefs;
-    }
-
-    private static GetPreferencesResponse MapToResponse(AppPreferences preferences) =>
-        new(
-            preferences.PricePerKilowat, preferences.PricePerAmp,
-            preferences.FixedCharge, preferences.TVA,
-            preferences.ResidentialPricePerAmp, preferences.ResidentialPricePerKilowat,
-            preferences.ResidentialFixedCharge, preferences.ResidentialTVA,
-            preferences.CommercialPricePerAmp, preferences.CommercialPricePerKilowat,
-            preferences.CommercialFixedCharge, preferences.CommercialTVA,
-            preferences.IndustrialPricePerAmp, preferences.IndustrialPricePerKilowat,
-            preferences.IndustrialFixedCharge, preferences.IndustrialTVA,
-            preferences.Language, preferences.DueDate, preferences.TriggerDate,
-            preferences.TriggerMessage,
-            preferences.AmpereSchedulePricingEnabled, preferences.AmpereProrateByDaysEnabled);
 
     private static void ValidatePreferencesRequest(UpdatePreferencesRequest request)
     {
@@ -149,11 +102,5 @@ public sealed class AppPreferencesService : IAppPreferencesService
 
         if (request.DueDate < 1 || request.DueDate > 31)
             throw new DomainException("DueDate must be between 1 and 31.");
-
-        if (request.TriggerDate < 1 || request.TriggerDate > 31)
-            throw new DomainException("TriggerDate must be between 1 and 31.");
-
-        if (request.TriggerMessage is not null && request.TriggerMessage.Trim().Length > 1000)
-            throw new DomainException("TriggerMessage cannot exceed 1000 characters.");
     }
 }

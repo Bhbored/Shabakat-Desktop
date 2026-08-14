@@ -3,6 +3,7 @@ using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Expenses;
 using Shabakat.Application.Helper;
+using Shabakat.Application.Mappers;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Enums;
 using Shabakat.Domain.Exceptions;
@@ -37,7 +38,7 @@ public sealed class ExpenseService : IExpenseService
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
         return new ExpenseListResponse(
-            Data: items.Select(MapToResponse),
+            Data: items.Select(e => e.ToResponse()),
             TotalCount: totalCount,
             PageNumber: pageNumber,
             PageSize: pageSize,
@@ -54,7 +55,7 @@ public sealed class ExpenseService : IExpenseService
 
         return items
             .OrderByDescending(e => e.ExpenseDate)
-            .Select(MapToResponse);
+            .Select(e => e.ToResponse());
     }
 
     public async Task<ExpenseResponse> GetByIdAsync(Guid id)
@@ -62,7 +63,7 @@ public sealed class ExpenseService : IExpenseService
         var expense = await _expenseRepository.GetByIdAsync(id)
             ?? throw new DomainException("Expense not found.");
 
-        return MapToResponse(expense);
+        return expense.ToResponse();
     }
 
     public async Task<ExpenseResponse> CreateAsync(CreateExpenseRequest request)
@@ -88,7 +89,7 @@ public sealed class ExpenseService : IExpenseService
             expense.ExpenseType,
             expense.Amount);
 
-        return MapToResponse(expense);
+        return expense.ToResponse();
     }
 
     public async Task<ExpenseResponse> UpdateAsync(Guid id, UpdateExpenseRequest request)
@@ -108,7 +109,7 @@ public sealed class ExpenseService : IExpenseService
         await _expenseRepository.SaveChangesAsync();
 
         _logger.LogInformation("Updated expense {ExpenseId}", expense.Id);
-        return MapToResponse(expense);
+        return expense.ToResponse();
     }
 
     public async Task DeleteAsync(Guid id)
@@ -132,15 +133,4 @@ public sealed class ExpenseService : IExpenseService
                 "Label is required when ExpenseType is 'Other' (e.g. 'Rent', 'Insurance').");
         }
     }
-
-    private static ExpenseResponse MapToResponse(Domain.Entities.Expenses e) =>
-        new(
-            Id: e.Id,
-            ExpenseType: e.ExpenseType.ToString(),
-            Amount: e.Amount,
-            ExpenseDate: e.ExpenseDate,
-            Label: e.Label,
-            Notes: e.Notes,
-            CreatedAt: e.CreatedAt,
-            UpdatedAt: e.UpdatedAt);
 }

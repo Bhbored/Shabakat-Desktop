@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Profile;
+using Shabakat.Application.Mappers;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Exceptions;
 using Shabakat.Infrastructure.Persistence;
@@ -22,7 +23,7 @@ public sealed class AppUserService : IAppUserService
     public async Task<ProfileResponse?> GetAsync()
     {
         var user = await _db.AppUsers.AsNoTracking().FirstOrDefaultAsync();
-        return user is null ? null : Map(user);
+        return user?.ToResponse();
     }
 
     public async Task<ProfileResponse> UpsertAsync(UpdateProfileRequest request)
@@ -84,14 +85,6 @@ public sealed class AppUserService : IAppUserService
             isCreate ? "Created" : "Updated",
             user.Id,
             user.Username);
-        return Map(user);
+        return user.ToResponse();
     }
-
-    private static ProfileResponse Map(AppUser user) =>
-        new(
-            Id: user.Id,
-            FullName: user.FullName,
-            Username: user.Username,
-            BusinessName: user.BusinessName,
-            LogoUrl: user.LogoUrl);
 }

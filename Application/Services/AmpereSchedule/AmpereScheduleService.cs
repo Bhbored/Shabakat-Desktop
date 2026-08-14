@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.AmpereSchedule;
+using Shabakat.Application.Mappers;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Exceptions;
 
@@ -23,7 +24,7 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
     public async Task<IEnumerable<AmpereScheduleResponse>> GetAllAsync()
     {
         var schedules = await _ampereScheduleRepository.GetAllWithCustomerCountAsync();
-        return schedules.Select(MapToResponse);
+        return schedules.Select(s => s.ToResponse());
     }
 
     public async Task<AmpereScheduleResponse> CreateAsync(CreateAmpereScheduleRequest request)
@@ -52,7 +53,7 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
             created.Name,
             created.HoursPerDay);
 
-        return MapToResponse(created);
+        return created.ToResponse();
     }
 
     public async Task<AmpereScheduleResponse> UpdateAsync(Guid id, UpdateAmpereScheduleRequest request)
@@ -76,7 +77,7 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
             ?? throw new DomainException("Ampere schedule not found.");
 
         _logger.LogInformation("Updated ampere schedule {ScheduleId} ({Name})", updated.Id, updated.Name);
-        return MapToResponse(updated);
+        return updated.ToResponse();
     }
 
     public async Task DeleteAsync(Guid id)
@@ -104,21 +105,5 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
             throw new DomainException(
                 $"An ampere schedule with {hoursPerDay} hours per day already exists.");
         }
-    }
-
-    private static AmpereScheduleResponse MapToResponse(Domain.Entities.AmpereSchedule schedule)
-    {
-        var customerCount = schedule.Customers?.Count ?? 0;
-        return new(
-            Id: schedule.Id,
-            Name: schedule.Name,
-            HoursPerDay: schedule.HoursPerDay,
-            PricePerAmp: schedule.PricePerAmp,
-            ResidentialPricePerAmp: schedule.ResidentialPricePerAmp,
-            CommercialPricePerAmp: schedule.CommercialPricePerAmp,
-            IndustrialPricePerAmp: schedule.IndustrialPricePerAmp,
-            CustomerCount: customerCount,
-            CanBeDeleted: customerCount == 0,
-            CreatedAt: schedule.CreatedAt);
     }
 }
