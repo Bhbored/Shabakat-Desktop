@@ -10,10 +10,6 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
     {
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.FullName)
-            .IsRequired()
-            .HasMaxLength(200);
-
         builder.Property(e => e.Username)
             .IsRequired()
             .HasMaxLength(100);

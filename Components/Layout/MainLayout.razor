@@ -7,7 +7,7 @@
 
 <div class="flex min-h-dvh bg-background">
     <aside class="w-[250px] shrink-0 hidden md:flex md:flex-col md:sticky md:top-0 md:h-screen border-r border-border bg-sidebar">
-        <NavMenu DisplayName="@_displayName" Initials="@_initials" />
+        <NavMenu DisplayName="@_displayName" Initials="@_initials" LogoSrc="@_logoSrc" />
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
@@ -35,7 +35,16 @@
                    aria-label="Open audit logs">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
                 </a>
-                <div class="flex h-8 w-8 items-center justify-center rounded-full text-white text-xs font-semibold" style="background-color: @FormatHelper.AvatarColor(_displayName);">@_initials</div>
+                <div class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-white text-xs font-semibold" style="background-color: @FormatHelper.AvatarColor(_displayName);">
+                    @if (!string.IsNullOrWhiteSpace(_logoSrc))
+                    {
+                        <img src="@_logoSrc" alt="" class="h-full w-full object-cover" />
+                    }
+                    else
+                    {
+                        @_initials
+                    }
+                </div>
             </div>
         </header>
 
@@ -52,7 +61,7 @@
         <div class="md:hidden fixed inset-0 z-50">
             <div class="fixed inset-0 bg-black/50" @onclick="ToggleMobileNav"></div>
             <aside class="fixed inset-y-0 left-0 w-[280px] bg-sidebar border-r border-sidebar-border shadow-xl flex flex-col">
-                <NavMenu DisplayName="@_displayName" Initials="@_initials" OnNavigate="CloseMobileNav" />
+                <NavMenu DisplayName="@_displayName" Initials="@_initials" LogoSrc="@_logoSrc" OnNavigate="CloseMobileNav" />
             </aside>
         </div>
     }
@@ -62,18 +71,38 @@
     private bool _mobileNavOpen;
     private string _displayName = "Admin";
     private string _initials = "AD";
+    private string? _logoSrc;
 
     protected override async Task OnInitializedAsync()
     {
         ThemeService.Changed += OnThemeChanged;
+        AppUserService.Changed += OnProfileChanged;
         await ApplyThemeAsync();
+        await LoadProfileAsync();
+    }
 
+    private void OnProfileChanged() => _ = InvokeAsync(async () =>
+    {
+        await LoadProfileAsync();
+        StateHasChanged();
+    });
+
+    private async Task LoadProfileAsync()
+    {
         var profile = await AppUserService.GetAsync();
-        if (profile is not null && !string.IsNullOrWhiteSpace(profile.FullName))
+        if (profile is null)
         {
-            _displayName = profile.FullName;
-            _initials = FormatHelper.Initials(profile.FullName);
+            _logoSrc = null;
+            return;
         }
+
+        if (!string.IsNullOrWhiteSpace(profile.BusinessName))
+        {
+            _displayName = profile.BusinessName;
+            _initials = FormatHelper.Initials(profile.BusinessName);
+        }
+
+        _logoSrc = CompanyLogoStore.ToDataUri(profile.LogoUrl);
     }
 
     private void OnThemeChanged() => _ = InvokeAsync(ApplyThemeAsync);
@@ -130,5 +159,9 @@
 
     private void CloseMobileNav() => _mobileNavOpen = false;
 
-    public void Dispose() => ThemeService.Changed -= OnThemeChanged;
+    public void Dispose()
+    {
+        ThemeService.Changed -= OnThemeChanged;
+        AppUserService.Changed -= OnProfileChanged;
+    }
 }

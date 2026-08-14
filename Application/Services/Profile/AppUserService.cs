@@ -14,6 +14,8 @@ public sealed class AppUserService : IAppUserService
     private readonly AppDbContext _db;
     private readonly ILogger<AppUserService> _logger;
 
+    public event Action? Changed;
+
     public AppUserService(AppDbContext db, ILogger<AppUserService> logger)
     {
         _db = db;
@@ -28,21 +30,6 @@ public sealed class AppUserService : IAppUserService
 
     public async Task<ProfileResponse> UpsertAsync(UpdateProfileRequest request)
     {
-        var fullName = request.FullName?.Trim() ?? string.Empty;
-        var username = request.Username?.Trim() ?? string.Empty;
-
-        if (string.IsNullOrWhiteSpace(fullName))
-            throw new DomainException("Full name is required.");
-
-        if (string.IsNullOrWhiteSpace(username))
-            throw new DomainException("Username is required.");
-
-        if (fullName.Length > 200)
-            throw new DomainException("Full name cannot exceed 200 characters.");
-
-        if (username.Length > 100)
-            throw new DomainException("Username cannot exceed 100 characters.");
-
         var businessName = string.IsNullOrWhiteSpace(request.BusinessName)
             ? null
             : request.BusinessName.Trim();
@@ -63,28 +50,20 @@ public sealed class AppUserService : IAppUserService
         {
             user = new AppUser
             {
-                FullName = fullName,
-                Username = username,
                 BusinessName = businessName,
-                LogoUrl = logoUrl,
-                PasswordHash = string.Empty
+                LogoUrl = logoUrl
             };
             await _db.AppUsers.AddAsync(user);
         }
         else
         {
-            user.FullName = fullName;
-            user.Username = username;
             user.BusinessName = businessName;
             user.LogoUrl = logoUrl;
         }
 
         await _db.SaveChangesAsync();
-        _logger.LogInformation(
-            "{Action} profile {UserId} ({Username})",
-            isCreate ? "Created" : "Updated",
-            user.Id,
-            user.Username);
+        _logger.LogInformation("{Action} company profile {UserId}", isCreate ? "Created" : "Updated", user.Id);
+        Changed?.Invoke();
         return user.ToResponse();
     }
 }

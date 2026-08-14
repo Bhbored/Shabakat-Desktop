@@ -845,9 +845,7 @@ public sealed class InvoiceService : IInvoiceService
             ?? throw new DomainException("App preferences have not been configured.");
 
         var profile = await _appUserService.GetAsync();
-        var companyName = !string.IsNullOrWhiteSpace(profile?.BusinessName)
-            ? profile.BusinessName.Trim()
-            : profile?.FullName?.Trim() ?? string.Empty;
+        var companyName = profile?.BusinessName?.Trim() ?? string.Empty;
 
         var unitPrice = _pricingService.GetRates(customer, preferences).UnitPrice;
         var isMeterKilowatt = customer.Plan == PlanType.Kilowatt;

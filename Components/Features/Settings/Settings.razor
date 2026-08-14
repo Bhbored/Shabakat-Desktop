@@ -84,7 +84,7 @@
 
     private string LogoLabel =>
         !string.IsNullOrWhiteSpace(_profile?.LogoUrl) ? "Configured"
-        : !string.IsNullOrWhiteSpace(_profile?.FullName) ? _profile.FullName
+        : !string.IsNullOrWhiteSpace(_profile?.BusinessName) ? _profile.BusinessName
         : "Not set";
 
     protected override async Task OnInitializedAsync()
