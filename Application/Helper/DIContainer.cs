@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shabakat.Application.Contracts.Abstractions;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.Services.AmpereSchedules;
@@ -51,6 +52,7 @@ public static class DIContainer
     {
         services.RegisterDataBase();
 
+        services.AddSingleton<IInvoiceTemplateRenderer, InvoiceTemplateRenderer>();
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddScoped<IToastService, ToastService>();
         services.AddScoped<IPricingService, PricingService>();

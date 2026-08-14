@@ -435,31 +435,43 @@
     private async Task PrintInvoiceAsync(InvoiceSummaryResponse inv)
     {
         _openMenuId = null;
-        var detail = await UiActions.RunAsync(Toast, () => InvoiceService.GetByIdAsync(inv.Id));
-        if (detail is null)
-        {
-            Toast.Error("Unable to print invoice.");
-            return;
-        }
-
-        await PrintHtmlAsync(detail);
+        await PrintByIdAsync(inv.Id, inv.InvoiceNumber);
     }
 
     private async Task PrintDetailsAsync()
     {
         if (_details is null) return;
-        await PrintHtmlAsync(_details);
+        await PrintByIdAsync(_details.Id, _details.InvoiceNumber);
     }
 
-    private async Task PrintHtmlAsync(InvoiceResponse invoice)
+    private async Task PrintByIdAsync(Guid invoiceId, int invoiceNumber)
     {
+        var html = await UiActions.RunAsync(Toast, () => InvoiceService.RenderPrintHtmlAsync(invoiceId));
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            Toast.Error("Unable to print invoice.");
+            return;
+        }
+
+        var fileName = invoiceNumber.ToString();
+        var window = Microsoft.Maui.Controls.Application.Current?.Windows.FirstOrDefault();
+        var previousTitle = window?.Title;
         try
         {
-            await Js.InvokeVoidAsync("shabakatPrintHtml", InvoicePrintHtml.Build(invoice));
+            if (window is not null)
+                window.Title = fileName;
+
+            await Task.Delay(50);
+            await Js.InvokeVoidAsync("shabakatPrintHtml", html, fileName);
         }
         catch
         {
             Toast.Error("Unable to print invoice.");
+        }
+        finally
+        {
+            if (window is not null)
+                window.Title = string.IsNullOrWhiteSpace(previousTitle) ? "Shabakat" : previousTitle;
         }
     }
 

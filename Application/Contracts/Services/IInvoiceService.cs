@@ -19,4 +19,5 @@ public interface IInvoiceService
     Task<IEnumerable<PaymentResponse>> GetAllPaymentsUnpagedAsync();
     Task<IEnumerable<InvoiceSkippedResponse>> GetSkippedAsync();
     Task<FixedKilowattCalculateResponse> CalculateFixedKilowattAsync(FixedKilowattCalculateRequest request);
+    Task<string> RenderPrintHtmlAsync(Guid invoiceId);
 }

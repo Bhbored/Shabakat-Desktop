@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Shabakat.Application.Contracts.Abstractions;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Invoices;
@@ -22,6 +23,8 @@ public sealed class InvoiceService : IInvoiceService
     private readonly IInvoiceSkipRepository _invoiceSkipRepository;
     private readonly IPricingService _pricingService;
     private readonly IAuditLogService _auditLogService;
+    private readonly IAppUserService _appUserService;
+    private readonly IInvoiceTemplateRenderer _templateRenderer;
     private readonly ILogger<InvoiceService> _logger;
 
     public InvoiceService(
@@ -33,6 +36,8 @@ public sealed class InvoiceService : IInvoiceService
         IInvoiceSkipRepository invoiceSkipRepository,
         IPricingService pricingService,
         IAuditLogService auditLogService,
+        IAppUserService appUserService,
+        IInvoiceTemplateRenderer templateRenderer,
         ILogger<InvoiceService> logger)
     {
         _invoiceRepository = invoiceRepository;
@@ -43,6 +48,8 @@ public sealed class InvoiceService : IInvoiceService
         _invoiceSkipRepository = invoiceSkipRepository;
         _pricingService = pricingService;
         _auditLogService = auditLogService;
+        _appUserService = appUserService;
+        _templateRenderer = templateRenderer;
         _logger = logger;
     }
 
@@ -824,5 +831,132 @@ public sealed class InvoiceService : IInvoiceService
             BillingPeriodEnd = billingPeriodEnd,
             Reason = reason
         });
+    }
+
+    public async Task<string> RenderPrintHtmlAsync(Guid invoiceId)
+    {
+        var invoice = await _invoiceRepository.GetByIdForPrintAsync(invoiceId)
+            ?? throw new DomainException("Invoice not found.");
+
+        var customer = invoice.Customer
+            ?? throw new DomainException("Customer not found.");
+
+        var preferences = await _preferencesRepository.GetAsync()
+            ?? throw new DomainException("App preferences have not been configured.");
+
+        var profile = await _appUserService.GetAsync();
+        var companyName = !string.IsNullOrWhiteSpace(profile?.BusinessName)
+            ? profile.BusinessName.Trim()
+            : profile?.FullName?.Trim() ?? string.Empty;
+
+        var unitPrice = _pricingService.GetRates(customer, preferences).UnitPrice;
+        var isMeterKilowatt = customer.Plan == PlanType.Kilowatt;
+        var isFixedKilowatt = customer.Plan == PlanType.FixedKilowatt;
+
+        decimal? previousReading = null;
+        DateOnly? previousReadingDate = null;
+        decimal? currentReading = null;
+        DateOnly? currentReadingDate = null;
+        decimal? totalConsumption = null;
+        decimal consumptionCost;
+
+        if (isMeterKilowatt)
+        {
+            var referenceToday = DateOnly.FromDateTime(invoice.CreatedAt);
+            var periodEnd = BillingPeriodHelper.ResolveKilowattMeterReadingPeriodEnd(
+                invoice.DueDate, referenceToday);
+            var periodReading = await _meterReadingRepository.GetForPeriodAsync(
+                customer.Id, invoice.IssueDate, periodEnd);
+
+            if (periodReading is not null)
+            {
+                currentReading = periodReading.ReadingValue;
+                currentReadingDate = periodReading.ReadingDate;
+
+                var priorReading = await _meterReadingRepository.GetLatestBeforeAsync(
+                    customer.Id, periodReading.ReadingDate, periodReading.Id);
+
+                previousReading = priorReading?.ReadingValue ?? 0m;
+                previousReadingDate = priorReading?.ReadingDate;
+                totalConsumption = InvoiceCalculationHelper.CalculateConsumption(
+                    currentReading.Value, priorReading);
+            }
+
+            consumptionCost = Math.Round((totalConsumption ?? 0m) * unitPrice, 4);
+        }
+        else if (isFixedKilowatt)
+        {
+            totalConsumption = invoice.BilledConsumption
+                ?? InvoiceCalculationHelper.CalculateFixedKilowattConsumption(
+                    invoice.TotalAmount,
+                    customer.PlanValue,
+                    unitPrice,
+                    invoice.FixedCharge,
+                    invoice.TVA);
+            consumptionCost = Math.Round((totalConsumption ?? 0m) * unitPrice, 4);
+
+            var latestReading = await _meterReadingRepository.GetLatestForCustomerAsync(customer.Id);
+            if (latestReading is not null)
+            {
+                currentReading = latestReading.ReadingValue;
+                currentReadingDate = latestReading.ReadingDate;
+                previousReading = currentReading - totalConsumption;
+                if (previousReading < 0) previousReading = 0;
+            }
+        }
+        else
+        {
+            consumptionCost = Math.Round(unitPrice * customer.PlanValue, 4);
+        }
+
+        var subtotalBeforeTva = Math.Round(consumptionCost + invoice.FixedCharge, 4);
+        var tvaAmount = invoice.TVA > 0
+            ? Math.Round(subtotalBeforeTva * invoice.TVA / 100m, 4)
+            : 0m;
+
+        var createdOn = DateOnly.FromDateTime(invoice.CreatedAt);
+        var paymentDueDate = BillingPeriodHelper.ResolvePaymentDueDate(
+            createdOn, preferences.DueDate);
+
+        var model = new InvoicePrintModel(
+            CompanyName: companyName,
+            LogoUrl: profile?.LogoUrl?.Trim(),
+            InvoiceNumber: invoice.InvoiceNumber,
+            CustomerName: customer.Name,
+            CustomerPhone: customer.Phone,
+            CustomerAddress: customer.Address,
+            PlanType: customer.Plan.ToString(),
+            PlanValue: customer.PlanValue,
+            UnitPrice: unitPrice,
+            FixedCharge: invoice.FixedCharge,
+            TvaPercent: invoice.TVA,
+            TvaAmount: tvaAmount,
+            ShowTva: invoice.TVA > 0,
+            PreviousReading: previousReading,
+            PreviousReadingDate: previousReadingDate?.ToString("dd-MMM-yy"),
+            CurrentReading: currentReading,
+            CurrentReadingDate: currentReadingDate?.ToString("dd-MMM-yy"),
+            TotalConsumption: totalConsumption,
+            ConsumptionCost: consumptionCost,
+            SubtotalBeforeTva: subtotalBeforeTva,
+            TotalAmount: invoice.TotalAmount,
+            PaidAmount: invoice.PaidAmount,
+            AmountDue: invoice.AmountDue,
+            InvoiceStatus: invoice.InvoiceStatus.ToString(),
+            ConsumptionStart: invoice.IssueDate.ToString("dd-MMM-yy"),
+            ConsumptionEnd: invoice.DueDate.ToString("dd-MMM-yy"),
+            DueDate: paymentDueDate.ToString("dd-MMM-yy"),
+            CreatedDate: invoice.CreatedAt.ToString("dd-MMM-yy"),
+            IsKilowattPlan: isMeterKilowatt,
+            IsFixedKilowattPlan: isFixedKilowatt);
+
+        try
+        {
+            return _templateRenderer.Render(model, preferences.Language);
+        }
+        catch (FileNotFoundException)
+        {
+            throw new DomainException("Invoice print template was not found.");
+        }
     }
 }

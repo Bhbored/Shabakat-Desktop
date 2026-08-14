@@ -53,6 +53,8 @@
 
         <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
         <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+        <MauiAsset Include="Infrastructure\Templates\invoice.html" LogicalName="Templates\invoice.html" />
+        <MauiAsset Include="Infrastructure\Templates\invoice.ar.html" LogicalName="Templates\invoice.ar.html" />
 		
     </ItemGroup>
 
@@ -89,6 +91,17 @@
 		<MakeDir Directories="$(_DevFlowBlazorDstDir)" Condition="Exists('$(_DevFlowBlazorSrc)')" />
 		<Copy SourceFiles="$(_DevFlowBlazorSrc)" DestinationFolder="$(_DevFlowBlazorDstDir)" SkipUnchangedFiles="true" Condition="Exists('$(_DevFlowBlazorSrc)')" />
 	</Target>
+
+    <ItemGroup>
+        <Content Include="Infrastructure\Templates\invoice.html">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>Templates\invoice.html</Link>
+        </Content>
+        <Content Include="Infrastructure\Templates\invoice.ar.html">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>Templates\invoice.ar.html</Link>
+        </Content>
+    </ItemGroup>
 
 	<Target Name="BuildTailwind" BeforeTargets="BeforeBuild">
 		<Exec Command="npm run tw:build" Condition="'$(Configuration)' == 'Release'" ContinueOnError="true" />
