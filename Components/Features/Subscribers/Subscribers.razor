@@ -497,7 +497,8 @@
         var detail = await UiActions.RunAsync(Toast, () => CustomerService.GetByIdAsync(sub.Id));
         _details = detail;
         if (detail is not null
-            && detail.Plan.Equals(nameof(PlanType.Kilowatt), StringComparison.OrdinalIgnoreCase))
+            && (detail.Plan.Equals(nameof(PlanType.Kilowatt), StringComparison.OrdinalIgnoreCase)
+                || detail.Plan.Equals(nameof(PlanType.FixedKilowatt), StringComparison.OrdinalIgnoreCase)))
         {
             var readings = await UiActions.RunAsync(Toast, () => MeterReadingService.GetAllForCustomerAsync(detail.Id)) ?? [];
             _meterReadings.AddRange(readings);

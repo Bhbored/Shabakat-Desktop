@@ -1,6 +1,7 @@
 @namespace Shabakat.Components.Features.Expenses.Components
 
-<tr class="border-b border-border transition-colors hover:bg-muted/30 @(MenuOpen ? "relative z-40" : null)">
+<tr class="cursor-pointer border-b border-border transition-colors hover:bg-muted/30 @(MenuOpen ? "relative z-40" : null)"
+    @onclick="OnView">
     <td class="px-4 py-3.5 align-middle">
         <ExpenseTypeBadge Category="@Expense.ExpenseType" />
     </td>
