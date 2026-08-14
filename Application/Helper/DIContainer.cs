@@ -19,6 +19,7 @@ using Shabakat.Application.Services.Theme;
 using Shabakat.Application.Services.Toasts;
 using Shabakat.Infrastructure.Persistence;
 using Shabakat.Infrastructure.Persistence.Interceptors;
+using Shabakat.Infrastructure.Persistence.Seed;
 using Shabakat.Infrastructure.Repository;
 
 public static class DIContainer
@@ -71,6 +72,7 @@ public static class DIContainer
         services.AddScoped<ICustomerExportService, CustomerExportService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IInvoiceService, InvoiceService>();
+        services.AddScoped<IDatabaseSeedService, LebanonDatabaseSeeder>();
 
         return services;
     }

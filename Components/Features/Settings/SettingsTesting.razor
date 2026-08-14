@@ -1,0 +1,86 @@
+@page "/settings/testing"
+@inject IDatabaseSeedService SeedService
+@inject IToastService Toast
+
+<SettingsScaffold Title="Testing">
+    <div class="space-y-5">
+        <div>
+            <p class="text-sm font-medium text-foreground">Lebanon sample data</p>
+            <p class="mt-1 text-xs text-muted-foreground">
+                Inserts correlated demo areas, boxes, customers, invoices, payments, and expenses.
+            </p>
+        </div>
+
+        @if (_alreadySeeded && !_seeding)
+        {
+            <p class="rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                Sample data is already present in this database.
+            </p>
+        }
+
+        @if (_seeding || _progress > 0)
+        {
+            <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>@(_seeding ? "Seeding..." : "Done")</span>
+                    <span>@((_progress * 100).ToString("0"))%</span>
+                </div>
+                <div class="h-2.5 overflow-hidden rounded-full bg-muted">
+                    <div class="h-full rounded-full bg-primary transition-[width] duration-300"
+                         style="width: @((_progress * 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                </div>
+            </div>
+        }
+
+        <button type="button"
+                class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+                disabled="@(_seeding || _alreadySeeded)"
+                @onclick="SeedAsync">
+            @(_seeding ? "Seeding..." : _alreadySeeded ? "Already seeded" : "Seed sample data")
+        </button>
+    </div>
+</SettingsScaffold>
+
+@code {
+    private bool _seeding;
+    private bool _alreadySeeded;
+    private double _progress;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _alreadySeeded = await SeedService.IsSeededAsync();
+    }
+
+    private async Task SeedAsync()
+    {
+        if (_seeding || _alreadySeeded)
+            return;
+
+        _seeding = true;
+        _progress = 0;
+        var ok = false;
+
+        try
+        {
+            await foreach (var value in SeedService.SeedAsync())
+            {
+                _progress = value;
+                await InvokeAsync(StateHasChanged);
+            }
+
+            _alreadySeeded = await SeedService.IsSeededAsync();
+            ok = _alreadySeeded;
+            if (ok)
+                Toast.Success("Sample data seeded.");
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message);
+        }
+        finally
+        {
+            _seeding = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}
