@@ -6,8 +6,7 @@
 @inject IJSRuntime Js
 
 <div class="space-y-4" @onclick="CloseMenu">
-    <InvoicesToolbar Customers="_customers"
-                     CustomerFilter="@_customerFilter"
+    <InvoicesToolbar CustomerFilter="@_customerFilter"
                      StatusFilter="@_statusFilter"
                      DateFrom="_dateFrom"
                      DateTo="_dateTo"
@@ -41,7 +40,6 @@
 </div>
 
 <CreateInvoiceSheet Open="_showCreate"
-                    Customers="_customers"
                     Model="_create"
                     Saving="_saving"
                     AmpereProrateByDaysEnabled="_ampereProrateByDaysEnabled"
@@ -79,7 +77,6 @@
 
 @code {
     private readonly List<InvoiceSummaryResponse> _items = [];
-    private readonly List<CustomerResponse> _customers = [];
     private readonly List<PaymentResponse> _payments = [];
 
     private bool _loading = true;
@@ -113,9 +110,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var customers = await UiActions.RunAsync(Toast, () => CustomerService.GetAllUnpagedAsync()) ?? [];
-        _customers.Clear();
-        _customers.AddRange(customers.OrderBy(c => c.Name));
         var prefs = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
         _ampereProrateByDaysEnabled = prefs?.AmpereProrateByDaysEnabled == true;
         await LoadAsync();
@@ -260,7 +254,9 @@
             return;
         }
 
-        var customer = _customers.FirstOrDefault(c => c.Id == customerId);
+        var customer = await UiActions.RunAsync(Toast, () => CustomerService.GetByIdAsync(customerId));
+        if (customer is null)
+            return;
         int? billedDays = null;
         decimal? paymentAmount = null;
         decimal? kilowattAmount = null;
@@ -416,7 +412,7 @@
 
         _details = detail;
         _detailsCustomer = detail.CustomerId is { } customerId
-            ? _customers.FirstOrDefault(c => c.Id == customerId)
+            ? await UiActions.RunAsync(Toast, () => CustomerService.GetByIdAsync(customerId))
             : null;
         var payments = await UiActions.RunAsync(Toast, () => InvoiceService.GetPaymentsAsync(inv.Id)) ?? detail.Payments;
         _payments.Clear();

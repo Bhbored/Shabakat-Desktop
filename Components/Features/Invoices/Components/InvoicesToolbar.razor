@@ -4,15 +4,10 @@
     <div class="flex flex-wrap items-end gap-3">
         <div class="min-w-64 flex-1">
             <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Customer</label>
-            <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                    value="@CustomerFilter"
-                    @onchange="OnCustomerFilterChanged">
-                <option value="">All customers</option>
-                @foreach (var cust in Customers)
-                {
-                    <option value="@cust.Id">@cust.Name</option>
-                }
-            </select>
+            <CustomerSearchSelect Value="@CustomerFilter"
+                                  ValueChanged="OnCustomerSelected"
+                                  AllowEmpty="true"
+                                  EmptyLabel="All customers" />
         </div>
 
         <div class="min-w-48">
@@ -69,7 +64,6 @@
 </div>
 
 @code {
-    [Parameter] public IReadOnlyList<CustomerResponse> Customers { get; set; } = [];
     [Parameter] public string CustomerFilter { get; set; } = "";
     [Parameter] public EventCallback<string> CustomerFilterChanged { get; set; }
     [Parameter] public string StatusFilter { get; set; } = "";
@@ -87,9 +81,9 @@
     private string DateFromText => DateFrom?.ToString("yyyy-MM-dd") ?? "";
     private string DateToText => DateTo?.ToString("yyyy-MM-dd") ?? "";
 
-    private async Task OnCustomerFilterChanged(ChangeEventArgs e)
+    private async Task OnCustomerSelected(string value)
     {
-        await CustomerFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+        await CustomerFilterChanged.InvokeAsync(value);
         await OnFiltersChanged.InvokeAsync();
     }
 

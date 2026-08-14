@@ -1,0 +1,231 @@
+@namespace Shabakat.Components.Shared
+@inject ICustomerService CustomerService
+@implements IDisposable
+
+<div class="relative">
+    <button type="button"
+            class="flex h-[2.625rem] w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3 text-left text-sm text-foreground outline-none transition hover:bg-muted/40 focus:border-primary"
+            @onclick="ToggleAsync">
+        <span class="truncate @(string.IsNullOrWhiteSpace(DisplayLabel) ? "text-muted-foreground" : "")">@DisplayLabel</span>
+        <svg class="h-4 w-4 shrink-0 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9" />
+        </svg>
+    </button>
+
+    @if (_open)
+    {
+        <div class="fixed inset-0 z-[60]" @onclick="Close"></div>
+        <div class="absolute z-[70] mt-1 w-full overflow-hidden rounded-xl border border-border bg-card shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
+            <div class="border-b border-border p-2">
+                <input @ref="_searchInput"
+                       type="text"
+                       class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                       placeholder="Search customers..."
+                       value="@_search"
+                       @oninput="OnSearchInput"
+                       @onclick:stopPropagation="true" />
+            </div>
+            <div class="max-h-64 overflow-y-auto py-1">
+                @if (AllowEmpty)
+                {
+                    <button type="button"
+                            class="@OptionClass(string.IsNullOrWhiteSpace(Value))"
+                            @onclick="SelectEmptyAsync">
+                        @EmptyLabel
+                    </button>
+                }
+
+                @if (_loading)
+                {
+                    <div class="space-y-2 px-3 py-3">
+                        @for (var i = 0; i < 4; i++)
+                        {
+                            <div class="h-8 w-full animate-pulse rounded-lg bg-muted"></div>
+                        }
+                    </div>
+                }
+                else if (_items.Count == 0)
+                {
+                    <p class="px-3 py-4 text-sm text-muted-foreground">No customers found.</p>
+                }
+                else
+                {
+                    @foreach (var customer in _items)
+                    {
+                        var selected = string.Equals(Value, customer.Id.ToString(), StringComparison.OrdinalIgnoreCase);
+                        <button type="button"
+                                class="@OptionClass(selected)"
+                                @onclick="() => SelectAsync(customer)">
+                            <span class="truncate font-medium">@customer.Name</span>
+                            @if (!string.IsNullOrWhiteSpace(customer.Phone))
+                            {
+                                <span class="truncate text-xs text-muted-foreground">@customer.Phone</span>
+                            }
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public EventCallback<CustomerSummaryResponse?> SelectedChanged { get; set; }
+    [Parameter] public bool AllowEmpty { get; set; }
+    [Parameter] public string EmptyLabel { get; set; } = "All customers";
+    [Parameter] public string Placeholder { get; set; } = "Select customer";
+
+    private readonly List<CustomerSummaryResponse> _items = [];
+    private CancellationTokenSource? _searchCts;
+    private ElementReference _searchInput;
+    private bool _open;
+    private bool _loading;
+    private bool _focusSearch;
+    private int _loadVersion;
+    private string _search = "";
+    private string? _selectedName;
+    private string? _boundValue;
+
+    private string DisplayLabel =>
+        !string.IsNullOrWhiteSpace(_selectedName) ? _selectedName
+        : AllowEmpty ? EmptyLabel
+        : Placeholder;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Value == _boundValue)
+            return;
+
+        _boundValue = Value;
+        if (string.IsNullOrWhiteSpace(Value) || !Guid.TryParse(Value, out var id))
+        {
+            _selectedName = null;
+            return;
+        }
+
+        var match = _items.FirstOrDefault(c => c.Id == id);
+        if (match is not null)
+        {
+            _selectedName = match.Name;
+            return;
+        }
+
+        try
+        {
+            var customer = await CustomerService.GetByIdAsync(id);
+            _selectedName = customer.Name;
+        }
+        catch (DomainException)
+        {
+            _selectedName = null;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusSearch || !_open)
+            return;
+
+        _focusSearch = false;
+        try
+        {
+            await _searchInput.FocusAsync();
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    private async Task ToggleAsync()
+    {
+        if (_open)
+        {
+            Close();
+            return;
+        }
+
+        _open = true;
+        _focusSearch = true;
+        await LoadAsync();
+    }
+
+    private void Close() => _open = false;
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        _search = e.Value?.ToString() ?? "";
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+
+        try
+        {
+            await Task.Delay(250, token);
+            await LoadAsync();
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        var version = ++_loadVersion;
+        _loading = true;
+        try
+        {
+            var page = await CustomerService.GetAllAsync(new CustomerFilterRequest(
+                Name: string.IsNullOrWhiteSpace(_search) ? null : _search.Trim(),
+                PageNumber: 1,
+                PageSize: 20));
+            if (version != _loadVersion)
+                return;
+
+            _items.Clear();
+            _items.AddRange(page.Data);
+        }
+        catch (DomainException)
+        {
+            if (version != _loadVersion)
+                return;
+            _items.Clear();
+        }
+        finally
+        {
+            if (version == _loadVersion)
+                _loading = false;
+        }
+    }
+
+    private async Task SelectEmptyAsync()
+    {
+        _selectedName = null;
+        _boundValue = "";
+        await ValueChanged.InvokeAsync("");
+        await SelectedChanged.InvokeAsync(null);
+        Close();
+    }
+
+    private async Task SelectAsync(CustomerSummaryResponse customer)
+    {
+        _selectedName = customer.Name;
+        _boundValue = customer.Id.ToString();
+        await ValueChanged.InvokeAsync(_boundValue);
+        await SelectedChanged.InvokeAsync(customer);
+        Close();
+    }
+
+    private static string OptionClass(bool selected) =>
+        selected
+            ? "flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm bg-primary/10 text-foreground"
+            : "flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm text-foreground hover:bg-muted";
+
+    public void Dispose()
+    {
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
+    }
+}
