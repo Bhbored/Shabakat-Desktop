@@ -1748,4 +1748,22 @@
   <data name="AuditAction.ExpenseDeleted" xml:space="preserve">
     <value>حذف مصروف</value>
   </data>
+  <data name="Invoices.BulkResultTitle" xml:space="preserve">
+    <value>تم توليد الفواتير</value>
+  </data>
+  <data name="Invoices.BulkResultDescription" xml:space="preserve">
+    <value>انتهت الفوترة الجماعية لهذه الفترة.</value>
+  </data>
+  <data name="Invoices.BulkCreated" xml:space="preserve">
+    <value>أُنشئت</value>
+  </data>
+  <data name="Invoices.BulkSkipped" xml:space="preserve">
+    <value>تم التخطي</value>
+  </data>
+  <data name="Invoices.ViewSkipped" xml:space="preserve">
+    <value>عرض المتخطين</value>
+  </data>
+  <data name="Invoices.NoSkippedDetails" xml:space="preserve">
+    <value>لا سجلات تخطٍ محفوظة لهذه الفترة.</value>
+  </data>
 </root>

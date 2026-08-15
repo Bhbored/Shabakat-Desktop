@@ -1,41 +1,141 @@
 @namespace Shabakat.Components.Features.Invoices.Components
+@inject IInvoiceService InvoiceService
+@inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
 
 <ConfirmDialog Open="Open"
-               Title="@L["Invoices.BulkTitleFull"]"
-               Description="@L["Invoices.BulkHint"].Value"
+               Title="@(Result is null ? L["Invoices.BulkTitleFull"].Value : L["Invoices.BulkResultTitle"].Value)"
+               Description="@DialogDescription"
                OnClose="OnClose">
     <ChildContent>
-        <div class="space-y-1.5 text-foreground">
-            <label class="text-sm font-medium">@L["Field.PlanType"]</label>
-            <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary"
-                    value="@Plan"
-                    @onchange="OnPlanChanged">
-                <option value="">@L["Invoices.BulkAllPlans"]</option>
-                <option value="@PlanType.Ampere">@L["Invoices.AmpereOnly"]</option>
-                <option value="@PlanType.Kilowatt">@L["Invoices.KilowattOnly"]</option>
-            </select>
-        </div>
+        @if (Result is null)
+        {
+            <div class="space-y-1.5 text-foreground">
+                <label class="text-sm font-medium">@L["Field.PlanType"]</label>
+                <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary"
+                        value="@Plan"
+                        @onchange="OnPlanChanged">
+                    <option value="">@L["Invoices.BulkAllPlans"]</option>
+                    <option value="@PlanType.Ampere">@L["Invoices.AmpereOnly"]</option>
+                    <option value="@PlanType.Kilowatt">@L["Invoices.KilowattOnly"]</option>
+                </select>
+            </div>
+        }
+        else
+        {
+            <div class="mt-4 grid grid-cols-2 gap-3 text-center">
+                <div class="rounded-xl border border-border bg-card p-4">
+                    <p class="text-3xl font-semibold text-emerald-400">@Result.Created</p>
+                    <p class="mt-1 text-sm text-muted-foreground">@L["Invoices.BulkCreated"]</p>
+                </div>
+                <div class="rounded-xl border border-border bg-card p-4">
+                    <p class="text-3xl font-semibold text-amber-400">@Result.Skipped</p>
+                    <p class="mt-1 text-sm text-muted-foreground">@L["Invoices.BulkSkipped"]</p>
+                </div>
+            </div>
+            @if (_showSkipped)
+            {
+                <div class="mt-4 max-h-72 space-y-2 overflow-y-auto rounded-xl border border-border p-3">
+                    @if (_skippedLoading)
+                    {
+                        <p class="py-4 text-center text-sm text-muted-foreground">@L["Common.Loading"]</p>
+                    }
+                    else if (_skipped.Count == 0)
+                    {
+                        <p class="py-4 text-center text-sm text-muted-foreground">@L["Invoices.NoSkippedDetails"]</p>
+                    }
+                    else
+                    {
+                        @foreach (var customer in _skipped)
+                        {
+                            <div class="rounded-lg bg-muted/40 p-3">
+                                <p class="font-medium text-foreground">@customer.CustomerName</p>
+                                <p class="mt-1 text-sm text-muted-foreground">@customer.Reason</p>
+                                <p class="mt-1 text-xs text-muted-foreground">@FormatHelper.Date(customer.SkippedAt)</p>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        }
     </ChildContent>
     <Footer>
-        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">@L["Common.Cancel"]</button>
-        <button type="button"
-                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
-                disabled="@Saving"
-                @onclick="OnSave">
-            @(Saving ? L["Invoices.Generating"] : L["Invoices.Generate"])
-        </button>
+        @if (Result is null)
+        {
+            <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">@L["Common.Cancel"]</button>
+            <button type="button"
+                    class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                    disabled="@Saving"
+                    @onclick="OnSave">
+                @(Saving ? L["Invoices.Generating"] : L["Invoices.Generate"])
+            </button>
+        }
+        else
+        {
+            @if (Result.Skipped > 0 && !_showSkipped)
+            {
+                <button type="button"
+                        class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted disabled:opacity-50"
+                        disabled="@_skippedLoading"
+                        @onclick="LoadSkippedAsync">
+                    @L["Invoices.ViewSkipped"]
+                </button>
+            }
+            <button type="button"
+                    class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                    @onclick="OnClose">
+                @L["Common.Done"]
+            </button>
+        }
     </Footer>
 </ConfirmDialog>
 
 @code {
+    private readonly List<InvoiceSkippedResponse> _skipped = [];
+    private bool _showSkipped;
+    private bool _skippedLoading;
+
     [Parameter] public bool Open { get; set; }
     [Parameter] public string Plan { get; set; } = "";
     [Parameter] public EventCallback<string> PlanChanged { get; set; }
     [Parameter] public bool Saving { get; set; }
+    [Parameter] public BulkCreateInvoiceResponse? Result { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnSave { get; set; }
 
+    private string DialogDescription
+    {
+        get
+        {
+            if (Result is null)
+                return L["Invoices.BulkHint"].Value;
+            if (Result.Created == 0 && Result.Skipped == 0)
+                return Result.Message;
+            return L["Invoices.BulkResultDescription"].Value;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Result is null && (_showSkipped || _skipped.Count > 0))
+        {
+            _showSkipped = false;
+            _skipped.Clear();
+            _skippedLoading = false;
+        }
+    }
+
     private Task OnPlanChanged(ChangeEventArgs e) =>
         PlanChanged.InvokeAsync(e.Value?.ToString() ?? "");
+
+    private async Task LoadSkippedAsync()
+    {
+        _showSkipped = true;
+        _skippedLoading = true;
+        _skipped.Clear();
+        var items = await UiActions.RunAsync(Toast, () => InvoiceService.GetSkippedAsync());
+        if (items is not null)
+            _skipped.AddRange(items);
+        _skippedLoading = false;
+    }
 }

@@ -52,6 +52,7 @@
                         Plan="@_bulkPlan"
                         PlanChanged="OnBulkPlanChanged"
                         Saving="_saving"
+                        Result="_bulkResult"
                         OnClose="CloseBulk"
                         OnSave="BulkCreateAsync" />
 
@@ -103,6 +104,7 @@
 
     private CreateInvoiceSheet.CreateFormModel _create = new();
     private string _bulkPlan = "";
+    private BulkCreateInvoiceResponse? _bulkResult;
     private PayInvoiceSheet.PayFormModel _pay = new();
     private InvoiceSummaryResponse? _payInvoice;
     private InvoiceResponse? _details;
@@ -320,10 +322,15 @@
     {
         _openMenuId = null;
         _bulkPlan = "";
+        _bulkResult = null;
         _showBulk = true;
     }
 
-    private void CloseBulk() => _showBulk = false;
+    private void CloseBulk()
+    {
+        _showBulk = false;
+        _bulkResult = null;
+    }
 
     private async Task BulkCreateAsync()
     {
@@ -333,8 +340,7 @@
         _saving = false;
         if (result is not null)
         {
-            Toast.Success(result.Message);
-            CloseBulk();
+            _bulkResult = result;
             await LoadAsync();
         }
     }

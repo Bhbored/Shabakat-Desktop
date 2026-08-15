@@ -1748,4 +1748,22 @@
   <data name="AuditAction.ExpenseDeleted" xml:space="preserve">
     <value>Expense Deleted</value>
   </data>
+  <data name="Invoices.BulkResultTitle" xml:space="preserve">
+    <value>Invoices generated</value>
+  </data>
+  <data name="Invoices.BulkResultDescription" xml:space="preserve">
+    <value>Bulk billing has finished for this period.</value>
+  </data>
+  <data name="Invoices.BulkCreated" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="Invoices.BulkSkipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="Invoices.ViewSkipped" xml:space="preserve">
+    <value>View skipped</value>
+  </data>
+  <data name="Invoices.NoSkippedDetails" xml:space="preserve">
+    <value>No skip records were stored for this period.</value>
+  </data>
 </root>
