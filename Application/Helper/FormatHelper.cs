@@ -4,13 +4,15 @@ namespace Shabakat.Application.Helper;
 
 public static class FormatHelper
 {
+    private static readonly CultureInfo UsdCulture = CultureInfo.GetCultureInfo("en-US");
+
     public static CultureInfo Culture { get; set; } = CultureInfo.GetCultureInfo("en-US");
 
     public static string Currency(decimal value) =>
-        value.ToString("C2", Culture);
+        value.ToString("C2", UsdCulture);
 
     public static string CompactCurrency(decimal value) =>
-        value.ToString("C0", Culture);
+        value.ToString("C0", UsdCulture);
 
     public static string Number(decimal value) =>
         value.ToString("N2", Culture);

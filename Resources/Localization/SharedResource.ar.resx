@@ -942,13 +942,13 @@
     <value>دفعة</value>
   </data>
   <data name="Calculator.Kwh" xml:space="preserve">
-    <value>ك.و.س</value>
+    <value>kWh</value>
   </data>
   <data name="Calculator.PaymentAmount" xml:space="preserve">
     <value>مبلغ الدفع</value>
   </data>
   <data name="Calculator.KilowattAmount" xml:space="preserve">
-    <value>كمية الكيلوواط (ك.و.س)</value>
+    <value>كمية الكيلوواط (kWh)</value>
   </data>
   <data name="Calculator.Calculate" xml:space="preserve">
     <value>احسب</value>
@@ -972,7 +972,7 @@
     <value>تعذّر حساب السعر.</value>
   </data>
   <data name="Calculator.KwhSuffix" xml:space="preserve">
-    <value>{0} ك.و.س</value>
+    <value>{0} kWh</value>
   </data>
   <data name="Settings.Appearance" xml:space="preserve">
     <value>المظهر</value>
@@ -1452,13 +1452,13 @@
     <value>تُستخدم في حسابات فوترة العداد الشهرية.</value>
   </data>
   <data name="Subscribers.PlanAmpere" xml:space="preserve">
-    <value>{0} أ</value>
+    <value>{0} A</value>
   </data>
   <data name="Subscribers.PlanFixedKilowatt" xml:space="preserve">
-    <value>{0} ك.و مسبق</value>
+    <value>{0} kW مسبق</value>
   </data>
   <data name="Subscribers.PlanKilowatt" xml:space="preserve">
-    <value>{0} ك.و</value>
+    <value>{0} kW</value>
   </data>
   <data name="Subscribers.FixedKwReadingsHelp" xml:space="preserve">
     <value>تُحدَّث قراءات العداد عند إنشاء فاتورة كيلوواط ثابت. أضف الشحن من الفواتير.</value>
@@ -1584,7 +1584,7 @@
     <value>جارٍ الحساب...</value>
   </data>
   <data name="Invoices.KwhCredit" xml:space="preserve">
-    <value>رصيد ك.و.س</value>
+    <value>رصيد kWh</value>
   </data>
   <data name="Invoices.PreviewHint" xml:space="preserve">
     <value>أدخل مبلغ دفع أو كمية كيلوواط لمعاينة الحساب قبل إنشاء الفاتورة المدفوعة.</value>
@@ -1629,7 +1629,7 @@
     <value>{0} ساعات/يوم</value>
   </data>
   <data name="Ampere.PerAmp" xml:space="preserve">
-    <value>{0}/أ</value>
+    <value>{0}/A</value>
   </data>
   <data name="Ampere.NamePlaceholder" xml:space="preserve">
     <value>مثال: 8 ساعات</value>
