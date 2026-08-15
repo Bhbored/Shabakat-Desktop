@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Shabakat.Application.Contracts.Abstractions;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
@@ -58,6 +59,7 @@ public static class DIContainer
 
         services.AddLocalization();
         services.AddSingleton<ICultureService, CultureService>();
+        services.AddSingleton<IStringLocalizer<Shabakat.Resources.Localization.SharedResource>, SharedResourceLocalizer>();
         services.AddSingleton<IInvoiceTemplateRenderer, InvoiceTemplateRenderer>();
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddScoped<IToastService, ToastService>();

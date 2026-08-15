@@ -4,23 +4,25 @@ namespace Shabakat.Application.Helper;
 
 public static class FormatHelper
 {
+    public static CultureInfo Culture { get; set; } = CultureInfo.GetCultureInfo("en-US");
+
     public static string Currency(decimal value) =>
-        value.ToString("C2", CultureInfo.CurrentCulture);
+        value.ToString("C2", Culture);
 
     public static string CompactCurrency(decimal value) =>
-        value.ToString("C0", CultureInfo.CurrentCulture);
+        value.ToString("C0", Culture);
 
     public static string Number(decimal value) =>
-        value.ToString("N2", CultureInfo.CurrentCulture);
+        value.ToString("N2", Culture);
 
     public static string Number(int value) =>
-        value.ToString("N0", CultureInfo.CurrentCulture);
+        value.ToString("N0", Culture);
 
     public static string Date(DateOnly value) =>
-        value.ToString("dd MMM yyyy", CultureInfo.CurrentCulture);
+        value.ToString("dd MMM yyyy", Culture);
 
     public static string Date(DateTime value) =>
-        value.ToString("dd MMM yyyy", CultureInfo.CurrentCulture);
+        value.ToString("dd MMM yyyy", Culture);
 
     public static string Initials(string? name)
     {

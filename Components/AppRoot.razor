@@ -4,7 +4,7 @@
 @inject IJSRuntime Js
 
 <div class="h-full min-h-full bg-background">
-    <Routes />
+    <Routes @key="CultureService.Language" />
 
     @if (!_splashDone)
     {
