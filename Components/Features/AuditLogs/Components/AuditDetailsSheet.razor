@@ -31,7 +31,7 @@
                 <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
                     <div>
                         <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Audit.Summary"]</p>
-                        <p class="mt-1 text-sm text-foreground">@Entry.Summary</p>
+                        <p class="mt-1 text-sm text-foreground">@AuditLabels.Summary(Entry, L)</p>
                     </div>
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
@@ -40,7 +40,7 @@
                         </div>
                         <div>
                             <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Table.Entity"]</p>
-                            <p class="mt-1 text-sm text-foreground">@AuditLabels.EntityType(Entry.EntityType)</p>
+                            <p class="mt-1 text-sm text-foreground">@AuditLabels.EntityType(Entry.EntityType, L)</p>
                         </div>
                     </div>
                     @if (Entry.EntityId is not null)
@@ -74,8 +74,8 @@
                         @foreach (var detail in Entry.Details)
                         {
                             <div class="flex items-start justify-between gap-4 border-b border-border py-3 last:border-b-0 last:pb-0 first:pt-0">
-                                <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@detail.Label</p>
-                                <p class="text-right text-sm text-foreground">@detail.Value</p>
+                                <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@AuditLabels.DetailLabel(detail.Label, L)</p>
+                                <p class="text-right text-sm text-foreground">@AuditLabels.DetailValue(detail.Label, detail.Value, L)</p>
                             </div>
                         }
                     }

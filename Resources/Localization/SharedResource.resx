@@ -1766,4 +1766,49 @@
   <data name="Invoices.NoSkippedDetails" xml:space="preserve">
     <value>No skip records were stored for this period.</value>
   </data>
+  <data name="AuditEntityType.Customer" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="AuditEntityType.Invoice" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="AuditEntityType.Payment" xml:space="preserve">
+    <value>Payment</value>
+  </data>
+  <data name="AuditEntityType.Expense" xml:space="preserve">
+    <value>Expense</value>
+  </data>
+  <data name="Field.ExpenseType" xml:space="preserve">
+    <value>Expense Type</value>
+  </data>
+  <data name="AuditSummary.CustomerCreated" xml:space="preserve">
+    <value>Customer '{0}' created</value>
+  </data>
+  <data name="AuditSummary.CustomerUpdated" xml:space="preserve">
+    <value>Customer '{0}' updated</value>
+  </data>
+  <data name="AuditSummary.CustomerDeleted" xml:space="preserve">
+    <value>Customer '{0}' deleted</value>
+  </data>
+  <data name="AuditSummary.ExpenseCreated" xml:space="preserve">
+    <value>Expense recorded ({0})</value>
+  </data>
+  <data name="AuditSummary.ExpenseUpdated" xml:space="preserve">
+    <value>Expense updated ({0})</value>
+  </data>
+  <data name="AuditSummary.ExpenseDeleted" xml:space="preserve">
+    <value>Expense deleted ({0})</value>
+  </data>
+  <data name="AuditSummary.InvoiceCreated" xml:space="preserve">
+    <value>Invoice #{0} created for {1}</value>
+  </data>
+  <data name="AuditSummary.InvoiceBulkCreated" xml:space="preserve">
+    <value>Bulk invoices: {0} created, {1} skipped</value>
+  </data>
+  <data name="AuditSummary.InvoicePaymentRecorded" xml:space="preserve">
+    <value>Payment of {0} recorded on invoice #{1}</value>
+  </data>
+  <data name="AuditSummary.InvoiceFixedKilowattCharge" xml:space="preserve">
+    <value>Fixed kilowatt charge for {0} (invoice #{1})</value>
+  </data>
 </root>

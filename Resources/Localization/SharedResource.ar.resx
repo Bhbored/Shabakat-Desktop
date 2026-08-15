@@ -1766,4 +1766,49 @@
   <data name="Invoices.NoSkippedDetails" xml:space="preserve">
     <value>لا سجلات تخطٍ محفوظة لهذه الفترة.</value>
   </data>
+  <data name="AuditEntityType.Customer" xml:space="preserve">
+    <value>مشترك</value>
+  </data>
+  <data name="AuditEntityType.Invoice" xml:space="preserve">
+    <value>فاتورة</value>
+  </data>
+  <data name="AuditEntityType.Payment" xml:space="preserve">
+    <value>دفعة</value>
+  </data>
+  <data name="AuditEntityType.Expense" xml:space="preserve">
+    <value>مصروف</value>
+  </data>
+  <data name="Field.ExpenseType" xml:space="preserve">
+    <value>نوع المصروف</value>
+  </data>
+  <data name="AuditSummary.CustomerCreated" xml:space="preserve">
+    <value>تم إنشاء المشترك «{0}»</value>
+  </data>
+  <data name="AuditSummary.CustomerUpdated" xml:space="preserve">
+    <value>تم تحديث المشترك «{0}»</value>
+  </data>
+  <data name="AuditSummary.CustomerDeleted" xml:space="preserve">
+    <value>تم حذف المشترك «{0}»</value>
+  </data>
+  <data name="AuditSummary.ExpenseCreated" xml:space="preserve">
+    <value>تم تسجيل مصروف ({0})</value>
+  </data>
+  <data name="AuditSummary.ExpenseUpdated" xml:space="preserve">
+    <value>تم تحديث مصروف ({0})</value>
+  </data>
+  <data name="AuditSummary.ExpenseDeleted" xml:space="preserve">
+    <value>تم حذف مصروف ({0})</value>
+  </data>
+  <data name="AuditSummary.InvoiceCreated" xml:space="preserve">
+    <value>تم إنشاء الفاتورة #{0} للمشترك {1}</value>
+  </data>
+  <data name="AuditSummary.InvoiceBulkCreated" xml:space="preserve">
+    <value>فواتير جماعية: {0} أُنشئت، {1} تم تخطيها</value>
+  </data>
+  <data name="AuditSummary.InvoicePaymentRecorded" xml:space="preserve">
+    <value>تم تسجيل دفعة {0} على الفاتورة #{1}</value>
+  </data>
+  <data name="AuditSummary.InvoiceFixedKilowattCharge" xml:space="preserve">
+    <value>شحن كيلوواط ثابت للمشترك {0} (فاتورة #{1})</value>
+  </data>
 </root>

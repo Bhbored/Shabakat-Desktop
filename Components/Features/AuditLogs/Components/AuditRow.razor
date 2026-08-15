@@ -4,14 +4,14 @@
 <tr class="cursor-pointer border-b border-border transition-colors hover:bg-muted/30"
     @onclick="OnView">
     <td class="px-4 py-3.5 align-middle">
-        <p class="font-medium text-foreground">@Entry.Summary</p>
+        <p class="font-medium text-foreground">@AuditLabels.Summary(Entry, L)</p>
         <p class="mt-0.5 text-xs text-muted-foreground">@FormatHelper.Date(Entry.CreatedAt) · @Entry.CreatedAt.ToString("HH:mm")</p>
     </td>
     <td class="px-4 py-3.5 align-middle">
         <AuditActionBadge Action="@Entry.Action" />
     </td>
     <td class="px-4 py-3.5 align-middle">
-        <span class="text-sm text-foreground">@AuditLabels.EntityType(Entry.EntityType)</span>
+        <span class="text-sm text-foreground">@AuditLabels.EntityType(Entry.EntityType, L)</span>
     </td>
     <td class="px-4 py-3.5 align-middle">
         <AuditStatusBadge Status="@Entry.Status" />

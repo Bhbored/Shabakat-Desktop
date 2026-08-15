@@ -12,7 +12,7 @@
                     <option value="">@L["Filter.AllActions"]</option>
                     @foreach (var action in Enum.GetValues<AuditAction>())
                     {
-                        <option value="@action">@AuditLabels.Action(action)</option>
+                        <option value="@action">@AuditLabels.Action(action, L)</option>
                     }
                 </select>
             </label>

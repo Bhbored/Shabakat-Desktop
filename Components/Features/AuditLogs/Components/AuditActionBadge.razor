@@ -8,13 +8,5 @@
 @code {
     [Parameter] public string Action { get; set; } = "";
 
-    private string ActionLabel
-    {
-        get
-        {
-            var key = $"AuditAction.{Action}";
-            var localized = L[key];
-            return localized.ResourceNotFound ? AuditLabels.Action(Action) : localized.Value;
-        }
-    }
+    private string ActionLabel => AuditLabels.Action(Action, L);
 }
