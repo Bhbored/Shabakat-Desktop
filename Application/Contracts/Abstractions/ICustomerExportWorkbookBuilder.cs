@@ -7,7 +7,8 @@ public interface ICustomerExportWorkbookBuilder
 {
     ICustomerExportWorkbook Create(
         IReadOnlyList<CustomerExportColumn> columns,
-        DateTime exportedAt);
+        DateTime exportedAt,
+        string? language = null);
 }
 
 public interface ICustomerExportWorkbook : IDisposable

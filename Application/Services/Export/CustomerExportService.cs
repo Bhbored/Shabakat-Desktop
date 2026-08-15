@@ -15,9 +15,6 @@ public sealed class CustomerExportService : ICustomerExportService
     private const string XlsxContentType =
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-    private const string UnassignedAreaName = "Unassigned";
-    private const string NoBoxGroupName = "No Box";
-
     private readonly ICustomerExportRepository _exportRepository;
     private readonly ICustomerExportWorkbookBuilder _workbookBuilder;
     private readonly IAppPreferencesRepository _preferencesRepository;
@@ -74,7 +71,7 @@ public sealed class CustomerExportService : ICustomerExportService
         var plan = await ResolvePlanAsync(request, cancellationToken);
 
         var exportedAt = DateTime.Now;
-        using var workbook = _workbookBuilder.Create(plan.Columns, exportedAt);
+        using var workbook = _workbookBuilder.Create(plan.Columns, exportedAt, plan.Language);
 
         foreach (var area in plan.Areas)
         {
@@ -85,7 +82,7 @@ public sealed class CustomerExportService : ICustomerExportService
         if (plan.IncludeUnassigned)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await AddUnassignedSheetAsync(workbook, cancellationToken);
+            await AddUnassignedSheetAsync(workbook, plan.IsArabic, cancellationToken);
         }
 
         return BuildFile(workbook, plan, request, exportedAt);
@@ -107,12 +104,18 @@ public sealed class CustomerExportService : ICustomerExportService
             ? CustomerExportColumns.Resolve(request.Columns)
             : await GetSelectedColumnsAsync(cancellationToken);
 
+        var prefs = await _preferencesRepository.GetAsync();
+        var language = prefs?.Language;
+        var arabic = CustomerExportLabels.IsArabic(language);
+
         return new ExportPlan(
             columns,
             areas,
             structureOnly,
             includeUnassigned,
-            singleAreaPerBox);
+            singleAreaPerBox,
+            language,
+            arabic);
     }
 
     private async Task AddAreaExportAsync(
@@ -124,20 +127,21 @@ public sealed class CustomerExportService : ICustomerExportService
         if (plan.SingleAreaPerBoxSheets)
         {
             await foreach (var _ in AddSingleAreaPerBoxSheetsAsync(
-                workbook, area, plan.StructureOnly, cancellationToken))
+                workbook, area, plan.StructureOnly, plan.IsArabic, cancellationToken))
             {
             }
 
             return;
         }
 
-        await AddAreaSheetAsync(workbook, area, plan.StructureOnly, cancellationToken);
+        await AddAreaSheetAsync(workbook, area, plan.StructureOnly, plan.IsArabic, cancellationToken);
     }
 
     private async IAsyncEnumerable<int> AddSingleAreaPerBoxSheetsAsync(
         ICustomerExportWorkbook workbook,
         ExportAreaRef area,
         bool structureOnly,
+        bool arabic,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (structureOnly)
@@ -162,14 +166,14 @@ public sealed class CustomerExportService : ICustomerExportService
         }
 
         var rows = await _exportRepository.GetRowsForAreaAsync(area.Id, cancellationToken);
-        var groups = BuildGroups(rows);
+        var groups = BuildGroups(rows, arabic);
 
         if (groups.Count == 0)
         {
             workbook.AddBoxSheet(new CustomerExportBoxSheet(
                 area.Name,
                 area.Name,
-                NoBoxGroupName,
+                CustomerExportLabels.NoBox(arabic),
                 []));
             yield return 0;
             yield break;
@@ -191,6 +195,7 @@ public sealed class CustomerExportService : ICustomerExportService
         ICustomerExportWorkbook workbook,
         ExportAreaRef area,
         bool structureOnly,
+        bool arabic,
         CancellationToken cancellationToken)
     {
         if (structureOnly)
@@ -201,16 +206,17 @@ public sealed class CustomerExportService : ICustomerExportService
         }
 
         var rows = await _exportRepository.GetRowsForAreaAsync(area.Id, cancellationToken);
-        workbook.AddSheet(BuildSheet(area.Name, rows));
+        workbook.AddSheet(BuildSheet(area.Name, rows, arabic));
     }
 
     private async Task AddUnassignedSheetAsync(
         ICustomerExportWorkbook workbook,
+        bool arabic,
         CancellationToken cancellationToken)
     {
         var rows = await _exportRepository.GetRowsWithoutAreaAsync(cancellationToken);
         if (rows.Count > 0)
-            workbook.AddSheet(BuildSheet(UnassignedAreaName, rows));
+            workbook.AddSheet(BuildSheet(CustomerExportLabels.Unassigned(arabic), rows, arabic));
     }
 
     private static CustomerExportFile BuildFile(
@@ -228,7 +234,9 @@ public sealed class CustomerExportService : ICustomerExportService
         IReadOnlyList<ExportAreaRef> Areas,
         bool StructureOnly,
         bool IncludeUnassigned,
-        bool SingleAreaPerBoxSheets);
+        bool SingleAreaPerBoxSheets,
+        string? Language,
+        bool IsArabic);
 
     private static bool IsSingleAreaExport(
         CustomerExportRequest request,
@@ -237,17 +245,19 @@ public sealed class CustomerExportService : ICustomerExportService
 
     private static CustomerExportSheet BuildSheet(
         string areaName,
-        IReadOnlyList<CustomerExportRow> rows)
-        => new(areaName, BuildGroups(rows));
+        IReadOnlyList<CustomerExportRow> rows,
+        bool arabic)
+        => new(areaName, BuildGroups(rows, arabic));
 
     private static IReadOnlyList<CustomerExportGroup> BuildGroups(
-        IReadOnlyList<CustomerExportRow> rows)
+        IReadOnlyList<CustomerExportRow> rows,
+        bool arabic = false)
         => rows
             .GroupBy(r => string.IsNullOrWhiteSpace(r.BoxName) ? null : r.BoxName)
             .OrderBy(g => g.Key is null)
             .ThenBy(g => g.Key, StringComparer.CurrentCultureIgnoreCase)
             .Select(g => new CustomerExportGroup(
-                g.Key ?? NoBoxGroupName,
+                g.Key ?? CustomerExportLabels.NoBox(arabic),
                 BuildPlanGroups(g)))
             .ToList();
 
