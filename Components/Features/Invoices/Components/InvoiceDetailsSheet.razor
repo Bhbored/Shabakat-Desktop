@@ -1,9 +1,10 @@
 @namespace Shabakat.Components.Features.Invoices.Components
 @inject IInvoiceService InvoiceService
+@inject IStringLocalizer<SharedResource> L
 
 <SideSheet Open="Open"
-           Title="@(Invoice is null ? "Invoice Details" : $"Invoice # {Invoice.InvoiceNumber}")"
-           Description="Review billing totals, payment history, and print server-backed invoice data."
+           Title="@(Invoice is null ? L["Invoices.Details"].Value : L["Invoices.DetailsNumber", Invoice.InvoiceNumber].Value)"
+           Description="@L["Invoices.DetailsHint"].Value"
            MaxWidthClass="sm:max-w-2xl"
            OnClose="OnClose">
     @if (IsLoading)
@@ -16,21 +17,21 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <p class="text-lg font-semibold text-foreground">@Invoice.CustomerName</p>
-                    <p class="text-sm text-muted-foreground">Created @FormatHelper.Date(Invoice.CreatedAt)</p>
+                    <p class="text-sm text-muted-foreground">@L["Invoices.CreatedOn", FormatHelper.Date(Invoice.CreatedAt)]</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <InvoiceStatusBadge Status="@ToBadgeStatus(Invoice.InvoiceStatus)" />
                     <button type="button"
                             class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted"
                             @onclick="OnPrint">
-                        Print
+                        @L["Common.Print"]
                     </button>
                     @if (!Invoice.InvoiceStatus.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase))
                     {
                         <button type="button"
                                 class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
                                 @onclick="OnRecordPayment">
-                            Record Payment
+                            @L["Invoices.RecordPayment"]
                         </button>
                     }
                 </div>
@@ -38,25 +39,25 @@
 
             <div class="grid gap-4 md:grid-cols-3">
                 <div class="rounded-2xl border border-border bg-card p-4">
-                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Total Amount</p>
+                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Invoices.TotalAmount"]</p>
                     <p class="mt-2 text-xl font-semibold text-foreground">@FormatHelper.Currency(Invoice.TotalAmount)</p>
                 </div>
                 <div class="rounded-2xl border border-border bg-card p-4">
-                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Paid Amount</p>
+                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Invoices.PaidAmount"]</p>
                     <p class="mt-2 text-xl font-semibold text-foreground">@FormatHelper.Currency(Invoice.PaidAmount)</p>
                 </div>
                 <div class="rounded-2xl border border-border bg-card p-4">
-                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Amount Due</p>
+                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Invoices.AmountDue"]</p>
                     <p class="mt-2 text-xl font-semibold text-foreground">@FormatHelper.Currency(Invoice.AmountDue)</p>
                 </div>
             </div>
 
             <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
-                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Consumption Period</h3>
-                <InvoiceDetailRow Label="Consumption Start" Value="@FormatHelper.Date(Invoice.ConsumptionStart)">
+                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Invoices.ConsumptionPeriod"]</h3>
+                <InvoiceDetailRow Label="@L["Invoices.ConsumptionStart"]" Value="@FormatHelper.Date(Invoice.ConsumptionStart)">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </InvoiceDetailRow>
-                <InvoiceDetailRow Label="Consumption End" Value="@FormatHelper.Date(Invoice.ConsumptionEnd)">
+                <InvoiceDetailRow Label="@L["Invoices.ConsumptionEnd"]" Value="@FormatHelper.Date(Invoice.ConsumptionEnd)">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </InvoiceDetailRow>
             </div>
@@ -65,11 +66,11 @@
             {
                 var breakdown = Breakdown.Value;
                 <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
-                    <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Breakdown</h3>
-                    <InvoiceDetailRow Label="Charge" Value="@FormatHelper.Currency(breakdown.Charge)">
+                    <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Invoices.Breakdown"]</h3>
+                    <InvoiceDetailRow Label="@L["Invoices.Charge"]" Value="@FormatHelper.Currency(breakdown.Charge)">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h6l-2 8 10-12h-6l2-8z"/></svg>
                     </InvoiceDetailRow>
-                    <InvoiceDetailRow Label="Fixed Charge" Value="@FormatHelper.Currency(breakdown.FixedCharge)">
+                    <InvoiceDetailRow Label="@L["Field.FixedCharge"]" Value="@FormatHelper.Currency(breakdown.FixedCharge)">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
                     </InvoiceDetailRow>
                     <InvoiceDetailRow Label="@TvaLabel" Value="@FormatHelper.Currency(breakdown.TvaAmount)">
@@ -81,8 +82,8 @@
             @if (Invoice.BilledConsumption is not null)
             {
                 <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
-                    <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Billed Consumption</h3>
-                    <InvoiceDetailRow Label="Consumption" Value="@($"{FormatHelper.Number(Invoice.BilledConsumption.Value)} kWh")">
+                    <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Invoices.BilledConsumption"]</h3>
+                    <InvoiceDetailRow Label="@L["Subscribers.Consumption"]" Value="@L["Calculator.KwhSuffix", FormatHelper.Number(Invoice.BilledConsumption.Value)].Value">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                     </InvoiceDetailRow>
                 </div>
@@ -90,14 +91,14 @@
 
             <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Payments</h3>
-                    <span class="text-xs text-muted-foreground">@Payments.Count payment@(Payments.Count == 1 ? "" : "s")</span>
+                    <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Invoices.Payments"]</h3>
+                    <span class="text-xs text-muted-foreground">@(Payments.Count == 1 ? L["Count.Payments", Payments.Count] : L["Count.PaymentsPlural", Payments.Count])</span>
                 </div>
 
                 @if (Payments.Count == 0)
                 {
                     <p class="rounded-xl border border-border bg-muted/20 px-3 py-6 text-sm text-muted-foreground">
-                        No payments recorded yet.
+                        @L["Invoices.NoPayments"]
                     </p>
                 }
                 else
@@ -127,11 +128,11 @@
             </div>
 
             <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
-                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Record</h3>
-                <InvoiceDetailRow Label="Created" Value="@FormatHelper.Date(Invoice.CreatedAt)">
+                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Invoices.Record"]</h3>
+                <InvoiceDetailRow Label="@L["Common.Created"]" Value="@FormatHelper.Date(Invoice.CreatedAt)">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </InvoiceDetailRow>
-                <InvoiceDetailRow Label="Updated" Value="@FormatHelper.Date(Invoice.UpdatedAt)">
+                <InvoiceDetailRow Label="@L["Common.Updated"]" Value="@FormatHelper.Date(Invoice.UpdatedAt)">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                 </InvoiceDetailRow>
             </div>
@@ -165,8 +166,8 @@
 
     private string TvaLabel =>
         Invoice is null || Invoice.TVA <= 0
-            ? "TVA"
-            : $"TVA ({FormatHelper.Number(Invoice.TVA)}%)";
+            ? L["Settings.Tva"].Value
+            : L["Invoices.TvaWithRate", FormatHelper.Number(Invoice.TVA)].Value;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -226,6 +227,8 @@
             ? "partiallyPaid"
             : status.ToLowerInvariant();
 
-    private static string PaymentMethodLabel(string method) =>
-        method.Equals(nameof(PaymentMethod.Wish), StringComparison.OrdinalIgnoreCase) ? "Wish" : "Cash";
+    private string PaymentMethodLabel(string method) =>
+        method.Equals(nameof(PaymentMethod.Wish), StringComparison.OrdinalIgnoreCase)
+            ? L["PaymentMethod.Wish"].Value
+            : L["PaymentMethod.Cash"].Value;
 }

@@ -1,9 +1,10 @@
 @namespace Shabakat.Components.Shared
+@inject IStringLocalizer<SharedResource> L
 
 <div class="splash-root @_rootClass"
      role="status"
      aria-live="polite"
-     aria-label="Loading Shabakat">
+     aria-label="@L["Splash.Aria"]">
     <div class="splash-stage">
         <span class="splash-ripple splash-ripple-1"></span>
         <span class="splash-ripple splash-ripple-2"></span>
@@ -15,8 +16,8 @@
         </div>
     </div>
 
-    <h1 class="splash-title">Shabakat</h1>
-    <p class="splash-subtitle">Powering Your Generators</p>
+    <h1 class="splash-title">@L["Splash.Title"]</h1>
+    <p class="splash-subtitle">@L["Splash.Subtitle"]</p>
     <div class="splash-loader" aria-hidden="true"></div>
 </div>
 

@@ -1,16 +1,17 @@
 @namespace Shabakat.Components.Features.Expenses.Components
+@inject IStringLocalizer<SharedResource> L
 
 <ConfirmDialog Open="Open"
-               Title="Delete Expense"
+               Title="@L["Expenses.DeleteTitle"]"
                Description="@DeleteDescription"
                OnClose="OnClose">
     <Footer>
-        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="OnClose">Cancel</button>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted" @onclick="OnClose">@L["Common.Cancel"]</button>
         <button type="button"
                 class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500/90 disabled:opacity-50"
                 disabled="@Saving"
                 @onclick="OnConfirm">
-            @(Saving ? "Deleting..." : "Delete expense")
+            @(Saving ? L["Common.Deleting"] : L["Expenses.DeleteExpense"])
         </button>
     </Footer>
 </ConfirmDialog>
@@ -26,8 +27,8 @@
     {
         get
         {
-            var name = string.IsNullOrWhiteSpace(Expense?.Label) ? "this expense" : Expense.Label;
-            return $"Delete {name}? This is a soft delete in the backend.";
+            var name = string.IsNullOrWhiteSpace(Expense?.Label) ? L["Expenses.ThisExpense"].Value : Expense.Label;
+            return L["Expenses.DeleteConfirm", name].Value;
         }
     }
 }

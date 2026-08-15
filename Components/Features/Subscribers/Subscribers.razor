@@ -7,6 +7,7 @@
 @inject IAppPreferencesService PreferencesService
 @inject ICustomerExportService ExportService
 @inject IToastService Toast
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4" @onclick="CloseMenu">
     <SubscribersToolbar SearchField="@_searchField"
@@ -145,7 +146,7 @@
             : _boxes.Where(b => b.AreaId.ToString() == _form.AreaId);
 
     private string _readingToDeleteLabel =>
-        _readingToDelete is null ? "" : $"Reading {FormatHelper.Number(_readingToDelete.ReadingValue)}";
+        _readingToDelete is null ? "" : L["Subscribers.ReadingValue", FormatHelper.Number(_readingToDelete.ReadingValue)].Value;
 
     protected override async Task OnInitializedAsync()
     {
@@ -260,11 +261,11 @@
 
             var saved = await ExcelFileSaver.SaveAsync(file);
             if (saved)
-                Toast.Success("Excel export saved.");
+                Toast.Success(L["Subscribers.ExportSaved"].Value);
         }
         catch
         {
-            Toast.Error("Could not export customers.");
+            Toast.Error(L["Subscribers.ExportFailed"].Value);
         }
         finally
         {
@@ -405,12 +406,12 @@
     {
         if (string.IsNullOrWhiteSpace(_form.Name))
         {
-            Toast.Error("Name is required.");
+            Toast.Error(L["Subscribers.NameRequired"].Value);
             return;
         }
         if (_form.PlanValue <= 0)
         {
-            Toast.Error("Plan value must be greater than zero.");
+            Toast.Error(L["Subscribers.PlanValueRequired"].Value);
             return;
         }
 
@@ -447,7 +448,7 @@
                 PricingOverride: overrideDto,
                 InitialMeterReading: _form.InitialMeterReading);
 
-            var created = await UiActions.RunAsync(Toast, () => CustomerService.CreateAsync(request), "Subscriber created");
+            var created = await UiActions.RunAsync(Toast, () => CustomerService.CreateAsync(request), L["Subscribers.Created"].Value);
             if (created is not null)
             {
                 CloseForm();
@@ -475,7 +476,7 @@
                 ClearPricingOverride: _form.HadPricingOverride && !_form.UsePricingOverride,
                 InitialMeterReading: _form.InitialMeterReading);
 
-            var updated = await UiActions.RunAsync(Toast, () => CustomerService.UpdateAsync(_editingId.Value, request), "Subscriber updated");
+            var updated = await UiActions.RunAsync(Toast, () => CustomerService.UpdateAsync(_editingId.Value, request), L["Subscribers.Updated"].Value);
             if (updated is not null)
             {
                 CloseForm();
@@ -533,7 +534,7 @@
         var created = await UiActions.RunAsync(
             Toast,
             () => MeterReadingService.CreateAsync(_details.Id, new CreateMeterReadingRequest(_meterValue, date)),
-            "Meter reading created successfully.");
+            L["Subscribers.MeterCreated"].Value);
         _savingMeter = false;
         if (created is null) return;
 
@@ -547,7 +548,7 @@
     private async Task ConfirmDeleteReadingAsync()
     {
         if (_details is null || _readingToDelete is null) return;
-        await UiActions.RunAsync(Toast, () => MeterReadingService.DeleteAsync(_details.Id, _readingToDelete.Id), "Meter reading deleted successfully.");
+        await UiActions.RunAsync(Toast, () => MeterReadingService.DeleteAsync(_details.Id, _readingToDelete.Id), L["Subscribers.MeterDeleted"].Value);
         _readingToDelete = null;
         await ReloadMeterReadingsAsync();
     }
@@ -594,7 +595,7 @@
             var updated = await UiActions.RunAsync(
                 Toast,
                 () => CustomerService.UpdateAsync(id, new UpdateCustomerRequest(CustomerStatus: CustomerStatus.Active)),
-                "Subscriber activated.");
+                L["Subscribers.Activated"].Value);
             if (updated is null) return;
         }
         else
@@ -619,7 +620,7 @@
         {
             await CustomerService.DeleteAsync(id);
             succeeded = true;
-        }, "Subscriber deleted successfully.");
+        }, L["Subscribers.Deleted"].Value);
         if (!succeeded) return;
         _confirmDelete = null;
         if (_details?.Id == id) CloseDetails();

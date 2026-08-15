@@ -1,14 +1,15 @@
 @namespace Shabakat.Components.Features.AuditLogs.Components
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4">
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <label class="w-full sm:w-56">
-                <span class="sr-only">Action</span>
+                <span class="sr-only">@L["Table.Action"]</span>
                 <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
                         value="@ActionFilterKey"
                         @onchange="OnActionChanged">
-                    <option value="">All actions</option>
+                    <option value="">@L["Filter.AllActions"]</option>
                     @foreach (var action in Enum.GetValues<AuditAction>())
                     {
                         <option value="@action">@AuditLabels.Action(action)</option>
@@ -16,27 +17,27 @@
                 </select>
             </label>
             <label class="w-full sm:w-44">
-                <span class="sr-only">Status</span>
+                <span class="sr-only">@L["Common.Status"]</span>
                 <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
                         value="@StatusFilterKey"
                         @onchange="OnStatusChanged">
-                    <option value="">All statuses</option>
-                    <option value="@AuditLogStatus.Success">Success</option>
-                    <option value="@AuditLogStatus.Failed">Failed</option>
+                    <option value="">@L["Filter.AllStatuses"]</option>
+                    <option value="@AuditLogStatus.Success">@L["Status.Success"]</option>
+                    <option value="@AuditLogStatus.Failed">@L["Status.Failed"]</option>
                 </select>
             </label>
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:justify-end">
             <label class="min-w-40">
-                <span class="sr-only">Date from</span>
+                <span class="sr-only">@L["Filter.DateFrom"]</span>
                 <input type="date"
                        class="h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition focus:border-primary"
                        value="@DateFromText"
                        @onchange="OnDateFromChanged" />
             </label>
             <label class="min-w-40">
-                <span class="sr-only">Date to</span>
+                <span class="sr-only">@L["Filter.DateTo"]</span>
                 <input type="date"
                        class="h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition focus:border-primary"
                        value="@DateToText"
@@ -45,13 +46,13 @@
             <button type="button"
                     class="h-11 rounded-xl border border-border bg-card px-4 text-sm text-foreground hover:bg-muted"
                     @onclick="OnResetFilters">
-                Reset
+                @L["Audit.ResetFilters"]
             </button>
         </div>
     </div>
 
     <div class="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-        <span>@TotalCount event@(TotalCount == 1 ? "" : "s")</span>
+        <span>@(TotalCount == 1 ? L["Count.Audit", TotalCount] : L["Count.AuditPlural", TotalCount])</span>
     </div>
 </div>
 

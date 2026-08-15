@@ -2,47 +2,48 @@
 @inject IAppPreferencesService PreferencesService
 @inject IToastService Toast
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
-<SettingsScaffold Title="@_title">
+<SettingsScaffold Title="@L[_titleKey]">
     <div class="space-y-4">
         @if (_loading)
         {
-            <p class="text-sm text-muted-foreground">Loading company preferences...</p>
+            <p class="text-sm text-muted-foreground">@L["Settings.LoadingPrefs"]</p>
         }
         else if (_fieldKey is null)
         {
-            <p class="text-sm text-muted-foreground">Unknown pricing field.</p>
+            <p class="text-sm text-muted-foreground">@L["Settings.UnknownPricingField"]</p>
         }
         else
         {
             <div class="grid gap-3 sm:grid-cols-[180px_1fr]">
                 <label class="space-y-1 block">
-                    <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Customer type</span>
+                    <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">@L["Field.CustomerType"]</span>
                     <select class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
                             @bind="_tier"
                             @bind:after="LoadValueForTier">
-                        <option value="base">Base</option>
-                        <option value="residential">Residential</option>
-                        <option value="commercial">Commercial</option>
-                        <option value="industrial">Industrial</option>
+                        <option value="base">@L["Settings.Base"]</option>
+                        <option value="residential">@L["CustomerType.Residential"]</option>
+                        <option value="commercial">@L["CustomerType.Commercial"]</option>
+                        <option value="industrial">@L["CustomerType.Industrial"]</option>
                     </select>
                 </label>
                 <label class="space-y-1 block">
-                    <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Value@(_isTva ? " (%)" : "")</span>
+                    <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">@(_isTva ? L["Settings.ValuePercent"] : L["Settings.Value"])</span>
                     <input type="number" step="0.01"
                            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
                            @bind="_value" />
                 </label>
             </div>
             <p class="max-w-md text-sm leading-6 text-muted-foreground">
-                This value is used when billing that customer type. Base applies when no type-specific rate is set.
+                @L["Settings.PricingHint"]
             </p>
             <div class="pt-6">
                 <button type="button"
                         class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
                         disabled="@_saving"
                         @onclick="SaveAsync">
-                    @(_saving ? "Saving..." : "Save")
+                    @(_saving ? L["Common.Saving"] : L["Common.Save"])
                 </button>
             </div>
         }
@@ -56,7 +57,7 @@
     private bool _saving;
     private GetPreferencesResponse? _existing;
     private string? _fieldKey;
-    private string _title = "Pricing";
+    private string _titleKey = "Page.Settings.Title";
     private string _tier = "base";
     private decimal _value;
     private bool _isTva;
@@ -72,13 +73,13 @@
             _ => null
         };
 
-        _title = Field?.Trim().ToLowerInvariant() switch
+        _titleKey = Field?.Trim().ToLowerInvariant() switch
         {
-            "price-per-kilowatt" => "Price per Kilowatt",
-            "price-per-amp" => "Price per Amp",
-            "fixed-charge" => "Fixed Charge",
-            "tva" => "TVA",
-            _ => "Pricing"
+            "price-per-kilowatt" => "Page.SettingsPricePerKw.Title",
+            "price-per-amp" => "Page.SettingsPricePerAmp.Title",
+            "fixed-charge" => "Page.SettingsFixedCharge.Title",
+            "tva" => "Page.SettingsTva.Title",
+            _ => "Page.Settings.Title"
         };
         _isTva = _fieldKey == "tva";
 
@@ -157,7 +158,7 @@
         {
             await PreferencesService.UpsertAsync(request);
             ok = true;
-        }, "Preferences saved.");
+        }, L["Settings.PreferencesSaved"].Value);
         _saving = false;
         if (ok) Navigation.NavigateTo("settings");
     }

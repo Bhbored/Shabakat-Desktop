@@ -1,22 +1,23 @@
 @namespace Shabakat.Components.Features.Boxes.Components
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4">
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex flex-1 flex-col gap-3 sm:flex-row">
             <label class="min-w-60 flex-1">
-                <span class="sr-only">Search boxes</span>
+                <span class="sr-only">@L["Filter.SearchBoxes"]</span>
                 <input type="text"
                        class="h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition focus:border-primary"
-                       placeholder="Search boxes by name, area, or notes..."
+                       placeholder="@L["Filter.SearchBoxes"]"
                        value="@Search"
                        @oninput="OnSearchInput" />
             </label>
             <label class="w-full sm:w-60">
-                <span class="sr-only">Filter by area</span>
+                <span class="sr-only">@L["Filter.ByArea"]</span>
                 <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
                         value="@AreaFilter"
                         @onchange="OnAreaFilterChanged">
-                    <option value="">All Areas</option>
+                    <option value="">@L["Filter.AllAreas"]</option>
                     @foreach (var area in Areas)
                     {
                         <option value="@area.Id">@area.Name</option>
@@ -29,11 +30,11 @@
                 style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
                 disabled="@Disabled"
                 @onclick="HandleCreateAsync">
-            + Add Box
+            @L["Boxes.Add"]
         </button>
     </div>
     <p class="text-xs text-muted-foreground">
-        @Total box@(Total != 1 ? "es" : "")
+        @(Total == 1 ? L["Count.Boxes", Total] : L["Count.BoxesPlural", Total])
     </p>
 </div>
 

@@ -1,11 +1,12 @@
 @namespace Shabakat.Components.Features.Areas.Components
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-3">
         <div class="min-w-72 flex-1">
             <input type="text"
                    class="w-full max-w-[600px] rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none transition focus:border-primary"
-                   placeholder="Search areas..."
+                   placeholder="@L["Filter.SearchAreas"]"
                    value="@Search"
                    @oninput="OnSearchInput" />
         </div>
@@ -14,11 +15,11 @@
                 style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
                 disabled="@Disabled"
                 @onclick="HandleCreateAsync">
-            + Add Area
+            @L["Areas.Add"]
         </button>
     </div>
     <p class="text-xs text-muted-foreground">
-        @Total area@(Total != 1 ? "s" : "") found
+        @(Total == 1 ? L["Count.Areas", Total] : L["Count.AreasPlural", Total])
     </p>
 </div>
 

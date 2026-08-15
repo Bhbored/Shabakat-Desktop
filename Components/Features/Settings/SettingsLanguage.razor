@@ -1,35 +1,37 @@
 @page "/settings/language"
 @inject IAppPreferencesService PreferencesService
+@inject ICultureService CultureService
+@inject IStringLocalizer<SharedResource> L
 @inject IToastService Toast
 @inject NavigationManager Navigation
 
-<SettingsScaffold Title="Language">
+<SettingsScaffold Title="@L["Page.SettingsLanguage.Title"]">
     <div class="space-y-3">
         @if (_loading)
         {
-            <p class="text-sm text-muted-foreground">Loading company preferences...</p>
+            <p class="text-sm text-muted-foreground">@L["Settings.LoadingPrefs"]</p>
         }
         else
         {
             <button type="button" class="@LangClass("en")" @onclick='() => _language = "en"'>
-                <span class="text-sm font-medium">English</span>
+                <span class="text-sm font-medium">@L["Settings.Language.English"]</span>
                 @if (string.Equals(_language, "en", StringComparison.OrdinalIgnoreCase))
                 {
-                    <span class="text-xs font-semibold text-primary">Selected</span>
+                    <span class="text-xs font-semibold text-primary">@L["Common.Selected"]</span>
                 }
             </button>
             <button type="button" class="@LangClass("ar")" @onclick='() => _language = "ar"'>
-                <span class="text-sm font-medium">Arabic</span>
+                <span class="text-sm font-medium">@L["Settings.Language.Arabic"]</span>
                 @if (string.Equals(_language, "ar", StringComparison.OrdinalIgnoreCase))
                 {
-                    <span class="text-xs font-semibold text-primary">Selected</span>
+                    <span class="text-xs font-semibold text-primary">@L["Common.Selected"]</span>
                 }
             </button>
             <button type="button"
                     class="mt-6 w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
                     disabled="@_saving"
                     @onclick="SaveAsync">
-                @(_saving ? "Saving..." : "Save")
+                @(_saving ? L["Common.Saving"] : L["Common.Save"])
             </button>
         }
     </div>
@@ -62,8 +64,12 @@
         {
             await PreferencesService.UpsertAsync(request);
             ok = true;
-        }, "Language saved.");
+        }, L["Settings.LanguageSaved"].Value);
         _saving = false;
-        if (ok) Navigation.NavigateTo("settings");
+        if (ok)
+        {
+            CultureService.Apply(_language);
+            Navigation.NavigateTo("settings");
+        }
     }
 }

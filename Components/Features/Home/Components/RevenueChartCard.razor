@@ -1,17 +1,18 @@
 @namespace Shabakat.Components.Features.Home.Components
 @inject IJSRuntime Js
+@inject IStringLocalizer<SharedResource> L
 @implements IAsyncDisposable
 
 <section class="rounded-2xl border border-border bg-card p-5">
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-            <h2 class="text-lg font-semibold text-foreground">Finance Snapshot</h2>
-            <p class="text-xs text-muted-foreground">All-time billing, collection, expense, and net totals for the current company.</p>
+            <h2 class="text-lg font-semibold text-foreground">@L["Home.FinanceSnapshot"]</h2>
+            <p class="text-xs text-muted-foreground">@L["Home.FinanceSnapshotHint"]</p>
         </div>
         <div class="flex items-center gap-5 text-xs text-muted-foreground">
             <span class="flex items-center gap-1.5">
                 <span class="h-2 w-2 rounded-full bg-primary"></span>
-                Revenue vs cash flow
+                @L["Home.RevenueVsCash"]
             </span>
         </div>
     </div>
@@ -43,10 +44,10 @@
         Summary is null
             ? []
             : [
-                ("Fuel", Summary.ExpensesByType.Fuel),
-                ("Maintenance", Summary.ExpensesByType.Maintenance),
-                ("Employees", Summary.ExpensesByType.Employees),
-                ("Other", Summary.ExpensesByType.Other)
+                (L["ExpenseType.Fuel"].Value, Summary.ExpensesByType.Fuel),
+                (L["ExpenseType.Maintenance"].Value, Summary.ExpensesByType.Maintenance),
+                (L["ExpenseType.Employees"].Value, Summary.ExpensesByType.Employees),
+                (L["ExpenseType.Other"].Value, Summary.ExpensesByType.Other)
             ];
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -67,7 +68,14 @@
         if (Summary is null)
             return;
 
-        string[] labels = ["Billed", "Collected", "Outstanding", "Expenses", "Net"];
+        string[] labels =
+        [
+            L["Home.Chart.Billed"].Value,
+            L["Home.Chart.Collected"].Value,
+            L["Home.Chart.Outstanding"].Value,
+            L["Home.Chart.Expenses"].Value,
+            L["Home.Chart.Net"].Value
+        ];
         double[] values =
         [
             (double)Summary.TotalBilledAllTime,

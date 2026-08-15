@@ -2,6 +2,7 @@
 @inject IAmpereScheduleService AmpereScheduleService
 @inject ICustomerService CustomerService
 @inject IToastService Toast
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4" @onclick="CloseMenu">
     <AmpereSchedulesToolbar Search="@_searchTerm"
@@ -198,7 +199,7 @@
             var created = await UiActions.RunAsync(
                 Toast,
                 () => AmpereScheduleService.CreateAsync(request),
-                "Ampere schedule created.");
+                L["Ampere.Created"].Value);
             ok = created is not null;
         }
         else
@@ -212,7 +213,7 @@
                     request.ResidentialPricePerAmp,
                     request.CommercialPricePerAmp,
                     request.IndustrialPricePerAmp)),
-                "Ampere schedule updated.");
+                L["Ampere.Updated"].Value);
             ok = updated is not null;
         }
 
@@ -232,7 +233,7 @@
         await UiActions.RunAsync(
             Toast,
             () => AmpereScheduleService.DeleteAsync(_pendingDelete.Id),
-            "Ampere schedule deleted.");
+            L["Ampere.Deleted"].Value);
 
         _saving = false;
         _showDelete = false;

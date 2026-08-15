@@ -1,10 +1,9 @@
 @namespace Shabakat.Components.Features.Expenses.Components
+@inject IStringLocalizer<SharedResource> L
 
 <SideSheet Open="Open"
-           Title="@(IsEdit ? "Edit Expense" : "Add Expense")"
-           Description="@(IsEdit
-               ? "Edit the expense line item and keep dashboard totals current."
-               : "Track fuel, maintenance, payroll, and other operating costs.")"
+           Title="@(IsEdit ? L["Expenses.Edit"] : L["Expenses.Add"])"
+           Description="@(IsEdit ? L["Expenses.EditHint"] : L["Expenses.AddHint"])"
            MaxWidthClass="sm:max-w-xl"
            OnClose="OnClose">
     <TitleIcon>
@@ -14,18 +13,18 @@
         <div class="space-y-6">
             <div class="grid gap-4 md:grid-cols-2">
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-foreground">Expense Type</label>
+                    <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Filter.ExpenseType"]</label>
                     <select class="@InputClass"
                             value="@Type"
                             @onchange="OnTypeChanged">
                         @foreach (var type in Enum.GetValues<ExpenseType>())
                         {
-                            <option value="@type">@type</option>
+                            <option value="@type">@ExpenseTypeLabel(type)</option>
                         }
                     </select>
                 </div>
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-foreground">Amount</label>
+                    <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Common.Amount"]</label>
                     <input type="number"
                            step="0.01"
                            min="0.0001"
@@ -38,7 +37,7 @@
 
             <div class="grid gap-4 md:grid-cols-2">
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-foreground">Expense Date</label>
+                    <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Table.ExpenseDate"]</label>
                     <input type="date"
                            class="@InputClass"
                            value="@Date.ToString("yyyy-MM-dd")"
@@ -46,23 +45,23 @@
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-foreground">
-                        @(Type == ExpenseType.Other ? "Label" : "Label (Optional)")
+                        @(Type == ExpenseType.Other ? L["Table.Label"].Value : $"{L["Table.Label"]} ({L["Common.Optional"]})")
                     </label>
                     <input type="text"
                            maxlength="100"
                            class="@InputClass"
                            value="@Label"
                            @onchange="OnLabelChanged"
-                           placeholder="@(Type == ExpenseType.Other ? "Rent, Insurance..." : "Optional category")" />
+                           placeholder="@(Type == ExpenseType.Other ? L["Expenses.RentInsurance"] : L["Expenses.OptionalCategory"])" />
                 </div>
             </div>
 
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-foreground">Notes</label>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Common.Notes"]</label>
                 <textarea maxlength="500"
                           rows="6"
                           class="@InputClass"
-                          placeholder="Optional internal note..."
+                          placeholder="@L["Expenses.NotePlaceholder"]"
                           value="@Notes"
                           @onchange="OnNotesChanged"></textarea>
             </div>
@@ -70,12 +69,12 @@
             <p class="text-sm text-muted-foreground">@TypeDescription</p>
 
             <div class="flex flex-col gap-3 border-t border-border pt-5 md:flex-row md:items-center md:justify-between">
-                <p class="text-sm text-muted-foreground">Expenses update dashboard totals after successful save.</p>
+                <p class="text-sm text-muted-foreground">@L["Expenses.FormFooter"]</p>
                 <div class="flex items-center gap-3">
                     <button type="button"
                             class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
                             @onclick="OnClose">
-                        Cancel
+                        @L["Common.Cancel"]
                     </button>
                     <button type="button"
                             class="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
@@ -85,7 +84,7 @@
                         {
                             <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
                         }
-                        @(IsEdit ? "Save Changes" : "Create Expense")
+                        @(IsEdit ? L["Common.SaveChanges"] : L["Expenses.Create"])
                     </button>
                 </div>
             </div>
@@ -114,10 +113,18 @@
 
     private string TypeDescription => Type switch
     {
-        ExpenseType.Fuel => "Generator diesel, oil, and fuel logistics.",
-        ExpenseType.Maintenance => "Servicing, repairs, and spare parts.",
-        ExpenseType.Employees => "Payroll and operating staff costs.",
-        _ => "Custom operational expense with label."
+        ExpenseType.Fuel => L["Expenses.FuelHint"].Value,
+        ExpenseType.Maintenance => L["Expenses.MaintenanceHint"].Value,
+        ExpenseType.Employees => L["Expenses.EmployeesHint"].Value,
+        _ => L["Expenses.OtherHint"].Value
+    };
+
+    private string ExpenseTypeLabel(ExpenseType type) => type switch
+    {
+        ExpenseType.Fuel => L["ExpenseType.Fuel"].Value,
+        ExpenseType.Maintenance => L["ExpenseType.Maintenance"].Value,
+        ExpenseType.Employees => L["ExpenseType.Employees"].Value,
+        _ => L["ExpenseType.Other"].Value
     };
 
     private async Task OnTypeChanged(ChangeEventArgs e)

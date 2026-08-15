@@ -2,21 +2,22 @@
 @inject IAppUserService AppUserService
 @inject IToastService Toast
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
-<SettingsScaffold Title="Company Logo">
+<SettingsScaffold Title="@L["Page.SettingsCompanyLogo.Title"]">
     <div class="space-y-5">
         @if (_loading)
         {
-            <p class="text-sm text-muted-foreground">Loading profile...</p>
+            <p class="text-sm text-muted-foreground">@L["Settings.LoadingProfile"]</p>
         }
         else
         {
             <div class="rounded-3xl border border-border bg-background/70 p-4">
-                <p class="text-sm font-medium text-foreground">Current Logo</p>
+                <p class="text-sm font-medium text-foreground">@L["Settings.CurrentLogo"]</p>
                 <div class="mt-4 flex min-h-52 items-center justify-center rounded-2xl border border-dashed border-border bg-card p-4">
                     @if (!string.IsNullOrWhiteSpace(_previewSrc))
                     {
-                        <img src="@_previewSrc" alt="Company logo"
+                        <img src="@_previewSrc" alt="@L["Settings.CompanyLogoAlt"]"
                              class="max-h-48 max-w-full object-contain" />
                     }
                     else
@@ -27,13 +28,13 @@
                     }
                 </div>
                 <p class="mt-3 text-xs text-muted-foreground">
-                    The selected image is copied into the app data folder. Only the latest logo is kept.
+                    @L["Settings.LogoHint"]
                 </p>
             </div>
 
             <div class="space-y-4">
                 <label class="space-y-2 block">
-                    <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Business name</span>
+                    <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">@L["Settings.BusinessName"]</span>
                     <input type="text" maxlength="200"
                            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
                            @bind="_businessName" />
@@ -42,7 +43,7 @@
                         class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-50"
                         disabled="@(_saving || _picking)"
                         @onclick="PickLogoAsync">
-                    @(_picking ? "Opening..." : "Choose image")
+                    @(_picking ? L["Settings.Opening"] : L["Settings.ChooseImage"])
                 </button>
             </div>
 
@@ -50,7 +51,7 @@
                     class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
                     disabled="@_saving"
                     @onclick="SaveAsync">
-                @(_saving ? "Saving..." : "Save")
+                @(_saving ? L["Common.Saving"] : L["Common.Save"])
             </button>
         }
     </div>
@@ -110,7 +111,7 @@
                     string.IsNullOrWhiteSpace(_businessName) ? null : _businessName,
                     logoPath));
             },
-            "Profile saved.");
+            L["Settings.ProfileSaved"].Value);
 
         if (result is not null)
         {

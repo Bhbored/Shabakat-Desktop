@@ -1,5 +1,6 @@
 @namespace Shabakat.Components.Shared
 @inject ICustomerService CustomerService
+@inject IStringLocalizer<SharedResource> L
 @implements IDisposable
 
 <div class="relative">
@@ -20,7 +21,7 @@
                 <input @ref="_searchInput"
                        type="text"
                        class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
-                       placeholder="Search customers..."
+                       placeholder="@L["CustomerSearch.Search"]"
                        value="@_search"
                        @oninput="OnSearchInput"
                        @onclick:stopPropagation="true" />
@@ -46,7 +47,7 @@
                 }
                 else if (_items.Count == 0)
                 {
-                    <p class="px-3 py-4 text-sm text-muted-foreground">No customers found.</p>
+                    <p class="px-3 py-4 text-sm text-muted-foreground">@L["CustomerSearch.None"]</p>
                 }
                 else
                 {
@@ -74,8 +75,8 @@
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
     [Parameter] public EventCallback<CustomerSummaryResponse?> SelectedChanged { get; set; }
     [Parameter] public bool AllowEmpty { get; set; }
-    [Parameter] public string EmptyLabel { get; set; } = "All customers";
-    [Parameter] public string Placeholder { get; set; } = "Select customer";
+    [Parameter] public string EmptyLabel { get; set; } = "";
+    [Parameter] public string Placeholder { get; set; } = "";
 
     private readonly List<CustomerSummaryResponse> _items = [];
     private CancellationTokenSource? _searchCts;
@@ -90,8 +91,8 @@
 
     private string DisplayLabel =>
         !string.IsNullOrWhiteSpace(_selectedName) ? _selectedName
-        : AllowEmpty ? EmptyLabel
-        : Placeholder;
+        : AllowEmpty ? (string.IsNullOrWhiteSpace(EmptyLabel) ? L["CustomerSearch.All"].Value : EmptyLabel)
+        : (string.IsNullOrWhiteSpace(Placeholder) ? L["CustomerSearch.Placeholder"].Value : Placeholder);
 
     protected override async Task OnParametersSetAsync()
     {

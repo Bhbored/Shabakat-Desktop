@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.DevFlow.Agent;
+using Shabakat.Application.Contracts.Services;
 using Shabakat.Infrastructure.Persistence;
 
 namespace Shabakat
@@ -33,6 +34,13 @@ namespace Shabakat
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 db.Database.Migrate();
+
+                var prefs = scope.ServiceProvider.GetRequiredService<IAppPreferencesService>()
+                    .GetAsync()
+                    .GetAwaiter()
+                    .GetResult();
+                scope.ServiceProvider.GetRequiredService<ICultureService>()
+                    .Apply(prefs?.Language ?? "en");
             }
 
             return app;

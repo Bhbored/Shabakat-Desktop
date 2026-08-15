@@ -3,6 +3,8 @@
 @inject NavigationManager NavigationManager
 @inject IAppUserService AppUserService
 @inject IThemeService ThemeService
+@inject ICultureService CultureService
+@inject IStringLocalizer<SharedResource> L
 @inject IJSRuntime Js
 
 <div class="flex min-h-dvh bg-background">
@@ -27,12 +29,12 @@
             <div class="flex items-center gap-2">
                 <a href="subscribers" class="relative hidden md:flex items-center">
                     <svg class="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <span class="w-60 rounded-xl border border-border bg-secondary py-2 pe-4 ps-9 text-sm text-muted-foreground">Quick search subscribers...</span>
+                    <span class="w-60 rounded-xl border border-border bg-secondary py-2 pe-4 ps-9 text-sm text-muted-foreground">@L["Nav.QuickSearch"]</span>
                 </a>
                 <a href="audit"
                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                   title="Audit logs"
-                   aria-label="Open audit logs">
+                   title="@L["Nav.AuditLogs"]"
+                   aria-label="@L["Nav.OpenAuditLogs"]">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
                 </a>
                 <div class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-white text-xs font-semibold" style="background-color: @FormatHelper.AvatarColor(_displayName);">
@@ -60,7 +62,7 @@
     {
         <div class="md:hidden fixed inset-0 z-50">
             <div class="fixed inset-0 bg-black/50" @onclick="ToggleMobileNav"></div>
-            <aside class="fixed inset-y-0 left-0 w-[280px] bg-sidebar border-r border-sidebar-border shadow-xl flex flex-col">
+            <aside class="fixed inset-y-0 start-0 w-[280px] bg-sidebar border-e border-sidebar-border shadow-xl flex flex-col">
                 <NavMenu DisplayName="@_displayName" Initials="@_initials" LogoSrc="@_logoSrc" OnNavigate="CloseMobileNav" />
             </aside>
         </div>
@@ -76,6 +78,7 @@
     protected override async Task OnInitializedAsync()
     {
         ThemeService.Changed += OnThemeChanged;
+        CultureService.Changed += OnCultureChanged;
         AppUserService.Changed += OnProfileChanged;
         await ApplyThemeAsync();
         await LoadProfileAsync();
@@ -107,6 +110,8 @@
 
     private void OnThemeChanged() => _ = InvokeAsync(ApplyThemeAsync);
 
+    private void OnCultureChanged() => _ = InvokeAsync(StateHasChanged);
+
     private async Task ApplyThemeAsync()
     {
         var theme = ThemeService.ResolvedTheme;
@@ -130,27 +135,28 @@
 
             return relative.Trim('/').ToLowerInvariant() switch
             {
-                "areas" => ("Areas", "Organize subscriber groups and manage area assignments"),
-                "ampere-schedules" => ("Ampere Schedules", "Manage ampere supply-hour tiers and schedule-based pricing"),
-                "boxes" => ("Boxes", "Manage physical distribution boxes linked to company areas"),
-                "subscribers" => ("Subscribers", "Search, sort, and manage monthly accounts"),
-                "invoices" => ("Invoices", "Generate printable billing statements"),
-                "calculator" => ("Fixed kW Calculator", "Preview a fixed kilowatt price without creating an invoice"),
-                "expenses" => ("Expenses", "Track fuel, maintenance, payroll, and other operating costs"),
-                "audit" => ("Audit Logs", "Review recorded system actions, status, and detail fields"),
-                "settings" => ("Settings", "Preferences, pricing, and notification defaults"),
-                "settings/due-date" => ("Due Date", "Choose the invoice due day of month"),
-                "settings/language" => ("Language", "Set the notification language"),
-                "settings/ampere-schedule-pricing" => ("Ampere Schedule Pricing", "Enable or disable schedule-based ampere pricing"),
-                "settings/ampere-proration" => ("Ampere Proration", "Charge ampere subscribers proportionally by days of service"),
-                "settings/whatsapp" => ("WhatsApp Connection", "Manage QR pairing and live Evolution API session state"),
-                "settings/company-logo" => ("Company Logo", "Upload or replace the company logo used on invoices"),
-                "settings/excel-export" => ("Excel Export Columns", "Choose the customer columns included in Excel exports"),
-                "settings/pricing/price-per-kilowatt" => ("Price per Kilowatt", "Edit default and customer-type kilowatt pricing"),
-                "settings/pricing/price-per-amp" => ("Price per Amp", "Edit default and customer-type amp pricing"),
-                "settings/pricing/fixed-charge" => ("Fixed Charge", "Edit fixed charges by tier"),
-                "settings/pricing/tva" => ("TVA (%)", "Edit tax values by tier"),
-                _ => ("Dashboard", "All-time operations snapshot for Shabakat")
+                "areas" => (L["Page.Areas.Title"].Value, L["Page.Areas.Subtitle"].Value),
+                "ampere-schedules" => (L["Page.AmpereSchedules.Title"].Value, L["Page.AmpereSchedules.Subtitle"].Value),
+                "boxes" => (L["Page.Boxes.Title"].Value, L["Page.Boxes.Subtitle"].Value),
+                "subscribers" => (L["Page.Subscribers.Title"].Value, L["Page.Subscribers.Subtitle"].Value),
+                "invoices" => (L["Page.Invoices.Title"].Value, L["Page.Invoices.Subtitle"].Value),
+                "calculator" => (L["Page.Calculator.Title"].Value, L["Page.Calculator.Subtitle"].Value),
+                "expenses" => (L["Page.Expenses.Title"].Value, L["Page.Expenses.Subtitle"].Value),
+                "audit" => (L["Page.Audit.Title"].Value, L["Page.Audit.Subtitle"].Value),
+                "settings" => (L["Page.Settings.Title"].Value, L["Page.Settings.Subtitle"].Value),
+                "settings/due-date" => (L["Page.SettingsDueDate.Title"].Value, L["Page.SettingsDueDate.Subtitle"].Value),
+                "settings/language" => (L["Page.SettingsLanguage.Title"].Value, L["Page.SettingsLanguage.Subtitle"].Value),
+                "settings/ampere-schedule-pricing" => (L["Page.SettingsAmpereSchedulePricing.Title"].Value, L["Page.SettingsAmpereSchedulePricing.Subtitle"].Value),
+                "settings/ampere-proration" => (L["Page.SettingsAmpereProration.Title"].Value, L["Page.SettingsAmpereProration.Subtitle"].Value),
+                "settings/whatsapp" => (L["Page.SettingsWhatsApp.Title"].Value, L["Page.SettingsWhatsApp.Subtitle"].Value),
+                "settings/company-logo" => (L["Page.SettingsCompanyLogo.Title"].Value, L["Page.SettingsCompanyLogo.Subtitle"].Value),
+                "settings/excel-export" => (L["Page.SettingsExcelExport.Title"].Value, L["Page.SettingsExcelExport.Subtitle"].Value),
+                "settings/pricing/price-per-kilowatt" => (L["Page.SettingsPricePerKw.Title"].Value, L["Page.SettingsPricePerKw.Subtitle"].Value),
+                "settings/pricing/price-per-amp" => (L["Page.SettingsPricePerAmp.Title"].Value, L["Page.SettingsPricePerAmp.Subtitle"].Value),
+                "settings/pricing/fixed-charge" => (L["Page.SettingsFixedCharge.Title"].Value, L["Page.SettingsFixedCharge.Subtitle"].Value),
+                "settings/pricing/tva" => (L["Page.SettingsTva.Title"].Value, L["Page.SettingsTva.Subtitle"].Value),
+                "settings/testing" => (L["Page.SettingsTesting.Title"].Value, L["Page.SettingsTesting.Subtitle"].Value),
+                _ => (L["Page.Dashboard.Title"].Value, L["Page.Dashboard.Subtitle"].Value)
             };
         }
     }
@@ -162,6 +168,7 @@
     public void Dispose()
     {
         ThemeService.Changed -= OnThemeChanged;
+        CultureService.Changed -= OnCultureChanged;
         AppUserService.Changed -= OnProfileChanged;
     }
 }

@@ -1,4 +1,5 @@
 @namespace Shabakat.Components.Features.Invoices.Components
+@inject IStringLocalizer<SharedResource> L
 
 @if (IsLoading)
 {
@@ -7,7 +8,7 @@
 else if (Items.Count == 0)
 {
     <section class="rounded-2xl border border-border bg-card">
-        <div class="px-4 py-10 text-sm text-muted-foreground">No invoices matched the current filters.</div>
+        <div class="px-4 py-10 text-sm text-muted-foreground">@L["Empty.Invoices"]</div>
     </section>
 }
 else
@@ -16,12 +17,12 @@ else
         <table class="w-full min-w-[840px]">
                 <thead>
                     <tr class="border-b border-border">
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Invoice #</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Customer</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Status</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Due Date</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Total</th>
-                        <th class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Amount Due</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Table.InvoiceNumber"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Customer"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Status"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Table.DueDate"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Table.Total"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Table.AmountDue"]</th>
                         <th class="px-4 py-3.5"></th>
                     </tr>
                 </thead>
@@ -40,18 +41,18 @@ else
             </table>
 
         <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-            <span>Showing @((PageNumber - 1) * PageSize + 1) - @Math.Min(PageNumber * PageSize, TotalCount) of @TotalCount</span>
+            <span>@L["Pager.Showing", (PageNumber - 1) * PageSize + 1, Math.Min(PageNumber * PageSize, TotalCount), TotalCount]</span>
             <div class="flex items-center gap-2 self-end md:self-auto">
                 <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm"
                         value="@PageSize"
                         @onchange="OnPageSizeChanged">
-                    <option value="10">10 / page</option>
-                    <option value="20">20 / page</option>
-                    <option value="50">50 / page</option>
+                    <option value="10">@L["Pager.PerPage", 10]</option>
+                    <option value="20">@L["Pager.PerPage", 20]</option>
+                    <option value="50">@L["Pager.PerPage", 50]</option>
                 </select>
-                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasPrevious)" @onclick="OnPreviousPage">Previous</button>
-                <span class="min-w-24 text-center">Page @PageNumber of @Math.Max(1, TotalPages)</span>
-                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasNext)" @onclick="OnNextPage">Next</button>
+                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasPrevious)" @onclick="OnPreviousPage">@L["Common.Previous"]</button>
+                <span class="min-w-24 text-center">@L["Pager.PageOf", PageNumber, Math.Max(1, TotalPages)]</span>
+                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasNext)" @onclick="OnNextPage">@L["Common.Next"]</button>
             </div>
         </div>
     </section>

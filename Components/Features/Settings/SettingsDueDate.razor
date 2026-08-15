@@ -2,27 +2,28 @@
 @inject IAppPreferencesService PreferencesService
 @inject IToastService Toast
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
-<SettingsScaffold Title="Due Date">
+<SettingsScaffold Title="@L["Page.SettingsDueDate.Title"]">
     <div class="space-y-4">
         @if (_loading)
         {
-            <p class="text-sm text-muted-foreground">Loading company preferences...</p>
+            <p class="text-sm text-muted-foreground">@L["Settings.LoadingPrefs"]</p>
         }
         else
         {
             <label class="space-y-2 block">
-                <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Day of month</span>
+                <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">@L["Settings.DayOfMonthLabel"]</span>
                 <input type="number" min="1" max="31"
                        class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
                        @bind="_dueDate" />
             </label>
-            <p class="text-sm leading-6 text-muted-foreground">Invoices will use this day of the month as the due date.</p>
+            <p class="text-sm leading-6 text-muted-foreground">@L["Settings.DueDateHint"]</p>
             <button type="button"
                     class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
                     disabled="@_saving"
                     @onclick="SaveAsync">
-                @(_saving ? "Saving..." : "Save")
+                @(_saving ? L["Common.Saving"] : L["Common.Save"])
             </button>
         }
     </div>
@@ -50,7 +51,7 @@
         {
             await PreferencesService.UpsertAsync(request);
             ok = true;
-        }, "Preferences saved.");
+        }, L["Settings.PreferencesSaved"].Value);
         _saving = false;
         if (ok) Navigation.NavigateTo("settings");
     }

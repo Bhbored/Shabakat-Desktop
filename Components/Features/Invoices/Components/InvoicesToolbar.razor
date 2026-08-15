@@ -1,29 +1,30 @@
 @namespace Shabakat.Components.Features.Invoices.Components
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4">
     <div class="flex flex-wrap items-end gap-3">
         <div class="min-w-64 flex-1">
-            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Customer</label>
+            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Common.Customer"]</label>
             <CustomerSearchSelect Value="@CustomerFilter"
                                   ValueChanged="OnCustomerSelected"
                                   AllowEmpty="true"
-                                  EmptyLabel="All customers" />
+                                  EmptyLabel="@L["CustomerSearch.All"].Value" />
         </div>
 
         <div class="min-w-48">
-            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Status</label>
+            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Common.Status"]</label>
             <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                     value="@StatusFilter"
                     @onchange="OnStatusFilterChanged">
-                <option value="">All statuses</option>
-                <option value="@InvoiceStatus.Unpaid">Unpaid</option>
-                <option value="@InvoiceStatus.PartiallyPaid">Partially paid</option>
-                <option value="@InvoiceStatus.Paid">Paid</option>
+                <option value="">@L["Filter.AllStatuses"]</option>
+                <option value="@InvoiceStatus.Unpaid">@L["Status.Unpaid"]</option>
+                <option value="@InvoiceStatus.PartiallyPaid">@L["Status.PartiallyPaid"]</option>
+                <option value="@InvoiceStatus.Paid">@L["Status.Paid"]</option>
             </select>
         </div>
 
         <div class="min-w-44">
-            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Issue Date From</label>
+            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Filter.IssueDateFrom"]</label>
             <input type="date"
                    class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                    value="@DateFromText"
@@ -31,7 +32,7 @@
         </div>
 
         <div class="min-w-44">
-            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Issue Date To</label>
+            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Filter.IssueDateTo"]</label>
             <input type="date"
                    class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                    value="@DateToText"
@@ -41,25 +42,25 @@
         <button type="button"
                 class="rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground hover:bg-muted"
                 @onclick="OnResetFilters">
-            Reset
+            @L["Common.Reset"]
         </button>
 
         <button type="button"
                 class="rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground hover:bg-muted"
                 @onclick="OnBulkCreate">
-            Bulk Generate
+            @L["Invoices.BulkGenerate"]
         </button>
 
         <button type="button"
                 class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
                 style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
                 @onclick="OnCreate">
-            Create Invoice
+            @L["Invoices.Create"]
         </button>
     </div>
 
     <p class="text-xs text-muted-foreground">
-        @TotalCount invoice@(TotalCount == 1 ? "" : "s")
+        @(TotalCount == 1 ? L["Count.Invoices", TotalCount] : L["Count.InvoicesPlural", TotalCount])
     </p>
 </div>
 

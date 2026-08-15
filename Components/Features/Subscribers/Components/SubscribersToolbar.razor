@@ -1,4 +1,5 @@
 @namespace Shabakat.Components.Features.Subscribers.Components
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-3 xl:flex-nowrap">
@@ -6,12 +7,12 @@
             <select class="w-36 shrink-0 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                     value="@SearchField"
                     @onchange="OnSearchFieldChanged">
-                <option value="name">Name</option>
-                <option value="phone">Phone</option>
+                <option value="name">@L["Common.Name"]</option>
+                <option value="phone">@L["Common.Phone"]</option>
             </select>
             <input type="text"
                    class="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none transition focus:border-primary"
-                   placeholder="@(SearchField == "phone" ? "Search subscribers by phone..." : "Search subscribers by name...")"
+                   placeholder="@(SearchField == "phone" ? L["Filter.SearchSubscribersPhone"] : L["Filter.SearchSubscribersName"])"
                    value="@SearchTerm"
                    @oninput="OnSearchTermInput" />
         </div>
@@ -19,7 +20,7 @@
             <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
                     value="@AreaFilter"
                     @onchange="OnAreaFilterChanged">
-                <option value="">All areas</option>
+                <option value="">@L["Filter.AllAreas"]</option>
                 @foreach (var area in Areas)
                 {
                     <option value="@area.Id">@area.Name</option>
@@ -43,13 +44,13 @@
                         <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
                 }
-                Export Excel
+                @L["Subscribers.ExportExcel"]
             </button>
             <button type="button"
                     class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
                     style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
                     @onclick="OnCreate">
-                + Add Subscriber
+                @L["Subscribers.Add"]
             </button>
         </div>
     </div>
@@ -58,15 +59,15 @@
         <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                 value="@PlanFilter"
                 @onchange="OnPlanFilterChanged">
-            <option value="">All plan types</option>
-            <option value="@PlanType.Ampere">Ampere</option>
-            <option value="@PlanType.Kilowatt">Kilowatt</option>
-            <option value="@PlanType.FixedKilowatt">Fixed Kilowatt</option>
+            <option value="">@L["Filter.AllPlanTypes"]</option>
+            <option value="@PlanType.Ampere">@L["PlanType.Ampere"]</option>
+            <option value="@PlanType.Kilowatt">@L["PlanType.Kilowatt"]</option>
+            <option value="@PlanType.FixedKilowatt">@L["PlanType.FixedKilowatt"]</option>
         </select>
         <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                 value="@ScheduleFilter"
                 @onchange="OnScheduleFilterChanged">
-            <option value="">All schedules</option>
+            <option value="">@L["Filter.AllSchedules"]</option>
             @foreach (var schedule in Schedules)
             {
                 <option value="@schedule.Id">@schedule.Name</option>
@@ -75,23 +76,23 @@
         <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                 value="@RelationFilter"
                 @onchange="OnRelationFilterChanged">
-            <option value="">All relations</option>
-            <option value="@CustomerRelation.Friend">Friend</option>
-            <option value="@CustomerRelation.Family">Family</option>
-            <option value="@CustomerRelation.Owner">Owner</option>
+            <option value="">@L["Filter.AllRelations"]</option>
+            <option value="@CustomerRelation.Friend">@L["Relation.Friend"]</option>
+            <option value="@CustomerRelation.Family">@L["Relation.Family"]</option>
+            <option value="@CustomerRelation.Owner">@L["Relation.Owner"]</option>
         </select>
         <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
                 value="@StatusFilter"
                 @onchange="OnStatusFilterChanged">
-            <option value="">All statuses</option>
-            <option value="@CustomerStatus.Active">Active</option>
-            <option value="@CustomerStatus.Suspended">Suspended</option>
-            <option value="@CustomerStatus.Terminated">Terminated</option>
+            <option value="">@L["Filter.AllStatuses"]</option>
+            <option value="@CustomerStatus.Active">@L["Status.Active"]</option>
+            <option value="@CustomerStatus.Suspended">@L["Status.Suspended"]</option>
+            <option value="@CustomerStatus.Terminated">@L["Status.Terminated"]</option>
         </select>
     </div>
 
     <p class="text-xs text-muted-foreground">
-        @TotalCount subscriber@(TotalCount != 1 ? "s" : "")
+        @(TotalCount == 1 ? L["Count.Subscribers", TotalCount] : L["Count.SubscribersPlural", TotalCount])
     </p>
 </div>
 

@@ -1,16 +1,19 @@
+@namespace Shabakat.Components.Shared
+@inject IStringLocalizer<SharedResource> L
+
 @switch (Category)
 {
     case "Fuel":
-        <span class="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/12 px-2.5 py-0.5 text-xs font-semibold text-amber-300">Fuel</span>
+        <span class="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/12 px-2.5 py-0.5 text-xs font-semibold text-amber-300">@L["ExpenseType.Fuel"]</span>
         break;
     case "Maintenance":
-        <span class="inline-flex items-center rounded-full border border-sky-500/20 bg-sky-500/12 px-2.5 py-0.5 text-xs font-semibold text-sky-300">Maintenance</span>
+        <span class="inline-flex items-center rounded-full border border-sky-500/20 bg-sky-500/12 px-2.5 py-0.5 text-xs font-semibold text-sky-300">@L["ExpenseType.Maintenance"]</span>
         break;
     case "Employees":
-        <span class="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/12 px-2.5 py-0.5 text-xs font-semibold text-emerald-300">Employees</span>
+        <span class="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/12 px-2.5 py-0.5 text-xs font-semibold text-emerald-300">@L["ExpenseType.Employees"]</span>
         break;
     case "Other":
-        <span class="inline-flex items-center rounded-full border border-violet-500/20 bg-violet-500/12 px-2.5 py-0.5 text-xs font-semibold text-violet-300">Other</span>
+        <span class="inline-flex items-center rounded-full border border-violet-500/20 bg-violet-500/12 px-2.5 py-0.5 text-xs font-semibold text-violet-300">@L["ExpenseType.Other"]</span>
         break;
     default:
         <span class="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">@Category</span>

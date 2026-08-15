@@ -1,0 +1,1751 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="xml:space" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="Nav.Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Nav.Areas" xml:space="preserve">
+    <value>Areas</value>
+  </data>
+  <data name="Nav.AmpereSchedules" xml:space="preserve">
+    <value>Ampere Schedules</value>
+  </data>
+  <data name="Nav.Boxes" xml:space="preserve">
+    <value>Boxes</value>
+  </data>
+  <data name="Nav.Subscribers" xml:space="preserve">
+    <value>Subscribers</value>
+  </data>
+  <data name="Nav.Invoices" xml:space="preserve">
+    <value>Invoices</value>
+  </data>
+  <data name="Nav.Calculator" xml:space="preserve">
+    <value>Calculator</value>
+  </data>
+  <data name="Nav.Calc" xml:space="preserve">
+    <value>Calc</value>
+  </data>
+  <data name="Nav.Expenses" xml:space="preserve">
+    <value>Expenses</value>
+  </data>
+  <data name="Nav.Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Nav.MainMenu" xml:space="preserve">
+    <value>Main Menu</value>
+  </data>
+  <data name="Nav.OperatorManagement" xml:space="preserve">
+    <value>Operator Management</value>
+  </data>
+  <data name="Nav.OperatorRole" xml:space="preserve">
+    <value>Operator · Shabakat</value>
+  </data>
+  <data name="Nav.QuickSearch" xml:space="preserve">
+    <value>Quick search subscribers...</value>
+  </data>
+  <data name="Nav.AuditLogs" xml:space="preserve">
+    <value>Audit logs</value>
+  </data>
+  <data name="Nav.OpenAuditLogs" xml:space="preserve">
+    <value>Open audit logs</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Common.Saving" xml:space="preserve">
+    <value>Saving...</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Common.Deleting" xml:space="preserve">
+    <value>Deleting...</value>
+  </data>
+  <data name="Common.Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Common.Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Common.Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Common.Print" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="Common.Pay" xml:space="preserve">
+    <value>Pay</value>
+  </data>
+  <data name="Common.Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Common.View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Common.Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Common.Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Common.Selected" xml:space="preserve">
+    <value>Selected</value>
+  </data>
+  <data name="Common.Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="Common.Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Common.Activate" xml:space="preserve">
+    <value>Activate</value>
+  </data>
+  <data name="Common.Suspend" xml:space="preserve">
+    <value>Suspend</value>
+  </data>
+  <data name="Common.ViewDetails" xml:space="preserve">
+    <value>View details</value>
+  </data>
+  <data name="Common.SaveChanges" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="Common.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Common.Phone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="Common.PhoneNumber" xml:space="preserve">
+    <value>Phone Number</value>
+  </data>
+  <data name="Common.Area" xml:space="preserve">
+    <value>Area</value>
+  </data>
+  <data name="Common.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Common.Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Common.Created" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="Common.CreatedAt" xml:space="preserve">
+    <value>Created At</value>
+  </data>
+  <data name="Common.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Common.Amount" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="Common.Customer" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="Common.Plan" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="Common.Since" xml:space="preserve">
+    <value>Since</value>
+  </data>
+  <data name="Common.Optional" xml:space="preserve">
+    <value>Optional</value>
+  </data>
+  <data name="Common.Enabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Common.Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Common.NotConfigured" xml:space="preserve">
+    <value>Not configured</value>
+  </data>
+  <data name="Common.NotSet" xml:space="preserve">
+    <value>Not set</value>
+  </data>
+  <data name="Common.Configured" xml:space="preserve">
+    <value>Configured</value>
+  </data>
+  <data name="Common.NoNotes" xml:space="preserve">
+    <value>No notes</value>
+  </data>
+  <data name="Common.Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="Common.Dash" xml:space="preserve">
+    <value>-</value>
+  </data>
+  <data name="Pager.PageOf" xml:space="preserve">
+    <value>Page {0} of {1}</value>
+  </data>
+  <data name="Pager.Showing" xml:space="preserve">
+    <value>Showing {0}–{1} of {2}</value>
+  </data>
+  <data name="Splash.Title" xml:space="preserve">
+    <value>Shabakat</value>
+  </data>
+  <data name="Splash.Subtitle" xml:space="preserve">
+    <value>Powering Your Generators</value>
+  </data>
+  <data name="Splash.Aria" xml:space="preserve">
+    <value>Loading Shabakat</value>
+  </data>
+  <data name="Status.Paid" xml:space="preserve">
+    <value>Paid</value>
+  </data>
+  <data name="Status.Unpaid" xml:space="preserve">
+    <value>Unpaid</value>
+  </data>
+  <data name="Status.Overdue" xml:space="preserve">
+    <value>Overdue</value>
+  </data>
+  <data name="Status.PartiallyPaid" xml:space="preserve">
+    <value>Partially Paid</value>
+  </data>
+  <data name="Status.Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Status.Suspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+  <data name="Status.Terminated" xml:space="preserve">
+    <value>Terminated</value>
+  </data>
+  <data name="Status.Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Status.Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Status.Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="ExpenseType.Fuel" xml:space="preserve">
+    <value>Fuel</value>
+  </data>
+  <data name="ExpenseType.Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="ExpenseType.Employees" xml:space="preserve">
+    <value>Employees</value>
+  </data>
+  <data name="ExpenseType.Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="PlanType.Ampere" xml:space="preserve">
+    <value>Ampere</value>
+  </data>
+  <data name="PlanType.Kilowatt" xml:space="preserve">
+    <value>Kilowatt</value>
+  </data>
+  <data name="PlanType.FixedKilowatt" xml:space="preserve">
+    <value>Fixed Kilowatt</value>
+  </data>
+  <data name="Relation.Friend" xml:space="preserve">
+    <value>Friend</value>
+  </data>
+  <data name="Relation.Family" xml:space="preserve">
+    <value>Family</value>
+  </data>
+  <data name="Relation.Owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="CustomerType.Residential" xml:space="preserve">
+    <value>Residential</value>
+  </data>
+  <data name="CustomerType.Commercial" xml:space="preserve">
+    <value>Commercial</value>
+  </data>
+  <data name="CustomerType.Industrial" xml:space="preserve">
+    <value>Industrial</value>
+  </data>
+  <data name="Page.Dashboard.Title" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Page.Dashboard.Subtitle" xml:space="preserve">
+    <value>All-time operations snapshot for Shabakat</value>
+  </data>
+  <data name="Page.Areas.Title" xml:space="preserve">
+    <value>Areas</value>
+  </data>
+  <data name="Page.Areas.Subtitle" xml:space="preserve">
+    <value>Organize subscriber groups and manage area assignments</value>
+  </data>
+  <data name="Page.AmpereSchedules.Title" xml:space="preserve">
+    <value>Ampere Schedules</value>
+  </data>
+  <data name="Page.AmpereSchedules.Subtitle" xml:space="preserve">
+    <value>Manage ampere supply-hour tiers and schedule-based pricing</value>
+  </data>
+  <data name="Page.Boxes.Title" xml:space="preserve">
+    <value>Boxes</value>
+  </data>
+  <data name="Page.Boxes.Subtitle" xml:space="preserve">
+    <value>Manage physical distribution boxes linked to company areas</value>
+  </data>
+  <data name="Page.Subscribers.Title" xml:space="preserve">
+    <value>Subscribers</value>
+  </data>
+  <data name="Page.Subscribers.Subtitle" xml:space="preserve">
+    <value>Search, sort, and manage monthly accounts</value>
+  </data>
+  <data name="Page.Invoices.Title" xml:space="preserve">
+    <value>Invoices</value>
+  </data>
+  <data name="Page.Invoices.Subtitle" xml:space="preserve">
+    <value>Generate printable billing statements</value>
+  </data>
+  <data name="Page.Calculator.Title" xml:space="preserve">
+    <value>Fixed kW Calculator</value>
+  </data>
+  <data name="Page.Calculator.Subtitle" xml:space="preserve">
+    <value>Preview a fixed kilowatt price without creating an invoice</value>
+  </data>
+  <data name="Page.Expenses.Title" xml:space="preserve">
+    <value>Expenses</value>
+  </data>
+  <data name="Page.Expenses.Subtitle" xml:space="preserve">
+    <value>Track fuel, maintenance, payroll, and other operating costs</value>
+  </data>
+  <data name="Page.Audit.Title" xml:space="preserve">
+    <value>Audit Logs</value>
+  </data>
+  <data name="Page.Audit.Subtitle" xml:space="preserve">
+    <value>Review recorded system actions, status, and detail fields</value>
+  </data>
+  <data name="Page.Settings.Title" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Page.Settings.Subtitle" xml:space="preserve">
+    <value>Preferences, pricing, and notification defaults</value>
+  </data>
+  <data name="Page.SettingsDueDate.Title" xml:space="preserve">
+    <value>Due Date</value>
+  </data>
+  <data name="Page.SettingsDueDate.Subtitle" xml:space="preserve">
+    <value>Choose the invoice due day of month</value>
+  </data>
+  <data name="Page.SettingsLanguage.Title" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Page.SettingsLanguage.Subtitle" xml:space="preserve">
+    <value>Set the notification language</value>
+  </data>
+  <data name="Page.SettingsAmpereSchedulePricing.Title" xml:space="preserve">
+    <value>Ampere Schedule Pricing</value>
+  </data>
+  <data name="Page.SettingsAmpereSchedulePricing.Subtitle" xml:space="preserve">
+    <value>Enable or disable schedule-based ampere pricing</value>
+  </data>
+  <data name="Page.SettingsAmpereProration.Title" xml:space="preserve">
+    <value>Ampere Proration</value>
+  </data>
+  <data name="Page.SettingsAmpereProration.Subtitle" xml:space="preserve">
+    <value>Charge ampere subscribers proportionally by days of service</value>
+  </data>
+  <data name="Page.SettingsWhatsApp.Title" xml:space="preserve">
+    <value>WhatsApp Connection</value>
+  </data>
+  <data name="Page.SettingsWhatsApp.Subtitle" xml:space="preserve">
+    <value>Manage QR pairing and live Evolution API session state</value>
+  </data>
+  <data name="Page.SettingsCompanyLogo.Title" xml:space="preserve">
+    <value>Company Logo</value>
+  </data>
+  <data name="Page.SettingsCompanyLogo.Subtitle" xml:space="preserve">
+    <value>Upload or replace the company logo used on invoices</value>
+  </data>
+  <data name="Page.SettingsExcelExport.Title" xml:space="preserve">
+    <value>Excel Export Columns</value>
+  </data>
+  <data name="Page.SettingsExcelExport.Subtitle" xml:space="preserve">
+    <value>Choose the customer columns included in Excel exports</value>
+  </data>
+  <data name="Page.SettingsPricePerKw.Title" xml:space="preserve">
+    <value>Price per Kilowatt</value>
+  </data>
+  <data name="Page.SettingsPricePerKw.Subtitle" xml:space="preserve">
+    <value>Edit default and customer-type kilowatt pricing</value>
+  </data>
+  <data name="Page.SettingsPricePerAmp.Title" xml:space="preserve">
+    <value>Price per Amp</value>
+  </data>
+  <data name="Page.SettingsPricePerAmp.Subtitle" xml:space="preserve">
+    <value>Edit default and customer-type amp pricing</value>
+  </data>
+  <data name="Page.SettingsFixedCharge.Title" xml:space="preserve">
+    <value>Fixed Charge</value>
+  </data>
+  <data name="Page.SettingsFixedCharge.Subtitle" xml:space="preserve">
+    <value>Edit fixed charges by tier</value>
+  </data>
+  <data name="Page.SettingsTva.Title" xml:space="preserve">
+    <value>TVA (%)</value>
+  </data>
+  <data name="Page.SettingsTva.Subtitle" xml:space="preserve">
+    <value>Edit tax values by tier</value>
+  </data>
+  <data name="Page.SettingsTesting.Title" xml:space="preserve">
+    <value>Testing</value>
+  </data>
+  <data name="Page.SettingsTesting.Subtitle" xml:space="preserve">
+    <value>Seed demo data for the local database</value>
+  </data>
+  <data name="Page.NotFound.Title" xml:space="preserve">
+    <value>Not Found</value>
+  </data>
+  <data name="Page.NotFound.Body" xml:space="preserve">
+    <value>Sorry, the content you are looking for does not exist.</value>
+  </data>
+  <data name="Home.AllTime" xml:space="preserve">
+    <value>All Time</value>
+  </data>
+  <data name="Home.TotalSubscribers" xml:space="preserve">
+    <value>Total Subscribers</value>
+  </data>
+  <data name="Home.SubscribersHint" xml:space="preserve">
+    <value>{0} active · {1} suspended</value>
+  </data>
+  <data name="Home.CollectedAllTime" xml:space="preserve">
+    <value>Collected All Time</value>
+  </data>
+  <data name="Home.CollectedHint" xml:space="preserve">
+    <value>{0}% of {1}</value>
+  </data>
+  <data name="Home.OutstandingInvoices" xml:space="preserve">
+    <value>Outstanding Invoices</value>
+  </data>
+  <data name="Home.OutstandingHint" xml:space="preserve">
+    <value>{0} unpaid · {1} partial</value>
+  </data>
+  <data name="Home.NetIncomeAllTime" xml:space="preserve">
+    <value>Net Income All Time</value>
+  </data>
+  <data name="Home.OutstandingAmount" xml:space="preserve">
+    <value>{0} outstanding</value>
+  </data>
+  <data name="Home.UpcomingDue" xml:space="preserve">
+    <value>Upcoming Due</value>
+  </data>
+  <data name="Home.PendingCount" xml:space="preserve">
+    <value>{0} pending</value>
+  </data>
+  <data name="Home.NoUpcoming" xml:space="preserve">
+    <value>No unpaid or partially paid invoices found.</value>
+  </data>
+  <data name="Home.DueOn" xml:space="preserve">
+    <value>Due {0}</value>
+  </data>
+  <data name="Home.ReviewBalances" xml:space="preserve">
+    <value>Review balances</value>
+  </data>
+  <data name="Home.RecentlyPaid" xml:space="preserve">
+    <value>Recently Paid Invoices</value>
+  </data>
+  <data name="Home.ViewAll" xml:space="preserve">
+    <value>View all</value>
+  </data>
+  <data name="Home.NoPaid" xml:space="preserve">
+    <value>No paid invoices yet for current dataset.</value>
+  </data>
+  <data name="Home.InvoiceIssued" xml:space="preserve">
+    <value>Invoice #{0} · Issued {1}</value>
+  </data>
+  <data name="Home.FinanceSnapshot" xml:space="preserve">
+    <value>Finance Snapshot</value>
+  </data>
+  <data name="Home.FinanceSnapshotHint" xml:space="preserve">
+    <value>All-time billing, collection, expense, and net totals for the current company.</value>
+  </data>
+  <data name="Home.RevenueVsCash" xml:space="preserve">
+    <value>Revenue vs cash flow</value>
+  </data>
+  <data name="Home.Chart.Billed" xml:space="preserve">
+    <value>Billed</value>
+  </data>
+  <data name="Home.Chart.Collected" xml:space="preserve">
+    <value>Collected</value>
+  </data>
+  <data name="Home.Chart.Outstanding" xml:space="preserve">
+    <value>Outstanding</value>
+  </data>
+  <data name="Home.Chart.Expenses" xml:space="preserve">
+    <value>Expenses</value>
+  </data>
+  <data name="Home.Chart.Net" xml:space="preserve">
+    <value>Net</value>
+  </data>
+  <data name="CustomerSearch.Placeholder" xml:space="preserve">
+    <value>Select customer</value>
+  </data>
+  <data name="CustomerSearch.Search" xml:space="preserve">
+    <value>Search customers...</value>
+  </data>
+  <data name="CustomerSearch.None" xml:space="preserve">
+    <value>No customers found.</value>
+  </data>
+  <data name="CustomerSearch.All" xml:space="preserve">
+    <value>All customers</value>
+  </data>
+  <data name="Table.InvoiceNumber" xml:space="preserve">
+    <value>Invoice #</value>
+  </data>
+  <data name="Table.DueDate" xml:space="preserve">
+    <value>Due Date</value>
+  </data>
+  <data name="Table.Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="Table.AmountDue" xml:space="preserve">
+    <value>Amount Due</value>
+  </data>
+  <data name="Table.ExpenseDate" xml:space="preserve">
+    <value>Expense Date</value>
+  </data>
+  <data name="Table.Label" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="Table.Event" xml:space="preserve">
+    <value>Event</value>
+  </data>
+  <data name="Table.Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Table.Entity" xml:space="preserve">
+    <value>Entity</value>
+  </data>
+  <data name="Empty.Subscribers" xml:space="preserve">
+    <value>No subscribers matched the current filters.</value>
+  </data>
+  <data name="Empty.Invoices" xml:space="preserve">
+    <value>No invoices matched the current filters.</value>
+  </data>
+  <data name="Empty.Expenses" xml:space="preserve">
+    <value>No expenses matched the current filters.</value>
+  </data>
+  <data name="Empty.Audit" xml:space="preserve">
+    <value>No audit events matched the current filters.</value>
+  </data>
+  <data name="Empty.Areas" xml:space="preserve">
+    <value>No areas matched the current filters.</value>
+  </data>
+  <data name="Empty.Boxes" xml:space="preserve">
+    <value>No boxes matched the current filters.</value>
+  </data>
+  <data name="Empty.Schedules" xml:space="preserve">
+    <value>No ampere schedules matched the current filters.</value>
+  </data>
+  <data name="Count.Subscribers" xml:space="preserve">
+    <value>{0} subscriber</value>
+  </data>
+  <data name="Count.SubscribersPlural" xml:space="preserve">
+    <value>{0} subscribers</value>
+  </data>
+  <data name="Count.Invoices" xml:space="preserve">
+    <value>{0} invoice</value>
+  </data>
+  <data name="Count.InvoicesPlural" xml:space="preserve">
+    <value>{0} invoices</value>
+  </data>
+  <data name="Count.Expenses" xml:space="preserve">
+    <value>{0} expense</value>
+  </data>
+  <data name="Count.ExpensesPlural" xml:space="preserve">
+    <value>{0} expenses</value>
+  </data>
+  <data name="Count.Areas" xml:space="preserve">
+    <value>{0} area</value>
+  </data>
+  <data name="Count.AreasPlural" xml:space="preserve">
+    <value>{0} areas</value>
+  </data>
+  <data name="Count.Boxes" xml:space="preserve">
+    <value>{0} box</value>
+  </data>
+  <data name="Count.BoxesPlural" xml:space="preserve">
+    <value>{0} boxes</value>
+  </data>
+  <data name="Count.Schedules" xml:space="preserve">
+    <value>{0} schedule</value>
+  </data>
+  <data name="Count.SchedulesPlural" xml:space="preserve">
+    <value>{0} schedules</value>
+  </data>
+  <data name="Count.Audit" xml:space="preserve">
+    <value>{0} event</value>
+  </data>
+  <data name="Count.AuditPlural" xml:space="preserve">
+    <value>{0} events</value>
+  </data>
+  <data name="Filter.AllAreas" xml:space="preserve">
+    <value>All areas</value>
+  </data>
+  <data name="Filter.AllPlanTypes" xml:space="preserve">
+    <value>All plan types</value>
+  </data>
+  <data name="Filter.AllSchedules" xml:space="preserve">
+    <value>All schedules</value>
+  </data>
+  <data name="Filter.AllRelations" xml:space="preserve">
+    <value>All relations</value>
+  </data>
+  <data name="Filter.AllStatuses" xml:space="preserve">
+    <value>All statuses</value>
+  </data>
+  <data name="Filter.AllExpenseTypes" xml:space="preserve">
+    <value>All expense types</value>
+  </data>
+  <data name="Filter.SearchSubscribersName" xml:space="preserve">
+    <value>Search subscribers by name...</value>
+  </data>
+  <data name="Filter.SearchSubscribersPhone" xml:space="preserve">
+    <value>Search subscribers by phone...</value>
+  </data>
+  <data name="Filter.SearchAreas" xml:space="preserve">
+    <value>Search areas...</value>
+  </data>
+  <data name="Filter.SearchSchedules" xml:space="preserve">
+    <value>Search schedules...</value>
+  </data>
+  <data name="Filter.SearchBoxes" xml:space="preserve">
+    <value>Search boxes by name, area, or notes...</value>
+  </data>
+  <data name="Filter.IssueDateFrom" xml:space="preserve">
+    <value>Issue Date From</value>
+  </data>
+  <data name="Filter.IssueDateTo" xml:space="preserve">
+    <value>Issue Date To</value>
+  </data>
+  <data name="Filter.DateFrom" xml:space="preserve">
+    <value>Date from</value>
+  </data>
+  <data name="Filter.DateTo" xml:space="preserve">
+    <value>Date to</value>
+  </data>
+  <data name="Filter.ExpenseType" xml:space="preserve">
+    <value>Expense type</value>
+  </data>
+  <data name="Subscribers.ExportExcel" xml:space="preserve">
+    <value>Export Excel</value>
+  </data>
+  <data name="Subscribers.Add" xml:space="preserve">
+    <value>+ Add Subscriber</value>
+  </data>
+  <data name="Subscribers.Edit" xml:space="preserve">
+    <value>Edit Subscriber</value>
+  </data>
+  <data name="Subscribers.AddTitle" xml:space="preserve">
+    <value>Add Subscriber</value>
+  </data>
+  <data name="Subscribers.EditHint" xml:space="preserve">
+    <value>Update subscriber details, plan, and optional custom pricing.</value>
+  </data>
+  <data name="Subscribers.AddHint" xml:space="preserve">
+    <value>Create a subscriber with plan, area, and optional custom pricing.</value>
+  </data>
+  <data name="Subscribers.Create" xml:space="preserve">
+    <value>Create Subscriber</value>
+  </data>
+  <data name="Subscribers.DeleteTitle" xml:space="preserve">
+    <value>Delete Subscriber</value>
+  </data>
+  <data name="Subscribers.ActivateTitle" xml:space="preserve">
+    <value>Activate Subscriber</value>
+  </data>
+  <data name="Subscribers.SuspendTitle" xml:space="preserve">
+    <value>Suspend Subscriber</value>
+  </data>
+  <data name="Subscribers.TotalBilled" xml:space="preserve">
+    <value>Total Billed</value>
+  </data>
+  <data name="Subscribers.TotalPaid" xml:space="preserve">
+    <value>Total Paid</value>
+  </data>
+  <data name="Subscribers.Outstanding" xml:space="preserve">
+    <value>Outstanding</value>
+  </data>
+  <data name="Subscribers.PricingOverride" xml:space="preserve">
+    <value>Pricing Override</value>
+  </data>
+  <data name="Subscribers.MeterReadings" xml:space="preserve">
+    <value>Meter Readings</value>
+  </data>
+  <data name="Subscribers.AddReading" xml:space="preserve">
+    <value>Add Reading</value>
+  </data>
+  <data name="Subscribers.ReadingThisMonth" xml:space="preserve">
+    <value>This subscriber already has a reading saved this month.</value>
+  </data>
+  <data name="Subscribers.NoReadings" xml:space="preserve">
+    <value>No meter readings recorded yet.</value>
+  </data>
+  <data name="Subscribers.ReadingValue" xml:space="preserve">
+    <value>Reading {0}</value>
+  </data>
+  <data name="Subscribers.SavedOn" xml:space="preserve">
+    <value>Saved {0}</value>
+  </data>
+  <data name="Subscribers.Consumption" xml:space="preserve">
+    <value>Consumption</value>
+  </data>
+  <data name="Subscribers.AmpereNoReadings" xml:space="preserve">
+    <value>Ampere subscribers do not use meter readings.</value>
+  </data>
+  <data name="Subscribers.NoSchedule" xml:space="preserve">
+    <value>No schedules are available yet. Create one first, then assign it here.</value>
+  </data>
+  <data name="Subscribers.NoBoxes" xml:space="preserve">
+    <value>No distribution boxes are available yet. Create them first, then select one here.</value>
+  </data>
+  <data name="Subscribers.DeleteReading" xml:space="preserve">
+    <value>Delete Meter Reading</value>
+  </data>
+  <data name="Subscribers.AddMeterReading" xml:space="preserve">
+    <value>Add Meter Reading</value>
+  </data>
+  <data name="Subscribers.SaveReading" xml:space="preserve">
+    <value>Save Reading</value>
+  </data>
+  <data name="Invoices.Create" xml:space="preserve">
+    <value>Create Invoice</value>
+  </data>
+  <data name="Invoices.BulkGenerate" xml:space="preserve">
+    <value>Bulk Generate</value>
+  </data>
+  <data name="Invoices.BulkTitle" xml:space="preserve">
+    <value>Bulk create invoices</value>
+  </data>
+  <data name="Invoices.BulkHint" xml:space="preserve">
+    <value>Create invoices for all eligible active customers for current billing period. This runs on backend billing rules.</value>
+  </data>
+  <data name="Invoices.DeleteTitle" xml:space="preserve">
+    <value>Delete Invoice</value>
+  </data>
+  <data name="Invoices.CreatedOn" xml:space="preserve">
+    <value>Created {0}</value>
+  </data>
+  <data name="Invoices.TotalAmount" xml:space="preserve">
+    <value>Total Amount</value>
+  </data>
+  <data name="Invoices.PaidAmount" xml:space="preserve">
+    <value>Paid Amount</value>
+  </data>
+  <data name="Invoices.AmountDue" xml:space="preserve">
+    <value>Amount Due</value>
+  </data>
+  <data name="Invoices.ConsumptionPeriod" xml:space="preserve">
+    <value>Consumption Period</value>
+  </data>
+  <data name="Invoices.Breakdown" xml:space="preserve">
+    <value>Breakdown</value>
+  </data>
+  <data name="Invoices.BilledConsumption" xml:space="preserve">
+    <value>Billed Consumption</value>
+  </data>
+  <data name="Invoices.Payments" xml:space="preserve">
+    <value>Payments</value>
+  </data>
+  <data name="Invoices.Record" xml:space="preserve">
+    <value>Record</value>
+  </data>
+  <data name="Invoices.RecordPayment" xml:space="preserve">
+    <value>Record Payment</value>
+  </data>
+  <data name="Invoices.PaymentRequired" xml:space="preserve">
+    <value>Payment method is required.</value>
+  </data>
+  <data name="Invoices.PaymentRecorded" xml:space="preserve">
+    <value>Payment recorded successfully.</value>
+  </data>
+  <data name="Invoices.PaymentAmount" xml:space="preserve">
+    <value>Payment Amount</value>
+  </data>
+  <data name="Invoices.KilowattAmount" xml:space="preserve">
+    <value>Kilowatt Amount</value>
+  </data>
+  <data name="Invoices.SelectCustomer" xml:space="preserve">
+    <value>Select customer</value>
+  </data>
+  <data name="Expenses.Add" xml:space="preserve">
+    <value>Add Expense</value>
+  </data>
+  <data name="Expenses.Edit" xml:space="preserve">
+    <value>Edit Expense</value>
+  </data>
+  <data name="Expenses.Create" xml:space="preserve">
+    <value>Create Expense</value>
+  </data>
+  <data name="Expenses.EditHint" xml:space="preserve">
+    <value>Edit the expense line item and keep dashboard totals current.</value>
+  </data>
+  <data name="Expenses.AddHint" xml:space="preserve">
+    <value>Record a new operating expense.</value>
+  </data>
+  <data name="Expenses.DeleteTitle" xml:space="preserve">
+    <value>Delete Expense</value>
+  </data>
+  <data name="Expenses.DeleteExpense" xml:space="preserve">
+    <value>Delete expense</value>
+  </data>
+  <data name="Expenses.DeleteConfirm" xml:space="preserve">
+    <value>Delete {0}? This is a soft delete in the backend.</value>
+  </data>
+  <data name="Expenses.TotalMatching" xml:space="preserve">
+    <value>Total Matching Spend</value>
+  </data>
+  <data name="Expenses.TotalMatchingHint" xml:space="preserve">
+    <value>Across all server-matched rows, not only current page.</value>
+  </data>
+  <data name="Expenses.MatchingCount" xml:space="preserve">
+    <value>Matching Expenses</value>
+  </data>
+  <data name="Expenses.MatchingCountHint" xml:space="preserve">
+    <value>Count of rows matching current backend filters.</value>
+  </data>
+  <data name="Expenses.PageSpend" xml:space="preserve">
+    <value>Current Page Spend</value>
+  </data>
+  <data name="Expenses.TotalSpend" xml:space="preserve">
+    <value>Total spend {0}</value>
+  </data>
+  <data name="Expenses.EmployeesHint" xml:space="preserve">
+    <value>Payroll and operating staff costs.</value>
+  </data>
+  <data name="Expenses.FuelHint" xml:space="preserve">
+    <value>Generator fuel and related running costs.</value>
+  </data>
+  <data name="Expenses.MaintenanceHint" xml:space="preserve">
+    <value>Repairs and upkeep for equipment.</value>
+  </data>
+  <data name="Expenses.OtherHint" xml:space="preserve">
+    <value>Other operating costs.</value>
+  </data>
+  <data name="Areas.Add" xml:space="preserve">
+    <value>Add Area</value>
+  </data>
+  <data name="Areas.Edit" xml:space="preserve">
+    <value>Edit Area</value>
+  </data>
+  <data name="Areas.UpdateHint" xml:space="preserve">
+    <value>Update the area name.</value>
+  </data>
+  <data name="Areas.CreateHint" xml:space="preserve">
+    <value>Create a new service area.</value>
+  </data>
+  <data name="Areas.DeleteTitle" xml:space="preserve">
+    <value>Delete area</value>
+  </data>
+  <data name="Ampere.Add" xml:space="preserve">
+    <value>Add Ampere Schedule</value>
+  </data>
+  <data name="Ampere.Edit" xml:space="preserve">
+    <value>Edit Ampere Schedule</value>
+  </data>
+  <data name="Ampere.DeleteTitle" xml:space="preserve">
+    <value>Delete ampere schedule</value>
+  </data>
+  <data name="Ampere.HoursPerDay" xml:space="preserve">
+    <value>Hours / day</value>
+  </data>
+  <data name="Ampere.PricingPerAmp" xml:space="preserve">
+    <value>Pricing per amp</value>
+  </data>
+  <data name="Ampere.Base" xml:space="preserve">
+    <value>Base</value>
+  </data>
+  <data name="Ampere.AssignedSubscribers" xml:space="preserve">
+    <value>Assigned subscribers</value>
+  </data>
+  <data name="Ampere.AssignedHint" xml:space="preserve">
+    <value>Subscribers billed on this ampere schedule.</value>
+  </data>
+  <data name="Ampere.Subscribers" xml:space="preserve">
+    <value>Subscribers</value>
+  </data>
+  <data name="Boxes.Add" xml:space="preserve">
+    <value>Add Box</value>
+  </data>
+  <data name="Boxes.Edit" xml:space="preserve">
+    <value>Edit Box</value>
+  </data>
+  <data name="Boxes.Create" xml:space="preserve">
+    <value>Create Box</value>
+  </data>
+  <data name="Boxes.AddHint" xml:space="preserve">
+    <value>Create a physical distribution box and attach it to an area for subscriber assignment.</value>
+  </data>
+  <data name="Boxes.EditHint" xml:space="preserve">
+    <value>Update this distribution box and its area assignment.</value>
+  </data>
+  <data name="Boxes.DeleteTitle" xml:space="preserve">
+    <value>Delete distribution box</value>
+  </data>
+  <data name="Boxes.SelectHint" xml:space="preserve">
+    <value>Select a box to view its details.</value>
+  </data>
+  <data name="Boxes.BoxName" xml:space="preserve">
+    <value>Box Name</value>
+  </data>
+  <data name="Boxes.LocationNote" xml:space="preserve">
+    <value>Location Note</value>
+  </data>
+  <data name="Boxes.AssignedSubscribers" xml:space="preserve">
+    <value>Assigned Subscribers</value>
+  </data>
+  <data name="Boxes.AssignedHint" xml:space="preserve">
+    <value>Subscribers currently wired to this physical box.</value>
+  </data>
+  <data name="Boxes.NoneAssigned" xml:space="preserve">
+    <value>No subscribers are assigned to this box yet.</value>
+  </data>
+  <data name="Boxes.NeedArea" xml:space="preserve">
+    <value>Create an area before adding a distribution box.</value>
+  </data>
+  <data name="Audit.ViewEvent" xml:space="preserve">
+    <value>View audit event</value>
+  </data>
+  <data name="Audit.ResetFilters" xml:space="preserve">
+    <value>Reset filters</value>
+  </data>
+  <data name="Calculator.CustomerType" xml:space="preserve">
+    <value>Customer type</value>
+  </data>
+  <data name="Calculator.PlanValue" xml:space="preserve">
+    <value>Plan value</value>
+  </data>
+  <data name="Calculator.CalculateFrom" xml:space="preserve">
+    <value>Calculate from</value>
+  </data>
+  <data name="Calculator.Payment" xml:space="preserve">
+    <value>Payment</value>
+  </data>
+  <data name="Calculator.Kwh" xml:space="preserve">
+    <value>kWh</value>
+  </data>
+  <data name="Calculator.PaymentAmount" xml:space="preserve">
+    <value>Payment amount</value>
+  </data>
+  <data name="Calculator.KilowattAmount" xml:space="preserve">
+    <value>Kilowatt amount (kWh)</value>
+  </data>
+  <data name="Calculator.Calculate" xml:space="preserve">
+    <value>Calculate</value>
+  </data>
+  <data name="Calculator.Result" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="Calculator.UnitPrice" xml:space="preserve">
+    <value>Unit price</value>
+  </data>
+  <data name="Calculator.FixedCharge" xml:space="preserve">
+    <value>Fixed charge</value>
+  </data>
+  <data name="Calculator.Tva" xml:space="preserve">
+    <value>TVA</value>
+  </data>
+  <data name="Calculator.AmountRequired" xml:space="preserve">
+    <value>Enter an amount greater than zero.</value>
+  </data>
+  <data name="Calculator.Failed" xml:space="preserve">
+    <value>Could not calculate the price.</value>
+  </data>
+  <data name="Calculator.KwhSuffix" xml:space="preserve">
+    <value>{0} kWh</value>
+  </data>
+  <data name="Settings.Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Settings.Theme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="Settings.Theme.Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Settings.Theme.Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="Settings.Theme.System" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="Settings.CompanyPreferences" xml:space="preserve">
+    <value>Company Preferences</value>
+  </data>
+  <data name="Settings.Testing" xml:space="preserve">
+    <value>Testing</value>
+  </data>
+  <data name="Settings.About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="Settings.Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Settings.Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Settings.Language.English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Settings.Language.Arabic" xml:space="preserve">
+    <value>Arabic</value>
+  </data>
+  <data name="Settings.LanguageSaved" xml:space="preserve">
+    <value>Language saved.</value>
+  </data>
+  <data name="Settings.LoadingPrefs" xml:space="preserve">
+    <value>Loading company preferences...</value>
+  </data>
+  <data name="Settings.PricePerKilowatt" xml:space="preserve">
+    <value>Price per Kilowatt</value>
+  </data>
+  <data name="Settings.PricePerAmp" xml:space="preserve">
+    <value>Price per Amp</value>
+  </data>
+  <data name="Settings.FixedCharge" xml:space="preserve">
+    <value>Fixed Charge</value>
+  </data>
+  <data name="Settings.Tva" xml:space="preserve">
+    <value>TVA</value>
+  </data>
+  <data name="Settings.DueDate" xml:space="preserve">
+    <value>Due Date</value>
+  </data>
+  <data name="Settings.AmpereSchedulePricing" xml:space="preserve">
+    <value>Ampere Schedule Pricing</value>
+  </data>
+  <data name="Settings.AmpereProration" xml:space="preserve">
+    <value>Ampere Proration</value>
+  </data>
+  <data name="Settings.AmpereSchedules" xml:space="preserve">
+    <value>Ampere Schedules</value>
+  </data>
+  <data name="Settings.ManageTiers" xml:space="preserve">
+    <value>Manage tiers</value>
+  </data>
+  <data name="Settings.CompanyLogo" xml:space="preserve">
+    <value>Company Logo / Profile</value>
+  </data>
+  <data name="Settings.ExcelExport" xml:space="preserve">
+    <value>Excel Export</value>
+  </data>
+  <data name="Settings.ExcelExportHint" xml:space="preserve">
+    <value>Choose exported customer columns</value>
+  </data>
+  <data name="Settings.SampleData" xml:space="preserve">
+    <value>Sample data</value>
+  </data>
+  <data name="Settings.SeedLebanon" xml:space="preserve">
+    <value>Seed Lebanon demo dataset</value>
+  </data>
+  <data name="Settings.DayOfMonth" xml:space="preserve">
+    <value>{0} of each month</value>
+  </data>
+  <data name="Settings.ExportColumnsSaved" xml:space="preserve">
+    <value>Export columns saved.</value>
+  </data>
+  <data name="Settings.Testing.Title" xml:space="preserve">
+    <value>Lebanon sample data</value>
+  </data>
+  <data name="Settings.Testing.Hint" xml:space="preserve">
+    <value>Inserts correlated demo areas, boxes, customers, invoices, payments, and expenses.</value>
+  </data>
+  <data name="Settings.Testing.Already" xml:space="preserve">
+    <value>Sample data is already present in this database.</value>
+  </data>
+  <data name="Settings.Testing.Seeding" xml:space="preserve">
+    <value>Seeding...</value>
+  </data>
+  <data name="Settings.Testing.Seed" xml:space="preserve">
+    <value>Seed sample data</value>
+  </data>
+  <data name="Settings.Testing.AlreadySeeded" xml:space="preserve">
+    <value>Already seeded</value>
+  </data>
+  <data name="Settings.Testing.Seeded" xml:space="preserve">
+    <value>Sample data seeded.</value>
+  </data>
+  <data name="Settings.WhatsApp.Unavailable" xml:space="preserve">
+    <value>WhatsApp is not available in this offline build.</value>
+  </data>
+  <data name="Settings.WhatsApp.Hint" xml:space="preserve">
+    <value>Payment reminders and QR linking are disabled for the local desktop app.</value>
+  </data>
+  <data name="Settings.DayOfMonthLabel" xml:space="preserve">
+    <value>Day of month</value>
+  </data>
+  <data name="Settings.DueDateHint" xml:space="preserve">
+    <value>Invoices will use this day of the month as the due date.</value>
+  </data>
+  <data name="Settings.PreferencesSaved" xml:space="preserve">
+    <value>Preferences saved.</value>
+  </data>
+  <data name="Settings.UnknownPricingField" xml:space="preserve">
+    <value>Unknown pricing field.</value>
+  </data>
+  <data name="Settings.Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Settings.ValuePercent" xml:space="preserve">
+    <value>Value (%)</value>
+  </data>
+  <data name="Settings.PricingHint" xml:space="preserve">
+    <value>This value is used when billing that customer type. Base applies when no type-specific rate is set.</value>
+  </data>
+  <data name="Settings.Base" xml:space="preserve">
+    <value>Base</value>
+  </data>
+  <data name="Settings.LoadingProfile" xml:space="preserve">
+    <value>Loading profile...</value>
+  </data>
+  <data name="Settings.CurrentLogo" xml:space="preserve">
+    <value>Current Logo</value>
+  </data>
+  <data name="Settings.LogoHint" xml:space="preserve">
+    <value>The selected image is copied into the app data folder. Only the latest logo is kept.</value>
+  </data>
+  <data name="Settings.BusinessName" xml:space="preserve">
+    <value>Business name</value>
+  </data>
+  <data name="Settings.Opening" xml:space="preserve">
+    <value>Opening...</value>
+  </data>
+  <data name="Settings.ChooseImage" xml:space="preserve">
+    <value>Choose image</value>
+  </data>
+  <data name="Settings.ProrationHint" xml:space="preserve">
+    <value>Prorate ampere charges by days remaining in the billing cycle.</value>
+  </data>
+  <data name="Settings.ProrationFooter" xml:space="preserve">
+    <value>When enabled, ampere invoices can charge for a partial month using billed days.</value>
+  </data>
+  <data name="Settings.ScheduleBasedPricing" xml:space="preserve">
+    <value>Schedule-Based Pricing</value>
+  </data>
+  <data name="Settings.ScheduleBasedHint" xml:space="preserve">
+    <value>Use per-schedule ampere prices instead of the global amp rate.</value>
+  </data>
+  <data name="Settings.ManageTiersPrefix" xml:space="preserve">
+    <value>Manage tiers on the</value>
+  </data>
+  <data name="Settings.ManageTiersSuffix" xml:space="preserve">
+    <value>page.</value>
+  </data>
+  <data name="Settings.LoadingExport" xml:space="preserve">
+    <value>Loading export columns...</value>
+  </data>
+  <data name="Settings.CompanyLogoAlt" xml:space="preserve">
+    <value>Company logo</value>
+  </data>
+  <data name="Settings.WhatsApp" xml:space="preserve">
+    <value>WhatsApp</value>
+  </data>
+  <data name="Pager.ShowingZero" xml:space="preserve">
+    <value>Showing 0 of 0</value>
+  </data>
+  <data name="Pager.PerPage" xml:space="preserve">
+    <value>{0} / page</value>
+  </data>
+  <data name="Empty.AreasNone" xml:space="preserve">
+    <value>No areas found.</value>
+  </data>
+  <data name="Empty.SchedulesNone" xml:space="preserve">
+    <value>No ampere schedules found.</value>
+  </data>
+  <data name="Empty.BoxesNone" xml:space="preserve">
+    <value>No distribution boxes matched the current filters.</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Common.Unassigned" xml:space="preserve">
+    <value>Unassigned</value>
+  </data>
+  <data name="Common.Updated" xml:space="preserve">
+    <value>Updated</value>
+  </data>
+  <data name="Common.Building" xml:space="preserve">
+    <value>Building</value>
+  </data>
+  <data name="Common.Floor" xml:space="preserve">
+    <value>Floor</value>
+  </data>
+  <data name="Common.Address" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Common.Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Field.DistributionBox" xml:space="preserve">
+    <value>Distribution Box</value>
+  </data>
+  <data name="Field.CableName" xml:space="preserve">
+    <value>Cable Name</value>
+  </data>
+  <data name="Field.AmpereSchedule" xml:space="preserve">
+    <value>Ampere Schedule</value>
+  </data>
+  <data name="Field.Subscribed" xml:space="preserve">
+    <value>Subscribed</value>
+  </data>
+  <data name="Field.PaidThisMonth" xml:space="preserve">
+    <value>Paid This Month</value>
+  </data>
+  <data name="Field.OverridePrice" xml:space="preserve">
+    <value>Override Price</value>
+  </data>
+  <data name="Field.CustomerType" xml:space="preserve">
+    <value>Customer Type</value>
+  </data>
+  <data name="Field.PlanValue" xml:space="preserve">
+    <value>Plan Value</value>
+  </data>
+  <data name="Field.SubscriptionDate" xml:space="preserve">
+    <value>Subscription Date</value>
+  </data>
+  <data name="Field.Relation" xml:space="preserve">
+    <value>Relation</value>
+  </data>
+  <data name="Field.InitialReading" xml:space="preserve">
+    <value>Initial Reading</value>
+  </data>
+  <data name="Field.LatestReading" xml:space="preserve">
+    <value>Latest Reading</value>
+  </data>
+  <data name="Field.TotalToPay" xml:space="preserve">
+    <value>Total To Pay</value>
+  </data>
+  <data name="Field.Box" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="Invoices.Details" xml:space="preserve">
+    <value>Invoice Details</value>
+  </data>
+  <data name="Invoices.DetailsNumber" xml:space="preserve">
+    <value>Invoice # {0}</value>
+  </data>
+  <data name="Invoices.DetailsHint" xml:space="preserve">
+    <value>Review billing totals, payment history, and print server-backed invoice data.</value>
+  </data>
+  <data name="Invoices.CreateHint" xml:space="preserve">
+    <value>Generate one invoice from backend billing rules for a selected customer.</value>
+  </data>
+  <data name="Invoices.Charge" xml:space="preserve">
+    <value>Charge</value>
+  </data>
+  <data name="Invoices.ConsumptionStart" xml:space="preserve">
+    <value>Consumption Start</value>
+  </data>
+  <data name="Invoices.ConsumptionEnd" xml:space="preserve">
+    <value>Consumption End</value>
+  </data>
+  <data name="Invoices.CounterPayment" xml:space="preserve">
+    <value>Counter payment</value>
+  </data>
+  <data name="Invoices.PayHint" xml:space="preserve">
+    <value>Record payment for this invoice.</value>
+  </data>
+  <data name="Invoices.PayHintNumber" xml:space="preserve">
+    <value>Collect payment for invoice #{0}.</value>
+  </data>
+  <data name="Invoices.NotePlaceholder" xml:space="preserve">
+    <value>Optional receipt or context note</value>
+  </data>
+  <data name="Invoices.BulkTitleFull" xml:space="preserve">
+    <value>Bulk Generate Invoices</value>
+  </data>
+  <data name="Subscribers.DetailsHint" xml:space="preserve">
+    <value>Review account status, billing totals, subscriber metadata, and meter usage.</value>
+  </data>
+  <data name="Expenses.Details" xml:space="preserve">
+    <value>Expense Details</value>
+  </data>
+  <data name="Expenses.DetailsHint" xml:space="preserve">
+    <value>Review expense amount, category, notes, and audit timestamps.</value>
+  </data>
+  <data name="Expenses.RentInsurance" xml:space="preserve">
+    <value>Rent, Insurance...</value>
+  </data>
+  <data name="Expenses.OptionalCategory" xml:space="preserve">
+    <value>Optional category</value>
+  </data>
+  <data name="Expenses.NotePlaceholder" xml:space="preserve">
+    <value>Optional internal note...</value>
+  </data>
+  <data name="Boxes.DetailsHint" xml:space="preserve">
+    <value>Review physical box metadata, area placement, and assigned subscribers.</value>
+  </data>
+  <data name="Ampere.Details" xml:space="preserve">
+    <value>Schedule details</value>
+  </data>
+  <data name="Ampere.DetailsHint" xml:space="preserve">
+    <value>Ampere schedule overview, pricing tiers, and assigned subscribers.</value>
+  </data>
+  <data name="Ampere.FormHint" xml:space="preserve">
+    <value>Set hours per day and per-amp pricing tiers.</value>
+  </data>
+  <data name="Areas.Details" xml:space="preserve">
+    <value>Area details</value>
+  </data>
+  <data name="Areas.DetailsHint" xml:space="preserve">
+    <value>Service area overview and assigned subscribers.</value>
+  </data>
+  <data name="Audit.EventTitle" xml:space="preserve">
+    <value>Audit Event</value>
+  </data>
+  <data name="Audit.EventHint" xml:space="preserve">
+    <value>Review what changed, when it happened, and the recorded detail fields.</value>
+  </data>
+  <data name="Filter.AllActions" xml:space="preserve">
+    <value>All actions</value>
+  </data>
+  <data name="Audit.SelectEvent" xml:space="preserve">
+    <value>Select an audit event to review its details.</value>
+  </data>
+  <data name="Audit.Summary" xml:space="preserve">
+    <value>Summary</value>
+  </data>
+  <data name="Audit.When" xml:space="preserve">
+    <value>When</value>
+  </data>
+  <data name="Audit.EntityId" xml:space="preserve">
+    <value>Entity Id</value>
+  </data>
+  <data name="Audit.Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Count.Field" xml:space="preserve">
+    <value>{0} field</value>
+  </data>
+  <data name="Count.FieldPlural" xml:space="preserve">
+    <value>{0} fields</value>
+  </data>
+  <data name="Empty.AuditDetails" xml:space="preserve">
+    <value>No detail fields were recorded for this event.</value>
+  </data>
+  <data name="Common.MoreActions" xml:space="preserve">
+    <value>More actions</value>
+  </data>
+  <data name="Field.ReadingValue" xml:space="preserve">
+    <value>Reading Value</value>
+  </data>
+  <data name="Field.ReadingDate" xml:space="preserve">
+    <value>Reading Date</value>
+  </data>
+  <data name="Field.PlanType" xml:space="preserve">
+    <value>Plan Type</value>
+  </data>
+  <data name="Field.SelectSchedule" xml:space="preserve">
+    <value>Select schedule</value>
+  </data>
+  <data name="Field.InitialMeterReading" xml:space="preserve">
+    <value>Initial Meter Reading</value>
+  </data>
+  <data name="Field.OptionalArea" xml:space="preserve">
+    <value>Optional area</value>
+  </data>
+  <data name="Field.NoBox" xml:space="preserve">
+    <value>No box</value>
+  </data>
+  <data name="Field.OptionalRelation" xml:space="preserve">
+    <value>Optional relation</value>
+  </data>
+  <data name="Field.FixedCharge" xml:space="preserve">
+    <value>Fixed Charge</value>
+  </data>
+  <data name="Field.TvaPercent" xml:space="preserve">
+    <value>TVA (%)</value>
+  </data>
+  <data name="PaymentMethod.Cash" xml:space="preserve">
+    <value>Cash</value>
+  </data>
+  <data name="PaymentMethod.Wish" xml:space="preserve">
+    <value>Wish</value>
+  </data>
+  <data name="Count.Payments" xml:space="preserve">
+    <value>{0} payment</value>
+  </data>
+  <data name="Count.PaymentsPlural" xml:space="preserve">
+    <value>{0} payments</value>
+  </data>
+  <data name="Subscribers.DeleteConfirm" xml:space="preserve">
+    <value>Delete {0}? This cannot be undone.</value>
+  </data>
+  <data name="Subscribers.ActivateConfirm" xml:space="preserve">
+    <value>Activate {0}? They will be billed as an active subscriber again.</value>
+  </data>
+  <data name="Subscribers.SuspendConfirm" xml:space="preserve">
+    <value>Suspend {0}? They will no longer be billed as active.</value>
+  </data>
+  <data name="Subscribers.ThisReading" xml:space="preserve">
+    <value>this reading</value>
+  </data>
+  <data name="Subscribers.ThisSubscriber" xml:space="preserve">
+    <value>this subscriber</value>
+  </data>
+  <data name="Subscribers.DeleteReadingConfirm" xml:space="preserve">
+    <value>Delete {0}? Use this only to correct a mistaken entry before recording the right one.</value>
+  </data>
+  <data name="Subscribers.RecordReading" xml:space="preserve">
+    <value>Record one monthly meter reading for {0}.</value>
+  </data>
+  <data name="Subscribers.ReadingDateHint" xml:space="preserve">
+    <value>Optional. Backend defaults to today and blocks duplicate calendar months.</value>
+  </data>
+  <data name="Subscribers.SubscriptionDateHint" xml:space="preserve">
+    <value>Optional. Defaults to today if omitted.</value>
+  </data>
+  <data name="Subscribers.ScheduleRequired" xml:space="preserve">
+    <value>Required for Ampere subscribers when schedule pricing is enabled.</value>
+  </data>
+  <data name="Subscribers.InitialReadingHint" xml:space="preserve">
+    <value>The old meter reading value for this subscriber. Only relevant for Kilowatt and Fixed Kilowatt plans.</value>
+  </data>
+  <data name="Subscribers.AreaHint" xml:space="preserve">
+    <value>Optional area assignment for grouping and filtering.</value>
+  </data>
+  <data name="Subscribers.BoxHint" xml:space="preserve">
+    <value>Optional box assignment for tracking physical connections.</value>
+  </data>
+  <data name="Subscribers.StatusHint" xml:space="preserve">
+    <value>Suspended and terminated subscribers stay in the list but are treated as overdue.</value>
+  </data>
+  <data name="Subscribers.UsePricingOverride" xml:space="preserve">
+    <value>Use pricing override</value>
+  </data>
+  <data name="Subscribers.PricingOverrideHint" xml:space="preserve">
+    <value>Override company pricing for this subscriber with a custom price, fixed charge, and TVA.</value>
+  </data>
+  <data name="Subscribers.RequiredHint" xml:space="preserve">
+    <value>Required fields are validated before submit.</value>
+  </data>
+  <data name="Subscribers.PlanValueAmpere" xml:space="preserve">
+    <value>Used as the contracted ampere value for ampere billing.</value>
+  </data>
+  <data name="Subscribers.PlanValueFixed" xml:space="preserve">
+    <value>Used by prepaid counter billing and fixed-kilowatt top-up calculations.</value>
+  </data>
+  <data name="Subscribers.PlanValueKilowatt" xml:space="preserve">
+    <value>Used by monthly meter billing calculations.</value>
+  </data>
+  <data name="Subscribers.PlanAmpere" xml:space="preserve">
+    <value>{0} A</value>
+  </data>
+  <data name="Subscribers.PlanFixedKilowatt" xml:space="preserve">
+    <value>{0} kW prepaid</value>
+  </data>
+  <data name="Subscribers.PlanKilowatt" xml:space="preserve">
+    <value>{0} kW</value>
+  </data>
+  <data name="Subscribers.FixedKwReadingsHelp" xml:space="preserve">
+    <value>Counter readings update when a Fixed Kilowatt invoice is created. Add top-ups from Invoices.</value>
+  </data>
+  <data name="Subscribers.KwReadingsHelp" xml:space="preserve">
+    <value>One reading per calendar month. Backend still enforces the final duplicate check.</value>
+  </data>
+  <data name="Subscribers.ExportSaved" xml:space="preserve">
+    <value>Excel export saved.</value>
+  </data>
+  <data name="Subscribers.ExportFailed" xml:space="preserve">
+    <value>Could not export customers.</value>
+  </data>
+  <data name="Subscribers.NameRequired" xml:space="preserve">
+    <value>Name is required.</value>
+  </data>
+  <data name="Subscribers.PlanValueRequired" xml:space="preserve">
+    <value>Plan value must be greater than zero.</value>
+  </data>
+  <data name="Subscribers.Created" xml:space="preserve">
+    <value>Subscriber created</value>
+  </data>
+  <data name="Subscribers.Updated" xml:space="preserve">
+    <value>Subscriber updated</value>
+  </data>
+  <data name="Subscribers.MeterCreated" xml:space="preserve">
+    <value>Meter reading created successfully.</value>
+  </data>
+  <data name="Subscribers.MeterDeleted" xml:space="preserve">
+    <value>Meter reading deleted successfully.</value>
+  </data>
+  <data name="Subscribers.Activated" xml:space="preserve">
+    <value>Subscriber activated.</value>
+  </data>
+  <data name="Subscribers.Deleted" xml:space="preserve">
+    <value>Subscriber deleted successfully.</value>
+  </data>
+  <data name="Invoices.DeleteConfirm" xml:space="preserve">
+    <value>Delete invoice #{0}? This cannot be undone.</value>
+  </data>
+  <data name="Invoices.BulkAllPlans" xml:space="preserve">
+    <value>All (Ampere &amp; Kilowatt)</value>
+  </data>
+  <data name="Invoices.AmpereOnly" xml:space="preserve">
+    <value>Ampere Only</value>
+  </data>
+  <data name="Invoices.KilowattOnly" xml:space="preserve">
+    <value>Kilowatt Only</value>
+  </data>
+  <data name="Invoices.Generating" xml:space="preserve">
+    <value>Generating...</value>
+  </data>
+  <data name="Invoices.Generate" xml:space="preserve">
+    <value>Generate</value>
+  </data>
+  <data name="Invoices.Issued" xml:space="preserve">
+    <value>Issued {0}</value>
+  </data>
+  <data name="Invoices.ViewInvoice" xml:space="preserve">
+    <value>View invoice</value>
+  </data>
+  <data name="Invoices.PrintInvoice" xml:space="preserve">
+    <value>Print invoice</value>
+  </data>
+  <data name="Invoices.RemainingBalance" xml:space="preserve">
+    <value>Remaining balance: {0}</value>
+  </data>
+  <data name="Invoices.PaymentMethod" xml:space="preserve">
+    <value>Payment Method</value>
+  </data>
+  <data name="Invoices.CustomerRequired" xml:space="preserve">
+    <value>Customer is required.</value>
+  </data>
+  <data name="Invoices.ToDateAfterFrom" xml:space="preserve">
+    <value>The 'To' date must be on or after the 'From' date.</value>
+  </data>
+  <data name="Invoices.Created" xml:space="preserve">
+    <value>Invoice created successfully.</value>
+  </data>
+  <data name="Invoices.AmountRequired" xml:space="preserve">
+    <value>Amount must be greater than zero.</value>
+  </data>
+  <data name="Invoices.PrintFailed" xml:space="preserve">
+    <value>Unable to print invoice.</value>
+  </data>
+  <data name="Invoices.Deleted" xml:space="preserve">
+    <value>Invoice deleted successfully.</value>
+  </data>
+  <data name="Invoices.DaysBilled" xml:space="preserve">
+    <value>Days Billed</value>
+  </data>
+  <data name="Invoices.DaysBilledHint" xml:space="preserve">
+    <value>Set the date range for ampere proration. The billed amount will be calculated proportionally based on the number of days.</value>
+  </data>
+  <data name="Invoices.From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="Invoices.To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="Invoices.DaysWillBeBilled" xml:space="preserve">
+    <value>{0} day(s) will be billed.</value>
+  </data>
+  <data name="Invoices.ChargeMode" xml:space="preserve">
+    <value>Charge Mode</value>
+  </data>
+  <data name="Invoices.ByPayment" xml:space="preserve">
+    <value>By payment</value>
+  </data>
+  <data name="Invoices.ByKwh" xml:space="preserve">
+    <value>By kWh</value>
+  </data>
+  <data name="Invoices.SelectPaymentMethod" xml:space="preserve">
+    <value>Select payment method</value>
+  </data>
+  <data name="Invoices.FixedKilowattHint" xml:space="preserve">
+    <value>FixedKilowatt creates a paid invoice and credits kWh immediately.</value>
+  </data>
+  <data name="Invoices.Preview" xml:space="preserve">
+    <value>Server Calculation Preview</value>
+  </data>
+  <data name="Invoices.Calculating" xml:space="preserve">
+    <value>Calculating...</value>
+  </data>
+  <data name="Invoices.KwhCredit" xml:space="preserve">
+    <value>kWh Credit</value>
+  </data>
+  <data name="Invoices.PreviewHint" xml:space="preserve">
+    <value>Enter a payment or kWh amount to preview the exact backend calculation before creating the paid invoice.</value>
+  </data>
+  <data name="Invoices.NoPayments" xml:space="preserve">
+    <value>No payments recorded yet.</value>
+  </data>
+  <data name="Invoices.TvaWithRate" xml:space="preserve">
+    <value>TVA ({0}%)</value>
+  </data>
+  <data name="Areas.Created" xml:space="preserve">
+    <value>Area created.</value>
+  </data>
+  <data name="Areas.Updated" xml:space="preserve">
+    <value>Area updated.</value>
+  </data>
+  <data name="Areas.Deleted" xml:space="preserve">
+    <value>Area deleted.</value>
+  </data>
+  <data name="Areas.DeleteConfirm" xml:space="preserve">
+    <value>Delete {0}? This cannot be undone.</value>
+  </data>
+  <data name="Areas.NamePlaceholder" xml:space="preserve">
+    <value>e.g. Downtown</value>
+  </data>
+  <data name="Areas.FormFooter" xml:space="preserve">
+    <value>Areas group subscribers for billing and routing.</value>
+  </data>
+  <data name="Ampere.Created" xml:space="preserve">
+    <value>Ampere schedule created.</value>
+  </data>
+  <data name="Ampere.Updated" xml:space="preserve">
+    <value>Ampere schedule updated.</value>
+  </data>
+  <data name="Ampere.Deleted" xml:space="preserve">
+    <value>Ampere schedule deleted.</value>
+  </data>
+  <data name="Ampere.DeleteConfirm" xml:space="preserve">
+    <value>Delete {0}? This cannot be undone.</value>
+  </data>
+  <data name="Ampere.HoursPerDayValue" xml:space="preserve">
+    <value>{0} hours/day</value>
+  </data>
+  <data name="Ampere.PerAmp" xml:space="preserve">
+    <value>{0}/A</value>
+  </data>
+  <data name="Ampere.NamePlaceholder" xml:space="preserve">
+    <value>e.g. 8-Hour</value>
+  </data>
+  <data name="Ampere.HoursHint" xml:space="preserve">
+    <value>Must be unique across schedules (1–24).</value>
+  </data>
+  <data name="Ampere.PricingHint" xml:space="preserve">
+    <value>Choose a customer type, then set its amp price.</value>
+  </data>
+  <data name="Ampere.FormFooter" xml:space="preserve">
+    <value>Schedules define hours and amp rates for billing.</value>
+  </data>
+  <data name="Ampere.NoneAssigned" xml:space="preserve">
+    <value>No subscribers assigned to this schedule.</value>
+  </data>
+  <data name="Boxes.Created" xml:space="preserve">
+    <value>Distribution box created.</value>
+  </data>
+  <data name="Boxes.Updated" xml:space="preserve">
+    <value>Distribution box updated.</value>
+  </data>
+  <data name="Boxes.Deleted" xml:space="preserve">
+    <value>Distribution box deleted.</value>
+  </data>
+  <data name="Boxes.DeleteConfirm" xml:space="preserve">
+    <value>Delete {0}? This cannot be undone.</value>
+  </data>
+  <data name="Boxes.SelectArea" xml:space="preserve">
+    <value>Select area</value>
+  </data>
+  <data name="Boxes.SelectAreaRequired" xml:space="preserve">
+    <value>Please select an area.</value>
+  </data>
+  <data name="Boxes.NamePlaceholder" xml:space="preserve">
+    <value>Panel 1</value>
+  </data>
+  <data name="Boxes.LocationPlaceholder" xml:space="preserve">
+    <value>Building entrance</value>
+  </data>
+  <data name="Boxes.NotesPlaceholder" xml:space="preserve">
+    <value>Near the elevator room</value>
+  </data>
+  <data name="Boxes.LocationHint" xml:space="preserve">
+    <value>Optional. Use this for landmarks like building entrance or floor.</value>
+  </data>
+  <data name="Boxes.NotesHint" xml:space="preserve">
+    <value>Optional internal notes for technicians or operations.</value>
+  </data>
+  <data name="Boxes.FormFooter" xml:space="preserve">
+    <value>Boxes can be reused by subscribers through the box selector.</value>
+  </data>
+  <data name="Filter.ByArea" xml:space="preserve">
+    <value>Filter by area</value>
+  </data>
+  <data name="Expenses.Created" xml:space="preserve">
+    <value>Expense created successfully.</value>
+  </data>
+  <data name="Expenses.Updated" xml:space="preserve">
+    <value>Expense updated successfully.</value>
+  </data>
+  <data name="Expenses.Deleted" xml:space="preserve">
+    <value>Expense deleted successfully.</value>
+  </data>
+  <data name="Expenses.ThisExpense" xml:space="preserve">
+    <value>this expense</value>
+  </data>
+  <data name="Expenses.FormFooter" xml:space="preserve">
+    <value>Expenses update dashboard totals after successful save.</value>
+  </data>
+  <data name="Expenses.PageHoldsRow" xml:space="preserve">
+    <value>Current page holds {0} row.</value>
+  </data>
+  <data name="Expenses.PageHoldsRows" xml:space="preserve">
+    <value>Current page holds {0} rows.</value>
+  </data>
+  <data name="Settings.BackToSettings" xml:space="preserve">
+    <value>Back to settings</value>
+  </data>
+  <data name="Settings.ProfileSaved" xml:space="preserve">
+    <value>Profile saved.</value>
+  </data>
+  <data name="Validation.NameRequired" xml:space="preserve">
+    <value>Name is required.</value>
+  </data>
+  <data name="Validation.HoursRange" xml:space="preserve">
+    <value>Hours must be between 1 and 24.</value>
+  </data>
+  <data name="AuditAction.CustomerCreated" xml:space="preserve">
+    <value>Customer Created</value>
+  </data>
+  <data name="AuditAction.CustomerUpdated" xml:space="preserve">
+    <value>Customer Updated</value>
+  </data>
+  <data name="AuditAction.CustomerDeleted" xml:space="preserve">
+    <value>Customer Deleted</value>
+  </data>
+  <data name="AuditAction.InvoiceCreated" xml:space="preserve">
+    <value>Invoice Created</value>
+  </data>
+  <data name="AuditAction.InvoiceBulkCreated" xml:space="preserve">
+    <value>Invoice Bulk Created</value>
+  </data>
+  <data name="AuditAction.InvoicePaymentRecorded" xml:space="preserve">
+    <value>Invoice Payment Recorded</value>
+  </data>
+  <data name="AuditAction.InvoiceFixedKilowattCharge" xml:space="preserve">
+    <value>Invoice Fixed Kilowatt Charge</value>
+  </data>
+  <data name="AuditAction.ExpenseCreated" xml:space="preserve">
+    <value>Expense Created</value>
+  </data>
+  <data name="AuditAction.ExpenseUpdated" xml:space="preserve">
+    <value>Expense Updated</value>
+  </data>
+  <data name="AuditAction.ExpenseDeleted" xml:space="preserve">
+    <value>Expense Deleted</value>
+  </data>
+</root>

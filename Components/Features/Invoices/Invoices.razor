@@ -4,6 +4,7 @@
 @inject IAppPreferencesService PreferencesService
 @inject IToastService Toast
 @inject IJSRuntime Js
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4" @onclick="CloseMenu">
     <InvoicesToolbar CustomerFilter="@_customerFilter"
@@ -250,7 +251,7 @@
     {
         if (!Guid.TryParse(_create.CustomerId, out var customerId))
         {
-            Toast.Error("Customer is required.");
+            Toast.Error(L["Invoices.CustomerRequired"].Value);
             return;
         }
 
@@ -269,7 +270,7 @@
             var days = CreateInvoiceSheet.CalcBilledDays(_create.BilledFrom, _create.BilledTo);
             if (days <= 0)
             {
-                Toast.Error("The 'To' date must be on or after the 'From' date.");
+                Toast.Error(L["Invoices.ToDateAfterFrom"].Value);
                 return;
             }
 
@@ -285,7 +286,7 @@
 
             if (!Enum.TryParse<PaymentMethod>(_create.PaymentMethod, out var method))
             {
-                Toast.Error("Payment method is required.");
+                Toast.Error(L["Invoices.PaymentRequired"].Value);
                 return;
             }
 
@@ -308,7 +309,7 @@
                     Notes: notes));
                 succeeded = true;
             },
-            "Invoice created successfully.");
+            L["Invoices.Created"].Value);
         _saving = false;
         if (!succeeded) return;
         CloseCreate();
@@ -369,7 +370,7 @@
         if (_payInvoice is null) return;
         if (_pay.Amount <= 0)
         {
-            Toast.Error("Amount must be greater than zero.");
+            Toast.Error(L["Invoices.AmountRequired"].Value);
             return;
         }
 
@@ -386,7 +387,7 @@
                     Notes: string.IsNullOrWhiteSpace(_pay.Notes) ? null : _pay.Notes.Trim()));
                 succeeded = true;
             },
-            "Payment recorded successfully.");
+            L["Invoices.PaymentRecorded"].Value);
         _saving = false;
         if (!succeeded) return;
         ClosePay();
@@ -445,7 +446,7 @@
         var html = await UiActions.RunAsync(Toast, () => InvoiceService.RenderPrintHtmlAsync(invoiceId));
         if (string.IsNullOrWhiteSpace(html))
         {
-            Toast.Error("Unable to print invoice.");
+            Toast.Error(L["Invoices.PrintFailed"].Value);
             return;
         }
 
@@ -462,7 +463,7 @@
         }
         catch
         {
-            Toast.Error("Unable to print invoice.");
+            Toast.Error(L["Invoices.PrintFailed"].Value);
         }
         finally
         {
@@ -488,7 +489,7 @@
         {
             await InvoiceService.DeleteAsync(id);
             succeeded = true;
-        }, "Invoice deleted successfully.");
+        }, L["Invoices.Deleted"].Value);
         if (!succeeded) return;
         _confirmDelete = null;
         if (_details?.Id == id) CloseDetails();

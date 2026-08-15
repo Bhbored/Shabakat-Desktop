@@ -1,0 +1,1751 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="xml:space" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="Nav.Dashboard" xml:space="preserve">
+    <value>لوحة التحكم</value>
+  </data>
+  <data name="Nav.Areas" xml:space="preserve">
+    <value>المناطق</value>
+  </data>
+  <data name="Nav.AmpereSchedules" xml:space="preserve">
+    <value>جداول الأمبير</value>
+  </data>
+  <data name="Nav.Boxes" xml:space="preserve">
+    <value>الصناديق</value>
+  </data>
+  <data name="Nav.Subscribers" xml:space="preserve">
+    <value>المشتركون</value>
+  </data>
+  <data name="Nav.Invoices" xml:space="preserve">
+    <value>الفواتير</value>
+  </data>
+  <data name="Nav.Calculator" xml:space="preserve">
+    <value>الحاسبة</value>
+  </data>
+  <data name="Nav.Calc" xml:space="preserve">
+    <value>حاسبة</value>
+  </data>
+  <data name="Nav.Expenses" xml:space="preserve">
+    <value>المصاريف</value>
+  </data>
+  <data name="Nav.Settings" xml:space="preserve">
+    <value>الإعدادات</value>
+  </data>
+  <data name="Nav.MainMenu" xml:space="preserve">
+    <value>القائمة الرئيسية</value>
+  </data>
+  <data name="Nav.OperatorManagement" xml:space="preserve">
+    <value>إدارة التشغيل</value>
+  </data>
+  <data name="Nav.OperatorRole" xml:space="preserve">
+    <value>مشغّل · شبكات</value>
+  </data>
+  <data name="Nav.QuickSearch" xml:space="preserve">
+    <value>بحث سريع عن المشتركين...</value>
+  </data>
+  <data name="Nav.AuditLogs" xml:space="preserve">
+    <value>سجل التدقيق</value>
+  </data>
+  <data name="Nav.OpenAuditLogs" xml:space="preserve">
+    <value>فتح سجل التدقيق</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>حفظ</value>
+  </data>
+  <data name="Common.Saving" xml:space="preserve">
+    <value>جارٍ الحفظ...</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="Common.Deleting" xml:space="preserve">
+    <value>جارٍ الحذف...</value>
+  </data>
+  <data name="Common.Edit" xml:space="preserve">
+    <value>تعديل</value>
+  </data>
+  <data name="Common.Previous" xml:space="preserve">
+    <value>السابق</value>
+  </data>
+  <data name="Common.Next" xml:space="preserve">
+    <value>التالي</value>
+  </data>
+  <data name="Common.Print" xml:space="preserve">
+    <value>طباعة</value>
+  </data>
+  <data name="Common.Pay" xml:space="preserve">
+    <value>دفع</value>
+  </data>
+  <data name="Common.Create" xml:space="preserve">
+    <value>إنشاء</value>
+  </data>
+  <data name="Common.View" xml:space="preserve">
+    <value>عرض</value>
+  </data>
+  <data name="Common.Search" xml:space="preserve">
+    <value>بحث</value>
+  </data>
+  <data name="Common.Reset" xml:space="preserve">
+    <value>إعادة تعيين</value>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>تصدير</value>
+  </data>
+  <data name="Common.Selected" xml:space="preserve">
+    <value>محدّد</value>
+  </data>
+  <data name="Common.Loading" xml:space="preserve">
+    <value>جارٍ التحميل...</value>
+  </data>
+  <data name="Common.Add" xml:space="preserve">
+    <value>إضافة</value>
+  </data>
+  <data name="Common.Activate" xml:space="preserve">
+    <value>تفعيل</value>
+  </data>
+  <data name="Common.Suspend" xml:space="preserve">
+    <value>تعليق</value>
+  </data>
+  <data name="Common.ViewDetails" xml:space="preserve">
+    <value>عرض التفاصيل</value>
+  </data>
+  <data name="Common.SaveChanges" xml:space="preserve">
+    <value>حفظ التغييرات</value>
+  </data>
+  <data name="Common.Name" xml:space="preserve">
+    <value>الاسم</value>
+  </data>
+  <data name="Common.Phone" xml:space="preserve">
+    <value>الهاتف</value>
+  </data>
+  <data name="Common.PhoneNumber" xml:space="preserve">
+    <value>رقم الهاتف</value>
+  </data>
+  <data name="Common.Area" xml:space="preserve">
+    <value>المنطقة</value>
+  </data>
+  <data name="Common.Status" xml:space="preserve">
+    <value>الحالة</value>
+  </data>
+  <data name="Common.Notes" xml:space="preserve">
+    <value>ملاحظات</value>
+  </data>
+  <data name="Common.Created" xml:space="preserve">
+    <value>تاريخ الإنشاء</value>
+  </data>
+  <data name="Common.CreatedAt" xml:space="preserve">
+    <value>تاريخ الإنشاء</value>
+  </data>
+  <data name="Common.Type" xml:space="preserve">
+    <value>النوع</value>
+  </data>
+  <data name="Common.Amount" xml:space="preserve">
+    <value>المبلغ</value>
+  </data>
+  <data name="Common.Customer" xml:space="preserve">
+    <value>الزبون</value>
+  </data>
+  <data name="Common.Plan" xml:space="preserve">
+    <value>الخطة</value>
+  </data>
+  <data name="Common.Since" xml:space="preserve">
+    <value>منذ</value>
+  </data>
+  <data name="Common.Optional" xml:space="preserve">
+    <value>اختياري</value>
+  </data>
+  <data name="Common.Enabled" xml:space="preserve">
+    <value>مفعّل</value>
+  </data>
+  <data name="Common.Disabled" xml:space="preserve">
+    <value>معطّل</value>
+  </data>
+  <data name="Common.NotConfigured" xml:space="preserve">
+    <value>غير مضبوط</value>
+  </data>
+  <data name="Common.NotSet" xml:space="preserve">
+    <value>غير معيّن</value>
+  </data>
+  <data name="Common.Configured" xml:space="preserve">
+    <value>مضبوط</value>
+  </data>
+  <data name="Common.NoNotes" xml:space="preserve">
+    <value>لا ملاحظات</value>
+  </data>
+  <data name="Common.Done" xml:space="preserve">
+    <value>تم</value>
+  </data>
+  <data name="Common.Dash" xml:space="preserve">
+    <value>-</value>
+  </data>
+  <data name="Pager.PageOf" xml:space="preserve">
+    <value>الصفحة {0} من {1}</value>
+  </data>
+  <data name="Pager.Showing" xml:space="preserve">
+    <value>عرض {0}–{1} من {2}</value>
+  </data>
+  <data name="Splash.Title" xml:space="preserve">
+    <value>شبكات</value>
+  </data>
+  <data name="Splash.Subtitle" xml:space="preserve">
+    <value>نحو تشغيل أفضل للمولّدات</value>
+  </data>
+  <data name="Splash.Aria" xml:space="preserve">
+    <value>جارٍ تحميل شبكات</value>
+  </data>
+  <data name="Status.Paid" xml:space="preserve">
+    <value>مدفوعة</value>
+  </data>
+  <data name="Status.Unpaid" xml:space="preserve">
+    <value>غير مدفوعة</value>
+  </data>
+  <data name="Status.Overdue" xml:space="preserve">
+    <value>متأخرة</value>
+  </data>
+  <data name="Status.PartiallyPaid" xml:space="preserve">
+    <value>مدفوعة جزئياً</value>
+  </data>
+  <data name="Status.Active" xml:space="preserve">
+    <value>نشط</value>
+  </data>
+  <data name="Status.Suspended" xml:space="preserve">
+    <value>معلّق</value>
+  </data>
+  <data name="Status.Terminated" xml:space="preserve">
+    <value>منتهٍ</value>
+  </data>
+  <data name="Status.Failed" xml:space="preserve">
+    <value>فشل</value>
+  </data>
+  <data name="Status.Success" xml:space="preserve">
+    <value>نجاح</value>
+  </data>
+  <data name="Status.Unknown" xml:space="preserve">
+    <value>غير معروف</value>
+  </data>
+  <data name="ExpenseType.Fuel" xml:space="preserve">
+    <value>وقود</value>
+  </data>
+  <data name="ExpenseType.Maintenance" xml:space="preserve">
+    <value>صيانة</value>
+  </data>
+  <data name="ExpenseType.Employees" xml:space="preserve">
+    <value>موظفون</value>
+  </data>
+  <data name="ExpenseType.Other" xml:space="preserve">
+    <value>أخرى</value>
+  </data>
+  <data name="PlanType.Ampere" xml:space="preserve">
+    <value>أمبير</value>
+  </data>
+  <data name="PlanType.Kilowatt" xml:space="preserve">
+    <value>كيلوواط</value>
+  </data>
+  <data name="PlanType.FixedKilowatt" xml:space="preserve">
+    <value>كيلوواط ثابت</value>
+  </data>
+  <data name="Relation.Friend" xml:space="preserve">
+    <value>صديق</value>
+  </data>
+  <data name="Relation.Family" xml:space="preserve">
+    <value>عائلة</value>
+  </data>
+  <data name="Relation.Owner" xml:space="preserve">
+    <value>مالك</value>
+  </data>
+  <data name="CustomerType.Residential" xml:space="preserve">
+    <value>سكني</value>
+  </data>
+  <data name="CustomerType.Commercial" xml:space="preserve">
+    <value>تجاري</value>
+  </data>
+  <data name="CustomerType.Industrial" xml:space="preserve">
+    <value>صناعي</value>
+  </data>
+  <data name="Page.Dashboard.Title" xml:space="preserve">
+    <value>لوحة التحكم</value>
+  </data>
+  <data name="Page.Dashboard.Subtitle" xml:space="preserve">
+    <value>نظرة شاملة على عمليات شبكات</value>
+  </data>
+  <data name="Page.Areas.Title" xml:space="preserve">
+    <value>المناطق</value>
+  </data>
+  <data name="Page.Areas.Subtitle" xml:space="preserve">
+    <value>تنظيم مجموعات المشتركين وإدارة تعيين المناطق</value>
+  </data>
+  <data name="Page.AmpereSchedules.Title" xml:space="preserve">
+    <value>جداول الأمبير</value>
+  </data>
+  <data name="Page.AmpereSchedules.Subtitle" xml:space="preserve">
+    <value>إدارة شرائح ساعات التغذية وتسعير الجداول</value>
+  </data>
+  <data name="Page.Boxes.Title" xml:space="preserve">
+    <value>الصناديق</value>
+  </data>
+  <data name="Page.Boxes.Subtitle" xml:space="preserve">
+    <value>إدارة صناديق التوزيع المرتبطة بمناطق الشركة</value>
+  </data>
+  <data name="Page.Subscribers.Title" xml:space="preserve">
+    <value>المشتركون</value>
+  </data>
+  <data name="Page.Subscribers.Subtitle" xml:space="preserve">
+    <value>بحث وترتيب وإدارة الحسابات الشهرية</value>
+  </data>
+  <data name="Page.Invoices.Title" xml:space="preserve">
+    <value>الفواتير</value>
+  </data>
+  <data name="Page.Invoices.Subtitle" xml:space="preserve">
+    <value>إنشاء كشوف فوترة قابلة للطباعة</value>
+  </data>
+  <data name="Page.Calculator.Title" xml:space="preserve">
+    <value>حاسبة الكيلوواط الثابت</value>
+  </data>
+  <data name="Page.Calculator.Subtitle" xml:space="preserve">
+    <value>معاينة سعر كيلوواط ثابت دون إنشاء فاتورة</value>
+  </data>
+  <data name="Page.Expenses.Title" xml:space="preserve">
+    <value>المصاريف</value>
+  </data>
+  <data name="Page.Expenses.Subtitle" xml:space="preserve">
+    <value>تتبع الوقود والصيانة والأجور ومصاريف التشغيل</value>
+  </data>
+  <data name="Page.Audit.Title" xml:space="preserve">
+    <value>سجل التدقيق</value>
+  </data>
+  <data name="Page.Audit.Subtitle" xml:space="preserve">
+    <value>مراجعة إجراءات النظام والحالة والتفاصيل</value>
+  </data>
+  <data name="Page.Settings.Title" xml:space="preserve">
+    <value>الإعدادات</value>
+  </data>
+  <data name="Page.Settings.Subtitle" xml:space="preserve">
+    <value>التفضيلات والتسعير وإعدادات الإشعارات</value>
+  </data>
+  <data name="Page.SettingsDueDate.Title" xml:space="preserve">
+    <value>تاريخ الاستحقاق</value>
+  </data>
+  <data name="Page.SettingsDueDate.Subtitle" xml:space="preserve">
+    <value>اختر يوم استحقاق الفاتورة من الشهر</value>
+  </data>
+  <data name="Page.SettingsLanguage.Title" xml:space="preserve">
+    <value>اللغة</value>
+  </data>
+  <data name="Page.SettingsLanguage.Subtitle" xml:space="preserve">
+    <value>تعيين لغة الإشعارات</value>
+  </data>
+  <data name="Page.SettingsAmpereSchedulePricing.Title" xml:space="preserve">
+    <value>تسعير جداول الأمبير</value>
+  </data>
+  <data name="Page.SettingsAmpereSchedulePricing.Subtitle" xml:space="preserve">
+    <value>تفعيل أو تعطيل تسعير الأمبير حسب الجدول</value>
+  </data>
+  <data name="Page.SettingsAmpereProration.Title" xml:space="preserve">
+    <value>توزيع الأمبير</value>
+  </data>
+  <data name="Page.SettingsAmpereProration.Subtitle" xml:space="preserve">
+    <value>احتساب المشتركين بالأمبير حسب أيام الخدمة</value>
+  </data>
+  <data name="Page.SettingsWhatsApp.Title" xml:space="preserve">
+    <value>اتصال واتساب</value>
+  </data>
+  <data name="Page.SettingsWhatsApp.Subtitle" xml:space="preserve">
+    <value>إدارة الربط عبر QR وحالة جلسة Evolution API</value>
+  </data>
+  <data name="Page.SettingsCompanyLogo.Title" xml:space="preserve">
+    <value>شعار الشركة</value>
+  </data>
+  <data name="Page.SettingsCompanyLogo.Subtitle" xml:space="preserve">
+    <value>رفع أو استبدال شعار الشركة المستخدم في الفواتير</value>
+  </data>
+  <data name="Page.SettingsExcelExport.Title" xml:space="preserve">
+    <value>أعمدة تصدير إكسل</value>
+  </data>
+  <data name="Page.SettingsExcelExport.Subtitle" xml:space="preserve">
+    <value>اختر أعمدة الزبائن المضمّنة في تصدير إكسل</value>
+  </data>
+  <data name="Page.SettingsPricePerKw.Title" xml:space="preserve">
+    <value>سعر الكيلوواط</value>
+  </data>
+  <data name="Page.SettingsPricePerKw.Subtitle" xml:space="preserve">
+    <value>تعديل تسعير الكيلوواط الافتراضي وحسب نوع الزبون</value>
+  </data>
+  <data name="Page.SettingsPricePerAmp.Title" xml:space="preserve">
+    <value>سعر الأمبير</value>
+  </data>
+  <data name="Page.SettingsPricePerAmp.Subtitle" xml:space="preserve">
+    <value>تعديل تسعير الأمبير الافتراضي وحسب نوع الزبون</value>
+  </data>
+  <data name="Page.SettingsFixedCharge.Title" xml:space="preserve">
+    <value>الرسوم الثابتة</value>
+  </data>
+  <data name="Page.SettingsFixedCharge.Subtitle" xml:space="preserve">
+    <value>تعديل الرسوم الثابتة حسب الشريحة</value>
+  </data>
+  <data name="Page.SettingsTva.Title" xml:space="preserve">
+    <value>ضريبة القيمة المضافة (%)</value>
+  </data>
+  <data name="Page.SettingsTva.Subtitle" xml:space="preserve">
+    <value>تعديل قيم الضريبة حسب الشريحة</value>
+  </data>
+  <data name="Page.SettingsTesting.Title" xml:space="preserve">
+    <value>الاختبار</value>
+  </data>
+  <data name="Page.SettingsTesting.Subtitle" xml:space="preserve">
+    <value>تعبئة بيانات تجريبية لقاعدة البيانات المحلية</value>
+  </data>
+  <data name="Page.NotFound.Title" xml:space="preserve">
+    <value>غير موجود</value>
+  </data>
+  <data name="Page.NotFound.Body" xml:space="preserve">
+    <value>عذراً، المحتوى الذي تبحث عنه غير موجود.</value>
+  </data>
+  <data name="Home.AllTime" xml:space="preserve">
+    <value>كل الفترات</value>
+  </data>
+  <data name="Home.TotalSubscribers" xml:space="preserve">
+    <value>إجمالي المشتركين</value>
+  </data>
+  <data name="Home.SubscribersHint" xml:space="preserve">
+    <value>{0} نشط · {1} معلّق</value>
+  </data>
+  <data name="Home.CollectedAllTime" xml:space="preserve">
+    <value>المحصّل الإجمالي</value>
+  </data>
+  <data name="Home.CollectedHint" xml:space="preserve">
+    <value>{0}% من {1}</value>
+  </data>
+  <data name="Home.OutstandingInvoices" xml:space="preserve">
+    <value>فواتير مستحقة</value>
+  </data>
+  <data name="Home.OutstandingHint" xml:space="preserve">
+    <value>{0} غير مدفوعة · {1} جزئية</value>
+  </data>
+  <data name="Home.NetIncomeAllTime" xml:space="preserve">
+    <value>صافي الدخل الإجمالي</value>
+  </data>
+  <data name="Home.OutstandingAmount" xml:space="preserve">
+    <value>{0} مستحق</value>
+  </data>
+  <data name="Home.UpcomingDue" xml:space="preserve">
+    <value>مستحقات قادمة</value>
+  </data>
+  <data name="Home.PendingCount" xml:space="preserve">
+    <value>{0} معلّقة</value>
+  </data>
+  <data name="Home.NoUpcoming" xml:space="preserve">
+    <value>لا توجد فواتير غير مدفوعة أو مدفوعة جزئياً.</value>
+  </data>
+  <data name="Home.DueOn" xml:space="preserve">
+    <value>الاستحقاق {0}</value>
+  </data>
+  <data name="Home.ReviewBalances" xml:space="preserve">
+    <value>مراجعة الأرصدة</value>
+  </data>
+  <data name="Home.RecentlyPaid" xml:space="preserve">
+    <value>فواتير مدفوعة حديثاً</value>
+  </data>
+  <data name="Home.ViewAll" xml:space="preserve">
+    <value>عرض الكل</value>
+  </data>
+  <data name="Home.NoPaid" xml:space="preserve">
+    <value>لا توجد فواتير مدفوعة بعد في هذه البيانات.</value>
+  </data>
+  <data name="Home.InvoiceIssued" xml:space="preserve">
+    <value>فاتورة #{0} · صدرت {1}</value>
+  </data>
+  <data name="Home.FinanceSnapshot" xml:space="preserve">
+    <value>لمحة مالية</value>
+  </data>
+  <data name="Home.FinanceSnapshotHint" xml:space="preserve">
+    <value>إجمالي الفوترة والتحصيل والمصاريف والصافي لهذه الشركة.</value>
+  </data>
+  <data name="Home.RevenueVsCash" xml:space="preserve">
+    <value>الإيرادات مقابل التدفق النقدي</value>
+  </data>
+  <data name="Home.Chart.Billed" xml:space="preserve">
+    <value>مفوتر</value>
+  </data>
+  <data name="Home.Chart.Collected" xml:space="preserve">
+    <value>محصّل</value>
+  </data>
+  <data name="Home.Chart.Outstanding" xml:space="preserve">
+    <value>مستحق</value>
+  </data>
+  <data name="Home.Chart.Expenses" xml:space="preserve">
+    <value>مصاريف</value>
+  </data>
+  <data name="Home.Chart.Net" xml:space="preserve">
+    <value>صافي</value>
+  </data>
+  <data name="CustomerSearch.Placeholder" xml:space="preserve">
+    <value>اختر زبوناً</value>
+  </data>
+  <data name="CustomerSearch.Search" xml:space="preserve">
+    <value>بحث عن زبائن...</value>
+  </data>
+  <data name="CustomerSearch.None" xml:space="preserve">
+    <value>لم يتم العثور على زبائن.</value>
+  </data>
+  <data name="CustomerSearch.All" xml:space="preserve">
+    <value>كل الزبائن</value>
+  </data>
+  <data name="Table.InvoiceNumber" xml:space="preserve">
+    <value>رقم الفاتورة</value>
+  </data>
+  <data name="Table.DueDate" xml:space="preserve">
+    <value>تاريخ الاستحقاق</value>
+  </data>
+  <data name="Table.Total" xml:space="preserve">
+    <value>المجموع</value>
+  </data>
+  <data name="Table.AmountDue" xml:space="preserve">
+    <value>المبلغ المستحق</value>
+  </data>
+  <data name="Table.ExpenseDate" xml:space="preserve">
+    <value>تاريخ المصروف</value>
+  </data>
+  <data name="Table.Label" xml:space="preserve">
+    <value>التسمية</value>
+  </data>
+  <data name="Table.Event" xml:space="preserve">
+    <value>الحدث</value>
+  </data>
+  <data name="Table.Action" xml:space="preserve">
+    <value>الإجراء</value>
+  </data>
+  <data name="Table.Entity" xml:space="preserve">
+    <value>الكيان</value>
+  </data>
+  <data name="Empty.Subscribers" xml:space="preserve">
+    <value>لا مشتركون مطابقون للفلاتر الحالية.</value>
+  </data>
+  <data name="Empty.Invoices" xml:space="preserve">
+    <value>لا فواتير مطابقة للفلاتر الحالية.</value>
+  </data>
+  <data name="Empty.Expenses" xml:space="preserve">
+    <value>لا مصاريف مطابقة للفلاتر الحالية.</value>
+  </data>
+  <data name="Empty.Audit" xml:space="preserve">
+    <value>لا أحداث تدقيق مطابقة للفلاتر الحالية.</value>
+  </data>
+  <data name="Empty.Areas" xml:space="preserve">
+    <value>لا مناطق مطابقة للفلاتر الحالية.</value>
+  </data>
+  <data name="Empty.Boxes" xml:space="preserve">
+    <value>لا صناديق مطابقة للفلاتر الحالية.</value>
+  </data>
+  <data name="Empty.Schedules" xml:space="preserve">
+    <value>لا جداول أمبير مطابقة للفلاتر الحالية.</value>
+  </data>
+  <data name="Count.Subscribers" xml:space="preserve">
+    <value>{0} مشترك</value>
+  </data>
+  <data name="Count.SubscribersPlural" xml:space="preserve">
+    <value>{0} مشتركون</value>
+  </data>
+  <data name="Count.Invoices" xml:space="preserve">
+    <value>{0} فاتورة</value>
+  </data>
+  <data name="Count.InvoicesPlural" xml:space="preserve">
+    <value>{0} فواتير</value>
+  </data>
+  <data name="Count.Expenses" xml:space="preserve">
+    <value>{0} مصروف</value>
+  </data>
+  <data name="Count.ExpensesPlural" xml:space="preserve">
+    <value>{0} مصاريف</value>
+  </data>
+  <data name="Count.Areas" xml:space="preserve">
+    <value>{0} منطقة</value>
+  </data>
+  <data name="Count.AreasPlural" xml:space="preserve">
+    <value>{0} مناطق</value>
+  </data>
+  <data name="Count.Boxes" xml:space="preserve">
+    <value>{0} صندوق</value>
+  </data>
+  <data name="Count.BoxesPlural" xml:space="preserve">
+    <value>{0} صناديق</value>
+  </data>
+  <data name="Count.Schedules" xml:space="preserve">
+    <value>{0} جدول</value>
+  </data>
+  <data name="Count.SchedulesPlural" xml:space="preserve">
+    <value>{0} جداول</value>
+  </data>
+  <data name="Count.Audit" xml:space="preserve">
+    <value>{0} حدث</value>
+  </data>
+  <data name="Count.AuditPlural" xml:space="preserve">
+    <value>{0} أحداث</value>
+  </data>
+  <data name="Filter.AllAreas" xml:space="preserve">
+    <value>كل المناطق</value>
+  </data>
+  <data name="Filter.AllPlanTypes" xml:space="preserve">
+    <value>كل أنواع الخطط</value>
+  </data>
+  <data name="Filter.AllSchedules" xml:space="preserve">
+    <value>كل الجداول</value>
+  </data>
+  <data name="Filter.AllRelations" xml:space="preserve">
+    <value>كل العلاقات</value>
+  </data>
+  <data name="Filter.AllStatuses" xml:space="preserve">
+    <value>كل الحالات</value>
+  </data>
+  <data name="Filter.AllExpenseTypes" xml:space="preserve">
+    <value>كل أنواع المصاريف</value>
+  </data>
+  <data name="Filter.SearchSubscribersName" xml:space="preserve">
+    <value>بحث عن مشتركين بالاسم...</value>
+  </data>
+  <data name="Filter.SearchSubscribersPhone" xml:space="preserve">
+    <value>بحث عن مشتركين بالهاتف...</value>
+  </data>
+  <data name="Filter.SearchAreas" xml:space="preserve">
+    <value>بحث في المناطق...</value>
+  </data>
+  <data name="Filter.SearchSchedules" xml:space="preserve">
+    <value>بحث في الجداول...</value>
+  </data>
+  <data name="Filter.SearchBoxes" xml:space="preserve">
+    <value>بحث في الصناديق بالاسم أو المنطقة أو الملاحظات...</value>
+  </data>
+  <data name="Filter.IssueDateFrom" xml:space="preserve">
+    <value>تاريخ الإصدار من</value>
+  </data>
+  <data name="Filter.IssueDateTo" xml:space="preserve">
+    <value>تاريخ الإصدار إلى</value>
+  </data>
+  <data name="Filter.DateFrom" xml:space="preserve">
+    <value>التاريخ من</value>
+  </data>
+  <data name="Filter.DateTo" xml:space="preserve">
+    <value>التاريخ إلى</value>
+  </data>
+  <data name="Filter.ExpenseType" xml:space="preserve">
+    <value>نوع المصروف</value>
+  </data>
+  <data name="Subscribers.ExportExcel" xml:space="preserve">
+    <value>تصدير إكسل</value>
+  </data>
+  <data name="Subscribers.Add" xml:space="preserve">
+    <value>+ إضافة مشترك</value>
+  </data>
+  <data name="Subscribers.Edit" xml:space="preserve">
+    <value>تعديل مشترك</value>
+  </data>
+  <data name="Subscribers.AddTitle" xml:space="preserve">
+    <value>إضافة مشترك</value>
+  </data>
+  <data name="Subscribers.EditHint" xml:space="preserve">
+    <value>تحديث بيانات المشترك والخطة والتسعير المخصص.</value>
+  </data>
+  <data name="Subscribers.AddHint" xml:space="preserve">
+    <value>إنشاء مشترك مع الخطة والمنطقة وتسعير اختياري.</value>
+  </data>
+  <data name="Subscribers.Create" xml:space="preserve">
+    <value>إنشاء مشترك</value>
+  </data>
+  <data name="Subscribers.DeleteTitle" xml:space="preserve">
+    <value>حذف مشترك</value>
+  </data>
+  <data name="Subscribers.ActivateTitle" xml:space="preserve">
+    <value>تفعيل مشترك</value>
+  </data>
+  <data name="Subscribers.SuspendTitle" xml:space="preserve">
+    <value>تعليق مشترك</value>
+  </data>
+  <data name="Subscribers.TotalBilled" xml:space="preserve">
+    <value>إجمالي المفوتر</value>
+  </data>
+  <data name="Subscribers.TotalPaid" xml:space="preserve">
+    <value>إجمالي المدفوع</value>
+  </data>
+  <data name="Subscribers.Outstanding" xml:space="preserve">
+    <value>المستحق</value>
+  </data>
+  <data name="Subscribers.PricingOverride" xml:space="preserve">
+    <value>تجاوز التسعير</value>
+  </data>
+  <data name="Subscribers.MeterReadings" xml:space="preserve">
+    <value>قراءات العداد</value>
+  </data>
+  <data name="Subscribers.AddReading" xml:space="preserve">
+    <value>إضافة قراءة</value>
+  </data>
+  <data name="Subscribers.ReadingThisMonth" xml:space="preserve">
+    <value>هذا المشترك لديه قراءة محفوظة لهذا الشهر.</value>
+  </data>
+  <data name="Subscribers.NoReadings" xml:space="preserve">
+    <value>لا توجد قراءات عداد بعد.</value>
+  </data>
+  <data name="Subscribers.ReadingValue" xml:space="preserve">
+    <value>قراءة {0}</value>
+  </data>
+  <data name="Subscribers.SavedOn" xml:space="preserve">
+    <value>حُفظت {0}</value>
+  </data>
+  <data name="Subscribers.Consumption" xml:space="preserve">
+    <value>الاستهلاك</value>
+  </data>
+  <data name="Subscribers.AmpereNoReadings" xml:space="preserve">
+    <value>مشتركو الأمبير لا يستخدمون قراءات العداد.</value>
+  </data>
+  <data name="Subscribers.NoSchedule" xml:space="preserve">
+    <value>لا توجد جداول بعد. أنشئ جدولاً أولاً ثم عيّنه هنا.</value>
+  </data>
+  <data name="Subscribers.NoBoxes" xml:space="preserve">
+    <value>لا توجد صناديق توزيع بعد. أنشئها أولاً ثم اختر واحداً هنا.</value>
+  </data>
+  <data name="Subscribers.DeleteReading" xml:space="preserve">
+    <value>حذف قراءة العداد</value>
+  </data>
+  <data name="Subscribers.AddMeterReading" xml:space="preserve">
+    <value>إضافة قراءة عداد</value>
+  </data>
+  <data name="Subscribers.SaveReading" xml:space="preserve">
+    <value>حفظ القراءة</value>
+  </data>
+  <data name="Invoices.Create" xml:space="preserve">
+    <value>إنشاء فاتورة</value>
+  </data>
+  <data name="Invoices.BulkGenerate" xml:space="preserve">
+    <value>توليد جماعي</value>
+  </data>
+  <data name="Invoices.BulkTitle" xml:space="preserve">
+    <value>إنشاء فواتير جماعي</value>
+  </data>
+  <data name="Invoices.BulkHint" xml:space="preserve">
+    <value>إنشاء فواتير لكل الزبائن النشطين المؤهلين لفترة الفوترة الحالية وفق قواعد النظام.</value>
+  </data>
+  <data name="Invoices.DeleteTitle" xml:space="preserve">
+    <value>حذف فاتورة</value>
+  </data>
+  <data name="Invoices.CreatedOn" xml:space="preserve">
+    <value>أُنشئت {0}</value>
+  </data>
+  <data name="Invoices.TotalAmount" xml:space="preserve">
+    <value>المبلغ الإجمالي</value>
+  </data>
+  <data name="Invoices.PaidAmount" xml:space="preserve">
+    <value>المبلغ المدفوع</value>
+  </data>
+  <data name="Invoices.AmountDue" xml:space="preserve">
+    <value>المبلغ المستحق</value>
+  </data>
+  <data name="Invoices.ConsumptionPeriod" xml:space="preserve">
+    <value>فترة الاستهلاك</value>
+  </data>
+  <data name="Invoices.Breakdown" xml:space="preserve">
+    <value>التفاصيل</value>
+  </data>
+  <data name="Invoices.BilledConsumption" xml:space="preserve">
+    <value>الاستهلاك المفوتر</value>
+  </data>
+  <data name="Invoices.Payments" xml:space="preserve">
+    <value>الدفعات</value>
+  </data>
+  <data name="Invoices.Record" xml:space="preserve">
+    <value>السجل</value>
+  </data>
+  <data name="Invoices.RecordPayment" xml:space="preserve">
+    <value>تسجيل دفعة</value>
+  </data>
+  <data name="Invoices.PaymentRequired" xml:space="preserve">
+    <value>طريقة الدفع مطلوبة.</value>
+  </data>
+  <data name="Invoices.PaymentRecorded" xml:space="preserve">
+    <value>تم تسجيل الدفعة بنجاح.</value>
+  </data>
+  <data name="Invoices.PaymentAmount" xml:space="preserve">
+    <value>مبلغ الدفع</value>
+  </data>
+  <data name="Invoices.KilowattAmount" xml:space="preserve">
+    <value>كمية الكيلوواط</value>
+  </data>
+  <data name="Invoices.SelectCustomer" xml:space="preserve">
+    <value>اختر زبوناً</value>
+  </data>
+  <data name="Expenses.Add" xml:space="preserve">
+    <value>إضافة مصروف</value>
+  </data>
+  <data name="Expenses.Edit" xml:space="preserve">
+    <value>تعديل مصروف</value>
+  </data>
+  <data name="Expenses.Create" xml:space="preserve">
+    <value>إنشاء مصروف</value>
+  </data>
+  <data name="Expenses.EditHint" xml:space="preserve">
+    <value>تعديل بند المصروف وتحديث مجاميع لوحة التحكم.</value>
+  </data>
+  <data name="Expenses.AddHint" xml:space="preserve">
+    <value>تسجيل مصروف تشغيل جديد.</value>
+  </data>
+  <data name="Expenses.DeleteTitle" xml:space="preserve">
+    <value>حذف مصروف</value>
+  </data>
+  <data name="Expenses.DeleteExpense" xml:space="preserve">
+    <value>حذف المصروف</value>
+  </data>
+  <data name="Expenses.DeleteConfirm" xml:space="preserve">
+    <value>حذف {0}؟ هذا حذف ناعم في النظام.</value>
+  </data>
+  <data name="Expenses.TotalMatching" xml:space="preserve">
+    <value>إجمالي الإنفاق المطابق</value>
+  </data>
+  <data name="Expenses.TotalMatchingHint" xml:space="preserve">
+    <value>يشمل كل الصفوف المطابقة في الخادم وليس الصفحة الحالية فقط.</value>
+  </data>
+  <data name="Expenses.MatchingCount" xml:space="preserve">
+    <value>المصاريف المطابقة</value>
+  </data>
+  <data name="Expenses.MatchingCountHint" xml:space="preserve">
+    <value>عدد الصفوف المطابقة للفلاتر الحالية.</value>
+  </data>
+  <data name="Expenses.PageSpend" xml:space="preserve">
+    <value>إنفاق الصفحة الحالية</value>
+  </data>
+  <data name="Expenses.TotalSpend" xml:space="preserve">
+    <value>إجمالي الإنفاق {0}</value>
+  </data>
+  <data name="Expenses.EmployeesHint" xml:space="preserve">
+    <value>تكاليف الرواتب والعاملين.</value>
+  </data>
+  <data name="Expenses.FuelHint" xml:space="preserve">
+    <value>وقود المولّد وتكاليف التشغيل المرتبطة.</value>
+  </data>
+  <data name="Expenses.MaintenanceHint" xml:space="preserve">
+    <value>إصلاحات وصيانة المعدات.</value>
+  </data>
+  <data name="Expenses.OtherHint" xml:space="preserve">
+    <value>مصاريف تشغيل أخرى.</value>
+  </data>
+  <data name="Areas.Add" xml:space="preserve">
+    <value>إضافة منطقة</value>
+  </data>
+  <data name="Areas.Edit" xml:space="preserve">
+    <value>تعديل منطقة</value>
+  </data>
+  <data name="Areas.UpdateHint" xml:space="preserve">
+    <value>تحديث اسم المنطقة.</value>
+  </data>
+  <data name="Areas.CreateHint" xml:space="preserve">
+    <value>إنشاء منطقة خدمة جديدة.</value>
+  </data>
+  <data name="Areas.DeleteTitle" xml:space="preserve">
+    <value>حذف المنطقة</value>
+  </data>
+  <data name="Ampere.Add" xml:space="preserve">
+    <value>إضافة جدول أمبير</value>
+  </data>
+  <data name="Ampere.Edit" xml:space="preserve">
+    <value>تعديل جدول أمبير</value>
+  </data>
+  <data name="Ampere.DeleteTitle" xml:space="preserve">
+    <value>حذف جدول الأمبير</value>
+  </data>
+  <data name="Ampere.HoursPerDay" xml:space="preserve">
+    <value>ساعات / يوم</value>
+  </data>
+  <data name="Ampere.PricingPerAmp" xml:space="preserve">
+    <value>التسعير لكل أمبير</value>
+  </data>
+  <data name="Ampere.Base" xml:space="preserve">
+    <value>أساسي</value>
+  </data>
+  <data name="Ampere.AssignedSubscribers" xml:space="preserve">
+    <value>المشتركون المعيّنون</value>
+  </data>
+  <data name="Ampere.AssignedHint" xml:space="preserve">
+    <value>المشتركون المفوترون على هذا الجدول.</value>
+  </data>
+  <data name="Ampere.Subscribers" xml:space="preserve">
+    <value>المشتركون</value>
+  </data>
+  <data name="Boxes.Add" xml:space="preserve">
+    <value>إضافة صندوق</value>
+  </data>
+  <data name="Boxes.Edit" xml:space="preserve">
+    <value>تعديل صندوق</value>
+  </data>
+  <data name="Boxes.Create" xml:space="preserve">
+    <value>إنشاء صندوق</value>
+  </data>
+  <data name="Boxes.AddHint" xml:space="preserve">
+    <value>إنشاء صندوق توزيع وربطه بمنطقة لتعيين المشتركين.</value>
+  </data>
+  <data name="Boxes.EditHint" xml:space="preserve">
+    <value>تحديث صندوق التوزيع وتعيين منطقته.</value>
+  </data>
+  <data name="Boxes.DeleteTitle" xml:space="preserve">
+    <value>حذف صندوق التوزيع</value>
+  </data>
+  <data name="Boxes.SelectHint" xml:space="preserve">
+    <value>اختر صندوقاً لعرض تفاصيله.</value>
+  </data>
+  <data name="Boxes.BoxName" xml:space="preserve">
+    <value>اسم الصندوق</value>
+  </data>
+  <data name="Boxes.LocationNote" xml:space="preserve">
+    <value>ملاحظة الموقع</value>
+  </data>
+  <data name="Boxes.AssignedSubscribers" xml:space="preserve">
+    <value>المشتركون المعيّنون</value>
+  </data>
+  <data name="Boxes.AssignedHint" xml:space="preserve">
+    <value>المشتركون الموصولون حالياً بهذا الصندوق.</value>
+  </data>
+  <data name="Boxes.NoneAssigned" xml:space="preserve">
+    <value>لا مشتركون معيّنون لهذا الصندوق بعد.</value>
+  </data>
+  <data name="Boxes.NeedArea" xml:space="preserve">
+    <value>أنشئ منطقة قبل إضافة صندوق توزيع.</value>
+  </data>
+  <data name="Audit.ViewEvent" xml:space="preserve">
+    <value>عرض حدث التدقيق</value>
+  </data>
+  <data name="Audit.ResetFilters" xml:space="preserve">
+    <value>إعادة تعيين الفلاتر</value>
+  </data>
+  <data name="Calculator.CustomerType" xml:space="preserve">
+    <value>نوع الزبون</value>
+  </data>
+  <data name="Calculator.PlanValue" xml:space="preserve">
+    <value>قيمة الخطة</value>
+  </data>
+  <data name="Calculator.CalculateFrom" xml:space="preserve">
+    <value>احسب من</value>
+  </data>
+  <data name="Calculator.Payment" xml:space="preserve">
+    <value>دفعة</value>
+  </data>
+  <data name="Calculator.Kwh" xml:space="preserve">
+    <value>ك.و.س</value>
+  </data>
+  <data name="Calculator.PaymentAmount" xml:space="preserve">
+    <value>مبلغ الدفع</value>
+  </data>
+  <data name="Calculator.KilowattAmount" xml:space="preserve">
+    <value>كمية الكيلوواط (ك.و.س)</value>
+  </data>
+  <data name="Calculator.Calculate" xml:space="preserve">
+    <value>احسب</value>
+  </data>
+  <data name="Calculator.Result" xml:space="preserve">
+    <value>النتيجة</value>
+  </data>
+  <data name="Calculator.UnitPrice" xml:space="preserve">
+    <value>سعر الوحدة</value>
+  </data>
+  <data name="Calculator.FixedCharge" xml:space="preserve">
+    <value>الرسوم الثابتة</value>
+  </data>
+  <data name="Calculator.Tva" xml:space="preserve">
+    <value>ض.ق.م</value>
+  </data>
+  <data name="Calculator.AmountRequired" xml:space="preserve">
+    <value>أدخل مبلغاً أكبر من صفر.</value>
+  </data>
+  <data name="Calculator.Failed" xml:space="preserve">
+    <value>تعذّر حساب السعر.</value>
+  </data>
+  <data name="Calculator.KwhSuffix" xml:space="preserve">
+    <value>{0} ك.و.س</value>
+  </data>
+  <data name="Settings.Appearance" xml:space="preserve">
+    <value>المظهر</value>
+  </data>
+  <data name="Settings.Theme" xml:space="preserve">
+    <value>السمة</value>
+  </data>
+  <data name="Settings.Theme.Light" xml:space="preserve">
+    <value>فاتح</value>
+  </data>
+  <data name="Settings.Theme.Dark" xml:space="preserve">
+    <value>داكن</value>
+  </data>
+  <data name="Settings.Theme.System" xml:space="preserve">
+    <value>النظام</value>
+  </data>
+  <data name="Settings.CompanyPreferences" xml:space="preserve">
+    <value>تفضيلات الشركة</value>
+  </data>
+  <data name="Settings.Testing" xml:space="preserve">
+    <value>الاختبار</value>
+  </data>
+  <data name="Settings.About" xml:space="preserve">
+    <value>حول</value>
+  </data>
+  <data name="Settings.Version" xml:space="preserve">
+    <value>الإصدار</value>
+  </data>
+  <data name="Settings.Language" xml:space="preserve">
+    <value>اللغة</value>
+  </data>
+  <data name="Settings.Language.English" xml:space="preserve">
+    <value>الإنجليزية</value>
+  </data>
+  <data name="Settings.Language.Arabic" xml:space="preserve">
+    <value>العربية</value>
+  </data>
+  <data name="Settings.LanguageSaved" xml:space="preserve">
+    <value>تم حفظ اللغة.</value>
+  </data>
+  <data name="Settings.LoadingPrefs" xml:space="preserve">
+    <value>جارٍ تحميل تفضيلات الشركة...</value>
+  </data>
+  <data name="Settings.PricePerKilowatt" xml:space="preserve">
+    <value>سعر الكيلوواط</value>
+  </data>
+  <data name="Settings.PricePerAmp" xml:space="preserve">
+    <value>سعر الأمبير</value>
+  </data>
+  <data name="Settings.FixedCharge" xml:space="preserve">
+    <value>الرسوم الثابتة</value>
+  </data>
+  <data name="Settings.Tva" xml:space="preserve">
+    <value>ض.ق.م</value>
+  </data>
+  <data name="Settings.DueDate" xml:space="preserve">
+    <value>تاريخ الاستحقاق</value>
+  </data>
+  <data name="Settings.AmpereSchedulePricing" xml:space="preserve">
+    <value>تسعير جداول الأمبير</value>
+  </data>
+  <data name="Settings.AmpereProration" xml:space="preserve">
+    <value>توزيع الأمبير</value>
+  </data>
+  <data name="Settings.AmpereSchedules" xml:space="preserve">
+    <value>جداول الأمبير</value>
+  </data>
+  <data name="Settings.ManageTiers" xml:space="preserve">
+    <value>إدارة الشرائح</value>
+  </data>
+  <data name="Settings.CompanyLogo" xml:space="preserve">
+    <value>شعار الشركة / الملف</value>
+  </data>
+  <data name="Settings.ExcelExport" xml:space="preserve">
+    <value>تصدير إكسل</value>
+  </data>
+  <data name="Settings.ExcelExportHint" xml:space="preserve">
+    <value>اختر أعمدة الزبائن المصدّرة</value>
+  </data>
+  <data name="Settings.SampleData" xml:space="preserve">
+    <value>بيانات تجريبية</value>
+  </data>
+  <data name="Settings.SeedLebanon" xml:space="preserve">
+    <value>تعبئة بيانات لبنان التجريبية</value>
+  </data>
+  <data name="Settings.DayOfMonth" xml:space="preserve">
+    <value>{0} من كل شهر</value>
+  </data>
+  <data name="Settings.ExportColumnsSaved" xml:space="preserve">
+    <value>تم حفظ أعمدة التصدير.</value>
+  </data>
+  <data name="Settings.Testing.Title" xml:space="preserve">
+    <value>بيانات لبنان التجريبية</value>
+  </data>
+  <data name="Settings.Testing.Hint" xml:space="preserve">
+    <value>تُدرج مناطق وصناديق وزبائن وفواتير ودفعات ومصاريف تجريبية مترابطة.</value>
+  </data>
+  <data name="Settings.Testing.Already" xml:space="preserve">
+    <value>البيانات التجريبية موجودة مسبقاً في هذه القاعدة.</value>
+  </data>
+  <data name="Settings.Testing.Seeding" xml:space="preserve">
+    <value>جارٍ التعبئة...</value>
+  </data>
+  <data name="Settings.Testing.Seed" xml:space="preserve">
+    <value>تعبئة البيانات التجريبية</value>
+  </data>
+  <data name="Settings.Testing.AlreadySeeded" xml:space="preserve">
+    <value>تمّت التعبئة مسبقاً</value>
+  </data>
+  <data name="Settings.Testing.Seeded" xml:space="preserve">
+    <value>تم تعبئة البيانات التجريبية.</value>
+  </data>
+  <data name="Settings.WhatsApp.Unavailable" xml:space="preserve">
+    <value>واتساب غير متوفر في هذا الإصدار دون اتصال.</value>
+  </data>
+  <data name="Settings.WhatsApp.Hint" xml:space="preserve">
+    <value>تذكيرات الدفع والربط عبر QR معطّلة في تطبيق سطح المكتب المحلي.</value>
+  </data>
+  <data name="Settings.DayOfMonthLabel" xml:space="preserve">
+    <value>يوم من الشهر</value>
+  </data>
+  <data name="Settings.DueDateHint" xml:space="preserve">
+    <value>ستستخدم الفواتير هذا اليوم من الشهر كتاريخ استحقاق.</value>
+  </data>
+  <data name="Settings.PreferencesSaved" xml:space="preserve">
+    <value>تم حفظ التفضيلات.</value>
+  </data>
+  <data name="Settings.UnknownPricingField" xml:space="preserve">
+    <value>حقل تسعير غير معروف.</value>
+  </data>
+  <data name="Settings.Value" xml:space="preserve">
+    <value>القيمة</value>
+  </data>
+  <data name="Settings.ValuePercent" xml:space="preserve">
+    <value>القيمة (%)</value>
+  </data>
+  <data name="Settings.PricingHint" xml:space="preserve">
+    <value>تُستخدم هذه القيمة عند فوترة هذا النوع من الزبائن. القيمة الأساسية تُطبَّق عند غياب سعر خاص بالنوع.</value>
+  </data>
+  <data name="Settings.Base" xml:space="preserve">
+    <value>أساسي</value>
+  </data>
+  <data name="Settings.LoadingProfile" xml:space="preserve">
+    <value>جارٍ تحميل الملف...</value>
+  </data>
+  <data name="Settings.CurrentLogo" xml:space="preserve">
+    <value>الشعار الحالي</value>
+  </data>
+  <data name="Settings.LogoHint" xml:space="preserve">
+    <value>تُنسخ الصورة المختارة إلى مجلد بيانات التطبيق. يُحتفظ بأحدث شعار فقط.</value>
+  </data>
+  <data name="Settings.BusinessName" xml:space="preserve">
+    <value>اسم العمل</value>
+  </data>
+  <data name="Settings.Opening" xml:space="preserve">
+    <value>جارٍ الفتح...</value>
+  </data>
+  <data name="Settings.ChooseImage" xml:space="preserve">
+    <value>اختيار صورة</value>
+  </data>
+  <data name="Settings.ProrationHint" xml:space="preserve">
+    <value>توزيع رسوم الأمبير حسب الأيام المتبقية في دورة الفوترة.</value>
+  </data>
+  <data name="Settings.ProrationFooter" xml:space="preserve">
+    <value>عند التفعيل يمكن لفواتير الأمبير احتساب جزء من الشهر حسب الأيام المفوترة.</value>
+  </data>
+  <data name="Settings.ScheduleBasedPricing" xml:space="preserve">
+    <value>تسعير حسب الجدول</value>
+  </data>
+  <data name="Settings.ScheduleBasedHint" xml:space="preserve">
+    <value>استخدام أسعار أمبير لكل جدول بدل السعر العام.</value>
+  </data>
+  <data name="Settings.ManageTiersPrefix" xml:space="preserve">
+    <value>إدارة الشرائح من صفحة</value>
+  </data>
+  <data name="Settings.ManageTiersSuffix" xml:space="preserve">
+    <value>.</value>
+  </data>
+  <data name="Settings.LoadingExport" xml:space="preserve">
+    <value>جارٍ تحميل أعمدة التصدير...</value>
+  </data>
+  <data name="Settings.CompanyLogoAlt" xml:space="preserve">
+    <value>شعار الشركة</value>
+  </data>
+  <data name="Settings.WhatsApp" xml:space="preserve">
+    <value>واتساب</value>
+  </data>
+  <data name="Pager.ShowingZero" xml:space="preserve">
+    <value>عرض 0 من 0</value>
+  </data>
+  <data name="Pager.PerPage" xml:space="preserve">
+    <value>{0} / صفحة</value>
+  </data>
+  <data name="Empty.AreasNone" xml:space="preserve">
+    <value>لا توجد مناطق.</value>
+  </data>
+  <data name="Empty.SchedulesNone" xml:space="preserve">
+    <value>لا توجد جداول أمبير.</value>
+  </data>
+  <data name="Empty.BoxesNone" xml:space="preserve">
+    <value>لا صناديق توزيع مطابقة للفلاتر الحالية.</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>نعم</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>لا</value>
+  </data>
+  <data name="Common.Unassigned" xml:space="preserve">
+    <value>غير معيّن</value>
+  </data>
+  <data name="Common.Updated" xml:space="preserve">
+    <value>آخر تحديث</value>
+  </data>
+  <data name="Common.Building" xml:space="preserve">
+    <value>المبنى</value>
+  </data>
+  <data name="Common.Floor" xml:space="preserve">
+    <value>الطابق</value>
+  </data>
+  <data name="Common.Address" xml:space="preserve">
+    <value>العنوان</value>
+  </data>
+  <data name="Common.Category" xml:space="preserve">
+    <value>الفئة</value>
+  </data>
+  <data name="Field.DistributionBox" xml:space="preserve">
+    <value>صندوق التوزيع</value>
+  </data>
+  <data name="Field.CableName" xml:space="preserve">
+    <value>اسم الكابل</value>
+  </data>
+  <data name="Field.AmpereSchedule" xml:space="preserve">
+    <value>جدول الأمبير</value>
+  </data>
+  <data name="Field.Subscribed" xml:space="preserve">
+    <value>تاريخ الاشتراك</value>
+  </data>
+  <data name="Field.PaidThisMonth" xml:space="preserve">
+    <value>مدفوع هذا الشهر</value>
+  </data>
+  <data name="Field.OverridePrice" xml:space="preserve">
+    <value>سعر التجاوز</value>
+  </data>
+  <data name="Field.CustomerType" xml:space="preserve">
+    <value>نوع الزبون</value>
+  </data>
+  <data name="Field.PlanValue" xml:space="preserve">
+    <value>قيمة الخطة</value>
+  </data>
+  <data name="Field.SubscriptionDate" xml:space="preserve">
+    <value>تاريخ الاشتراك</value>
+  </data>
+  <data name="Field.Relation" xml:space="preserve">
+    <value>العلاقة</value>
+  </data>
+  <data name="Field.InitialReading" xml:space="preserve">
+    <value>القراءة الأولى</value>
+  </data>
+  <data name="Field.LatestReading" xml:space="preserve">
+    <value>آخر قراءة</value>
+  </data>
+  <data name="Field.TotalToPay" xml:space="preserve">
+    <value>المبلغ للدفع</value>
+  </data>
+  <data name="Field.Box" xml:space="preserve">
+    <value>صندوق</value>
+  </data>
+  <data name="Invoices.Details" xml:space="preserve">
+    <value>تفاصيل الفاتورة</value>
+  </data>
+  <data name="Invoices.DetailsNumber" xml:space="preserve">
+    <value>فاتورة #{0}</value>
+  </data>
+  <data name="Invoices.DetailsHint" xml:space="preserve">
+    <value>مراجعة مجاميع الفوترة وسجل الدفعات وطباعة بيانات الفاتورة.</value>
+  </data>
+  <data name="Invoices.CreateHint" xml:space="preserve">
+    <value>إنشاء فاتورة واحدة وفق قواعد الفوترة لزبون محدّد.</value>
+  </data>
+  <data name="Invoices.Charge" xml:space="preserve">
+    <value>الرسوم</value>
+  </data>
+  <data name="Invoices.ConsumptionStart" xml:space="preserve">
+    <value>بداية الاستهلاك</value>
+  </data>
+  <data name="Invoices.ConsumptionEnd" xml:space="preserve">
+    <value>نهاية الاستهلاك</value>
+  </data>
+  <data name="Invoices.CounterPayment" xml:space="preserve">
+    <value>دفع نقدي</value>
+  </data>
+  <data name="Invoices.PayHint" xml:space="preserve">
+    <value>تسجيل دفعة لهذه الفاتورة.</value>
+  </data>
+  <data name="Invoices.PayHintNumber" xml:space="preserve">
+    <value>تحصيل دفعة للفاتورة #{0}.</value>
+  </data>
+  <data name="Invoices.NotePlaceholder" xml:space="preserve">
+    <value>ملاحظة إيصال أو سياق اختيارية</value>
+  </data>
+  <data name="Invoices.BulkTitleFull" xml:space="preserve">
+    <value>توليد فواتير جماعي</value>
+  </data>
+  <data name="Subscribers.DetailsHint" xml:space="preserve">
+    <value>مراجعة حالة الحساب ومجاميع الفوترة وبيانات المشترك واستخدام العداد.</value>
+  </data>
+  <data name="Expenses.Details" xml:space="preserve">
+    <value>تفاصيل المصروف</value>
+  </data>
+  <data name="Expenses.DetailsHint" xml:space="preserve">
+    <value>مراجعة مبلغ المصروف والفئة والملاحظات وتواريخ التدقيق.</value>
+  </data>
+  <data name="Expenses.RentInsurance" xml:space="preserve">
+    <value>إيجار، تأمين...</value>
+  </data>
+  <data name="Expenses.OptionalCategory" xml:space="preserve">
+    <value>فئة اختيارية</value>
+  </data>
+  <data name="Expenses.NotePlaceholder" xml:space="preserve">
+    <value>ملاحظة داخلية اختيارية...</value>
+  </data>
+  <data name="Boxes.DetailsHint" xml:space="preserve">
+    <value>مراجعة بيانات الصندوق وموقعه في المنطقة والمشتركين المعيّنين.</value>
+  </data>
+  <data name="Ampere.Details" xml:space="preserve">
+    <value>تفاصيل الجدول</value>
+  </data>
+  <data name="Ampere.DetailsHint" xml:space="preserve">
+    <value>نظرة على جدول الأمبير وشرائح التسعير والمشتركين المعيّنين.</value>
+  </data>
+  <data name="Ampere.FormHint" xml:space="preserve">
+    <value>تعيين الساعات يومياً وشرائح التسعير لكل أمبير.</value>
+  </data>
+  <data name="Areas.Details" xml:space="preserve">
+    <value>تفاصيل المنطقة</value>
+  </data>
+  <data name="Areas.DetailsHint" xml:space="preserve">
+    <value>نظرة على منطقة الخدمة والمشتركين المعيّنين.</value>
+  </data>
+  <data name="Audit.EventTitle" xml:space="preserve">
+    <value>حدث التدقيق</value>
+  </data>
+  <data name="Audit.EventHint" xml:space="preserve">
+    <value>مراجعة ما تغيّر ومتى حدث والحقول المسجّلة.</value>
+  </data>
+  <data name="Filter.AllActions" xml:space="preserve">
+    <value>كل الإجراءات</value>
+  </data>
+  <data name="Audit.SelectEvent" xml:space="preserve">
+    <value>اختر حدث تدقيق لمراجعة تفاصيله.</value>
+  </data>
+  <data name="Audit.Summary" xml:space="preserve">
+    <value>الملخص</value>
+  </data>
+  <data name="Audit.When" xml:space="preserve">
+    <value>الوقت</value>
+  </data>
+  <data name="Audit.EntityId" xml:space="preserve">
+    <value>معرّف الكيان</value>
+  </data>
+  <data name="Audit.Details" xml:space="preserve">
+    <value>التفاصيل</value>
+  </data>
+  <data name="Count.Field" xml:space="preserve">
+    <value>حقل {0}</value>
+  </data>
+  <data name="Count.FieldPlural" xml:space="preserve">
+    <value>{0} حقول</value>
+  </data>
+  <data name="Empty.AuditDetails" xml:space="preserve">
+    <value>لم تُسجَّل حقول تفاصيل لهذا الحدث.</value>
+  </data>
+  <data name="Common.MoreActions" xml:space="preserve">
+    <value>المزيد من الإجراءات</value>
+  </data>
+  <data name="Field.ReadingValue" xml:space="preserve">
+    <value>قيمة القراءة</value>
+  </data>
+  <data name="Field.ReadingDate" xml:space="preserve">
+    <value>تاريخ القراءة</value>
+  </data>
+  <data name="Field.PlanType" xml:space="preserve">
+    <value>نوع الخطة</value>
+  </data>
+  <data name="Field.SelectSchedule" xml:space="preserve">
+    <value>اختر الجدول</value>
+  </data>
+  <data name="Field.InitialMeterReading" xml:space="preserve">
+    <value>القراءة الأولى للعداد</value>
+  </data>
+  <data name="Field.OptionalArea" xml:space="preserve">
+    <value>منطقة اختيارية</value>
+  </data>
+  <data name="Field.NoBox" xml:space="preserve">
+    <value>بدون صندوق</value>
+  </data>
+  <data name="Field.OptionalRelation" xml:space="preserve">
+    <value>علاقة اختيارية</value>
+  </data>
+  <data name="Field.FixedCharge" xml:space="preserve">
+    <value>الرسوم الثابتة</value>
+  </data>
+  <data name="Field.TvaPercent" xml:space="preserve">
+    <value>ض.ق.م (%)</value>
+  </data>
+  <data name="PaymentMethod.Cash" xml:space="preserve">
+    <value>نقداً</value>
+  </data>
+  <data name="PaymentMethod.Wish" xml:space="preserve">
+    <value>ويش</value>
+  </data>
+  <data name="Count.Payments" xml:space="preserve">
+    <value>دفعة {0}</value>
+  </data>
+  <data name="Count.PaymentsPlural" xml:space="preserve">
+    <value>{0} دفعات</value>
+  </data>
+  <data name="Subscribers.DeleteConfirm" xml:space="preserve">
+    <value>حذف {0}؟ لا يمكن التراجع عن ذلك.</value>
+  </data>
+  <data name="Subscribers.ActivateConfirm" xml:space="preserve">
+    <value>تفعيل {0}؟ سيُفوتر مجدداً كمشترك نشط.</value>
+  </data>
+  <data name="Subscribers.SuspendConfirm" xml:space="preserve">
+    <value>تعليق {0}؟ لن يُفوتر كمشترك نشط.</value>
+  </data>
+  <data name="Subscribers.ThisReading" xml:space="preserve">
+    <value>هذه القراءة</value>
+  </data>
+  <data name="Subscribers.ThisSubscriber" xml:space="preserve">
+    <value>هذا المشترك</value>
+  </data>
+  <data name="Subscribers.DeleteReadingConfirm" xml:space="preserve">
+    <value>حذف {0}؟ استخدم هذا لتصحيح إدخال خاطئ قبل تسجيل القراءة الصحيحة.</value>
+  </data>
+  <data name="Subscribers.RecordReading" xml:space="preserve">
+    <value>تسجيل قراءة عداد شهرية لـ {0}.</value>
+  </data>
+  <data name="Subscribers.ReadingDateHint" xml:space="preserve">
+    <value>اختياري. النظام يعتمد اليوم ويمنع تكرار الشهر نفسه.</value>
+  </data>
+  <data name="Subscribers.SubscriptionDateHint" xml:space="preserve">
+    <value>اختياري. يُعتمد اليوم إن تُرك فارغاً.</value>
+  </data>
+  <data name="Subscribers.ScheduleRequired" xml:space="preserve">
+    <value>مطلوب لمشتركي الأمبير عند تفعيل تسعير الجداول.</value>
+  </data>
+  <data name="Subscribers.InitialReadingHint" xml:space="preserve">
+    <value>قيمة القراءة السابقة لهذا المشترك. تخص خطط الكيلوواط والكيلوواط الثابت.</value>
+  </data>
+  <data name="Subscribers.AreaHint" xml:space="preserve">
+    <value>تعيين منطقة اختياري للتجميع والفلترة.</value>
+  </data>
+  <data name="Subscribers.BoxHint" xml:space="preserve">
+    <value>تعيين صندوق اختياري لتتبع التوصيلات.</value>
+  </data>
+  <data name="Subscribers.StatusHint" xml:space="preserve">
+    <value>المعلقون والمنتهون يبقون في القائمة ويُعاملون كمتأخرين.</value>
+  </data>
+  <data name="Subscribers.UsePricingOverride" xml:space="preserve">
+    <value>استخدام تجاوز التسعير</value>
+  </data>
+  <data name="Subscribers.PricingOverrideHint" xml:space="preserve">
+    <value>تجاوز تسعير الشركة لهذا المشترك بسعر ورسوم ثابتة وضريبة مخصصة.</value>
+  </data>
+  <data name="Subscribers.RequiredHint" xml:space="preserve">
+    <value>تُتحقق الحقول المطلوبة قبل الحفظ.</value>
+  </data>
+  <data name="Subscribers.PlanValueAmpere" xml:space="preserve">
+    <value>تُستخدم كقيمة أمبير متعاقد عليها للفوترة.</value>
+  </data>
+  <data name="Subscribers.PlanValueFixed" xml:space="preserve">
+    <value>تُستخدم في فوترة العداد المسبق وحسابات شحن الكيلوواط الثابت.</value>
+  </data>
+  <data name="Subscribers.PlanValueKilowatt" xml:space="preserve">
+    <value>تُستخدم في حسابات فوترة العداد الشهرية.</value>
+  </data>
+  <data name="Subscribers.PlanAmpere" xml:space="preserve">
+    <value>{0} أ</value>
+  </data>
+  <data name="Subscribers.PlanFixedKilowatt" xml:space="preserve">
+    <value>{0} ك.و مسبق</value>
+  </data>
+  <data name="Subscribers.PlanKilowatt" xml:space="preserve">
+    <value>{0} ك.و</value>
+  </data>
+  <data name="Subscribers.FixedKwReadingsHelp" xml:space="preserve">
+    <value>تُحدَّث قراءات العداد عند إنشاء فاتورة كيلوواط ثابت. أضف الشحن من الفواتير.</value>
+  </data>
+  <data name="Subscribers.KwReadingsHelp" xml:space="preserve">
+    <value>قراءة واحدة لكل شهر. النظام يمنع التكرار.</value>
+  </data>
+  <data name="Subscribers.ExportSaved" xml:space="preserve">
+    <value>تم حفظ تصدير إكسل.</value>
+  </data>
+  <data name="Subscribers.ExportFailed" xml:space="preserve">
+    <value>تعذّر تصدير الزبائن.</value>
+  </data>
+  <data name="Subscribers.NameRequired" xml:space="preserve">
+    <value>الاسم مطلوب.</value>
+  </data>
+  <data name="Subscribers.PlanValueRequired" xml:space="preserve">
+    <value>يجب أن تكون قيمة الخطة أكبر من صفر.</value>
+  </data>
+  <data name="Subscribers.Created" xml:space="preserve">
+    <value>تم إنشاء المشترك</value>
+  </data>
+  <data name="Subscribers.Updated" xml:space="preserve">
+    <value>تم تحديث المشترك</value>
+  </data>
+  <data name="Subscribers.MeterCreated" xml:space="preserve">
+    <value>تم إنشاء قراءة العداد بنجاح.</value>
+  </data>
+  <data name="Subscribers.MeterDeleted" xml:space="preserve">
+    <value>تم حذف قراءة العداد بنجاح.</value>
+  </data>
+  <data name="Subscribers.Activated" xml:space="preserve">
+    <value>تم تفعيل المشترك.</value>
+  </data>
+  <data name="Subscribers.Deleted" xml:space="preserve">
+    <value>تم حذف المشترك بنجاح.</value>
+  </data>
+  <data name="Invoices.DeleteConfirm" xml:space="preserve">
+    <value>حذف الفاتورة #{0}؟ لا يمكن التراجع عن ذلك.</value>
+  </data>
+  <data name="Invoices.BulkAllPlans" xml:space="preserve">
+    <value>الكل (أمبير وكيلوواط)</value>
+  </data>
+  <data name="Invoices.AmpereOnly" xml:space="preserve">
+    <value>أمبير فقط</value>
+  </data>
+  <data name="Invoices.KilowattOnly" xml:space="preserve">
+    <value>كيلوواط فقط</value>
+  </data>
+  <data name="Invoices.Generating" xml:space="preserve">
+    <value>جارٍ التوليد...</value>
+  </data>
+  <data name="Invoices.Generate" xml:space="preserve">
+    <value>توليد</value>
+  </data>
+  <data name="Invoices.Issued" xml:space="preserve">
+    <value>صدرت {0}</value>
+  </data>
+  <data name="Invoices.ViewInvoice" xml:space="preserve">
+    <value>عرض الفاتورة</value>
+  </data>
+  <data name="Invoices.PrintInvoice" xml:space="preserve">
+    <value>طباعة الفاتورة</value>
+  </data>
+  <data name="Invoices.RemainingBalance" xml:space="preserve">
+    <value>الرصيد المتبقي: {0}</value>
+  </data>
+  <data name="Invoices.PaymentMethod" xml:space="preserve">
+    <value>طريقة الدفع</value>
+  </data>
+  <data name="Invoices.CustomerRequired" xml:space="preserve">
+    <value>الزبون مطلوب.</value>
+  </data>
+  <data name="Invoices.ToDateAfterFrom" xml:space="preserve">
+    <value>يجب أن يكون تاريخ «إلى» في يوم تاريخ «من» أو بعده.</value>
+  </data>
+  <data name="Invoices.Created" xml:space="preserve">
+    <value>تم إنشاء الفاتورة بنجاح.</value>
+  </data>
+  <data name="Invoices.AmountRequired" xml:space="preserve">
+    <value>يجب أن يكون المبلغ أكبر من صفر.</value>
+  </data>
+  <data name="Invoices.PrintFailed" xml:space="preserve">
+    <value>تعذّر طباعة الفاتورة.</value>
+  </data>
+  <data name="Invoices.Deleted" xml:space="preserve">
+    <value>تم حذف الفاتورة بنجاح.</value>
+  </data>
+  <data name="Invoices.DaysBilled" xml:space="preserve">
+    <value>الأيام المفوترة</value>
+  </data>
+  <data name="Invoices.DaysBilledHint" xml:space="preserve">
+    <value>حدد نطاق التاريخ لتوزيع الأمبير. يُحسب المبلغ بنسبة عدد الأيام.</value>
+  </data>
+  <data name="Invoices.From" xml:space="preserve">
+    <value>من</value>
+  </data>
+  <data name="Invoices.To" xml:space="preserve">
+    <value>إلى</value>
+  </data>
+  <data name="Invoices.DaysWillBeBilled" xml:space="preserve">
+    <value>سيُفوتر {0} يوم.</value>
+  </data>
+  <data name="Invoices.ChargeMode" xml:space="preserve">
+    <value>وضع الاحتساب</value>
+  </data>
+  <data name="Invoices.ByPayment" xml:space="preserve">
+    <value>حسب الدفعة</value>
+  </data>
+  <data name="Invoices.ByKwh" xml:space="preserve">
+    <value>حسب الكيلوواط</value>
+  </data>
+  <data name="Invoices.SelectPaymentMethod" xml:space="preserve">
+    <value>اختر طريقة الدفع</value>
+  </data>
+  <data name="Invoices.FixedKilowattHint" xml:space="preserve">
+    <value>الكيلوواط الثابت ينشئ فاتورة مدفوعة ويضيف الرصيد فوراً.</value>
+  </data>
+  <data name="Invoices.Preview" xml:space="preserve">
+    <value>معاينة حساب النظام</value>
+  </data>
+  <data name="Invoices.Calculating" xml:space="preserve">
+    <value>جارٍ الحساب...</value>
+  </data>
+  <data name="Invoices.KwhCredit" xml:space="preserve">
+    <value>رصيد ك.و.س</value>
+  </data>
+  <data name="Invoices.PreviewHint" xml:space="preserve">
+    <value>أدخل مبلغ دفع أو كمية كيلوواط لمعاينة الحساب قبل إنشاء الفاتورة المدفوعة.</value>
+  </data>
+  <data name="Invoices.NoPayments" xml:space="preserve">
+    <value>لا دفعات مسجّلة بعد.</value>
+  </data>
+  <data name="Invoices.TvaWithRate" xml:space="preserve">
+    <value>ض.ق.م ({0}%)</value>
+  </data>
+  <data name="Areas.Created" xml:space="preserve">
+    <value>تم إنشاء المنطقة.</value>
+  </data>
+  <data name="Areas.Updated" xml:space="preserve">
+    <value>تم تحديث المنطقة.</value>
+  </data>
+  <data name="Areas.Deleted" xml:space="preserve">
+    <value>تم حذف المنطقة.</value>
+  </data>
+  <data name="Areas.DeleteConfirm" xml:space="preserve">
+    <value>حذف {0}؟ لا يمكن التراجع عن ذلك.</value>
+  </data>
+  <data name="Areas.NamePlaceholder" xml:space="preserve">
+    <value>مثال: وسط المدينة</value>
+  </data>
+  <data name="Areas.FormFooter" xml:space="preserve">
+    <value>المناطق تجمع المشتركين للفوترة والتوزيع.</value>
+  </data>
+  <data name="Ampere.Created" xml:space="preserve">
+    <value>تم إنشاء جدول الأمبير.</value>
+  </data>
+  <data name="Ampere.Updated" xml:space="preserve">
+    <value>تم تحديث جدول الأمبير.</value>
+  </data>
+  <data name="Ampere.Deleted" xml:space="preserve">
+    <value>تم حذف جدول الأمبير.</value>
+  </data>
+  <data name="Ampere.DeleteConfirm" xml:space="preserve">
+    <value>حذف {0}؟ لا يمكن التراجع عن ذلك.</value>
+  </data>
+  <data name="Ampere.HoursPerDayValue" xml:space="preserve">
+    <value>{0} ساعات/يوم</value>
+  </data>
+  <data name="Ampere.PerAmp" xml:space="preserve">
+    <value>{0}/أ</value>
+  </data>
+  <data name="Ampere.NamePlaceholder" xml:space="preserve">
+    <value>مثال: 8 ساعات</value>
+  </data>
+  <data name="Ampere.HoursHint" xml:space="preserve">
+    <value>يجب أن تكون فريدة بين الجداول (1–24).</value>
+  </data>
+  <data name="Ampere.PricingHint" xml:space="preserve">
+    <value>اختر نوع الزبون ثم حدد سعر الأمبير.</value>
+  </data>
+  <data name="Ampere.FormFooter" xml:space="preserve">
+    <value>الجداول تحدد الساعات وأسعار الأمبير للفوترة.</value>
+  </data>
+  <data name="Ampere.NoneAssigned" xml:space="preserve">
+    <value>لا مشتركون معيّنون لهذا الجدول.</value>
+  </data>
+  <data name="Boxes.Created" xml:space="preserve">
+    <value>تم إنشاء صندوق التوزيع.</value>
+  </data>
+  <data name="Boxes.Updated" xml:space="preserve">
+    <value>تم تحديث صندوق التوزيع.</value>
+  </data>
+  <data name="Boxes.Deleted" xml:space="preserve">
+    <value>تم حذف صندوق التوزيع.</value>
+  </data>
+  <data name="Boxes.DeleteConfirm" xml:space="preserve">
+    <value>حذف {0}؟ لا يمكن التراجع عن ذلك.</value>
+  </data>
+  <data name="Boxes.SelectArea" xml:space="preserve">
+    <value>اختر المنطقة</value>
+  </data>
+  <data name="Boxes.SelectAreaRequired" xml:space="preserve">
+    <value>يرجى اختيار منطقة.</value>
+  </data>
+  <data name="Boxes.NamePlaceholder" xml:space="preserve">
+    <value>لوحة 1</value>
+  </data>
+  <data name="Boxes.LocationPlaceholder" xml:space="preserve">
+    <value>مدخل المبنى</value>
+  </data>
+  <data name="Boxes.NotesPlaceholder" xml:space="preserve">
+    <value>قرب غرفة المصعد</value>
+  </data>
+  <data name="Boxes.LocationHint" xml:space="preserve">
+    <value>اختياري. استخدمه لمعالم مثل مدخل المبنى أو الطابق.</value>
+  </data>
+  <data name="Boxes.NotesHint" xml:space="preserve">
+    <value>ملاحظات داخلية اختيارية للفنيين أو التشغيل.</value>
+  </data>
+  <data name="Boxes.FormFooter" xml:space="preserve">
+    <value>يمكن للمشتركين إعادة استخدام الصناديق عبر أداة الاختيار.</value>
+  </data>
+  <data name="Filter.ByArea" xml:space="preserve">
+    <value>فلترة حسب المنطقة</value>
+  </data>
+  <data name="Expenses.Created" xml:space="preserve">
+    <value>تم إنشاء المصروف بنجاح.</value>
+  </data>
+  <data name="Expenses.Updated" xml:space="preserve">
+    <value>تم تحديث المصروف بنجاح.</value>
+  </data>
+  <data name="Expenses.Deleted" xml:space="preserve">
+    <value>تم حذف المصروف بنجاح.</value>
+  </data>
+  <data name="Expenses.ThisExpense" xml:space="preserve">
+    <value>هذا المصروف</value>
+  </data>
+  <data name="Expenses.FormFooter" xml:space="preserve">
+    <value>تحدّث المصاريف مجاميع لوحة التحكم بعد الحفظ.</value>
+  </data>
+  <data name="Expenses.PageHoldsRow" xml:space="preserve">
+    <value>الصفحة الحالية تحتوي صفاً {0}.</value>
+  </data>
+  <data name="Expenses.PageHoldsRows" xml:space="preserve">
+    <value>الصفحة الحالية تحتوي {0} صفوف.</value>
+  </data>
+  <data name="Settings.BackToSettings" xml:space="preserve">
+    <value>العودة إلى الإعدادات</value>
+  </data>
+  <data name="Settings.ProfileSaved" xml:space="preserve">
+    <value>تم حفظ الملف.</value>
+  </data>
+  <data name="Validation.NameRequired" xml:space="preserve">
+    <value>الاسم مطلوب.</value>
+  </data>
+  <data name="Validation.HoursRange" xml:space="preserve">
+    <value>يجب أن تكون الساعات بين 1 و24.</value>
+  </data>
+  <data name="AuditAction.CustomerCreated" xml:space="preserve">
+    <value>إنشاء مشترك</value>
+  </data>
+  <data name="AuditAction.CustomerUpdated" xml:space="preserve">
+    <value>تحديث مشترك</value>
+  </data>
+  <data name="AuditAction.CustomerDeleted" xml:space="preserve">
+    <value>حذف مشترك</value>
+  </data>
+  <data name="AuditAction.InvoiceCreated" xml:space="preserve">
+    <value>إنشاء فاتورة</value>
+  </data>
+  <data name="AuditAction.InvoiceBulkCreated" xml:space="preserve">
+    <value>توليد فواتير جماعي</value>
+  </data>
+  <data name="AuditAction.InvoicePaymentRecorded" xml:space="preserve">
+    <value>تسجيل دفعة فاتورة</value>
+  </data>
+  <data name="AuditAction.InvoiceFixedKilowattCharge" xml:space="preserve">
+    <value>شحن كيلوواط ثابت</value>
+  </data>
+  <data name="AuditAction.ExpenseCreated" xml:space="preserve">
+    <value>إنشاء مصروف</value>
+  </data>
+  <data name="AuditAction.ExpenseUpdated" xml:space="preserve">
+    <value>تحديث مصروف</value>
+  </data>
+  <data name="AuditAction.ExpenseDeleted" xml:space="preserve">
+    <value>حذف مصروف</value>
+  </data>
+</root>

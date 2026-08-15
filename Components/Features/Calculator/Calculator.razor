@@ -1,23 +1,24 @@
 @page "/calculator"
 @inject IInvoiceService InvoiceService
 @inject IToastService Toast
+@inject IStringLocalizer<SharedResource> L
 
 <div class="mx-auto max-w-2xl space-y-5 pb-6">
     <section class="rounded-2xl border border-border bg-card p-5 sm:p-8">
         <form class="space-y-7" @onsubmit="CalculateAsync" @onsubmit:preventDefault>
             <div>
-                <label class="mb-2 block text-base font-semibold text-foreground" for="calculator-customer-type">Customer type</label>
+                <label class="mb-2 block text-base font-semibold text-foreground" for="calculator-customer-type">@L["Calculator.CustomerType"]</label>
                 <select id="calculator-customer-type"
                         class="h-14 w-full rounded-2xl border border-border bg-card px-4 text-lg text-foreground outline-none focus:border-primary"
                         @bind="_customerType">
-                    <option value="@CustomerType.Residential">Residential</option>
-                    <option value="@CustomerType.Commercial">Commercial</option>
-                    <option value="@CustomerType.Industrial">Industrial</option>
+                    <option value="@CustomerType.Residential">@L["CustomerType.Residential"]</option>
+                    <option value="@CustomerType.Commercial">@L["CustomerType.Commercial"]</option>
+                    <option value="@CustomerType.Industrial">@L["CustomerType.Industrial"]</option>
                 </select>
             </div>
 
             <div>
-                <label class="mb-2 block text-base font-semibold text-foreground" for="calculator-plan-value">Plan value</label>
+                <label class="mb-2 block text-base font-semibold text-foreground" for="calculator-plan-value">@L["Calculator.PlanValue"]</label>
                 <div class="relative">
                     <svg class="pointer-events-none absolute start-4 top-1/2 h-6 w-6 -translate-y-1/2 text-foreground"
                          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -28,7 +29,7 @@
                            inputmode="decimal"
                            min="0"
                            step="any"
-                           placeholder="Optional"
+                           placeholder="@L["Common.Optional"]"
                            class="h-14 w-full rounded-2xl border border-border bg-secondary pe-4 ps-14 text-lg text-foreground outline-none focus:border-primary"
                            @bind="_planValueText"
                            @bind:event="oninput" />
@@ -36,24 +37,24 @@
             </div>
 
             <fieldset>
-                <legend class="mb-3 text-base font-semibold text-foreground">Calculate from</legend>
+                <legend class="mb-3 text-base font-semibold text-foreground">@L["Calculator.CalculateFrom"]</legend>
                 <div class="grid grid-cols-2 gap-2 rounded-2xl bg-secondary p-1">
                     <button type="button"
                             class="@ModeButtonClass(_mode == CalculatorMode.Payment)"
                             @onclick="() => _mode = CalculatorMode.Payment">
-                        Payment
+                        @L["Calculator.Payment"]
                     </button>
                     <button type="button"
                             class="@ModeButtonClass(_mode == CalculatorMode.Kilowatt)"
                             @onclick="() => _mode = CalculatorMode.Kilowatt">
-                        kWh
+                        @L["Calculator.Kwh"]
                     </button>
                 </div>
             </fieldset>
 
             <div>
                 <label class="mb-2 block text-base font-semibold text-foreground" for="calculator-amount">
-                    @(_mode == CalculatorMode.Payment ? "Payment amount" : "Kilowatt amount (kWh)")
+                    @(_mode == CalculatorMode.Payment ? L["Calculator.PaymentAmount"] : L["Calculator.KilowattAmount"])
                 </label>
                 <div class="relative">
                     <svg class="pointer-events-none absolute start-4 top-1/2 h-6 w-6 -translate-y-1/2 text-foreground"
@@ -86,7 +87,7 @@
                         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                     </svg>
                 }
-                Calculate
+                @L["Calculator.Calculate"]
             </button>
         </form>
     </section>
@@ -115,7 +116,7 @@
     {
         if (!decimal.TryParse(_amountText, out var amount) || amount <= 0)
         {
-            _error = "Enter an amount greater than zero.";
+            _error = L["Calculator.AmountRequired"].Value;
             _result = null;
             return;
         }
@@ -143,7 +144,7 @@
             () => InvoiceService.CalculateFixedKilowattAsync(request));
 
         if (_result is null)
-            _error = "Could not calculate the price.";
+            _error = L["Calculator.Failed"].Value;
 
         _calculating = false;
     }

@@ -1,4 +1,5 @@
 @namespace Shabakat.Components.Features.Boxes.Components
+@inject IStringLocalizer<SharedResource> L
 
 @if (IsLoading)
 {
@@ -7,7 +8,7 @@
 else if (Boxes.Count == 0)
 {
     <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
-        No distribution boxes matched the current filters.
+        @L["Empty.BoxesNone"]
     </section>
 }
 else
@@ -29,24 +30,24 @@ else
             <span>
                 @if (TotalCount == 0)
                 {
-                    @:Showing 0 of 0
+                    @L["Pager.ShowingZero"]
                 }
                 else
                 {
-                    @:Showing @((PageNumber - 1) * PageSize + 1) - @Math.Min(PageNumber * PageSize, TotalCount) of @TotalCount
+                    @L["Pager.Showing", (PageNumber - 1) * PageSize + 1, Math.Min(PageNumber * PageSize, TotalCount), TotalCount]
                 }
             </span>
             <div class="flex items-center gap-2 self-end md:self-auto">
                 <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm"
                         value="@PageSize"
                         @onchange="OnPageSizeChanged">
-                    <option value="10">10 / page</option>
-                    <option value="20">20 / page</option>
-                    <option value="50">50 / page</option>
+                    <option value="10">@L["Pager.PerPage", 10]</option>
+                    <option value="20">@L["Pager.PerPage", 20]</option>
+                    <option value="50">@L["Pager.PerPage", 50]</option>
                 </select>
-                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasPrevious)" @onclick="OnPrevPage">Previous</button>
-                <span class="min-w-24 text-center">Page @PageNumber of @Math.Max(1, TotalPages)</span>
-                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasNext)" @onclick="OnNextPage">Next</button>
+                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasPrevious)" @onclick="OnPrevPage">@L["Common.Previous"]</button>
+                <span class="min-w-24 text-center">@L["Pager.PageOf", PageNumber, Math.Max(1, TotalPages)]</span>
+                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasNext)" @onclick="OnNextPage">@L["Common.Next"]</button>
             </div>
         </div>
     </div>

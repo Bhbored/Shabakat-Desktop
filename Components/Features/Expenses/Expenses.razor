@@ -1,6 +1,7 @@
 @page "/expenses"
 @inject IExpenseService ExpenseService
 @inject IToastService Toast
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4" @onclick="CloseMenu">
     <ExpenseSummaryCards IsLoading="_loading"
@@ -249,7 +250,7 @@
                     _formDate,
                     _formLabel,
                     _formNotes)),
-                "Expense created successfully.");
+                L["Expenses.Created"].Value);
             if (created is not null)
             {
                 _showForm = false;
@@ -266,7 +267,7 @@
                     _formDate,
                     _formLabel,
                     _formNotes)),
-                "Expense updated successfully.");
+                L["Expenses.Updated"].Value);
             if (updated is not null)
             {
                 _showForm = false;
@@ -292,7 +293,7 @@
         await UiActions.RunAsync(
             Toast,
             () => ExpenseService.DeleteAsync(_deleteTarget.Id),
-            "Expense deleted successfully.");
+            L["Expenses.Deleted"].Value);
         _deleteTarget = null;
         _saving = false;
         await LoadAsync();

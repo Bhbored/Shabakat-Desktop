@@ -3,6 +3,7 @@
 @inject IAreaService AreaService
 @inject ICustomerService CustomerService
 @inject IToastService Toast
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4" @onclick="CloseMenu">
     <BoxesToolbar Search="@_searchTerm"
@@ -211,7 +212,7 @@
         CloseMenu();
         if (_areas.Count == 0)
         {
-            Toast.Error("Create an area before adding a distribution box.");
+            Toast.Error(L["Boxes.NeedArea"].Value);
             return;
         }
 
@@ -261,7 +262,7 @@
 
         if (form.AreaId == Guid.Empty)
         {
-            Toast.Error("Please select an area.");
+            Toast.Error(L["Boxes.SelectAreaRequired"].Value);
             return;
         }
 
@@ -279,7 +280,7 @@
                     form.AreaId,
                     location,
                     notes)),
-                "Distribution box created.");
+                L["Boxes.Created"].Value);
             ok = created is not null;
         }
         else
@@ -291,7 +292,7 @@
                     form.AreaId,
                     location,
                     notes)),
-                "Distribution box updated.");
+                L["Boxes.Updated"].Value);
             ok = updated is not null;
         }
 
@@ -311,7 +312,7 @@
         await UiActions.RunAsync(
             Toast,
             () => DistributionBoxService.DeleteAsync(_pendingDelete.Id),
-            "Distribution box deleted.");
+            L["Boxes.Deleted"].Value);
 
         _saving = false;
         _showDelete = false;

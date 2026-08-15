@@ -1,12 +1,13 @@
 @namespace Shabakat.Components.Features.AmpereSchedules.Components
+@inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4">
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <label class="min-w-60 flex-1">
-            <span class="sr-only">Search schedules</span>
+            <span class="sr-only">@L["Filter.SearchSchedules"]</span>
             <input type="text"
                    class="h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition focus:border-primary"
-                   placeholder="Search schedules..."
+                   placeholder="@L["Filter.SearchSchedules"]"
                    value="@Search"
                    @oninput="OnSearchInput" />
         </label>
@@ -15,11 +16,11 @@
                 style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
                 disabled="@Disabled"
                 @onclick="HandleCreateAsync">
-            + Add Schedule
+            @L["Ampere.Add"]
         </button>
     </div>
     <p class="text-xs text-muted-foreground">
-        @Total pricing tier@(Total != 1 ? "s" : "")
+        @(Total == 1 ? L["Count.Schedules", Total] : L["Count.SchedulesPlural", Total])
     </p>
 </div>
 

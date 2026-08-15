@@ -1,9 +1,10 @@
 @namespace Shabakat.Components.Features.Invoices.Components
 @inject IInvoiceService InvoiceService
+@inject IStringLocalizer<SharedResource> L
 
 <SideSheet Open="Open"
-           Title="Create Invoice"
-           Description="Generate one invoice from backend billing rules for a selected customer."
+           Title="@L["Invoices.Create"]"
+           Description="@L["Invoices.CreateHint"].Value"
            MaxWidthClass="sm:max-w-xl"
            OnClose="OnClose">
     <TitleIcon>
@@ -12,27 +13,27 @@
     <ChildContent>
         <div class="space-y-4 text-sm text-foreground">
             <div>
-                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Customer</label>
+                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Common.Customer"]</label>
                 <CustomerSearchSelect Value="@Model.CustomerId"
                                       ValueChanged="OnCustomerIdChanged"
                                       SelectedChanged="OnCustomerSelectedAsync"
-                                      Placeholder="Select customer" />
+                                      Placeholder="@L["Invoices.SelectCustomer"].Value" />
             </div>
 
         @if (ShowBilledDays)
         {
             <div class="space-y-3 rounded-2xl border border-border bg-card p-4">
-                <p class="text-sm font-medium text-foreground">Days Billed</p>
-                <p class="text-xs text-muted-foreground">Set the date range for ampere proration. The billed amount will be calculated proportionally based on the number of days.</p>
+                <p class="text-sm font-medium text-foreground">@L["Invoices.DaysBilled"]</p>
+                <p class="text-xs text-muted-foreground">@L["Invoices.DaysBilledHint"]</p>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="mb-1.5 block text-xs font-medium text-muted-foreground">From</label>
+                        <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Invoices.From"]</label>
                         <input type="date"
                                class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary"
                                @bind="Model.BilledFrom" />
                     </div>
                     <div>
-                        <label class="mb-1.5 block text-xs font-medium text-muted-foreground">To</label>
+                        <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Invoices.To"]</label>
                         <input type="date"
                                class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary"
                                @bind="Model.BilledTo" />
@@ -40,11 +41,11 @@
                 </div>
                 @if (BilledDays > 0)
                 {
-                    <p class="text-sm text-foreground">@BilledDays day(s) will be billed.</p>
+                    <p class="text-sm text-foreground">@L["Invoices.DaysWillBeBilled", BilledDays]</p>
                 }
                 else
                 {
-                    <p class="text-sm text-red-500">The 'To' date must be on or after the 'From' date.</p>
+                    <p class="text-sm text-red-500">@L["Invoices.ToDateAfterFrom"]</p>
                 }
             </div>
         }
@@ -52,24 +53,24 @@
         @if (IsFixedKilowatt)
         {
             <div class="space-y-2">
-                <label class="block text-xs font-medium text-muted-foreground">Charge Mode</label>
+                <label class="block text-xs font-medium text-muted-foreground">@L["Invoices.ChargeMode"]</label>
                 <div class="grid grid-cols-2 gap-1 rounded-xl border border-border bg-muted/40 p-1">
                     <button type="button"
                             class="rounded-lg px-3 py-2 text-sm @(Model.FixedMode == "payment" ? "bg-card font-medium shadow-sm" : "text-muted-foreground")"
                             @onclick='() => SetFixedModeAsync("payment")'>
-                        By payment
+                        @L["Invoices.ByPayment"]
                     </button>
                     <button type="button"
                             class="rounded-lg px-3 py-2 text-sm @(Model.FixedMode == "kilowatt" ? "bg-card font-medium shadow-sm" : "text-muted-foreground")"
                             @onclick='() => SetFixedModeAsync("kilowatt")'>
-                        By kWh
+                        @L["Invoices.ByKwh"]
                     </button>
                 </div>
             </div>
 
             <div>
                 <label class="mb-1.5 block text-xs font-medium text-muted-foreground">
-                    @(Model.FixedMode == "payment" ? "Payment Amount" : "Kilowatt Amount")
+                    @(Model.FixedMode == "payment" ? L["Invoices.PaymentAmount"] : L["Invoices.KilowattAmount"])
                 </label>
                 @if (Model.FixedMode == "payment")
                 {
@@ -92,29 +93,29 @@
             </div>
 
             <div>
-                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Payment Method</label>
+                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Invoices.PaymentMethod"]</label>
                 <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary"
                         @bind="Model.PaymentMethod">
-                    <option value="">Select payment method</option>
-                    <option value="@PaymentMethod.Cash">Cash</option>
-                    <option value="@PaymentMethod.Wish">Wish</option>
+                    <option value="">@L["Invoices.SelectPaymentMethod"]</option>
+                    <option value="@PaymentMethod.Cash">@L["PaymentMethod.Cash"]</option>
+                    <option value="@PaymentMethod.Wish">@L["PaymentMethod.Wish"]</option>
                 </select>
             </div>
 
             <div>
-                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">Notes</label>
+                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Common.Notes"]</label>
                 <input class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary"
-                       placeholder="Counter payment"
+                       placeholder="@L["Invoices.CounterPayment"]"
                        @bind="Model.Notes" />
-                <p class="mt-2 text-xs text-muted-foreground">FixedKilowatt creates a paid invoice and credits kWh immediately.</p>
+                <p class="mt-2 text-xs text-muted-foreground">@L["Invoices.FixedKilowattHint"]</p>
             </div>
 
             <div class="space-y-3 rounded-2xl border border-border bg-card p-4">
                 <div class="flex items-center justify-between gap-3">
-                    <p class="text-sm font-semibold text-foreground">Server Calculation Preview</p>
+                    <p class="text-sm font-semibold text-foreground">@L["Invoices.Preview"]</p>
                     @if (_previewLoading)
                     {
-                        <span class="text-xs text-muted-foreground">Calculating...</span>
+                        <span class="text-xs text-muted-foreground">@L["Invoices.Calculating"]</span>
                     }
                 </div>
 
@@ -122,27 +123,27 @@
                 {
                     <div class="grid gap-3 sm:grid-cols-2">
                         <div class="rounded-xl border border-border bg-muted/20 px-3 py-2">
-                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Payment</p>
+                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">@L["Calculator.Payment"]</p>
                             <p class="mt-1 text-sm font-medium text-foreground">@FormatHelper.Currency(_preview.PaymentAmount)</p>
                         </div>
                         <div class="rounded-xl border border-border bg-muted/20 px-3 py-2">
-                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">kWh Credit</p>
+                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">@L["Invoices.KwhCredit"]</p>
                             <p class="mt-1 text-sm font-medium text-foreground">@FormatHelper.Number(_preview.KilowattAmount)</p>
                         </div>
                         <div class="rounded-xl border border-border bg-muted/20 px-3 py-2">
-                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Unit Price</p>
+                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">@L["Calculator.UnitPrice"]</p>
                             <p class="mt-1 text-sm font-medium text-foreground">@FormatHelper.Currency(_preview.UnitPrice)</p>
                         </div>
                         <div class="rounded-xl border border-border bg-muted/20 px-3 py-2">
-                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Fixed Charge</p>
+                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">@L["Field.FixedCharge"]</p>
                             <p class="mt-1 text-sm font-medium text-foreground">@FormatHelper.Currency(_preview.FixedCharge)</p>
                         </div>
                         <div class="rounded-xl border border-border bg-muted/20 px-3 py-2">
-                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">TVA</p>
+                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">@L["Settings.Tva"]</p>
                             <p class="mt-1 text-sm font-medium text-foreground">@($"{FormatHelper.Number(_preview.TVA)}%")</p>
                         </div>
                         <div class="rounded-xl border border-border bg-muted/20 px-3 py-2">
-                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Plan Value</p>
+                            <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">@L["Field.PlanValue"]</p>
                             <p class="mt-1 text-sm font-medium text-foreground">@FormatHelper.Number(_preview.PlanValue)</p>
                         </div>
                     </div>
@@ -154,7 +155,7 @@
                 else
                 {
                     <p class="text-sm text-muted-foreground">
-                        Enter a payment or kWh amount to preview the exact backend calculation before creating the paid invoice.
+                        @L["Invoices.PreviewHint"]
                     </p>
                 }
             </div>
@@ -163,7 +164,7 @@
     </ChildContent>
     <Footer>
         <div class="flex items-center justify-end gap-3">
-            <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
+            <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">@L["Common.Cancel"]</button>
             <button type="button"
                     class="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
                     disabled="@Saving"
@@ -172,7 +173,7 @@
                 {
                     <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
                 }
-                Create Invoice
+                @L["Invoices.Create"]
             </button>
         </div>
     </Footer>

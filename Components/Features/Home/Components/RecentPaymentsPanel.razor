@@ -1,10 +1,11 @@
 @namespace Shabakat.Components.Features.Home.Components
+@inject IStringLocalizer<SharedResource> L
 
 <section class="rounded-2xl border border-border bg-card p-5 lg:col-span-3">
     @if (IsLoading)
     {
         <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-foreground">Recently Paid Invoices</h2>
+            <h2 class="text-lg font-semibold text-foreground">@L["Home.RecentlyPaid"]</h2>
             <SkeletonBone Class="h-6 w-16 rounded-full" />
         </div>
         <div class="space-y-3">
@@ -17,14 +18,14 @@
     else
     {
         <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-foreground">Recently Paid Invoices</h2>
-            <a href="subscribers" class="text-xs font-medium text-primary transition-opacity hover:opacity-75">View all</a>
+            <h2 class="text-lg font-semibold text-foreground">@L["Home.RecentlyPaid"]</h2>
+            <a href="subscribers" class="text-xs font-medium text-primary transition-opacity hover:opacity-75">@L["Home.ViewAll"]</a>
         </div>
 
         @if (Items.Count == 0)
         {
             <p class="rounded-xl border border-border bg-white/[0.02] px-3 py-6 text-sm text-muted-foreground">
-                No paid invoices yet for current dataset.
+                @L["Home.NoPaid"]
             </p>
         }
         else
@@ -40,7 +41,7 @@
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-sm font-medium text-foreground">@invoice.CustomerName</p>
                             <p class="text-xs text-muted-foreground">
-                                Invoice #@invoice.InvoiceNumber · Issued @FormatHelper.Date(invoice.ConsumptionStart)
+                                @L["Home.InvoiceIssued", invoice.InvoiceNumber, FormatHelper.Date(invoice.ConsumptionStart)]
                             </p>
                         </div>
                         <div class="text-right">

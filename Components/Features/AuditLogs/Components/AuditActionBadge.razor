@@ -1,9 +1,20 @@
 @namespace Shabakat.Components.Features.AuditLogs.Components
+@inject IStringLocalizer<SharedResource> L
 
 <span class="inline-flex items-center rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs font-semibold text-foreground">
-    @AuditLabels.Action(Action)
+    @ActionLabel
 </span>
 
 @code {
     [Parameter] public string Action { get; set; } = "";
+
+    private string ActionLabel
+    {
+        get
+        {
+            var key = $"AuditAction.{Action}";
+            var localized = L[key];
+            return localized.ResourceNotFound ? AuditLabels.Action(Action) : localized.Value;
+        }
+    }
 }

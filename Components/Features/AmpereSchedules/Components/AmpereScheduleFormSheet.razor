@@ -1,8 +1,9 @@
 @namespace Shabakat.Components.Features.AmpereSchedules.Components
+@inject IStringLocalizer<SharedResource> L
 
 <SideSheet Open="Open"
-           Title="@(IsEdit ? "Edit Ampere Schedule" : "Add Ampere Schedule")"
-           Description="Set hours per day and per-amp pricing tiers."
+           Title="@(IsEdit ? L["Ampere.Edit"] : L["Ampere.Add"])"
+           Description="@L["Ampere.FormHint"]"
            MaxWidthClass="sm:max-w-xl"
            OnClose="OnClose">
     <TitleIcon>
@@ -12,34 +13,34 @@
         <EditForm Model="_form" OnValidSubmit="HandleSubmitAsync" class="space-y-6">
             <DataAnnotationsValidator />
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-foreground">Name</label>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Common.Name"]</label>
                 <InputText @bind-Value="_form.Name"
                            class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                           placeholder="e.g. 8-Hour" />
+                           placeholder="@L["Ampere.NamePlaceholder"]" />
                 <ValidationMessage For="() => _form.Name" class="mt-1 text-xs text-red-500" />
             </div>
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-foreground">Hours per day</label>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Ampere.HoursPerDay"]</label>
                 <InputNumber @bind-Value="_form.HoursPerDay"
                              class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
                              min="1" max="24" />
-                <p class="mt-1 text-xs text-muted-foreground">Must be unique across schedules (1–24).</p>
+                <p class="mt-1 text-xs text-muted-foreground">@L["Ampere.HoursHint"]</p>
                 <ValidationMessage For="() => _form.HoursPerDay" class="mt-1 text-xs text-red-500" />
             </div>
 
             <div class="space-y-4 rounded-2xl border border-border bg-muted/30 p-5">
-                <p class="text-sm font-medium text-foreground">Pricing per amp</p>
-                <p class="text-xs text-muted-foreground">Choose a customer type, then set its amp price.</p>
-                <p class="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Customer type</p>
+                <p class="text-sm font-medium text-foreground">@L["Ampere.PricingPerAmp"]</p>
+                <p class="text-xs text-muted-foreground">@L["Ampere.PricingHint"]</p>
+                <p class="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">@L["Field.CustomerType"]</p>
 
                 <div class="flex items-start gap-3">
                     <select class="w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
                             @bind="_pricingTier"
                             @bind:after="StateHasChanged">
-                        <option value="base">Base</option>
-                        <option value="residential">Residential</option>
-                        <option value="commercial">Commercial</option>
-                        <option value="industrial">Industrial</option>
+                        <option value="base">@L["Ampere.Base"]</option>
+                        <option value="residential">@L["CustomerType.Residential"]</option>
+                        <option value="commercial">@L["CustomerType.Commercial"]</option>
+                        <option value="industrial">@L["CustomerType.Industrial"]</option>
                     </select>
                     <InputNumber @bind-Value="ActiveTierPrice"
                                  class="min-w-0 flex-1 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
@@ -48,37 +49,37 @@
 
                 <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     <button type="button" class="@TierTileClass("base")" @onclick='() => _pricingTier = "base"'>
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Base</p>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">@L["Ampere.Base"]</p>
                         <p class="mt-0.5 text-sm font-medium text-foreground">@_form.PricePerAmp.ToString("0.00")</p>
                     </button>
                     <button type="button" class="@TierTileClass("residential")" @onclick='() => _pricingTier = "residential"'>
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Residential</p>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">@L["CustomerType.Residential"]</p>
                         <p class="mt-0.5 text-sm font-medium text-foreground">@_form.ResidentialPricePerAmp.ToString("0.00")</p>
                     </button>
                     <button type="button" class="@TierTileClass("commercial")" @onclick='() => _pricingTier = "commercial"'>
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Commercial</p>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">@L["CustomerType.Commercial"]</p>
                         <p class="mt-0.5 text-sm font-medium text-foreground">@_form.CommercialPricePerAmp.ToString("0.00")</p>
                     </button>
                     <button type="button" class="@TierTileClass("industrial")" @onclick='() => _pricingTier = "industrial"'>
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Industrial</p>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">@L["CustomerType.Industrial"]</p>
                         <p class="mt-0.5 text-sm font-medium text-foreground">@_form.IndustrialPricePerAmp.ToString("0.00")</p>
                     </button>
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
-                <p class="text-sm text-muted-foreground">Schedules define hours and amp rates for billing.</p>
+                <p class="text-sm text-muted-foreground">@L["Ampere.FormFooter"]</p>
                 <div class="flex items-center gap-3">
                     <button type="button"
                             class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
                             disabled="@Saving"
                             @onclick="OnClose">
-                        Cancel
+                        @L["Common.Cancel"]
                     </button>
                     <button type="submit"
                             class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
                             disabled="@Saving">
-                        @(Saving ? "Saving..." : (IsEdit ? "Save" : "Create"))
+                        @(Saving ? L["Common.Saving"] : (IsEdit ? L["Common.Save"] : L["Common.Create"]))
                     </button>
                 </div>
             </div>

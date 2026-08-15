@@ -1,8 +1,9 @@
 @namespace Shabakat.Components.Features.AuditLogs.Components
+@inject IStringLocalizer<SharedResource> L
 
 <SideSheet Open="Open"
-           Title="Audit Event"
-           Description="Review what changed, when it happened, and the recorded detail fields."
+           Title="@L["Audit.EventTitle"]"
+           Description="@L["Audit.EventHint"]"
            MaxWidthClass="sm:max-w-xl"
            OnClose="OnClose">
     <TitleIcon>
@@ -11,41 +12,41 @@
     <ChildContent>
         @if (Entry is null)
         {
-            <p class="text-sm text-muted-foreground">Select an audit event to review its details.</p>
+            <p class="text-sm text-muted-foreground">@L["Audit.SelectEvent"]</p>
         }
         else
         {
             <div class="space-y-4">
                 <div class="grid gap-4 md:grid-cols-2">
                     <div class="rounded-2xl border border-border bg-card p-4">
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Action</p>
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Table.Action"]</p>
                         <div class="mt-2"><AuditActionBadge Action="@Entry.Action" /></div>
                     </div>
                     <div class="rounded-2xl border border-border bg-card p-4">
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Status</p>
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Status"]</p>
                         <div class="mt-2"><AuditStatusBadge Status="@Entry.Status" /></div>
                     </div>
                 </div>
 
                 <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
                     <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Summary</p>
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Audit.Summary"]</p>
                         <p class="mt-1 text-sm text-foreground">@Entry.Summary</p>
                     </div>
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">When</p>
+                            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Audit.When"]</p>
                             <p class="mt-1 text-sm text-foreground">@FormatHelper.Date(Entry.CreatedAt) · @Entry.CreatedAt.ToString("HH:mm:ss")</p>
                         </div>
                         <div>
-                            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Entity</p>
+                            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Table.Entity"]</p>
                             <p class="mt-1 text-sm text-foreground">@AuditLabels.EntityType(Entry.EntityType)</p>
                         </div>
                     </div>
                     @if (Entry.EntityId is not null)
                     {
                         <div>
-                            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Entity Id</p>
+                            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Audit.EntityId"]</p>
                             <p class="mt-1 break-all font-mono text-xs text-muted-foreground">@Entry.EntityId</p>
                         </div>
                     }
@@ -59,13 +60,13 @@
 
                 <div class="space-y-3 rounded-2xl border border-border bg-card p-5">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Details</h3>
-                        <span class="text-xs text-muted-foreground">@Entry.Details.Count field@(Entry.Details.Count == 1 ? "" : "s")</span>
+                        <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Audit.Details"]</h3>
+                        <span class="text-xs text-muted-foreground">@(Entry.Details.Count == 1 ? L["Count.Field", Entry.Details.Count] : L["Count.FieldPlural", Entry.Details.Count])</span>
                     </div>
                     @if (Entry.Details.Count == 0)
                     {
                         <p class="rounded-xl border border-border bg-muted/20 px-3 py-6 text-sm text-muted-foreground">
-                            No detail fields were recorded for this event.
+                            @L["Empty.AuditDetails"]
                         </p>
                     }
                     else

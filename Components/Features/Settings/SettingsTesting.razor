@@ -1,20 +1,21 @@
 @page "/settings/testing"
 @inject IDatabaseSeedService SeedService
 @inject IToastService Toast
+@inject IStringLocalizer<SharedResource> L
 
-<SettingsScaffold Title="Testing">
+<SettingsScaffold Title="@L["Page.SettingsTesting.Title"]">
     <div class="space-y-5">
         <div>
-            <p class="text-sm font-medium text-foreground">Lebanon sample data</p>
+            <p class="text-sm font-medium text-foreground">@L["Settings.Testing.Title"]</p>
             <p class="mt-1 text-xs text-muted-foreground">
-                Inserts correlated demo areas, boxes, customers, invoices, payments, and expenses.
+                @L["Settings.Testing.Hint"]
             </p>
         </div>
 
         @if (_alreadySeeded && !_seeding)
         {
             <p class="rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-                Sample data is already present in this database.
+                @L["Settings.Testing.Already"]
             </p>
         }
 
@@ -22,7 +23,7 @@
         {
             <div class="space-y-2">
                 <div class="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>@(_seeding ? "Seeding..." : "Done")</span>
+                    <span>@(_seeding ? L["Settings.Testing.Seeding"] : L["Common.Done"])</span>
                     <span>@((_progress * 100).ToString("0"))%</span>
                 </div>
                 <div class="h-2.5 overflow-hidden rounded-full bg-muted">
@@ -36,7 +37,7 @@
                 class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
                 disabled="@(_seeding || _alreadySeeded)"
                 @onclick="SeedAsync">
-            @(_seeding ? "Seeding..." : _alreadySeeded ? "Already seeded" : "Seed sample data")
+            @(_seeding ? L["Settings.Testing.Seeding"] : _alreadySeeded ? L["Settings.Testing.AlreadySeeded"] : L["Settings.Testing.Seed"])
         </button>
     </div>
 </SettingsScaffold>
@@ -71,7 +72,7 @@
             _alreadySeeded = await SeedService.IsSeededAsync();
             ok = _alreadySeeded;
             if (ok)
-                Toast.Success("Sample data seeded.");
+                Toast.Success(L["Settings.Testing.Seeded"].Value);
         }
         catch (Exception ex)
         {

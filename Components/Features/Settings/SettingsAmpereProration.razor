@@ -2,20 +2,21 @@
 @inject IAppPreferencesService PreferencesService
 @inject IToastService Toast
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
-<SettingsScaffold Title="Ampere Proration">
+<SettingsScaffold Title="@L["Page.SettingsAmpereProration.Title"]">
     <div class="space-y-4">
         @if (_loading)
         {
-            <p class="text-sm text-muted-foreground">Loading company preferences...</p>
+            <p class="text-sm text-muted-foreground">@L["Settings.LoadingPrefs"]</p>
         }
         else
         {
             <div class="rounded-2xl border border-border bg-background px-4 py-4">
                 <div class="flex items-center justify-between gap-4">
                     <div class="space-y-1">
-                        <p class="text-sm font-medium text-foreground">Ampere Proration</p>
-                        <p class="text-sm text-muted-foreground">Prorate ampere charges by days remaining in the billing cycle.</p>
+                        <p class="text-sm font-medium text-foreground">@L["Settings.AmpereProration"]</p>
+                        <p class="text-sm text-muted-foreground">@L["Settings.ProrationHint"]</p>
                     </div>
                     <label class="relative inline-flex cursor-pointer items-center">
                         <input type="checkbox" class="peer sr-only" @bind="_enabled" />
@@ -23,12 +24,12 @@
                     </label>
                 </div>
             </div>
-            <p class="text-sm leading-6 text-muted-foreground">When enabled, ampere invoices can charge for a partial month using billed days.</p>
+            <p class="text-sm leading-6 text-muted-foreground">@L["Settings.ProrationFooter"]</p>
             <button type="button"
                     class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
                     disabled="@_saving"
                     @onclick="SaveAsync">
-                @(_saving ? "Saving..." : "Save")
+                @(_saving ? L["Common.Saving"] : L["Common.Save"])
             </button>
         }
     </div>
@@ -56,7 +57,7 @@
         {
             await PreferencesService.UpsertAsync(request);
             ok = true;
-        }, "Preferences saved.");
+        }, L["Settings.PreferencesSaved"].Value);
         _saving = false;
         if (ok) Navigation.NavigateTo("settings");
     }

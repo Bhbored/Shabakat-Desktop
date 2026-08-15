@@ -1,8 +1,9 @@
 @page "/settings/whatsapp"
+@inject IStringLocalizer<SharedResource> L
 
-<SettingsScaffold Title="WhatsApp">
+<SettingsScaffold Title="@L["Page.SettingsWhatsApp.Title"]">
     <div class="space-y-4 py-2 text-center sm:py-6">
-        <p class="text-sm font-medium text-foreground">WhatsApp is not available in this offline build.</p>
-        <p class="text-sm leading-6 text-muted-foreground">Payment reminders and QR linking are disabled for the local desktop app.</p>
+        <p class="text-sm font-medium text-foreground">@L["Settings.WhatsApp.Unavailable"]</p>
+        <p class="text-sm leading-6 text-muted-foreground">@L["Settings.WhatsApp.Hint"]</p>
     </div>
 </SettingsScaffold>

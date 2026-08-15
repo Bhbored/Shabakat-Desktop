@@ -1,4 +1,5 @@
 @namespace Shabakat.Components.Features.Calculator.Components
+@inject IStringLocalizer<SharedResource> L
 
 <section class="rounded-2xl border border-border bg-card p-5 sm:p-8">
     <div class="mb-6 flex items-center gap-2 text-primary">
@@ -6,35 +7,35 @@
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
             <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
-        <h2 class="text-sm font-semibold uppercase tracking-[0.16em]">Result</h2>
+        <h2 class="text-sm font-semibold uppercase tracking-[0.16em]">@L["Calculator.Result"]</h2>
     </div>
     <dl class="divide-y divide-border">
         <div class="flex items-center justify-between gap-4 py-4 first:pt-0">
-            <dt class="text-muted-foreground">Payment amount</dt>
+            <dt class="text-muted-foreground">@L["Calculator.PaymentAmount"]</dt>
             <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.PaymentAmount)</dd>
         </div>
         <div class="flex items-center justify-between gap-4 py-4">
-            <dt class="text-muted-foreground">Kilowatt amount (kWh)</dt>
-            <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.KilowattAmount) kWh</dd>
+            <dt class="text-muted-foreground">@L["Calculator.KilowattAmount"]</dt>
+            <dd class="text-right font-semibold tabular-nums text-foreground">@L["Calculator.KwhSuffix", FormatHelper.Number(Result.KilowattAmount)]</dd>
         </div>
         <div class="flex items-center justify-between gap-4 py-4">
-            <dt class="text-muted-foreground">Unit price</dt>
+            <dt class="text-muted-foreground">@L["Calculator.UnitPrice"]</dt>
             <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.UnitPrice)</dd>
         </div>
         <div class="flex items-center justify-between gap-4 py-4">
-            <dt class="text-muted-foreground">Fixed charge</dt>
+            <dt class="text-muted-foreground">@L["Calculator.FixedCharge"]</dt>
             <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.FixedCharge)</dd>
         </div>
         <div class="flex items-center justify-between gap-4 py-4">
-            <dt class="text-muted-foreground">TVA</dt>
+            <dt class="text-muted-foreground">@L["Calculator.Tva"]</dt>
             <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.TVA)%</dd>
         </div>
         <div class="flex items-center justify-between gap-4 py-4">
-            <dt class="text-muted-foreground">Plan value</dt>
+            <dt class="text-muted-foreground">@L["Calculator.PlanValue"]</dt>
             <dd class="text-right font-semibold tabular-nums text-foreground">@FormatHelper.Number(Result.PlanValue)</dd>
         </div>
         <div class="flex items-center justify-between gap-4 py-4 last:pb-0">
-            <dt class="text-muted-foreground">Customer type</dt>
+            <dt class="text-muted-foreground">@L["Calculator.CustomerType"]</dt>
             <dd class="text-right font-semibold tabular-nums text-foreground">@CustomerTypeLabel(Result.CustomerType)</dd>
         </div>
     </dl>
@@ -43,11 +44,11 @@
 @code {
     [Parameter, EditorRequired] public FixedKilowattCalculateResponse Result { get; set; } = null!;
 
-    private static string CustomerTypeLabel(string value) => value.ToLowerInvariant() switch
+    private string CustomerTypeLabel(string value) => value.ToLowerInvariant() switch
     {
-        "residential" => "Residential",
-        "commercial" => "Commercial",
-        "industrial" => "Industrial",
+        "residential" => L["CustomerType.Residential"].Value,
+        "commercial" => L["CustomerType.Commercial"].Value,
+        "industrial" => L["CustomerType.Industrial"].Value,
         _ => value
     };
 }

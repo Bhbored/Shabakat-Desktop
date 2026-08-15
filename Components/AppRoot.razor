@@ -1,4 +1,7 @@
 @namespace Shabakat.Components
+@implements IDisposable
+@inject ICultureService CultureService
+@inject IJSRuntime Js
 
 <div class="h-full min-h-full bg-background">
     <Routes />
@@ -12,5 +15,38 @@
 @code {
     private bool _splashDone;
 
+    protected override void OnInitialized()
+    {
+        CultureService.Changed += OnCultureChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await ApplyDocumentCultureAsync();
+    }
+
     private void HideSplash() => _splashDone = true;
+
+    private void OnCultureChanged() => _ = InvokeAsync(async () =>
+    {
+        await ApplyDocumentCultureAsync();
+        StateHasChanged();
+    });
+
+    private async Task ApplyDocumentCultureAsync()
+    {
+        var lang = CultureService.IsRtl ? "ar" : "en";
+        var dir = CultureService.IsRtl ? "rtl" : "ltr";
+        await Js.InvokeVoidAsync("eval", $@"
+            document.documentElement.setAttribute('lang', '{lang}');
+            document.documentElement.setAttribute('dir', '{dir}');
+            try {{ localStorage.setItem('shabakat-lang', '{lang}'); }} catch (_) {{}}
+        ");
+    }
+
+    public void Dispose()
+    {
+        CultureService.Changed -= OnCultureChanged;
+    }
 }

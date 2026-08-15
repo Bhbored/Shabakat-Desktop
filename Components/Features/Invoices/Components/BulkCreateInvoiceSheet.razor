@@ -1,28 +1,29 @@
 @namespace Shabakat.Components.Features.Invoices.Components
+@inject IStringLocalizer<SharedResource> L
 
 <ConfirmDialog Open="Open"
-               Title="Bulk Generate Invoices"
-               Description="Create invoices for all eligible active customers for current billing period. This runs on backend billing rules."
+               Title="@L["Invoices.BulkTitleFull"]"
+               Description="@L["Invoices.BulkHint"].Value"
                OnClose="OnClose">
     <ChildContent>
         <div class="space-y-1.5 text-foreground">
-            <label class="text-sm font-medium">Plan Type</label>
+            <label class="text-sm font-medium">@L["Field.PlanType"]</label>
             <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary"
                     value="@Plan"
                     @onchange="OnPlanChanged">
-                <option value="">All (Ampere &amp; Kilowatt)</option>
-                <option value="@PlanType.Ampere">Ampere Only</option>
-                <option value="@PlanType.Kilowatt">Kilowatt Only</option>
+                <option value="">@L["Invoices.BulkAllPlans"]</option>
+                <option value="@PlanType.Ampere">@L["Invoices.AmpereOnly"]</option>
+                <option value="@PlanType.Kilowatt">@L["Invoices.KilowattOnly"]</option>
             </select>
         </div>
     </ChildContent>
     <Footer>
-        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">@L["Common.Cancel"]</button>
         <button type="button"
                 class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
                 disabled="@Saving"
                 @onclick="OnSave">
-            @(Saving ? "Generating..." : "Generate")
+            @(Saving ? L["Invoices.Generating"] : L["Invoices.Generate"])
         </button>
     </Footer>
 </ConfirmDialog>

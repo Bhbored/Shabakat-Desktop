@@ -1,17 +1,18 @@
 @namespace Shabakat.Components.Features.Subscribers.Components
+@inject IStringLocalizer<SharedResource> L
 
 <ConfirmDialog Open="Open"
-               Title="Delete Subscriber"
+               Title="@L["Subscribers.DeleteTitle"]"
                OnClose="OnClose">
     <ChildContent>
         @if (Subscriber is not null)
         {
-            <p>Delete <span class="font-medium text-foreground">@Subscriber.Name</span>? This cannot be undone.</p>
+            <p>@L["Subscribers.DeleteConfirm", Subscriber.Name]</p>
         }
     </ChildContent>
     <Footer>
-        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">Cancel</button>
-        <button type="button" class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white" @onclick="OnConfirm">Delete</button>
+        <button type="button" class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted" @onclick="OnClose">@L["Common.Cancel"]</button>
+        <button type="button" class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white" @onclick="OnConfirm">@L["Common.Delete"]</button>
     </Footer>
 </ConfirmDialog>
 

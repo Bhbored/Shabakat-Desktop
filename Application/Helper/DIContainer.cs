@@ -15,6 +15,7 @@ using Shabakat.Application.Services.MeterReadings;
 using Shabakat.Application.Services.Preferences;
 using Shabakat.Application.Services.Pricing;
 using Shabakat.Application.Services.Profile;
+using Shabakat.Application.Services.Culture;
 using Shabakat.Application.Services.Theme;
 using Shabakat.Application.Services.Toasts;
 using Shabakat.Infrastructure.Persistence;
@@ -55,6 +56,8 @@ public static class DIContainer
     {
         services.RegisterDataBase();
 
+        services.AddLocalization();
+        services.AddSingleton<ICultureService, CultureService>();
         services.AddSingleton<IInvoiceTemplateRenderer, InvoiceTemplateRenderer>();
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddScoped<IToastService, ToastService>();

@@ -2,12 +2,13 @@
 @inject ICustomerExportService ExportService
 @inject IToastService Toast
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
-<SettingsScaffold Title="Excel Export Columns">
-    <p class="mb-5 text-sm text-muted-foreground">Choose the customer columns included in Excel exports.</p>
+<SettingsScaffold Title="@L["Page.SettingsExcelExport.Title"]">
+    <p class="mb-5 text-sm text-muted-foreground">@L["Page.SettingsExcelExport.Subtitle"]</p>
     @if (_loading)
     {
-        <p class="text-sm text-muted-foreground">Loading export columns...</p>
+        <p class="text-sm text-muted-foreground">@L["Settings.LoadingExport"]</p>
     }
     else
     {
@@ -17,7 +18,7 @@
                 var selected = _selected.Contains(column);
                 var disableOff = selected && _selected.Count == 1;
                 <label class="flex cursor-pointer items-center gap-3 px-4 py-3">
-                    <span class="flex-1 text-sm font-medium text-foreground">@CustomerExportColumns.Header(column)</span>
+                    <span class="flex-1 text-sm font-medium text-foreground">@ColumnHeader(column)</span>
                     <span class="relative inline-flex cursor-pointer items-center @(disableOff ? "opacity-50" : "")">
                         <input type="checkbox" class="peer sr-only" checked="@selected" disabled="@disableOff"
                             @onchange="e => Toggle(column, e.Value is true)" />
@@ -31,7 +32,7 @@
             class="mt-6 w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
             disabled="@_saving"
             @onclick="SaveAsync">
-            @(_saving ? "Saving..." : "Save")
+            @(_saving ? L["Common.Saving"] : L["Common.Save"])
         </button>
     }
 </SettingsScaffold>
@@ -57,6 +58,31 @@
             _selected.Remove(column);
     }
 
+    private string ColumnHeader(CustomerExportColumn column) => column switch
+    {
+        CustomerExportColumn.Name => L["Common.Name"].Value,
+        CustomerExportColumn.Phone => L["Common.Phone"].Value,
+        CustomerExportColumn.Address => L["Common.Address"].Value,
+        CustomerExportColumn.Building => L["Common.Building"].Value,
+        CustomerExportColumn.Floor => L["Common.Floor"].Value,
+        CustomerExportColumn.CableName => L["Field.CableName"].Value,
+        CustomerExportColumn.AreaName => L["Common.Area"].Value,
+        CustomerExportColumn.BoxName => L["Field.Box"].Value,
+        CustomerExportColumn.AmpereScheduleName => L["Field.AmpereSchedule"].Value,
+        CustomerExportColumn.CustomerType => L["Field.CustomerType"].Value,
+        CustomerExportColumn.Plan => L["Common.Plan"].Value,
+        CustomerExportColumn.PlanValue => L["Field.PlanValue"].Value,
+        CustomerExportColumn.SubscriptionDate => L["Field.SubscriptionDate"].Value,
+        CustomerExportColumn.CustomerStatus => L["Common.Status"].Value,
+        CustomerExportColumn.CustomerRelation => L["Field.Relation"].Value,
+        CustomerExportColumn.InitialMeterReading => L["Field.InitialReading"].Value,
+        CustomerExportColumn.LatestMeterReading => L["Field.LatestReading"].Value,
+        CustomerExportColumn.TotalBilled => L["Subscribers.TotalBilled"].Value,
+        CustomerExportColumn.TotalPaid => L["Subscribers.TotalPaid"].Value,
+        CustomerExportColumn.TotalToPay => L["Field.TotalToPay"].Value,
+        _ => column.ToString()
+    };
+
     private async Task SaveAsync()
     {
         _saving = true;
@@ -65,7 +91,7 @@
         {
             await ExportService.SaveSelectedColumnsAsync(_selected);
             ok = true;
-        }, "Export columns saved.");
+        }, L["Settings.ExportColumnsSaved"].Value);
         _saving = false;
         if (ok) Navigation.NavigateTo("settings");
     }

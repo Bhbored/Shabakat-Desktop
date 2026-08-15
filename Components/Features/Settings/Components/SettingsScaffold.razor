@@ -1,9 +1,11 @@
+@inject IStringLocalizer<SharedResource> L
+
 <div class="mx-auto max-w-2xl">
     <div class="mb-6 flex items-center gap-3">
         <NavLink href="settings"
                  class="rounded-full p-2 text-muted-foreground no-underline transition-colors hover:bg-muted hover:text-foreground"
-                 aria-label="Back to settings">
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                 aria-label="@L["Settings.BackToSettings"]">
+            <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </NavLink>
         <h1 class="text-2xl font-semibold text-foreground">@Title</h1>
     </div>

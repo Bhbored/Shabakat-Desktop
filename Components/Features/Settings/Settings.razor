@@ -3,68 +3,69 @@
 @inject IAppUserService AppUserService
 @inject IToastService Toast
 @inject IThemeService ThemeService
+@inject IStringLocalizer<SharedResource> L
 
 <div class="mx-auto max-w-2xl space-y-6">
-    <SettingsSection Title="Appearance">
+    <SettingsSection Title="@L["Settings.Appearance"]">
         <div class="px-4 pb-4 pt-4">
             <div class="mb-3 flex items-center gap-3">
                 <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-foreground">Theme</p>
-                    <p class="text-xs capitalize text-muted-foreground">@ThemeService.Mode · @ThemeService.ResolvedTheme</p>
+                    <p class="text-sm font-medium text-foreground">@L["Settings.Theme"]</p>
+                    <p class="text-xs text-muted-foreground">@ThemeModeLabel · @ThemeResolvedLabel</p>
                 </div>
             </div>
             <div class="grid grid-cols-3 gap-3">
                 <button type="button" class="@ThemeButtonClass(AppThemeMode.Light)" @onclick="() => SetTheme(AppThemeMode.Light)">
                     <svg class="mx-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>
-                    <span class="mt-2 block text-xs font-medium">Light</span>
+                    <span class="mt-2 block text-xs font-medium">@L["Settings.Theme.Light"]</span>
                 </button>
                 <button type="button" class="@ThemeButtonClass(AppThemeMode.Dark)" @onclick="() => SetTheme(AppThemeMode.Dark)">
                     <svg class="mx-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    <span class="mt-2 block text-xs font-medium">Dark</span>
+                    <span class="mt-2 block text-xs font-medium">@L["Settings.Theme.Dark"]</span>
                 </button>
                 <button type="button" class="@ThemeButtonClass(AppThemeMode.System)" @onclick="() => SetTheme(AppThemeMode.System)">
                     <svg class="mx-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                    <span class="mt-2 block text-xs font-medium">System</span>
+                    <span class="mt-2 block text-xs font-medium">@L["Settings.Theme.System"]</span>
                 </button>
             </div>
         </div>
     </SettingsSection>
 
-    <SettingsSection Title="Company Preferences">
+    <SettingsSection Title="@L["Settings.CompanyPreferences"]">
         @if (_loading)
         {
             <SettingsRowsSkeleton Count="6" />
         }
         else
         {
-            <SettingRowLink Href="settings/pricing/price-per-kilowatt" Label="Price per Kilowatt" Value="@PriceValue(_prefs?.PricePerKilowat)" IconSvg="@Icons.Zap" />
-            <SettingRowLink Href="settings/pricing/price-per-amp" Label="Price per Amp" Value="@PriceValue(_prefs?.PricePerAmp)" IconSvg="@Icons.Zap" />
-            <SettingRowLink Href="settings/pricing/fixed-charge" Label="Fixed Charge" Value="@PriceValue(_prefs?.FixedCharge)" IconSvg="@Icons.Wallet" />
-            <SettingRowLink Href="settings/pricing/tva" Label="TVA" Value="@(_prefs is null ? NotConfigured : $"{FormatHelper.Number(_prefs.TVA)}%")" IconSvg="@Icons.Percent" />
-            <SettingRowLink Href="settings/language" Label="Language" Value="@LanguageLabel(_prefs?.Language)" IconSvg="@Icons.Languages" />
-            <SettingRowLink Href="settings/due-date" Label="Due Date" Value="@(_prefs is null ? NotConfigured : DayLabel(_prefs.DueDate))" IconSvg="@Icons.Calendar" />
-            <SettingRowLink Href="settings/ampere-schedule-pricing" Label="Ampere Schedule Pricing" Value="@EnabledLabel(_prefs?.AmpereSchedulePricingEnabled == true)" IconSvg="@Icons.Zap" />
-            <SettingRowLink Href="settings/ampere-proration" Label="Ampere Proration" Value="@EnabledLabel(_prefs?.AmpereProrateByDaysEnabled == true)" IconSvg="@Icons.Percent" />
-            <SettingRowLink Href="ampere-schedules" Label="Ampere Schedules" Value="Manage tiers" IconSvg="@Icons.Clock" />
-            <SettingRowLink Href="settings/company-logo" Label="Company Logo / Profile" Value="@LogoLabel" IconSvg="@Icons.Image" />
-            <SettingRowLink Href="settings/excel-export" Label="Excel Export" Value="Choose exported customer columns" IconSvg="@Icons.Spreadsheet" />
+            <SettingRowLink Href="settings/pricing/price-per-kilowatt" Label="@L["Settings.PricePerKilowatt"]" Value="@PriceValue(_prefs?.PricePerKilowat)" IconSvg="@Icons.Zap" />
+            <SettingRowLink Href="settings/pricing/price-per-amp" Label="@L["Settings.PricePerAmp"]" Value="@PriceValue(_prefs?.PricePerAmp)" IconSvg="@Icons.Zap" />
+            <SettingRowLink Href="settings/pricing/fixed-charge" Label="@L["Settings.FixedCharge"]" Value="@PriceValue(_prefs?.FixedCharge)" IconSvg="@Icons.Wallet" />
+            <SettingRowLink Href="settings/pricing/tva" Label="@L["Settings.Tva"]" Value="@(_prefs is null ? L["Common.NotConfigured"].Value : $"{FormatHelper.Number(_prefs.TVA)}%")" IconSvg="@Icons.Percent" />
+            <SettingRowLink Href="settings/language" Label="@L["Settings.Language"]" Value="@LanguageLabel(_prefs?.Language)" IconSvg="@Icons.Languages" />
+            <SettingRowLink Href="settings/due-date" Label="@L["Settings.DueDate"]" Value="@(_prefs is null ? L["Common.NotConfigured"].Value : DayLabel(_prefs.DueDate))" IconSvg="@Icons.Calendar" />
+            <SettingRowLink Href="settings/ampere-schedule-pricing" Label="@L["Settings.AmpereSchedulePricing"]" Value="@EnabledLabel(_prefs?.AmpereSchedulePricingEnabled == true)" IconSvg="@Icons.Zap" />
+            <SettingRowLink Href="settings/ampere-proration" Label="@L["Settings.AmpereProration"]" Value="@EnabledLabel(_prefs?.AmpereProrateByDaysEnabled == true)" IconSvg="@Icons.Percent" />
+            <SettingRowLink Href="ampere-schedules" Label="@L["Settings.AmpereSchedules"]" Value="@L["Settings.ManageTiers"]" IconSvg="@Icons.Clock" />
+            <SettingRowLink Href="settings/company-logo" Label="@L["Settings.CompanyLogo"]" Value="@LogoLabel" IconSvg="@Icons.Image" />
+            <SettingRowLink Href="settings/excel-export" Label="@L["Settings.ExcelExport"]" Value="@L["Settings.ExcelExportHint"]" IconSvg="@Icons.Spreadsheet" />
         }
     </SettingsSection>
 
-    <SettingsSection Title="Testing">
-        <SettingRowLink Href="settings/testing" Label="Sample data" Value="Seed Lebanon demo dataset" IconSvg="@Icons.Flask" />
+    <SettingsSection Title="@L["Settings.Testing"]">
+        <SettingRowLink Href="settings/testing" Label="@L["Settings.SampleData"]" Value="@L["Settings.SeedLebanon"]" IconSvg="@Icons.Flask" />
     </SettingsSection>
 
-    <SettingsSection Title="About">
+    <SettingsSection Title="@L["Settings.About"]">
         <div class="flex items-center gap-3 px-4 py-4">
             <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             </div>
             <div class="flex-1">
-                <p class="text-sm font-medium text-foreground">Version</p>
+                <p class="text-sm font-medium text-foreground">@L["Settings.Version"]</p>
             </div>
             <span class="text-sm text-muted-foreground">1.0.0</span>
         </div>
@@ -72,15 +73,26 @@
 </div>
 
 @code {
-    private const string NotConfigured = "Not configured";
     private bool _loading = true;
     private GetPreferencesResponse? _prefs;
     private ProfileResponse? _profile;
 
     private string LogoLabel =>
-        !string.IsNullOrWhiteSpace(_profile?.LogoUrl) ? "Configured"
-        : !string.IsNullOrWhiteSpace(_profile?.BusinessName) ? _profile.BusinessName
-        : "Not set";
+        !string.IsNullOrWhiteSpace(_profile?.LogoUrl) ? L["Common.Configured"].Value
+        : !string.IsNullOrWhiteSpace(_profile?.BusinessName) ? _profile.BusinessName!
+        : L["Common.NotSet"].Value;
+
+    private string ThemeModeLabel => ThemeService.Mode switch
+    {
+        AppThemeMode.Light => L["Settings.Theme.Light"].Value,
+        AppThemeMode.Dark => L["Settings.Theme.Dark"].Value,
+        _ => L["Settings.Theme.System"].Value
+    };
+
+    private string ThemeResolvedLabel =>
+        string.Equals(ThemeService.ResolvedTheme, "light", StringComparison.OrdinalIgnoreCase)
+            ? L["Settings.Theme.Light"].Value
+            : L["Settings.Theme.Dark"].Value;
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,27 +113,15 @@
             : "rounded-2xl border border-border bg-background px-3 py-3 text-center text-muted-foreground hover:text-foreground";
 
     private string PriceValue(decimal? value) =>
-        value is null ? NotConfigured : FormatHelper.Currency(value.Value);
+        value is null ? L["Common.NotConfigured"].Value : FormatHelper.Currency(value.Value);
 
-    private static string DayLabel(int day)
-    {
-        var suffix = day is 11 or 12 or 13
-            ? "th"
-            : (day % 10) switch
-            {
-                1 => "st",
-                2 => "nd",
-                3 => "rd",
-                _ => "th"
-            };
-        return $"{day}{suffix} of each month";
-    }
+    private string DayLabel(int day) => L["Settings.DayOfMonth", day].Value;
 
-    private static string LanguageLabel(string? language) =>
-        language is null ? NotConfigured
-        : string.Equals(language, "ar", StringComparison.OrdinalIgnoreCase) ? "Arabic" : "English";
+    private string LanguageLabel(string? language) =>
+        language is null ? L["Common.NotConfigured"].Value
+        : string.Equals(language, "ar", StringComparison.OrdinalIgnoreCase) ? L["Settings.Language.Arabic"].Value : L["Settings.Language.English"].Value;
 
-    private static string EnabledLabel(bool enabled) => enabled ? "Enabled" : "Disabled";
+    private string EnabledLabel(bool enabled) => enabled ? L["Common.Enabled"].Value : L["Common.Disabled"].Value;
 
     private static class Icons
     {

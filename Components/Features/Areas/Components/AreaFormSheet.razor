@@ -1,8 +1,9 @@
 @namespace Shabakat.Components.Features.Areas.Components
+@inject IStringLocalizer<SharedResource> L
 
 <SideSheet Open="Open"
-           Title="@(IsEdit ? "Edit Area" : "Add Area")"
-           Description="@(IsEdit ? "Update the area name." : "Create a new service area.")"
+           Title="@(IsEdit ? L["Areas.Edit"] : L["Areas.Add"])"
+           Description="@(IsEdit ? L["Areas.UpdateHint"] : L["Areas.CreateHint"])"
            MaxWidthClass="sm:max-w-lg"
            OnClose="OnClose">
     <TitleIcon>
@@ -12,25 +13,25 @@
         <EditForm Model="_form" OnValidSubmit="HandleSubmitAsync" class="space-y-6">
             <DataAnnotationsValidator />
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-foreground">Name</label>
+                <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Common.Name"]</label>
                 <InputText @bind-Value="_form.Name"
                            class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                           placeholder="e.g. Downtown" />
+                           placeholder="@L["Areas.NamePlaceholder"]" />
                 <ValidationMessage For="() => _form.Name" class="mt-1 text-xs text-red-500" />
             </div>
             <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
-                <p class="text-sm text-muted-foreground">Areas group subscribers for billing and routing.</p>
+                <p class="text-sm text-muted-foreground">@L["Areas.FormFooter"]</p>
                 <div class="flex items-center gap-3">
                     <button type="button"
                             class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
                             disabled="@Saving"
                             @onclick="OnClose">
-                        Cancel
+                        @L["Common.Cancel"]
                     </button>
                     <button type="submit"
                             class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
                             disabled="@Saving">
-                        @(Saving ? "Saving..." : (IsEdit ? "Save" : "Create"))
+                        @(Saving ? L["Common.Saving"] : (IsEdit ? L["Common.Save"] : L["Common.Create"]))
                     </button>
                 </div>
             </div>

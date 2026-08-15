@@ -18,6 +18,11 @@
                 if (saved === 'light' || saved === 'dark') {
                     document.documentElement.setAttribute('data-theme', saved);
                 }
+                var lang = localStorage.getItem('shabakat-lang');
+                if (lang === 'ar') {
+                    document.documentElement.setAttribute('lang', 'ar');
+                    document.documentElement.setAttribute('dir', 'rtl');
+                }
             } catch (_) { }
         })();
 

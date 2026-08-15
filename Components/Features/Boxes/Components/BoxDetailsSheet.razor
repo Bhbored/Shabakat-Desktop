@@ -1,8 +1,9 @@
 @namespace Shabakat.Components.Features.Boxes.Components
+@inject IStringLocalizer<SharedResource> L
 
 <SideSheet Open="Open"
-           Title="@(Box?.Name ?? "View details")"
-           Description="Review physical box metadata, area placement, and assigned subscribers."
+           Title="@(Box?.Name ?? L["Common.ViewDetails"].Value)"
+           Description="@L["Boxes.DetailsHint"]"
            MaxWidthClass="sm:max-w-xl"
            OnClose="OnClose">
     @if (Box is not null)
@@ -10,13 +11,13 @@
         <div class="space-y-4">
             <div class="grid gap-4 md:grid-cols-2">
                 <div class="rounded-2xl border border-border bg-card p-4">
-                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Subscribers</p>
+                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Ampere.Subscribers"]</p>
                     <p class="mt-2 text-xl font-semibold text-foreground">
-                        @Box.CustomerCount subscriber@(Box.CustomerCount != 1 ? "s" : "")
+                        @(Box.CustomerCount == 1 ? L["Count.Subscribers", Box.CustomerCount] : L["Count.SubscribersPlural", Box.CustomerCount])
                     </p>
                 </div>
                 <div class="rounded-2xl border border-border bg-card p-4">
-                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Created</p>
+                    <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Created"]</p>
                     <p class="mt-2 text-xl font-semibold text-foreground">@FormatHelper.Date(Box.CreatedAt)</p>
                 </div>
             </div>
@@ -27,7 +28,7 @@
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
                     </div>
                     <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Box Name</p>
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Boxes.BoxName"]</p>
                         <p class="mt-1 text-sm text-foreground">@Box.Name</p>
                     </div>
                 </div>
@@ -36,7 +37,7 @@
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     </div>
                     <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Area</p>
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Area"]</p>
                         <p class="mt-1 text-sm text-foreground">@Box.AreaName</p>
                     </div>
                 </div>
@@ -45,8 +46,8 @@
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     </div>
                     <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Location Note</p>
-                        <p class="mt-1 text-sm text-foreground">@(string.IsNullOrWhiteSpace(Box.LocationNote) ? "Not set" : Box.LocationNote)</p>
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Boxes.LocationNote"]</p>
+                        <p class="mt-1 text-sm text-foreground">@(string.IsNullOrWhiteSpace(Box.LocationNote) ? L["Common.NotSet"].Value : Box.LocationNote)</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -54,8 +55,8 @@
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                     </div>
                     <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Notes</p>
-                        <p class="mt-1 text-sm text-foreground">@(string.IsNullOrWhiteSpace(Box.Notes) ? "Not set" : Box.Notes)</p>
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Notes"]</p>
+                        <p class="mt-1 text-sm text-foreground">@(string.IsNullOrWhiteSpace(Box.Notes) ? L["Common.NotSet"].Value : Box.Notes)</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -63,8 +64,8 @@
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                     </div>
                     <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Assigned Subscribers</p>
-                        <p class="mt-1 text-sm text-foreground">@Box.CustomerCount subscriber@(Box.CustomerCount != 1 ? "s" : "")</p>
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Boxes.AssignedSubscribers"]</p>
+                        <p class="mt-1 text-sm text-foreground">@(Box.CustomerCount == 1 ? L["Count.Subscribers", Box.CustomerCount] : L["Count.SubscribersPlural", Box.CustomerCount])</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -72,7 +73,7 @@
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </div>
                     <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Created At</p>
+                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Common.CreatedAt"]</p>
                         <p class="mt-1 text-sm text-foreground">@FormatHelper.Date(Box.CreatedAt)</p>
                     </div>
                 </div>
@@ -81,11 +82,13 @@
             <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
                 <div class="flex items-start justify-between gap-3">
                     <div>
-                        <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Assigned Subscribers</h3>
-                        <p class="mt-2 text-sm text-muted-foreground">Subscribers currently wired to this physical box.</p>
+                        <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Boxes.AssignedSubscribers"]</h3>
+                        <p class="mt-2 text-sm text-muted-foreground">@L["Boxes.AssignedHint"]</p>
                     </div>
                     <span class="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-                        @(SubscribersPage?.TotalCount ?? 0) subscriber@((SubscribersPage?.TotalCount ?? 0) != 1 ? "s" : "")
+                        @((SubscribersPage?.TotalCount ?? 0) == 1
+                            ? L["Count.Subscribers", SubscribersPage?.TotalCount ?? 0]
+                            : L["Count.SubscribersPlural", SubscribersPage?.TotalCount ?? 0])
                     </span>
                 </div>
 
@@ -108,7 +111,7 @@
                 }
                 else if (SubscribersPage is null || !SubscribersPage.Data.Any())
                 {
-                    <p class="text-sm text-muted-foreground">No subscribers are assigned to this box yet.</p>
+                    <p class="text-sm text-muted-foreground">@L["Boxes.NoneAssigned"]</p>
                 }
                 else
                 {
@@ -125,7 +128,7 @@
                                         <div class="space-y-2">
                                             <div>
                                                 <p class="text-sm font-semibold text-foreground">@sub.Name</p>
-                                                <p class="text-xs text-muted-foreground">@FormatPlan(sub.Plan) · @FormatHelper.Number(sub.PlanValue)</p>
+                                                <p class="text-xs text-muted-foreground">@PlanLabel(sub.Plan) · @FormatHelper.Number(sub.PlanValue)</p>
                                             </div>
                                             <div class="flex flex-wrap items-center gap-2">
                                                 <StatusBadge Status="@sub.CustomerStatus" />
@@ -134,13 +137,13 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">Amount due</p>
+                                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Table.AmountDue"]</p>
                                         <p class="mt-2 text-base font-semibold text-foreground">@FormatHelper.Currency(sub.AmountDue)</p>
                                     </div>
                                 </div>
                                 <div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
                                     <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg>
-                                    <span class="font-mono">@(string.IsNullOrWhiteSpace(sub.Phone) ? "Not set" : sub.Phone)</span>
+                                    <span class="font-mono">@(string.IsNullOrWhiteSpace(sub.Phone) ? L["Common.NotSet"].Value : sub.Phone)</span>
                                 </div>
                             </div>
                         }
@@ -150,19 +153,19 @@
                 @if (SubscribersPage is { TotalPages: > 1 })
                 {
                     <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                        <span class="text-sm text-muted-foreground">Page @SubscribersPage.PageNumber of @SubscribersPage.TotalPages</span>
+                        <span class="text-sm text-muted-foreground">@L["Pager.PageOf", SubscribersPage.PageNumber, SubscribersPage.TotalPages]</span>
                         <div class="flex gap-2">
                             <button type="button"
                                     class="rounded-xl border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-40"
                                     disabled="@(!SubscribersPage.HasPreviousPage || SubscribersLoading)"
                                     @onclick="() => OnSubscribersPageChanged.InvokeAsync(SubscribersPage.PageNumber - 1)">
-                                Previous
+                                @L["Common.Previous"]
                             </button>
                             <button type="button"
                                     class="rounded-xl border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-40"
                                     disabled="@(!SubscribersPage.HasNextPage || SubscribersLoading)"
                                     @onclick="() => OnSubscribersPageChanged.InvokeAsync(SubscribersPage.PageNumber + 1)">
-                                Next
+                                @L["Common.Next"]
                             </button>
                         </div>
                     </div>
@@ -172,7 +175,7 @@
     }
     else
     {
-        <p class="text-sm text-muted-foreground">Select a box to view its details.</p>
+        <p class="text-sm text-muted-foreground">@L["Boxes.SelectHint"]</p>
     }
 </SideSheet>
 
@@ -184,11 +187,11 @@
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback<int> OnSubscribersPageChanged { get; set; }
 
-    private static string FormatPlan(string plan) => plan switch
+    private string PlanLabel(string plan) => plan switch
     {
-        nameof(PlanType.Ampere) => "Ampere",
-        nameof(PlanType.FixedKilowatt) => "Fixed kilowatt",
-        nameof(PlanType.Kilowatt) => "Kilowatt",
+        nameof(PlanType.Ampere) => L["PlanType.Ampere"].Value,
+        nameof(PlanType.FixedKilowatt) => L["PlanType.FixedKilowatt"].Value,
+        nameof(PlanType.Kilowatt) => L["PlanType.Kilowatt"].Value,
         _ => plan
     };
 }
