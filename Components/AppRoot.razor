@@ -1,0 +1,16 @@
+@namespace Shabakat.Components
+
+<div class="h-full min-h-full bg-background">
+    <Routes />
+
+    @if (!_splashDone)
+    {
+        <AppSplash OnFinished="HideSplash" />
+    }
+</div>
+
+@code {
+    private bool _splashDone;
+
+    private void HideSplash() => _splashDone = true;
+}

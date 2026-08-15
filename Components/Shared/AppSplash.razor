@@ -1,0 +1,40 @@
+@namespace Shabakat.Components.Shared
+
+<div class="splash-root @_rootClass"
+     role="status"
+     aria-live="polite"
+     aria-label="Loading Shabakat">
+    <div class="splash-stage">
+        <span class="splash-ripple splash-ripple-1"></span>
+        <span class="splash-ripple splash-ripple-2"></span>
+        <span class="splash-ripple splash-ripple-3"></span>
+        <div class="splash-icon-wrap">
+            <svg class="splash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M13 2 3 14h6l-2 8 10-12h-6l2-8z" />
+            </svg>
+        </div>
+    </div>
+
+    <h1 class="splash-title">Shabakat</h1>
+    <p class="splash-subtitle">Powering Your Generators</p>
+    <div class="splash-loader" aria-hidden="true"></div>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnFinished { get; set; }
+
+    private bool _exiting;
+    private string _rootClass => _exiting ? "splash-root--exit" : "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        await Task.Delay(2600);
+        _exiting = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(320);
+        await OnFinished.InvokeAsync();
+    }
+}
