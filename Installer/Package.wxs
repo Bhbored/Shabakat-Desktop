@@ -1,0 +1,59 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="Shabakat"
+           Manufacturer="Shabakat"
+           Version="1.0.1"
+           UpgradeCode="bd6fa014-7176-42ae-867f-38441509f355"
+           Scope="perMachine"
+           Compressed="yes">
+    <SummaryInformation Description="Shabakat desktop app" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Shabakat is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon.exe" SourceFile="!(bindpath.publish)\Shabakat.exe" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.exe" />
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="Shabakat" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="!(bindpath.publish)\**">
+        <Exclude Files="!(bindpath.publish)\**\*.pdb" />
+        <Exclude Files="!(bindpath.publish)\Shabakat.exe" />
+      </Files>
+    </ComponentGroup>
+
+    <Component Id="MainExe"
+               Directory="INSTALLFOLDER"
+               Guid="e5d61a2c-34c0-4381-9d32-11f5bda1dd53">
+      <File Id="ShabakatExe" Source="!(bindpath.publish)\Shabakat.exe" KeyPath="yes" />
+    </Component>
+
+    <Component Id="DesktopShortcut"
+               Directory="INSTALLFOLDER"
+               Guid="c4a7e91b-2f18-4d6c-9a33-7e8b5c1d0246">
+      <Shortcut Id="DesktopShortcut"
+                Name="Shabakat"
+                Description="Shabakat"
+                Directory="DesktopFolder"
+                Target="[INSTALLFOLDER]Shabakat.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AppIcon.exe" />
+      <RegistryValue Root="HKLM"
+                     Key="Software\Shabakat"
+                     Name="DesktopShortcut"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+
+    <Feature Id="Main" Title="Shabakat" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="MainExe" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+  </Package>
+</Wix>

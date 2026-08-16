@@ -10,6 +10,25 @@ namespace Shabakat
     {
         public static MauiApp CreateMauiApp()
         {
+            try
+            {
+                return CreateMauiAppCore();
+            }
+            catch (Exception ex)
+            {
+                var dir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Shabakat");
+                Directory.CreateDirectory(dir);
+                File.WriteAllText(Path.Combine(dir, "startup-error.log"), ex.ToString());
+                throw;
+            }
+        }
+
+        private static MauiApp CreateMauiAppCore()
+        {
+            Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()

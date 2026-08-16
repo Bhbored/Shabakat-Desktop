@@ -1,0 +1,14 @@
+<Project Sdk="WixToolset.Sdk/6.0.2">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <OutputName>Shabakat</OutputName>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <!-- Harvested .NET native binaries often have invalid PE language IDs. -->
+    <SuppressIces>ICE03;ICE43;ICE57;ICE60</SuppressIces>
+    <PublishDir Condition="'$(PublishDir)' == ''">$(MSBuildThisFileDirectory)..\bin\Release\net10.0-windows10.0.19041.0\win-x64\publish\</PublishDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <BindPath Include="$(PublishDir)" BindName="publish" />
+  </ItemGroup>
+</Project>
