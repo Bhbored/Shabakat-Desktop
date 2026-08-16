@@ -23,4 +23,7 @@ public sealed class PaymentRepository : GenericRepository<Payment>, IPaymentRepo
             .OrderByDescending(p => p.PaymentDate)
             .ThenByDescending(p => p.CreatedAt)
             .ToListAsync();
+
+    public async Task<IReadOnlyList<Payment>> GetAllForBackupAsync()
+        => await _dbSet.AsNoTracking().ToListAsync();
 }

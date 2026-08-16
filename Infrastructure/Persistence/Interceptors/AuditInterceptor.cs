@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Shabakat.Domain.Common;
+using Shabakat.Infrastructure.Persistence;
 
 namespace Shabakat.Infrastructure.Persistence.Interceptors;
 
@@ -26,6 +27,7 @@ public sealed class AuditInterceptor : SaveChangesInterceptor
         if (context is null) return;
 
         var now = DateTime.Now;
+        var preserveTimestamps = context is AppDbContext app && app.PreserveTimestamps;
 
         foreach (var entry in context.ChangeTracker.Entries<Base>())
         {
@@ -34,10 +36,13 @@ public sealed class AuditInterceptor : SaveChangesInterceptor
                 if (entry.Entity.Id == Guid.Empty)
                     entry.Entity.Id = Guid.NewGuid();
 
-                entry.Entity.CreatedAt = now;
-                entry.Entity.UpdatedAt = now;
+                if (!preserveTimestamps)
+                {
+                    entry.Entity.CreatedAt = now;
+                    entry.Entity.UpdatedAt = now;
+                }
             }
-            else if (entry.State == EntityState.Modified)
+            else if (entry.State == EntityState.Modified && !preserveTimestamps)
             {
                 entry.Entity.UpdatedAt = now;
             }

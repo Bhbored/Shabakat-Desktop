@@ -63,7 +63,9 @@ public sealed class AppUserService : IAppUserService
 
         await _db.SaveChangesAsync();
         _logger.LogInformation("{Action} company profile {UserId}", isCreate ? "Created" : "Updated", user.Id);
-        Changed?.Invoke();
+        NotifyChanged();
         return user.ToResponse();
     }
+
+    public void NotifyChanged() => Changed?.Invoke();
 }

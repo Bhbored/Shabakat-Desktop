@@ -43,4 +43,7 @@ public sealed class InvoiceSkipRepository : GenericRepository<InvoiceSkip>, IInv
         => await _dbSet
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync();
+
+    public async Task<IReadOnlyList<InvoiceSkip>> GetAllForBackupAsync()
+        => await _dbSet.AsNoTracking().ToListAsync();
 }

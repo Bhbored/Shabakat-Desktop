@@ -1,0 +1,130 @@
+@page "/settings/backup"
+@inject IBackupService BackupService
+@inject IToastService Toast
+@inject IStringLocalizer<SharedResource> L
+
+<SettingsScaffold Title="@L["Page.SettingsBackup.Title"]">
+    <div class="space-y-5">
+        <div>
+            <p class="text-sm font-medium text-foreground">@L["Settings.Backup"]</p>
+            <p class="mt-1 text-xs text-muted-foreground">@L["Page.SettingsBackup.Subtitle"]</p>
+        </div>
+
+        <button type="button"
+                class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+                disabled="@_busy"
+                @onclick="ExportAsync">
+            @(_busy && _exporting ? L["Settings.Backup.Exporting"] : L["Settings.Backup.Export"])
+        </button>
+        <p class="text-xs text-muted-foreground">@L["Settings.Backup.ExportHint"]</p>
+
+        <button type="button"
+                class="w-full rounded-2xl border border-red-600/40 bg-red-600/10 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-600/15 disabled:opacity-50 dark:text-red-400"
+                disabled="@_busy"
+                @onclick="BeginRestoreAsync">
+            @(_busy && _restoring ? L["Settings.Backup.Restoring"] : L["Settings.Backup.Restore"])
+        </button>
+        <p class="text-xs text-muted-foreground">@L["Settings.Backup.RestoreHint"]</p>
+    </div>
+</SettingsScaffold>
+
+<ConfirmDialog Open="_confirmOpen"
+               Title="@L["Settings.Backup.RestoreTitle"]"
+               OnClose="CancelRestore">
+    <ChildContent>
+        <p>@L["Settings.Backup.RestoreConfirm"]</p>
+    </ChildContent>
+    <Footer>
+        <button type="button"
+                class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted"
+                disabled="@_busy"
+                @onclick="CancelRestore">
+            @L["Common.Cancel"]
+        </button>
+        <button type="button"
+                class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+                disabled="@_busy"
+                @onclick="ConfirmRestoreAsync">
+            @L["Settings.Backup.ReplaceAll"]
+        </button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    private bool _busy;
+    private bool _exporting;
+    private bool _restoring;
+    private bool _confirmOpen;
+    private string? _pendingJson;
+
+    private async Task ExportAsync()
+    {
+        if (_busy)
+            return;
+
+        _busy = true;
+        _exporting = true;
+        try
+        {
+            var json = await UiActions.RunAsync(Toast, () => BackupService.ExportAsync());
+            if (json is null)
+                return;
+
+            var fileName = $"shabakat-backup-{DateTime.Now:yyyyMMdd-HHmm}.json";
+            var saved = await BackupFilePicker.SaveAsync(json, fileName);
+            if (saved)
+                Toast.Success(L["Settings.Backup.Exported"].Value);
+        }
+        finally
+        {
+            _busy = false;
+            _exporting = false;
+        }
+    }
+
+    private async Task BeginRestoreAsync()
+    {
+        if (_busy)
+            return;
+
+        var json = await BackupFilePicker.OpenAsync();
+        if (string.IsNullOrWhiteSpace(json))
+            return;
+
+        _pendingJson = json;
+        _confirmOpen = true;
+    }
+
+    private void CancelRestore()
+    {
+        if (_busy)
+            return;
+
+        _confirmOpen = false;
+        _pendingJson = null;
+    }
+
+    private async Task ConfirmRestoreAsync()
+    {
+        if (_busy || string.IsNullOrWhiteSpace(_pendingJson))
+            return;
+
+        _busy = true;
+        _restoring = true;
+        try
+        {
+            var json = _pendingJson;
+            await UiActions.RunAsync(
+                Toast,
+                () => BackupService.RestoreAsync(json),
+                L["Settings.Backup.Restored"].Value);
+            _confirmOpen = false;
+            _pendingJson = null;
+        }
+        finally
+        {
+            _busy = false;
+            _restoring = false;
+        }
+    }
+}

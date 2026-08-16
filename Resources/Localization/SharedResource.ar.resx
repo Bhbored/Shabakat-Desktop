@@ -383,6 +383,12 @@
   <data name="Page.SettingsExcelExport.Subtitle" xml:space="preserve">
     <value>اختر أعمدة الزبائن المضمّنة في تصدير إكسل</value>
   </data>
+  <data name="Page.SettingsBackup.Title" xml:space="preserve">
+    <value>النسخ الاحتياطي</value>
+  </data>
+  <data name="Page.SettingsBackup.Subtitle" xml:space="preserve">
+    <value>تصدير أو استبدال قاعدة البيانات بالكامل كملف JSON</value>
+  </data>
   <data name="Page.SettingsPricePerKw.Title" xml:space="preserve">
     <value>سعر الكيلوواط</value>
   </data>
@@ -1051,6 +1057,45 @@
   </data>
   <data name="Settings.ExcelExportHint" xml:space="preserve">
     <value>اختر أعمدة الزبائن المصدّرة</value>
+  </data>
+  <data name="Settings.Backup" xml:space="preserve">
+    <value>النسخ الاحتياطي</value>
+  </data>
+  <data name="Settings.BackupHint" xml:space="preserve">
+    <value>تصدير أو استعادة كل البيانات</value>
+  </data>
+  <data name="Settings.Backup.Export" xml:space="preserve">
+    <value>تصدير نسخة احتياطية</value>
+  </data>
+  <data name="Settings.Backup.Exporting" xml:space="preserve">
+    <value>جارٍ التصدير...</value>
+  </data>
+  <data name="Settings.Backup.ExportHint" xml:space="preserve">
+    <value>احفظ ملف JSON لكل بيانات العمل وسجل التدقيق</value>
+  </data>
+  <data name="Settings.Backup.Restore" xml:space="preserve">
+    <value>استعادة نسخة احتياطية</value>
+  </data>
+  <data name="Settings.Backup.Restoring" xml:space="preserve">
+    <value>جارٍ الاستعادة...</value>
+  </data>
+  <data name="Settings.Backup.RestoreHint" xml:space="preserve">
+    <value>استبدل قاعدة البيانات الحالية بملف تم تصديره سابقاً</value>
+  </data>
+  <data name="Settings.Backup.RestoreTitle" xml:space="preserve">
+    <value>استبدال كل البيانات؟</value>
+  </data>
+  <data name="Settings.Backup.RestoreConfirm" xml:space="preserve">
+    <value>سيؤدي هذا إلى حذف قاعدة البيانات الحالية واستبدالها بالنسخة المحددة. لا يمكن التراجع عن هذا الإجراء.</value>
+  </data>
+  <data name="Settings.Backup.ReplaceAll" xml:space="preserve">
+    <value>استبدال الكل</value>
+  </data>
+  <data name="Settings.Backup.Exported" xml:space="preserve">
+    <value>تم تصدير النسخة الاحتياطية</value>
+  </data>
+  <data name="Settings.Backup.Restored" xml:space="preserve">
+    <value>تمت استعادة النسخة الاحتياطية</value>
   </data>
   <data name="Settings.SampleData" xml:space="preserve">
     <value>بيانات تجريبية</value>

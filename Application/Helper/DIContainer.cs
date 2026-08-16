@@ -6,6 +6,7 @@ using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.Services.AmpereSchedules;
 using Shabakat.Application.Services.Areas;
 using Shabakat.Application.Services.AuditLogs;
+using Shabakat.Application.Services.Backup;
 using Shabakat.Application.Services.Customers;
 using Shabakat.Application.Services.Dashboard;
 using Shabakat.Application.Services.DistributionBoxes;
@@ -47,6 +48,7 @@ public static class DIContainer
         services.AddScoped<IExpenseRepository, ExpenseRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IAppPreferencesRepository, AppPreferencesRepository>();
+        services.AddScoped<IBackupRepository, BackupRepository>();
         services.AddScoped<ICustomerExportRepository, CustomerExportRepository>();
         services.AddScoped<IDashboardRepository, DashboardRepository>();
 
@@ -65,6 +67,7 @@ public static class DIContainer
         services.AddScoped<IToastService, ToastService>();
         services.AddScoped<IPricingService, PricingService>();
         services.AddScoped<IAppPreferencesService, AppPreferencesService>();
+        services.AddScoped<IBackupService, BackupService>();
         services.AddScoped<IAppUserService, AppUserService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
         services.AddScoped<IAreaService, AreaService>();

@@ -8,4 +8,5 @@ public interface IAuditLogRepository
     Task AddAsync(AuditLog auditLog);
     Task SaveChangesAsync();
     Task<(IEnumerable<AuditLog> Items, int TotalCount)> GetAllPagedAsync(AuditLogFilterRequest filter);
+    Task<IReadOnlyList<AuditLog>> GetAllWithDetailsAsync();
 }

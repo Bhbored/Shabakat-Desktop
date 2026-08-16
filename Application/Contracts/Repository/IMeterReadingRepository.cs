@@ -12,4 +12,5 @@ public interface IMeterReadingRepository : IGenericRepository<MeterReading>
     Task<MeterReading?> GetForPeriodAsync(Guid customerId, DateOnly periodStart, DateOnly periodEnd);
     Task<MeterReading?> GetInitialForCustomerAsync(Guid customerId);
     Task<bool> HasOfficialReadingAsync(Guid customerId);
+    Task<IReadOnlyList<MeterReading>> GetAllForBackupAsync();
 }

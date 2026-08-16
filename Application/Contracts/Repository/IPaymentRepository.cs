@@ -6,4 +6,5 @@ public interface IPaymentRepository : IGenericRepository<Payment>
 {
     Task<IEnumerable<Payment>> GetByInvoiceIdAsync(Guid invoiceId);
     Task<IEnumerable<Payment>> GetAllWithCustomerAsync();
+    Task<IReadOnlyList<Payment>> GetAllForBackupAsync();
 }

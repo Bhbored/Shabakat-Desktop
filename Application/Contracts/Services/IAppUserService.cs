@@ -8,4 +8,5 @@ public interface IAppUserService
 
     Task<ProfileResponse?> GetAsync();
     Task<ProfileResponse> UpsertAsync(UpdateProfileRequest request);
+    void NotifyChanged();
 }

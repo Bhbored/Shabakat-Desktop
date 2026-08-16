@@ -64,4 +64,11 @@ public sealed class AuditLogRepository : IAuditLogRepository
 
         return (items, totalCount);
     }
+
+    public async Task<IReadOnlyList<AuditLog>> GetAllWithDetailsAsync()
+        => await _db.AuditLogs
+            .AsNoTracking()
+            .Include(a => a.Details)
+            .OrderBy(a => a.CreatedAt)
+            .ToListAsync();
 }

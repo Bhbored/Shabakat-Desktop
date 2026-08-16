@@ -118,9 +118,7 @@ public sealed class BackupService : IBackupService
         };
     }
 
-    /// <summary>
-    /// Persist columns only: skip navigations and computed fields so the JSON stays flat.
-    /// </summary>
+
     private static void IgnoreNavigationsAndComputed(JsonTypeInfo info)
     {
         if (info.Kind != JsonTypeInfoKind.Object)

@@ -69,4 +69,7 @@ public sealed class MeterReadingRepository : GenericRepository<MeterReading>, IM
 
     public async Task<bool> HasOfficialReadingAsync(Guid customerId)
         => await _dbSet.AnyAsync(m => m.CustomerId == customerId && !m.IsInitial);
+
+    public async Task<IReadOnlyList<MeterReading>> GetAllForBackupAsync()
+        => await _dbSet.AsNoTracking().ToListAsync();
 }
