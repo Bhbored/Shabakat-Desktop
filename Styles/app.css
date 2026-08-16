@@ -172,6 +172,25 @@
 }
 
 @layer components {
+    /* Logical start/end so the knob follows inline direction (Arabic RTL).
+       translate-x is physical and leaves the knob on the wrong side. */
+    .ui-toggle {
+        @apply relative h-6 w-11 shrink-0 rounded-full bg-muted transition;
+    }
+
+    .ui-toggle::after {
+        content: "";
+        @apply absolute top-[2px] start-[2px] h-5 w-5 rounded-full border border-border bg-card transition-[inset-inline-start];
+    }
+
+    .peer:checked + .ui-toggle {
+        @apply bg-primary;
+    }
+
+    .peer:checked + .ui-toggle::after {
+        inset-inline-start: 1.375rem;
+    }
+
     @keyframes ui-fade-in {
         from { opacity: 0; }
         to { opacity: 1; }

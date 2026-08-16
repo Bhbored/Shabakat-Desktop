@@ -1,7 +1,7 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package Name="Shabakat"
-           Manufacturer="Shabakat"
-           Version="1.0.1"
+           Manufacturer="BHA .Tech"
+           Version="1.0.0"
            UpgradeCode="bd6fa014-7176-42ae-867f-38441509f355"
            Scope="perMachine"
            Compressed="yes">
