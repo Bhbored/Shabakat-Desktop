@@ -17,6 +17,10 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder.Property(e => e.LicensedUntil)
             .IsRequired();
 
+        builder.Property(e => e.LicenseStamp)
+            .IsRequired()
+            .HasMaxLength(128);
+
         builder.Property(e => e.BusinessName)
             .HasMaxLength(200);
 

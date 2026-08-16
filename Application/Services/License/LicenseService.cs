@@ -34,6 +34,12 @@ public sealed class LicenseService : ILicenseService
         if (user is null || string.IsNullOrWhiteSpace(user.PasswordHash))
             return LicenseStatus.SetupRequired;
 
+        if (!LicenseHmac.Matches(user.LicenseStamp, user.PasswordHash, user.LicensedUntil))
+        {
+            _logger.LogWarning("License stamp is missing or does not match the stored expiry.");
+            return LicenseStatus.Expired;
+        }
+
         return DateTimeOffset.UtcNow < user.LicensedUntil
             ? LicenseStatus.Active
             : LicenseStatus.Expired;
@@ -56,6 +62,7 @@ public sealed class LicenseService : ILicenseService
 
         user.PasswordHash = _hasher.HashPassword(user, pin.Trim());
         user.LicensedUntil = licensedUntil;
+        user.LicenseStamp = LicenseHmac.Compute(user.PasswordHash, user.LicensedUntil);
         await _db.SaveChangesAsync();
         _logger.LogInformation("License set up until {LicensedUntil}", licensedUntil);
         Changed?.Invoke();
@@ -75,6 +82,7 @@ public sealed class LicenseService : ILicenseService
             throw new DomainException("Invalid activation key.");
 
         user.LicensedUntil = licensedUntil;
+        user.LicenseStamp = LicenseHmac.Compute(user.PasswordHash, user.LicensedUntil);
         await _db.SaveChangesAsync();
         _logger.LogInformation("License renewed until {LicensedUntil}", licensedUntil);
         Changed?.Invoke();
