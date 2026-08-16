@@ -39,11 +39,11 @@ public static class CompanyLogoStore
     public static string Replace(string sourcePath)
     {
         if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
-            throw new DomainException("Selected logo file was not found.");
+            throw new DomainException("Error.LogoFileNotFound");
 
         var extension = Path.GetExtension(sourcePath).ToLowerInvariant();
         if (!AllowedExtensions.Contains(extension))
-            throw new DomainException("Logo must be a PNG, JPG, WEBP, GIF, BMP, or SVG file.");
+            throw new DomainException("Error.LogoFileType");
 
         var folder = FolderPath;
         Directory.CreateDirectory(folder);

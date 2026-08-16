@@ -1,4 +1,8 @@
+using Microsoft.Extensions.Localization;
 using Shabakat.Application.Contracts.Services;
+using Shabakat.Application.Helper;
+using Shabakat.Domain.Exceptions;
+using Shabakat.Resources.Localization;
 
 namespace Shabakat.Application.Services.Toasts;
 
@@ -6,8 +10,14 @@ public sealed class ToastService : IToastService
 {
     private readonly List<ToastMessage> _messages = [];
     private readonly object _gate = new();
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
     public event Action? OnChanged;
+
+    public ToastService(IStringLocalizer<SharedResource> localizer)
+    {
+        _localizer = localizer;
+    }
 
     public IReadOnlyList<ToastMessage> Messages
     {
@@ -20,7 +30,16 @@ public sealed class ToastService : IToastService
 
     public void Success(string message) => Add(message, ToastVariant.Success);
 
-    public void Error(string message) => Add(message, ToastVariant.Error);
+    public void Error(string message, params object[] args)
+        => Add(ToastLocalizer.Resolve(_localizer, message, args), ToastVariant.Error);
+
+    public void Error(Exception exception)
+    {
+        if (exception is DomainException domain)
+            Error(domain.Message, domain.Args);
+        else
+            Error("Error.Unexpected");
+    }
 
     public void Info(string message) => Add(message, ToastVariant.Info);
 

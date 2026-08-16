@@ -59,7 +59,7 @@ public sealed class DistributionBoxService : IDistributionBoxService
         await _distributionBoxRepository.SaveChangesAsync();
 
         var created = await _distributionBoxRepository.GetByIdWithDetailsAsync(box.Id)
-            ?? throw new DomainException("Distribution box not found.");
+            ?? throw new DomainException("Error.BoxNotFound");
 
         _logger.LogInformation(
             "Created distribution box {BoxId} ({Name}) in area {AreaId}",
@@ -74,7 +74,7 @@ public sealed class DistributionBoxService : IDistributionBoxService
         Guid id, UpdateDistributionBoxRequest request)
     {
         var box = await _distributionBoxRepository.GetByIdAsync(id)
-            ?? throw new DomainException("Distribution box not found.");
+            ?? throw new DomainException("Error.BoxNotFound");
 
         await EnsureAreaExistsAsync(request.AreaId);
 
@@ -87,7 +87,7 @@ public sealed class DistributionBoxService : IDistributionBoxService
         await _distributionBoxRepository.SaveChangesAsync();
 
         var updated = await _distributionBoxRepository.GetByIdWithDetailsAsync(id)
-            ?? throw new DomainException("Distribution box not found.");
+            ?? throw new DomainException("Error.BoxNotFound");
 
         _logger.LogInformation("Updated distribution box {BoxId} ({Name})", updated.Id, updated.Name);
         return updated.ToResponse();
@@ -96,13 +96,11 @@ public sealed class DistributionBoxService : IDistributionBoxService
     public async Task DeleteAsync(Guid id)
     {
         var box = await _distributionBoxRepository.GetByIdAsync(id)
-            ?? throw new DomainException("Distribution box not found.");
+            ?? throw new DomainException("Error.BoxNotFound");
 
         if (await _distributionBoxRepository.HasCustomersAsync(id))
         {
-            throw new DomainException(
-                "Cannot delete a distribution box that has customers assigned to it. " +
-                "Reassign or remove the customers first.");
+            throw new DomainException("Error.CannotDeleteBoxWithCustomers");
         }
 
         var name = box.Name;
@@ -114,6 +112,6 @@ public sealed class DistributionBoxService : IDistributionBoxService
     private async Task EnsureAreaExistsAsync(Guid areaId)
     {
         _ = await _areaRepository.GetByIdAsync(areaId)
-            ?? throw new DomainException("Area not found.");
+            ?? throw new DomainException("Error.AreaNotFound");
     }
 }

@@ -61,7 +61,7 @@ public sealed class ExpenseService : IExpenseService
     public async Task<ExpenseResponse> GetByIdAsync(Guid id)
     {
         var expense = await _expenseRepository.GetByIdAsync(id)
-            ?? throw new DomainException("Expense not found.");
+            ?? throw new DomainException("Error.ExpenseNotFound");
 
         return expense.ToResponse();
     }
@@ -95,7 +95,7 @@ public sealed class ExpenseService : IExpenseService
     public async Task<ExpenseResponse> UpdateAsync(Guid id, UpdateExpenseRequest request)
     {
         var expense = await _expenseRepository.GetByIdAsync(id)
-            ?? throw new DomainException("Expense not found.");
+            ?? throw new DomainException("Error.ExpenseNotFound");
 
         if (request.ExpenseType is not null) expense.ExpenseType = request.ExpenseType.Value;
         if (request.Amount is not null) expense.Amount = request.Amount.Value;
@@ -115,7 +115,7 @@ public sealed class ExpenseService : IExpenseService
     public async Task DeleteAsync(Guid id)
     {
         var expense = await _expenseRepository.GetByIdAsync(id)
-            ?? throw new DomainException("Expense not found.");
+            ?? throw new DomainException("Error.ExpenseNotFound");
 
         _expenseRepository.Delete(expense);
         await _expenseRepository.SaveChangesAsync();
@@ -125,12 +125,11 @@ public sealed class ExpenseService : IExpenseService
     private static void ValidateExpense(ExpenseType type, decimal amount, string? label)
     {
         if (amount <= 0)
-            throw new DomainException("Amount must be greater than zero.");
+            throw new DomainException("Error.AmountMustBePositive");
 
         if (type == ExpenseType.Other && string.IsNullOrWhiteSpace(label))
         {
-            throw new DomainException(
-                "Label is required when ExpenseType is 'Other' (e.g. 'Rent', 'Insurance').");
+            throw new DomainException("Error.OtherExpenseLabelRequired");
         }
     }
 }

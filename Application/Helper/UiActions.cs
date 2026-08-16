@@ -18,7 +18,7 @@ public static class UiActions
         }
         catch (DomainException ex)
         {
-            toast.Error(ex.Message);
+            toast.Error(ex);
         }
     }
 
@@ -36,7 +36,7 @@ public static class UiActions
         }
         catch (DomainException ex)
         {
-            toast.Error(ex.Message);
+            toast.Error(ex);
             return default;
         }
     }

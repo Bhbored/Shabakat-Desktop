@@ -27,7 +27,7 @@ public sealed class MeterReadingService : IMeterReadingService
     public async Task<IEnumerable<MeterReadingResponse>> GetAllForCustomerAsync(Guid customerId)
     {
         _ = await _customerRepository.GetByIdAsync(customerId)
-            ?? throw new DomainException("Customer not found.");
+            ?? throw new DomainException("Error.CustomerNotFound");
 
         var readings = (await _meterReadingRepository.GetAllForCustomerAsync(customerId))
             .OrderBy(r => r.ReadingDate)
@@ -96,10 +96,10 @@ public sealed class MeterReadingService : IMeterReadingService
     public async Task<MeterReadingResponse> GetLatestForCustomerAsync(Guid customerId)
     {
         _ = await _customerRepository.GetByIdAsync(customerId)
-            ?? throw new DomainException("Customer not found.");
+            ?? throw new DomainException("Error.CustomerNotFound");
 
         var reading = await _meterReadingRepository.GetLatestForCustomerAsync(customerId)
-            ?? throw new DomainException("Meter reading not found.");
+            ?? throw new DomainException("Error.MeterReadingNotFound");
 
         var previous = await _meterReadingRepository.GetLatestBeforeAsync(
             customerId, reading.ReadingDate, reading.Id);
@@ -119,12 +119,11 @@ public sealed class MeterReadingService : IMeterReadingService
         Guid customerId, CreateMeterReadingRequest request)
     {
         var customer = await _customerRepository.GetByIdAsync(customerId)
-            ?? throw new DomainException("Customer not found.");
+            ?? throw new DomainException("Error.CustomerNotFound");
 
         if (customer.Plan != PlanType.Kilowatt)
         {
-            throw new DomainException(
-                "Meter readings can only be recorded for Kilowatt plan customers.");
+            throw new DomainException("Error.MeterReadingsKilowattOnly");
         }
 
         var readingDate = request.ReadingDate ?? DateOnly.FromDateTime(DateTime.Now);
@@ -137,20 +136,23 @@ public sealed class MeterReadingService : IMeterReadingService
 
         if (existingForMonth is not null)
         {
-            throw new DomainException(
-                $"A meter reading already exists for {customer.Name} for " +
-                $"{periodStart:yyyy-MM} (recorded on {existingForMonth.ReadingDate}, " +
-                $"value {existingForMonth.ReadingValue}). " +
-                "Delete or correct the existing reading instead of adding a new one.");
+            throw DomainException.Format(
+                "Error.MeterReadingExists",
+                customer.Name,
+                periodStart.ToString("yyyy-MM"),
+                existingForMonth.ReadingDate.ToString("yyyy-MM-dd"),
+                existingForMonth.ReadingValue);
         }
 
         var previous = await _meterReadingRepository.GetLatestBeforeAsync(customerId, readingDate);
 
         if (previous is not null && request.ReadingValue < previous.ReadingValue)
         {
-            throw new DomainException(
-                $"New reading ({request.ReadingValue}) cannot be less than the previous reading " +
-                $"({previous.ReadingValue}) recorded on {previous.ReadingDate}.");
+            throw DomainException.Format(
+                "Error.MeterReadingDecreased",
+                request.ReadingValue,
+                previous.ReadingValue,
+                previous.ReadingDate.ToString("yyyy-MM-dd"));
         }
 
         var reading = new MeterReading
@@ -184,10 +186,10 @@ public sealed class MeterReadingService : IMeterReadingService
     public async Task DeleteAsync(Guid customerId, Guid readingId)
     {
         var reading = await _meterReadingRepository.GetByIdAsync(readingId)
-            ?? throw new DomainException("Meter reading not found.");
+            ?? throw new DomainException("Error.MeterReadingNotFound");
 
         if (reading.CustomerId != customerId)
-            throw new DomainException("Meter reading not found.");
+            throw new DomainException("Error.MeterReadingNotFound");
 
         _meterReadingRepository.Delete(reading);
         await _meterReadingRepository.SaveChangesAsync();

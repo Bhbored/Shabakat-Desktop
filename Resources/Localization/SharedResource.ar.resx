@@ -1937,4 +1937,247 @@
   <data name="AuditSummary.InvoiceFixedKilowattCharge" xml:space="preserve">
     <value>شحن كيلوواط ثابت للمشترك {0} (فاتورة #{1})</value>
   </data>
+  <data name="Error.Unexpected" xml:space="preserve">
+    <value>حدث خطأ. حاول مرة أخرى.</value>
+  </data>
+  <data name="Error.CustomerNotFound" xml:space="preserve">
+    <value>المشترك غير موجود.</value>
+  </data>
+  <data name="Error.CannotDeleteCustomer" xml:space="preserve">
+    <value>لا يمكن حذف {0} لأن لديه فواتير.</value>
+  </data>
+  <data name="Error.PriceOverrideRequired" xml:space="preserve">
+    <value>السعر مطلوب عند تحديد تسعير مخصّص.</value>
+  </data>
+  <data name="Error.PriceOverrideNegative" xml:space="preserve">
+    <value>سعر التسعير المخصّص لا يمكن أن يكون سالباً.</value>
+  </data>
+  <data name="Error.FixedChargeOverrideRequired" xml:space="preserve">
+    <value>الرسوم الثابتة مطلوبة عند تحديد تسعير مخصّص.</value>
+  </data>
+  <data name="Error.FixedChargeOverrideNegative" xml:space="preserve">
+    <value>الرسوم الثابتة المخصّصة لا يمكن أن تكون سالبة.</value>
+  </data>
+  <data name="Error.TvaOverrideRequired" xml:space="preserve">
+    <value>الضريبة مطلوبة عند تحديد تسعير مخصّص.</value>
+  </data>
+  <data name="Error.TvaOverrideRange" xml:space="preserve">
+    <value>ضريبة التسعير المخصّص يجب أن تكون بين 0 و 100.</value>
+  </data>
+  <data name="Error.BoxNotFound" xml:space="preserve">
+    <value>صندوق التوزيع غير موجود.</value>
+  </data>
+  <data name="Error.ScheduleNotFound" xml:space="preserve">
+    <value>جدول الأمبير غير موجود.</value>
+  </data>
+  <data name="Error.PreferencesNotConfigured" xml:space="preserve">
+    <value>لم يتم ضبط تفضيلات التطبيق بعد.</value>
+  </data>
+  <data name="Error.DashboardPeriodIncomplete" xml:space="preserve">
+    <value>السنة والشهر مطلوبان عند التصفية حسب الفترة.</value>
+  </data>
+  <data name="Error.MonthRange" xml:space="preserve">
+    <value>يجب أن يكون الشهر بين 1 و 12.</value>
+  </data>
+  <data name="Error.YearRange" xml:space="preserve">
+    <value>يجب أن تكون السنة بين 2000 و 2100.</value>
+  </data>
+  <data name="Error.ExportColumnRequired" xml:space="preserve">
+    <value>اختر عمود تصدير واحداً على الأقل.</value>
+  </data>
+  <data name="Error.InvoiceNotFound" xml:space="preserve">
+    <value>الفاتورة غير موجودة.</value>
+  </data>
+  <data name="Error.InvoiceAlreadyPaid" xml:space="preserve">
+    <value>هذه الفاتورة مدفوعة بالكامل.</value>
+  </data>
+  <data name="Error.PaymentExceedsBalance" xml:space="preserve">
+    <value>دفعة {0} تتجاوز إجمالي الفاتورة. الرصيد المتبقي {1}.</value>
+  </data>
+  <data name="Error.ConsumptionEndBeforeStart" xml:space="preserve">
+    <value>يجب أن يكون تاريخ نهاية الاستهلاك في يوم البداية أو بعده.</value>
+  </data>
+  <data name="Error.OnlyUnpaidInvoiceDelete" xml:space="preserve">
+    <value>يمكن حذف الفواتير غير المدفوعة فقط.</value>
+  </data>
+  <data name="Error.KwPriceNotConfiguredType" xml:space="preserve">
+    <value>سعر وحدة الكيلوواط غير مضبوط لهذا النوع من الزبائن.</value>
+  </data>
+  <data name="Error.KwPriceNotConfiguredCustomer" xml:space="preserve">
+    <value>سعر وحدة الكيلوواط غير مضبوط لهذا الزبون.</value>
+  </data>
+  <data name="Error.FixedKwPaymentMethodRequired" xml:space="preserve">
+    <value>طريقة الدفع مطلوبة لزبائن الكيلوواط الثابت.</value>
+  </data>
+  <data name="Error.PrintTemplateNotFound" xml:space="preserve">
+    <value>قالب طباعة الفاتورة غير موجود.</value>
+  </data>
+  <data name="Error.AreaNotFound" xml:space="preserve">
+    <value>المنطقة غير موجودة.</value>
+  </data>
+  <data name="Error.MeterReadingNotFound" xml:space="preserve">
+    <value>قراءة العداد غير موجودة.</value>
+  </data>
+  <data name="Error.ExpenseNotFound" xml:space="preserve">
+    <value>المصروف غير موجود.</value>
+  </data>
+  <data name="Error.AmountMustBePositive" xml:space="preserve">
+    <value>يجب أن يكون المبلغ أكبر من صفر.</value>
+  </data>
+  <data name="Error.OtherExpenseLabelRequired" xml:space="preserve">
+    <value>العنوان مطلوب عندما يكون نوع المصروف «أخرى».</value>
+  </data>
+  <data name="Error.BusinessNameTooLong" xml:space="preserve">
+    <value>اسم الشركة لا يمكن أن يتجاوز 200 حرف.</value>
+  </data>
+  <data name="Error.LogoPathTooLong" xml:space="preserve">
+    <value>مسار الشعار لا يمكن أن يتجاوز 500 حرف.</value>
+  </data>
+  <data name="Error.ActivateBeforeProfile" xml:space="preserve">
+    <value>فعّل التطبيق قبل إعداد ملف الشركة.</value>
+  </data>
+  <data name="Error.AlreadyActivated" xml:space="preserve">
+    <value>التطبيق مفعّل مسبقاً.</value>
+  </data>
+  <data name="Error.NotActivated" xml:space="preserve">
+    <value>التطبيق غير مفعّل بعد.</value>
+  </data>
+  <data name="Error.InvalidActivationKey" xml:space="preserve">
+    <value>مفتاح التفعيل غير صالح.</value>
+  </data>
+  <data name="Error.ActivationKeyTooShort" xml:space="preserve">
+    <value>يجب أن يكون مفتاح التفعيل 4 أحرف على الأقل.</value>
+  </data>
+  <data name="Error.ExpiryMustBeFuture" xml:space="preserve">
+    <value>يجب أن يكون الانتهاء في المستقبل (توقيت بيروت).</value>
+  </data>
+  <data name="Error.LanguageRequired" xml:space="preserve">
+    <value>اللغة مطلوبة.</value>
+  </data>
+  <data name="Error.LanguageTooLong" xml:space="preserve">
+    <value>اللغة لا يمكن أن تتجاوز 10 أحرف.</value>
+  </data>
+  <data name="Error.DueDateRange" xml:space="preserve">
+    <value>يجب أن يكون تاريخ الاستحقاق بين 1 و 31.</value>
+  </data>
+  <data name="Error.CannotBeNegative" xml:space="preserve">
+    <value>{0} لا يمكن أن يكون سالباً.</value>
+  </data>
+  <data name="Error.MustBePercent" xml:space="preserve">
+    <value>{0} يجب أن يكون بين 0 و 100.</value>
+  </data>
+  <data name="Error.LogoFileNotFound" xml:space="preserve">
+    <value>ملف الشعار المحدد غير موجود.</value>
+  </data>
+  <data name="Error.LogoFileType" xml:space="preserve">
+    <value>يجب أن يكون الشعار PNG أو JPG أو WEBP أو GIF أو BMP أو SVG.</value>
+  </data>
+  <data name="Error.BackupUnsupported" xml:space="preserve">
+    <value>ملف النسخة الاحتياطية هذا غير مدعوم.</value>
+  </data>
+  <data name="Error.BackupRestoreFailed" xml:space="preserve">
+    <value>تعذّر استعادة ملف النسخة الاحتياطية.</value>
+  </data>
+  <data name="Error.BackupInvalid" xml:space="preserve">
+    <value>ملف النسخة الاحتياطية غير صالح.</value>
+  </data>
+  <data name="Error.DatabaseResetFailed" xml:space="preserve">
+    <value>تعذّر حذف ملف قاعدة البيانات.</value>
+  </data>
+  <data name="Error.AmpereScheduleRequired" xml:space="preserve">
+    <value>جدول الأمبير مطلوب عند تفعيل تسعير الجداول.</value>
+  </data>
+  <data name="Error.AmpereScheduleRequiredForCustomer" xml:space="preserve">
+    <value>جدول الأمبير مطلوب لهذا الزبون عند تفعيل تسعير الجداول.</value>
+  </data>
+  <data name="Error.AmpereScheduleDetailsMissing" xml:space="preserve">
+    <value>بيانات جدول الأمبير غير متوفرة للتسعير.</value>
+  </data>
+  <data name="Error.SchedulePriceInvalid" xml:space="preserve">
+    <value>جدول الأمبير {0} لا يحتوي على سعر أمبير صالح لنوع الزبون {1}.</value>
+  </data>
+  <data name="Error.CannotDeleteAreaWithCustomers" xml:space="preserve">
+    <value>لا يمكن حذف منطقة مرتبطة بزبائن. أعد تعيين الزبائن أو احذفهم أولاً.</value>
+  </data>
+  <data name="Error.CannotDeleteScheduleWithCustomers" xml:space="preserve">
+    <value>لا يمكن حذف جدول أمبير مرتبط بزبائن. أعد تعيين الزبائن أو احذفهم أولاً.</value>
+  </data>
+  <data name="Error.CannotDeleteBoxWithCustomers" xml:space="preserve">
+    <value>لا يمكن حذف صندوق توزيع مرتبط بزبائن. أعد تعيين الزبائن أو احذفهم أولاً.</value>
+  </data>
+  <data name="Error.DuplicateScheduleHours" xml:space="preserve">
+    <value>يوجد جدول أمبير بعدد {0} ساعات في اليوم مسبقاً.</value>
+  </data>
+  <data name="Error.MeterReadingsKilowattOnly" xml:space="preserve">
+    <value>يمكن تسجيل قراءات العداد لزبائن خطة الكيلوواط فقط.</value>
+  </data>
+  <data name="Error.MeterReadingExists" xml:space="preserve">
+    <value>توجد قراءة عداد لـ {0} عن {1} (سُجّلت في {2}، القيمة {3}). احذف القراءة الحالية أو صحّحها بدل إضافة قراءة جديدة.</value>
+  </data>
+  <data name="Error.MeterReadingDecreased" xml:space="preserve">
+    <value>القراءة الجديدة ({0}) لا يمكن أن تكون أقل من القراءة السابقة ({1}) المسجّلة في {2}.</value>
+  </data>
+  <data name="Error.EnableScheduleNeedsSchedule" xml:space="preserve">
+    <value>أنشئ جدول أمبير واحداً على الأقل قبل تفعيل تسعير الجداول.</value>
+  </data>
+  <data name="Error.BulkPlanNotSupported" xml:space="preserve">
+    <value>الإنشاء الجماعي يدعم الأمبير والكيلوواط فقط. اترك الخطة فارغة لمعالجة الاثنين.</value>
+  </data>
+  <data name="Error.FixedKwXorAmounts" xml:space="preserve">
+    <value>أدخل مبلغ الدفع أو كمية الكيلوواط، وليس الاثنين.</value>
+  </data>
+  <data name="Error.FixedKwAmountRequired" xml:space="preserve">
+    <value>مبلغ الدفع أو كمية الكيلوواط مطلوب.</value>
+  </data>
+  <data name="Error.PaymentTooLowForFixedKw" xml:space="preserve">
+    <value>مبلغ الدفع منخفض جداً لتغطية قيمة الخطة والرسوم الثابتة والطاقة بالسعر المضبوط.</value>
+  </data>
+  <data name="Error.BilledDaysRequired" xml:space="preserve">
+    <value>أيام الفوترة مطلوبة عند تفعيل التقسيم حسب الأيام للأمبير.</value>
+  </data>
+  <data name="Error.BilledDaysRange" xml:space="preserve">
+    <value>يجب أن تكون أيام الفوترة بين 1 و {0} للشهر الحالي.</value>
+  </data>
+  <data name="Error.BilledDaysNotAllowed" xml:space="preserve">
+    <value>أيام الفوترة مسموحة فقط عند تفعيل التقسيم حسب الأيام للأمبير.</value>
+  </data>
+  <data name="Subscribers.Suspended" xml:space="preserve">
+    <value>تم تعليق المشترك.</value>
+  </data>
+  <data name="Error.Field.ResidentialPricePerAmp" xml:space="preserve">
+    <value>سعر الأمبير السكني</value>
+  </data>
+  <data name="Error.Field.ResidentialPricePerKilowatt" xml:space="preserve">
+    <value>سعر الكيلوواط السكني</value>
+  </data>
+  <data name="Error.Field.ResidentialFixedCharge" xml:space="preserve">
+    <value>الرسوم الثابتة السكنية</value>
+  </data>
+  <data name="Error.Field.ResidentialTva" xml:space="preserve">
+    <value>ضريبة السكن</value>
+  </data>
+  <data name="Error.Field.CommercialPricePerAmp" xml:space="preserve">
+    <value>سعر الأمبير التجاري</value>
+  </data>
+  <data name="Error.Field.CommercialPricePerKilowatt" xml:space="preserve">
+    <value>سعر الكيلوواط التجاري</value>
+  </data>
+  <data name="Error.Field.CommercialFixedCharge" xml:space="preserve">
+    <value>الرسوم الثابتة التجارية</value>
+  </data>
+  <data name="Error.Field.CommercialTva" xml:space="preserve">
+    <value>ضريبة التجاري</value>
+  </data>
+  <data name="Error.Field.IndustrialPricePerAmp" xml:space="preserve">
+    <value>سعر الأمبير الصناعي</value>
+  </data>
+  <data name="Error.Field.IndustrialPricePerKilowatt" xml:space="preserve">
+    <value>سعر الكيلوواط الصناعي</value>
+  </data>
+  <data name="Error.Field.IndustrialFixedCharge" xml:space="preserve">
+    <value>الرسوم الثابتة الصناعية</value>
+  </data>
+  <data name="Error.Field.IndustrialTva" xml:space="preserve">
+    <value>ضريبة الصناعي</value>
+  </data>
 </root>

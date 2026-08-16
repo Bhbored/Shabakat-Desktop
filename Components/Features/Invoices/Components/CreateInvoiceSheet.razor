@@ -267,7 +267,7 @@
         }
         catch (DomainException ex)
         {
-            _previewError = ex.Message;
+            _previewError = ToastLocalizer.Resolve(L, ex);
         }
         finally
         {

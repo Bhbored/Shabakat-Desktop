@@ -40,8 +40,7 @@ public sealed class AppPreferencesService : IAppPreferencesService
         if (request.AmpereSchedulePricingEnabled &&
             !await _ampereScheduleRepository.HasAnyAsync())
         {
-            throw new DomainException(
-                "Create at least one ampere schedule before enabling schedule pricing.");
+            throw new DomainException("Error.EnableScheduleNeedsSchedule");
         }
 
         var existing = await _preferencesRepository.GetAsync();
@@ -71,41 +70,41 @@ public sealed class AppPreferencesService : IAppPreferencesService
         void CheckNonNegative(decimal value, string name)
         {
             if (value < 0)
-                throw new DomainException($"{name} cannot be negative.");
+                throw DomainException.Format("Error.CannotBeNegative", name);
         }
 
         void CheckTva(decimal value, string name)
         {
             if (value < 0 || value > 100)
-                throw new DomainException($"{name} must be between 0 and 100.");
+                throw DomainException.Format("Error.MustBePercent", name);
         }
 
-        CheckNonNegative(request.PricePerKilowat, nameof(request.PricePerKilowat));
-        CheckNonNegative(request.PricePerAmp, nameof(request.PricePerAmp));
-        CheckNonNegative(request.FixedCharge, nameof(request.FixedCharge));
-        CheckTva(request.TVA, nameof(request.TVA));
+        CheckNonNegative(request.PricePerKilowat, "Settings.PricePerKilowatt");
+        CheckNonNegative(request.PricePerAmp, "Settings.PricePerAmp");
+        CheckNonNegative(request.FixedCharge, "Settings.FixedCharge");
+        CheckTva(request.TVA, "Settings.Tva");
 
-        CheckNonNegative(request.ResidentialPricePerAmp, nameof(request.ResidentialPricePerAmp));
-        CheckNonNegative(request.ResidentialPricePerKilowat, nameof(request.ResidentialPricePerKilowat));
-        CheckNonNegative(request.ResidentialFixedCharge, nameof(request.ResidentialFixedCharge));
-        CheckTva(request.ResidentialTVA, nameof(request.ResidentialTVA));
+        CheckNonNegative(request.ResidentialPricePerAmp, "Error.Field.ResidentialPricePerAmp");
+        CheckNonNegative(request.ResidentialPricePerKilowat, "Error.Field.ResidentialPricePerKilowatt");
+        CheckNonNegative(request.ResidentialFixedCharge, "Error.Field.ResidentialFixedCharge");
+        CheckTva(request.ResidentialTVA, "Error.Field.ResidentialTva");
 
-        CheckNonNegative(request.CommercialPricePerAmp, nameof(request.CommercialPricePerAmp));
-        CheckNonNegative(request.CommercialPricePerKilowat, nameof(request.CommercialPricePerKilowat));
-        CheckNonNegative(request.CommercialFixedCharge, nameof(request.CommercialFixedCharge));
-        CheckTva(request.CommercialTVA, nameof(request.CommercialTVA));
+        CheckNonNegative(request.CommercialPricePerAmp, "Error.Field.CommercialPricePerAmp");
+        CheckNonNegative(request.CommercialPricePerKilowat, "Error.Field.CommercialPricePerKilowatt");
+        CheckNonNegative(request.CommercialFixedCharge, "Error.Field.CommercialFixedCharge");
+        CheckTva(request.CommercialTVA, "Error.Field.CommercialTva");
 
-        CheckNonNegative(request.IndustrialPricePerAmp, nameof(request.IndustrialPricePerAmp));
-        CheckNonNegative(request.IndustrialPricePerKilowat, nameof(request.IndustrialPricePerKilowat));
-        CheckNonNegative(request.IndustrialFixedCharge, nameof(request.IndustrialFixedCharge));
-        CheckTva(request.IndustrialTVA, nameof(request.IndustrialTVA));
+        CheckNonNegative(request.IndustrialPricePerAmp, "Error.Field.IndustrialPricePerAmp");
+        CheckNonNegative(request.IndustrialPricePerKilowat, "Error.Field.IndustrialPricePerKilowatt");
+        CheckNonNegative(request.IndustrialFixedCharge, "Error.Field.IndustrialFixedCharge");
+        CheckTva(request.IndustrialTVA, "Error.Field.IndustrialTva");
 
         if (string.IsNullOrWhiteSpace(request.Language))
-            throw new DomainException("Language is required.");
+            throw new DomainException("Error.LanguageRequired");
         if (request.Language.Trim().Length > 10)
-            throw new DomainException("Language cannot exceed 10 characters.");
+            throw new DomainException("Error.LanguageTooLong");
 
         if (request.DueDate < 1 || request.DueDate > 31)
-            throw new DomainException("DueDate must be between 1 and 31.");
+            throw new DomainException("Error.DueDateRange");
     }
 }

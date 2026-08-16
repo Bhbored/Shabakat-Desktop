@@ -45,7 +45,7 @@ public sealed class CustomerExportService : ICustomerExportService
     {
         var selected = columns.Distinct().ToList();
         if (selected.Count == 0)
-            throw new DomainException("Select at least one export column.");
+            throw new DomainException("Error.ExportColumnRequired");
 
         var prefs = await _preferencesRepository.GetAsync();
         if (prefs is null)

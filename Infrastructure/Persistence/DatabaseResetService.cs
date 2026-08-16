@@ -38,7 +38,7 @@ public sealed class DatabaseResetService : IDatabaseResetService
         }
         catch (Exception ex)
         {
-            throw new DomainException("Could not delete the database file.", ex);
+            throw new DomainException("Error.DatabaseResetFailed", ex);
         }
 
         _culture.Apply("en");

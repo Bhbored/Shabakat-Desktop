@@ -34,18 +34,18 @@ public sealed class AppUserService : IAppUserService
             : request.BusinessName.Trim();
 
         if (businessName is { Length: > 200 })
-            throw new DomainException("Business name cannot exceed 200 characters.");
+            throw new DomainException("Error.BusinessNameTooLong");
 
         var logoUrl = string.IsNullOrWhiteSpace(request.LogoUrl)
             ? null
             : request.LogoUrl.Trim();
 
         if (logoUrl is { Length: > 500 })
-            throw new DomainException("Logo path cannot exceed 500 characters.");
+            throw new DomainException("Error.LogoPathTooLong");
 
         var user = await _db.AppUsers.FirstOrDefaultAsync();
         if (user is null)
-            throw new DomainException("Activate the app before setting a company profile.");
+            throw new DomainException("Error.ActivateBeforeProfile");
 
         user.BusinessName = businessName;
         user.LogoUrl = logoUrl;

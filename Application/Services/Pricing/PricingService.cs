@@ -61,14 +61,12 @@ public sealed class PricingService : IPricingService
 
         if (customer.AmpereScheduleId is null)
         {
-            throw new DomainException(
-                "An ampere schedule is required for this customer when schedule pricing is enabled.");
+            throw new DomainException("Error.AmpereScheduleRequiredForCustomer");
         }
 
         if (customer.AmpereSchedule is null)
         {
-            throw new DomainException(
-                "Ampere schedule details are not available for pricing.");
+            throw new DomainException("Error.AmpereScheduleDetailsMissing");
         }
 
         var schedule = customer.AmpereSchedule;
@@ -84,9 +82,10 @@ public sealed class PricingService : IPricingService
 
         if (unitPrice <= 0)
         {
-            throw new DomainException(
-                $"Ampere schedule '{schedule.Name}' does not have a valid price per amp " +
-                $"for customer type '{customer.CustomerType}'.");
+            throw DomainException.Format(
+                "Error.SchedulePriceInvalid",
+                schedule.Name,
+                $"CustomerType.{customer.CustomerType}");
         }
 
         return unitPrice;

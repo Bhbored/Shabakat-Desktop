@@ -55,7 +55,7 @@ public sealed class LicenseService : ILicenseService
 
         var user = await _db.AppUsers.FirstOrDefaultAsync();
         if (user is not null && !string.IsNullOrWhiteSpace(user.PasswordHash))
-            throw new DomainException("The app is already activated.");
+            throw new DomainException("Error.AlreadyActivated");
 
         if (user is null)
         {
@@ -78,11 +78,11 @@ public sealed class LicenseService : ILicenseService
 
         var user = await _db.AppUsers.FirstOrDefaultAsync();
         if (user is null || string.IsNullOrWhiteSpace(user.PasswordHash))
-            throw new DomainException("The app is not activated yet.");
+            throw new DomainException("Error.NotActivated");
 
         var result = _hasher.VerifyHashedPassword(user, user.PasswordHash, pin.Trim());
         if (result == PasswordVerificationResult.Failed)
-            throw new DomainException("Invalid activation key.");
+            throw new DomainException("Error.InvalidActivationKey");
 
         user.LicensedUntil = licensedUntil;
         user.LicenseStamp = LicenseHmac.Compute(user.PasswordHash, user.LicensedUntil);
@@ -129,14 +129,14 @@ public sealed class LicenseService : ILicenseService
     private static void EnsurePin(string pin)
     {
         if (string.IsNullOrWhiteSpace(pin) || pin.Trim().Length < 4)
-            throw new DomainException("Activation key must be at least 4 characters.");
+            throw new DomainException("Error.ActivationKeyTooShort");
     }
 
     private static DateTimeOffset ToFutureUtc(DateOnly expiryDate, TimeOnly expiryTime)
     {
         var until = BeirutTime.ToUtc(expiryDate, expiryTime);
         if (until <= DateTimeOffset.UtcNow)
-            throw new DomainException("Expiry must be in the future (Beirut time).");
+            throw new DomainException("Error.ExpiryMustBeFuture");
         return until;
     }
 }

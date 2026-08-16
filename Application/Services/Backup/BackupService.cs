@@ -62,7 +62,7 @@ public sealed class BackupService : IBackupService
         yield return 0.02;
         var file = Parse(json);
         if (file.Version != BackupFile.CurrentVersion)
-            throw new DomainException("This backup file is not supported.");
+            throw new DomainException("Error.BackupUnsupported");
 
         yield return 0.08;
 
@@ -91,7 +91,7 @@ public sealed class BackupService : IBackupService
             }
             catch (Exception ex)
             {
-                throw new DomainException("Could not restore this backup file.", ex);
+                throw new DomainException("Error.BackupRestoreFailed", ex);
             }
 
             if (!moved)
@@ -104,13 +104,13 @@ public sealed class BackupService : IBackupService
     private static BackupFile Parse(string json)
     {
         if (string.IsNullOrWhiteSpace(json))
-            throw new DomainException("This backup file is not valid.");
+            throw new DomainException("Error.BackupInvalid");
 
         try
         {
             var file = JsonSerializer.Deserialize<BackupFile>(json, JsonOptions);
             if (file is null)
-                throw new DomainException("This backup file is not valid.");
+                throw new DomainException("Error.BackupInvalid");
 
             file.ExportColumns ??= [];
             file.Areas ??= [];
@@ -132,7 +132,7 @@ public sealed class BackupService : IBackupService
         }
         catch (JsonException ex)
         {
-            throw new DomainException("This backup file is not valid.", ex);
+            throw new DomainException("Error.BackupInvalid", ex);
         }
     }
 

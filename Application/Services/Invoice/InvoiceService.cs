@@ -73,7 +73,7 @@ public sealed class InvoiceService : IInvoiceService
     public async Task<InvoiceResponse> GetByIdAsync(Guid id)
     {
         var invoice = await _invoiceRepository.GetByIdWithPaymentsAsync(id)
-            ?? throw new DomainException("Invoice not found.");
+            ?? throw new DomainException("Error.InvoiceNotFound");
 
         return invoice.ToResponse();
     }
@@ -81,7 +81,7 @@ public sealed class InvoiceService : IInvoiceService
     public async Task CreateAsync(CreateInvoiceRequest request)
     {
         var customer = await _customerRepository.GetByIdWithInvoicesAsync(request.CustomerId)
-            ?? throw new DomainException("Customer not found.");
+            ?? throw new DomainException("Error.CustomerNotFound");
 
         if (customer.Plan == PlanType.FixedKilowatt)
         {
@@ -90,7 +90,7 @@ public sealed class InvoiceService : IInvoiceService
         }
 
         var preferences = await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("App preferences have not been configured.");
+            ?? throw new DomainException("Error.PreferencesNotConfigured");
 
         var today = DateOnly.FromDateTime(DateTime.Now);
 
@@ -127,12 +127,11 @@ public sealed class InvoiceService : IInvoiceService
     {
         if (planType is PlanType.FixedKilowatt)
         {
-            throw new DomainException(
-                "Bulk invoice creation supports only Ampere and Kilowatt. Omit planType to process both.");
+            throw new DomainException("Error.BulkPlanNotSupported");
         }
 
         var preferences = await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("App preferences have not been configured.");
+            ?? throw new DomainException("Error.PreferencesNotConfigured");
 
         var today = DateOnly.FromDateTime(DateTime.Now);
         var (ampereStart, ampereEnd) = BillingPeriodHelper.GetBillingMonthBounds(
@@ -278,17 +277,18 @@ public sealed class InvoiceService : IInvoiceService
         await _invoiceRepository.ExecuteInTransactionAsync(async () =>
         {
             var invoice = await _invoiceRepository.GetByIdForUpdateAsync(invoiceId)
-                ?? throw new DomainException("Invoice not found.");
+                ?? throw new DomainException("Error.InvoiceNotFound");
 
             if (invoice.InvoiceStatus == InvoiceStatus.Paid)
-                throw new DomainException("This invoice is already fully paid.");
+                throw new DomainException("Error.InvoiceAlreadyPaid");
 
             var newTotalPaid = invoice.PaidAmount + request.Amount;
             if (newTotalPaid > invoice.TotalAmount)
             {
-                throw new DomainException(
-                    $"Payment of {request.Amount:F4} would exceed the invoice total. " +
-                    $"Outstanding balance is {invoice.AmountDue:F4}.");
+                throw DomainException.Format(
+                    "Error.PaymentExceedsBalance",
+                    request.Amount.ToString("F4"),
+                    invoice.AmountDue.ToString("F4"));
             }
 
             var payment = new Payment
@@ -328,7 +328,7 @@ public sealed class InvoiceService : IInvoiceService
     public async Task<InvoiceResponse> UpdateAsync(Guid id, UpdateInvoiceRequest request)
     {
         var invoice = await _invoiceRepository.GetByIdWithPaymentsAsync(id)
-            ?? throw new DomainException("Invoice not found.");
+            ?? throw new DomainException("Error.InvoiceNotFound");
 
         var newConsumptionStart = request.ConsumptionStart ?? invoice.IssueDate;
         var newConsumptionEnd = request.ConsumptionEnd ?? invoice.DueDate;
@@ -336,7 +336,7 @@ public sealed class InvoiceService : IInvoiceService
         if (newConsumptionEnd < newConsumptionStart)
         {
             throw new DomainException(
-                "Consumption end must be on or after the consumption start date.");
+                "Error.ConsumptionEndBeforeStart");
         }
 
         if (request.ConsumptionStart is not null) invoice.IssueDate = request.ConsumptionStart.Value;
@@ -352,12 +352,12 @@ public sealed class InvoiceService : IInvoiceService
     public async Task DeleteAsync(Guid id)
     {
         var invoice = await _invoiceRepository.GetByIdWithPaymentsAsync(id)
-            ?? throw new DomainException("Invoice not found.");
+            ?? throw new DomainException("Error.InvoiceNotFound");
 
         if (invoice.InvoiceStatus != InvoiceStatus.Unpaid)
         {
             throw new DomainException(
-                "Only unpaid invoices can be deleted.");
+                "Error.OnlyUnpaidInvoiceDelete");
         }
 
         var number = invoice.InvoiceNumber;
@@ -369,7 +369,7 @@ public sealed class InvoiceService : IInvoiceService
     public async Task<IEnumerable<PaymentResponse>> GetPaymentsAsync(Guid invoiceId)
     {
         _ = await _invoiceRepository.GetByIdAsync(invoiceId)
-            ?? throw new DomainException("Invoice not found.");
+            ?? throw new DomainException("Error.InvoiceNotFound");
 
         var payments = await _paymentRepository.GetByInvoiceIdAsync(invoiceId);
         return payments.Select(p => p.ToResponse());
@@ -385,13 +385,13 @@ public sealed class InvoiceService : IInvoiceService
         FixedKilowattCalculateRequest request)
     {
         var preferences = await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("App preferences have not been configured.");
+            ?? throw new DomainException("Error.PreferencesNotConfigured");
 
         var rates = _pricingService.GetRates(
             request.CustomerType, PlanType.FixedKilowatt, preferences);
 
         if (rates.UnitPrice <= 0)
-            throw new DomainException("Kilowatt unit price is not configured for this customer type.");
+            throw new DomainException("Error.KwPriceNotConfiguredType");
 
         var effectivePlanValue = request.PlanValue is > 0 ? request.PlanValue.Value : 0m;
 
@@ -418,14 +418,14 @@ public sealed class InvoiceService : IInvoiceService
         CreateInvoiceRequest request)
     {
         if (request.PaymentMethod is null)
-            throw new DomainException("Payment method is required for FixedKilowatt customers.");
+            throw new DomainException("Error.FixedKwPaymentMethodRequired");
 
         var preferences = await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("App preferences have not been configured.");
+            ?? throw new DomainException("Error.PreferencesNotConfigured");
 
         var rates = _pricingService.GetRates(customer, preferences);
         if (rates.UnitPrice <= 0)
-            throw new DomainException("Kilowatt unit price is not configured for this customer.");
+            throw new DomainException("Error.KwPriceNotConfiguredCustomer");
 
         var fixedCharge = rates.FixedCharge;
         var tva = rates.Tva;
@@ -540,14 +540,12 @@ public sealed class InvoiceService : IInvoiceService
 
         if (hasPayment && hasKilowatt)
         {
-            throw new DomainException(
-                "Provide either paymentAmount or kilowattAmount, not both.");
+            throw new DomainException("Error.FixedKwXorAmounts");
         }
 
         if (!hasPayment && !hasKilowatt)
         {
-            throw new DomainException(
-                "Either paymentAmount or kilowattAmount is required.");
+            throw new DomainException("Error.FixedKwAmountRequired");
         }
 
         if (hasPayment)
@@ -558,8 +556,7 @@ public sealed class InvoiceService : IInvoiceService
 
             if (kilowattCredits <= 0)
             {
-                throw new DomainException(
-                    "Payment amount is too low to cover the plan value, fixed charge, and energy at the configured rate.");
+                throw new DomainException("Error.PaymentTooLowForFixedKw");
             }
 
             return (payment, kilowattCredits);
@@ -571,8 +568,7 @@ public sealed class InvoiceService : IInvoiceService
 
         if (total <= 0)
         {
-            throw new DomainException(
-                "Kilowatt amount is too low to produce a valid charge at the configured rate.");
+            throw new DomainException("Error.PaymentTooLowForFixedKw");
         }
 
         return (total, credits);
@@ -775,20 +771,17 @@ public sealed class InvoiceService : IInvoiceService
         {
             if (!billedDays.HasValue)
             {
-                throw new DomainException(
-                    "BilledDays is required when ampere prorate-by-days is enabled.");
+                throw new DomainException("Error.BilledDaysRequired");
             }
 
             if (billedDays.Value < 1 || billedDays.Value > daysInMonth)
             {
-                throw new DomainException(
-                    $"BilledDays must be between 1 and {daysInMonth} for the current month.");
+                throw DomainException.Format("Error.BilledDaysRange", daysInMonth);
             }
         }
         else if (billedDays.HasValue)
         {
-            throw new DomainException(
-                "BilledDays is only allowed when ampere prorate-by-days is enabled in preferences.");
+            throw new DomainException("Error.BilledDaysNotAllowed");
         }
     }
 
@@ -836,13 +829,13 @@ public sealed class InvoiceService : IInvoiceService
     public async Task<string> RenderPrintHtmlAsync(Guid invoiceId)
     {
         var invoice = await _invoiceRepository.GetByIdForPrintAsync(invoiceId)
-            ?? throw new DomainException("Invoice not found.");
+            ?? throw new DomainException("Error.InvoiceNotFound");
 
         var customer = invoice.Customer
-            ?? throw new DomainException("Customer not found.");
+            ?? throw new DomainException("Error.CustomerNotFound");
 
         var preferences = await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("App preferences have not been configured.");
+            ?? throw new DomainException("Error.PreferencesNotConfigured");
 
         var profile = await _appUserService.GetAsync();
         var companyName = profile?.BusinessName?.Trim() ?? string.Empty;
@@ -954,7 +947,7 @@ public sealed class InvoiceService : IInvoiceService
         }
         catch (FileNotFoundException)
         {
-            throw new DomainException("Invoice print template was not found.");
+            throw new DomainException("Error.PrintTemplateNotFound");
         }
     }
 }

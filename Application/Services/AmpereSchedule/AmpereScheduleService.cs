@@ -45,7 +45,7 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
         await _ampereScheduleRepository.SaveChangesAsync();
 
         var created = await _ampereScheduleRepository.GetByIdWithDetailsAsync(schedule.Id)
-            ?? throw new DomainException("Ampere schedule not found.");
+            ?? throw new DomainException("Error.ScheduleNotFound");
 
         _logger.LogInformation(
             "Created ampere schedule {ScheduleId} ({Name}, {HoursPerDay}h/day)",
@@ -59,7 +59,7 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
     public async Task<AmpereScheduleResponse> UpdateAsync(Guid id, UpdateAmpereScheduleRequest request)
     {
         var schedule = await _ampereScheduleRepository.GetByIdAsync(id)
-            ?? throw new DomainException("Ampere schedule not found.");
+            ?? throw new DomainException("Error.ScheduleNotFound");
 
         await EnsureUniqueHoursPerDayAsync(request.HoursPerDay, id);
 
@@ -74,7 +74,7 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
         await _ampereScheduleRepository.SaveChangesAsync();
 
         var updated = await _ampereScheduleRepository.GetByIdWithDetailsAsync(id)
-            ?? throw new DomainException("Ampere schedule not found.");
+            ?? throw new DomainException("Error.ScheduleNotFound");
 
         _logger.LogInformation("Updated ampere schedule {ScheduleId} ({Name})", updated.Id, updated.Name);
         return updated.ToResponse();
@@ -83,13 +83,11 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
     public async Task DeleteAsync(Guid id)
     {
         var schedule = await _ampereScheduleRepository.GetByIdAsync(id)
-            ?? throw new DomainException("Ampere schedule not found.");
+            ?? throw new DomainException("Error.ScheduleNotFound");
 
         if (await _ampereScheduleRepository.HasCustomersAsync(id))
         {
-            throw new DomainException(
-                "Cannot delete an ampere schedule that has customers assigned to it. " +
-                "Reassign or remove the customers first.");
+            throw new DomainException("Error.CannotDeleteScheduleWithCustomers");
         }
 
         var name = schedule.Name;
@@ -102,8 +100,7 @@ public sealed class AmpereScheduleService : IAmpereScheduleService
     {
         if (await _ampereScheduleRepository.HoursPerDayExistsAsync(hoursPerDay, excludeId))
         {
-            throw new DomainException(
-                $"An ampere schedule with {hoursPerDay} hours per day already exists.");
+            throw DomainException.Format("Error.DuplicateScheduleHours", hoursPerDay);
         }
     }
 }

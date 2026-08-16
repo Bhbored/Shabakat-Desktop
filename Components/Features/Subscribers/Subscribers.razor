@@ -604,7 +604,7 @@
                 Toast,
                 () => CustomerService.SuspendAsync(new SuspendCustomersRequest([id])));
             if (result is null) return;
-            Toast.Success(result.Message);
+            Toast.Success(L["Subscribers.Suspended"].Value);
         }
 
         _confirmStatus = null;

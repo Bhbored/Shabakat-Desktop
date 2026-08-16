@@ -76,15 +76,14 @@ public sealed class DashboardService : IDashboardService
 
         if (!year.HasValue || !month.HasValue)
         {
-            throw new DomainException(
-                "Both year and month are required when filtering the dashboard by period.");
+            throw new DomainException("Error.DashboardPeriodIncomplete");
         }
 
         if (month is < 1 or > 12)
-            throw new DomainException("Month must be between 1 and 12.");
+            throw new DomainException("Error.MonthRange");
 
         if (year is < 2000 or > 2100)
-            throw new DomainException("Year must be between 2000 and 2100.");
+            throw new DomainException("Error.YearRange");
 
         var periodStart = new DateOnly(year.Value, month.Value, 1);
         return (periodStart, periodStart.AddMonths(1));

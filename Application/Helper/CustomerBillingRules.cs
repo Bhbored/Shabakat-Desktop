@@ -16,8 +16,7 @@ public static class CustomerBillingRules
 
         if (ampereScheduleId is null)
         {
-            throw new DomainException(
-                "An ampere schedule is required when schedule pricing is enabled.");
+            throw new DomainException("Error.AmpereScheduleRequired");
         }
     }
 

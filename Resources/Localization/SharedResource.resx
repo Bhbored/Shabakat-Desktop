@@ -1937,4 +1937,247 @@
   <data name="AuditSummary.InvoiceFixedKilowattCharge" xml:space="preserve">
     <value>Fixed kilowatt charge for {0} (invoice #{1})</value>
   </data>
+  <data name="Error.Unexpected" xml:space="preserve">
+    <value>Something went wrong. Try again.</value>
+  </data>
+  <data name="Error.CustomerNotFound" xml:space="preserve">
+    <value>Customer not found.</value>
+  </data>
+  <data name="Error.CannotDeleteCustomer" xml:space="preserve">
+    <value>Cannot delete {0} because they have invoices.</value>
+  </data>
+  <data name="Error.PriceOverrideRequired" xml:space="preserve">
+    <value>Price is required when providing a pricing override.</value>
+  </data>
+  <data name="Error.PriceOverrideNegative" xml:space="preserve">
+    <value>Pricing override price cannot be negative.</value>
+  </data>
+  <data name="Error.FixedChargeOverrideRequired" xml:space="preserve">
+    <value>Fixed charge is required when providing a pricing override.</value>
+  </data>
+  <data name="Error.FixedChargeOverrideNegative" xml:space="preserve">
+    <value>Pricing override fixed charge cannot be negative.</value>
+  </data>
+  <data name="Error.TvaOverrideRequired" xml:space="preserve">
+    <value>TVA is required when providing a pricing override.</value>
+  </data>
+  <data name="Error.TvaOverrideRange" xml:space="preserve">
+    <value>Pricing override TVA must be between 0 and 100.</value>
+  </data>
+  <data name="Error.BoxNotFound" xml:space="preserve">
+    <value>Distribution box not found.</value>
+  </data>
+  <data name="Error.ScheduleNotFound" xml:space="preserve">
+    <value>Ampere schedule not found.</value>
+  </data>
+  <data name="Error.PreferencesNotConfigured" xml:space="preserve">
+    <value>App preferences have not been configured.</value>
+  </data>
+  <data name="Error.DashboardPeriodIncomplete" xml:space="preserve">
+    <value>Both year and month are required when filtering by period.</value>
+  </data>
+  <data name="Error.MonthRange" xml:space="preserve">
+    <value>Month must be between 1 and 12.</value>
+  </data>
+  <data name="Error.YearRange" xml:space="preserve">
+    <value>Year must be between 2000 and 2100.</value>
+  </data>
+  <data name="Error.ExportColumnRequired" xml:space="preserve">
+    <value>Select at least one export column.</value>
+  </data>
+  <data name="Error.InvoiceNotFound" xml:space="preserve">
+    <value>Invoice not found.</value>
+  </data>
+  <data name="Error.InvoiceAlreadyPaid" xml:space="preserve">
+    <value>This invoice is already fully paid.</value>
+  </data>
+  <data name="Error.PaymentExceedsBalance" xml:space="preserve">
+    <value>Payment of {0} would exceed the invoice total. Outstanding balance is {1}.</value>
+  </data>
+  <data name="Error.ConsumptionEndBeforeStart" xml:space="preserve">
+    <value>Consumption end must be on or after the consumption start date.</value>
+  </data>
+  <data name="Error.OnlyUnpaidInvoiceDelete" xml:space="preserve">
+    <value>Only unpaid invoices can be deleted.</value>
+  </data>
+  <data name="Error.KwPriceNotConfiguredType" xml:space="preserve">
+    <value>Kilowatt unit price is not configured for this customer type.</value>
+  </data>
+  <data name="Error.KwPriceNotConfiguredCustomer" xml:space="preserve">
+    <value>Kilowatt unit price is not configured for this customer.</value>
+  </data>
+  <data name="Error.FixedKwPaymentMethodRequired" xml:space="preserve">
+    <value>Payment method is required for Fixed Kilowatt customers.</value>
+  </data>
+  <data name="Error.PrintTemplateNotFound" xml:space="preserve">
+    <value>Invoice print template was not found.</value>
+  </data>
+  <data name="Error.AreaNotFound" xml:space="preserve">
+    <value>Area not found.</value>
+  </data>
+  <data name="Error.MeterReadingNotFound" xml:space="preserve">
+    <value>Meter reading not found.</value>
+  </data>
+  <data name="Error.ExpenseNotFound" xml:space="preserve">
+    <value>Expense not found.</value>
+  </data>
+  <data name="Error.AmountMustBePositive" xml:space="preserve">
+    <value>Amount must be greater than zero.</value>
+  </data>
+  <data name="Error.OtherExpenseLabelRequired" xml:space="preserve">
+    <value>A label is required when the expense type is Other.</value>
+  </data>
+  <data name="Error.BusinessNameTooLong" xml:space="preserve">
+    <value>Business name cannot exceed 200 characters.</value>
+  </data>
+  <data name="Error.LogoPathTooLong" xml:space="preserve">
+    <value>Logo path cannot exceed 500 characters.</value>
+  </data>
+  <data name="Error.ActivateBeforeProfile" xml:space="preserve">
+    <value>Activate the app before setting a company profile.</value>
+  </data>
+  <data name="Error.AlreadyActivated" xml:space="preserve">
+    <value>The app is already activated.</value>
+  </data>
+  <data name="Error.NotActivated" xml:space="preserve">
+    <value>The app is not activated yet.</value>
+  </data>
+  <data name="Error.InvalidActivationKey" xml:space="preserve">
+    <value>Invalid activation key.</value>
+  </data>
+  <data name="Error.ActivationKeyTooShort" xml:space="preserve">
+    <value>Activation key must be at least 4 characters.</value>
+  </data>
+  <data name="Error.ExpiryMustBeFuture" xml:space="preserve">
+    <value>Expiry must be in the future (Beirut time).</value>
+  </data>
+  <data name="Error.LanguageRequired" xml:space="preserve">
+    <value>Language is required.</value>
+  </data>
+  <data name="Error.LanguageTooLong" xml:space="preserve">
+    <value>Language cannot exceed 10 characters.</value>
+  </data>
+  <data name="Error.DueDateRange" xml:space="preserve">
+    <value>Due date must be between 1 and 31.</value>
+  </data>
+  <data name="Error.CannotBeNegative" xml:space="preserve">
+    <value>{0} cannot be negative.</value>
+  </data>
+  <data name="Error.MustBePercent" xml:space="preserve">
+    <value>{0} must be between 0 and 100.</value>
+  </data>
+  <data name="Error.LogoFileNotFound" xml:space="preserve">
+    <value>Selected logo file was not found.</value>
+  </data>
+  <data name="Error.LogoFileType" xml:space="preserve">
+    <value>Logo must be a PNG, JPG, WEBP, GIF, BMP, or SVG file.</value>
+  </data>
+  <data name="Error.BackupUnsupported" xml:space="preserve">
+    <value>This backup file is not supported.</value>
+  </data>
+  <data name="Error.BackupRestoreFailed" xml:space="preserve">
+    <value>Could not restore this backup file.</value>
+  </data>
+  <data name="Error.BackupInvalid" xml:space="preserve">
+    <value>This backup file is not valid.</value>
+  </data>
+  <data name="Error.DatabaseResetFailed" xml:space="preserve">
+    <value>Could not delete the database file.</value>
+  </data>
+  <data name="Error.AmpereScheduleRequired" xml:space="preserve">
+    <value>An ampere schedule is required when schedule pricing is enabled.</value>
+  </data>
+  <data name="Error.AmpereScheduleRequiredForCustomer" xml:space="preserve">
+    <value>An ampere schedule is required for this customer when schedule pricing is enabled.</value>
+  </data>
+  <data name="Error.AmpereScheduleDetailsMissing" xml:space="preserve">
+    <value>Ampere schedule details are not available for pricing.</value>
+  </data>
+  <data name="Error.SchedulePriceInvalid" xml:space="preserve">
+    <value>Ampere schedule {0} does not have a valid price per amp for customer type {1}.</value>
+  </data>
+  <data name="Error.CannotDeleteAreaWithCustomers" xml:space="preserve">
+    <value>Cannot delete an area that has customers assigned. Reassign or remove the customers first.</value>
+  </data>
+  <data name="Error.CannotDeleteScheduleWithCustomers" xml:space="preserve">
+    <value>Cannot delete an ampere schedule that has customers assigned. Reassign or remove the customers first.</value>
+  </data>
+  <data name="Error.CannotDeleteBoxWithCustomers" xml:space="preserve">
+    <value>Cannot delete a distribution box that has customers assigned. Reassign or remove the customers first.</value>
+  </data>
+  <data name="Error.DuplicateScheduleHours" xml:space="preserve">
+    <value>An ampere schedule with {0} hours per day already exists.</value>
+  </data>
+  <data name="Error.MeterReadingsKilowattOnly" xml:space="preserve">
+    <value>Meter readings can only be recorded for Kilowatt plan customers.</value>
+  </data>
+  <data name="Error.MeterReadingExists" xml:space="preserve">
+    <value>A meter reading already exists for {0} for {1} (recorded on {2}, value {3}). Delete or correct the existing reading instead.</value>
+  </data>
+  <data name="Error.MeterReadingDecreased" xml:space="preserve">
+    <value>New reading ({0}) cannot be less than the previous reading ({1}) recorded on {2}.</value>
+  </data>
+  <data name="Error.EnableScheduleNeedsSchedule" xml:space="preserve">
+    <value>Create at least one ampere schedule before enabling schedule pricing.</value>
+  </data>
+  <data name="Error.BulkPlanNotSupported" xml:space="preserve">
+    <value>Bulk invoice creation supports only Ampere and Kilowatt. Omit the plan to process both.</value>
+  </data>
+  <data name="Error.FixedKwXorAmounts" xml:space="preserve">
+    <value>Provide either a payment amount or a kilowatt amount, not both.</value>
+  </data>
+  <data name="Error.FixedKwAmountRequired" xml:space="preserve">
+    <value>Either a payment amount or a kilowatt amount is required.</value>
+  </data>
+  <data name="Error.PaymentTooLowForFixedKw" xml:space="preserve">
+    <value>Payment amount is too low to cover the plan value, fixed charge, and energy at the configured rate.</value>
+  </data>
+  <data name="Error.BilledDaysRequired" xml:space="preserve">
+    <value>Billed days are required when ampere prorate-by-days is enabled.</value>
+  </data>
+  <data name="Error.BilledDaysRange" xml:space="preserve">
+    <value>Billed days must be between 1 and {0} for the current month.</value>
+  </data>
+  <data name="Error.BilledDaysNotAllowed" xml:space="preserve">
+    <value>Billed days are only allowed when ampere prorate-by-days is enabled.</value>
+  </data>
+  <data name="Subscribers.Suspended" xml:space="preserve">
+    <value>Subscriber suspended.</value>
+  </data>
+  <data name="Error.Field.ResidentialPricePerAmp" xml:space="preserve">
+    <value>Residential price per amp</value>
+  </data>
+  <data name="Error.Field.ResidentialPricePerKilowatt" xml:space="preserve">
+    <value>Residential price per kilowatt</value>
+  </data>
+  <data name="Error.Field.ResidentialFixedCharge" xml:space="preserve">
+    <value>Residential fixed charge</value>
+  </data>
+  <data name="Error.Field.ResidentialTva" xml:space="preserve">
+    <value>Residential TVA</value>
+  </data>
+  <data name="Error.Field.CommercialPricePerAmp" xml:space="preserve">
+    <value>Commercial price per amp</value>
+  </data>
+  <data name="Error.Field.CommercialPricePerKilowatt" xml:space="preserve">
+    <value>Commercial price per kilowatt</value>
+  </data>
+  <data name="Error.Field.CommercialFixedCharge" xml:space="preserve">
+    <value>Commercial fixed charge</value>
+  </data>
+  <data name="Error.Field.CommercialTva" xml:space="preserve">
+    <value>Commercial TVA</value>
+  </data>
+  <data name="Error.Field.IndustrialPricePerAmp" xml:space="preserve">
+    <value>Industrial price per amp</value>
+  </data>
+  <data name="Error.Field.IndustrialPricePerKilowatt" xml:space="preserve">
+    <value>Industrial price per kilowatt</value>
+  </data>
+  <data name="Error.Field.IndustrialFixedCharge" xml:space="preserve">
+    <value>Industrial fixed charge</value>
+  </data>
+  <data name="Error.Field.IndustrialTva" xml:space="preserve">
+    <value>Industrial TVA</value>
+  </data>
 </root>

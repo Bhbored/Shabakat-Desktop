@@ -59,7 +59,7 @@ public sealed class CustomerService : ICustomerService
     public async Task<CustomerResponse> GetByIdAsync(Guid id)
     {
         var customer = await _customerRepository.GetByIdWithInvoicesAsync(id)
-            ?? throw new DomainException("Customer not found.");
+            ?? throw new DomainException("Error.CustomerNotFound");
 
         return customer.ToResponse();
     }
@@ -116,7 +116,7 @@ public sealed class CustomerService : ICustomerService
             customer.Plan);
 
         var created = await _customerRepository.GetByIdWithInvoicesAsync(customer.Id)
-            ?? throw new DomainException("Customer not found.");
+            ?? throw new DomainException("Error.CustomerNotFound");
 
         return created.ToResponse();
     }
@@ -126,7 +126,7 @@ public sealed class CustomerService : ICustomerService
         ValidatePricingOverride(request.PricingOverride);
 
         var customer = await _customerRepository.GetByIdWithInvoicesAsync(id)
-            ?? throw new DomainException("Customer not found.");
+            ?? throw new DomainException("Error.CustomerNotFound");
 
         var preferences = await GetPreferencesAsync();
         var effectivePlan = request.Plan ?? customer.Plan;
@@ -183,7 +183,7 @@ public sealed class CustomerService : ICustomerService
         await TryApplyInitialMeterReadingAsync(customer, request.InitialMeterReading);
 
         var updated = await _customerRepository.GetByIdWithInvoicesAsync(customer.Id)
-            ?? throw new DomainException("Customer not found.");
+            ?? throw new DomainException("Error.CustomerNotFound");
 
         _logger.LogInformation("Updated customer {CustomerId} ({Name})", customer.Id, customer.Name);
         return updated.ToResponse();
@@ -192,12 +192,11 @@ public sealed class CustomerService : ICustomerService
     public async Task DeleteAsync(Guid id)
     {
         var customer = await _customerRepository.GetByIdWithInvoicesAsync(id)
-            ?? throw new DomainException("Customer not found.");
+            ?? throw new DomainException("Error.CustomerNotFound");
 
         if (customer.Invoices.Any())
         {
-            throw new DomainException(
-                $"Cannot delete '{customer.Name}' because they have one or more invoices.");
+            throw DomainException.Format("Error.CannotDeleteCustomer", customer.Name);
         }
 
         var name = customer.Name;
@@ -215,7 +214,7 @@ public sealed class CustomerService : ICustomerService
         {
             var foundIds = customers.Select(c => c.Id).ToHashSet();
             var missingId = ids.First(id => !foundIds.Contains(id));
-            throw new DomainException($"Customer not found: {missingId}.");
+            throw new DomainException("Error.CustomerNotFound");
         }
 
         foreach (var customer in customers)
@@ -241,19 +240,19 @@ public sealed class CustomerService : ICustomerService
         if (dto is null) return;
 
         if (!dto.Price.HasValue)
-            throw new DomainException("Price is required when providing a pricing override.");
+            throw new DomainException("Error.PriceOverrideRequired");
         if (dto.Price.Value < 0)
-            throw new DomainException("Pricing override price cannot be negative.");
+            throw new DomainException("Error.PriceOverrideNegative");
 
         if (!dto.FixedCharge.HasValue)
-            throw new DomainException("FixedCharge is required when providing a pricing override.");
+            throw new DomainException("Error.FixedChargeOverrideRequired");
         if (dto.FixedCharge.Value < 0)
-            throw new DomainException("Pricing override fixed charge cannot be negative.");
+            throw new DomainException("Error.FixedChargeOverrideNegative");
 
         if (!dto.TVA.HasValue)
-            throw new DomainException("TVA is required when providing a pricing override.");
+            throw new DomainException("Error.TvaOverrideRequired");
         if (dto.TVA.Value < 0 || dto.TVA.Value > 100)
-            throw new DomainException("Pricing override TVA must be between 0 and 100.");
+            throw new DomainException("Error.TvaOverrideRange");
     }
 
     private async Task TryApplyInitialMeterReadingAsync(
@@ -294,7 +293,7 @@ public sealed class CustomerService : ICustomerService
         if (boxId is null) return;
 
         _ = await _distributionBoxRepository.GetByIdAsync(boxId.Value)
-            ?? throw new DomainException("Distribution box not found.");
+            ?? throw new DomainException("Error.BoxNotFound");
     }
 
     private async Task EnsureAmpereScheduleExistsAsync(Guid? ampereScheduleId)
@@ -302,10 +301,10 @@ public sealed class CustomerService : ICustomerService
         if (ampereScheduleId is null) return;
 
         _ = await _ampereScheduleRepository.GetByIdAsync(ampereScheduleId.Value)
-            ?? throw new DomainException("Ampere schedule not found.");
+            ?? throw new DomainException("Error.ScheduleNotFound");
     }
 
     private async Task<AppPreferences> GetPreferencesAsync()
         => await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("App preferences have not been configured.");
+            ?? throw new DomainException("Error.PreferencesNotConfigured");
 }

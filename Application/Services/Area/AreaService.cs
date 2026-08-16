@@ -42,7 +42,7 @@ public sealed class AreaService : IAreaService
     public async Task<AreaResponse> UpdateAsync(Guid id, UpdateAreaRequest request)
     {
         var area = await _areaRepository.GetByIdAsync(id)
-            ?? throw new DomainException("Area not found.");
+            ?? throw new DomainException("Error.AreaNotFound");
 
         area.Name = request.Name.Trim();
 
@@ -56,13 +56,11 @@ public sealed class AreaService : IAreaService
     public async Task DeleteAsync(Guid id)
     {
         var area = await _areaRepository.GetByIdAsync(id)
-            ?? throw new DomainException("Area not found.");
+            ?? throw new DomainException("Error.AreaNotFound");
 
         if (await _areaRepository.HasCustomersAsync(id))
         {
-            throw new DomainException(
-                "Cannot delete an area that has customers assigned to it. " +
-                "Reassign or remove the customers first.");
+            throw new DomainException("Error.CannotDeleteAreaWithCustomers");
         }
 
         var name = area.Name;

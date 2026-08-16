@@ -19,7 +19,8 @@ public interface IToastService
     event Action? OnChanged;
     IReadOnlyList<ToastMessage> Messages { get; }
     void Success(string message);
-    void Error(string message);
+    void Error(string message, params object[] args);
+    void Error(Exception exception);
     void Info(string message);
     void Warning(string message);
     void Dismiss(Guid id);

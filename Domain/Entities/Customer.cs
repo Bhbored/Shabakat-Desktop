@@ -1,4 +1,4 @@
-﻿using Shabakat.Domain.Common;
+using Shabakat.Domain.Common;
 using Shabakat.Domain.Enums;
 using Shabakat.Domain.Exceptions;
 
@@ -34,11 +34,11 @@ public class Customer : Base
     public void SetPricingOverride(decimal price, decimal fixedCharge, decimal tva)
     {
             if (price < 0)
-                throw new DomainException("Price override cannot be negative.");
+                throw new DomainException("Error.PriceOverrideNegative");
             if (fixedCharge < 0)
-                throw new DomainException("Fixed charge override cannot be negative.");
+                throw new DomainException("Error.FixedChargeOverrideNegative");
             if (tva < 0 || tva > 100)
-                throw new DomainException("TVA override must be between 0 and 100.");
+                throw new DomainException("Error.TvaOverrideRange");
 
         PriceOverride = price;
         FixedChargeOverride = fixedCharge;
