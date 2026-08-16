@@ -2,6 +2,7 @@
 @implements IDisposable
 @inject ICultureService CultureService
 @inject ILicenseService LicenseService
+@inject IStringLocalizer<SharedResource> L
 @inject IJSRuntime Js
 
 <div class="h-full min-h-full bg-background">
@@ -24,11 +25,28 @@
     }
 
     <Toaster />
+
+    <ConfirmDialog Open="_contactOpen"
+                   Title="@L["License.Contact.Title"]"
+                   OnClose="DismissContact">
+        <ChildContent>
+            <p>@ContactMessage</p>
+        </ChildContent>
+        <Footer>
+            <button type="button"
+                    class="rounded-xl bg-secondary px-4 py-2.5 text-sm font-medium text-foreground"
+                    @onclick="DismissContact">
+                @L["Common.Done"]
+            </button>
+        </Footer>
+    </ConfirmDialog>
 </div>
 
 @code {
     private bool _splashDone;
+    private bool _contactOpen;
     private LicenseStatus? _status;
+    private LicenseRestoreNotice _restoreNotice;
 
     protected override void OnInitialized()
     {
@@ -58,8 +76,20 @@
     private void OnLicenseChanged() => _ = InvokeAsync(async () =>
     {
         await RefreshStatusAsync();
+        _restoreNotice = LicenseService.TakeRestoreNotice();
+        _contactOpen = _restoreNotice != LicenseRestoreNotice.None;
         StateHasChanged();
     });
+
+    private void DismissContact() => _contactOpen = false;
+
+    private string ContactMessage => _restoreNotice switch
+    {
+        LicenseRestoreNotice.Expired => L["License.Contact.Expired"],
+        LicenseRestoreNotice.Tampered => L["License.Contact.Tampered"],
+        LicenseRestoreNotice.Missing => L["License.Contact.Missing"],
+        _ => L["License.Contact.Expired"]
+    };
 
     private async Task RefreshStatusAsync()
     {

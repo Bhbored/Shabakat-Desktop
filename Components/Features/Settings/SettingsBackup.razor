@@ -1,5 +1,6 @@
 @page "/settings/backup"
 @inject IBackupService BackupService
+@inject ILicenseService LicenseService
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
 
@@ -158,7 +159,8 @@
                 await InvokeAsync(StateHasChanged);
             }
 
-            Toast.Success(L["Settings.Backup.Restored"].Value);
+            if (await LicenseService.GetStatusAsync() == LicenseStatus.Active)
+                Toast.Success(L["Settings.Backup.Restored"].Value);
         }
         catch (DomainException ex)
         {

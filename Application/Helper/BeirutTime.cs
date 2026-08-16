@@ -11,6 +11,9 @@ public static class BeirutTime
         return new DateTimeOffset(local, offset).ToUniversalTime();
     }
 
+    public static DateTimeOffset ToLocal(DateTimeOffset utc) =>
+        TimeZoneInfo.ConvertTime(utc, Zone);
+
     private static TimeZoneInfo Resolve()
     {
         try

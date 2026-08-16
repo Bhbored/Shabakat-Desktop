@@ -70,7 +70,7 @@ public sealed class BackupService : IBackupService
             yield return 0.08 + progress * 0.9;
 
         _cultureService.Apply(file.Preferences?.Language ?? "en");
-        _licenseService.NotifyChanged();
+        await _licenseService.NotifyRestoredAsync();
         _logger.LogInformation("Restored backup version {Version} exported at {ExportedAt}", file.Version, file.ExportedAt);
         yield return 1d;
     }

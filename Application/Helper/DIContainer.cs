@@ -85,6 +85,7 @@ public static class DIContainer
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IInvoiceService, InvoiceService>();
         services.AddScoped<IDatabaseSeedService, LebanonDatabaseSeeder>();
+        services.AddScoped<IDatabaseResetService, DatabaseResetService>();
 
         return services;
     }

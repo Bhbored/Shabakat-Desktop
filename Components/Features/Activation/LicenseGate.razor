@@ -1,5 +1,6 @@
 @namespace Shabakat.Components.Features.Activation
 @inject ILicenseService LicenseService
+@inject IBackupService BackupService
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
 
@@ -56,24 +57,79 @@
 
         <button type="button"
                 class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
-                disabled="@_saving"
+                disabled="@Busy"
                 @onclick="SubmitAsync">
             @(_saving ? L["Common.Saving"] : IsSetup ? L["License.Setup.Submit"] : L["License.Activate.Submit"])
         </button>
+
+        <p class="text-center text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">@L["License.Or"]</p>
+
+        @if (_restoring || _progress > 0)
+        {
+            <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>@L["Settings.Backup.Restoring"]</span>
+                    <span>@((_progress * 100).ToString("0"))%</span>
+                </div>
+                <div class="h-2.5 overflow-hidden rounded-full bg-muted">
+                    <div class="h-full rounded-full bg-primary transition-[width] duration-300"
+                         style="width: @((_progress * 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                </div>
+            </div>
+        }
+
+        <button type="button"
+                class="w-full rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-50"
+                disabled="@Busy"
+                @onclick="BeginRestoreAsync">
+            @(_restoring ? L["Settings.Backup.Restoring"] : L["License.Restore"])
+        </button>
+        <p class="text-xs text-muted-foreground">@L["License.Restore.Hint"]</p>
     </div>
 </div>
+
+<ConfirmDialog Open="_confirmOpen"
+               Title="@L["Settings.Backup.RestoreTitle"]"
+               OnClose="CancelRestore">
+    <ChildContent>
+        <p>@L["License.Restore.Confirm"]</p>
+    </ChildContent>
+    <Footer>
+        <button type="button"
+                class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted"
+                disabled="@Busy"
+                @onclick="CancelRestore">
+            @L["Common.Cancel"]
+        </button>
+        <button type="button"
+                class="rounded-xl bg-secondary px-4 py-2.5 text-sm font-medium text-foreground disabled:opacity-50"
+                disabled="@Busy"
+                @onclick="ConfirmRestoreAsync">
+            @L["Settings.Backup.Restore"]
+        </button>
+    </Footer>
+</ConfirmDialog>
 
 @code {
     [Parameter] public bool IsSetup { get; set; }
 
     private string _pin = "";
     private bool _saving;
+    private bool _restoring;
+    private bool _confirmOpen;
+    private double _progress;
+    private string? _pendingJson;
     private DateOnly _expiryDate = DateOnly.FromDateTime(DateTime.Today.AddYears(1));
     private int _hour;
     private int _minute;
 
+    private bool Busy => _saving || _restoring;
+
     private async Task SubmitAsync()
     {
+        if (Busy)
+            return;
+
         _saving = true;
         try
         {
@@ -89,6 +145,62 @@
         finally
         {
             _saving = false;
+        }
+    }
+
+    private async Task BeginRestoreAsync()
+    {
+        if (Busy)
+            return;
+
+        var json = await BackupFilePicker.OpenAsync();
+        if (string.IsNullOrWhiteSpace(json))
+            return;
+
+        _pendingJson = json;
+        _confirmOpen = true;
+    }
+
+    private void CancelRestore()
+    {
+        if (Busy)
+            return;
+
+        _confirmOpen = false;
+        _pendingJson = null;
+    }
+
+    private async Task ConfirmRestoreAsync()
+    {
+        if (Busy || string.IsNullOrWhiteSpace(_pendingJson))
+            return;
+
+        var json = _pendingJson;
+        _confirmOpen = false;
+        _pendingJson = null;
+        _restoring = true;
+        _progress = 0;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            await foreach (var value in BackupService.RestoreAsync(json))
+            {
+                _progress = value;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (DomainException ex)
+        {
+            Toast.Error(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message);
+        }
+        finally
+        {
+            _restoring = false;
         }
     }
 }

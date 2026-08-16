@@ -1,6 +1,8 @@
 @page "/settings"
 @inject IAppPreferencesService PreferencesService
 @inject IAppUserService AppUserService
+@inject ILicenseService LicenseService
+@inject IDatabaseResetService DatabaseReset
 @inject IToastService Toast
 @inject IThemeService ThemeService
 @inject IStringLocalizer<SharedResource> L
@@ -56,11 +58,32 @@
     </SettingsSection>
 
     <SettingsSection Title="@L["Settings.Backup"]">
+        <div class="flex items-center gap-3 border-b border-border px-4 py-4">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                @((MarkupString)Icons.Clock)
+            </div>
+            <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-foreground">@L["Settings.Subscription"]</p>
+                <p class="truncate text-xs text-muted-foreground">@SubscriptionValue</p>
+            </div>
+        </div>
         <SettingRowLink Href="settings/backup" Label="@L["Settings.Backup"]" Value="@L["Settings.BackupHint"]" IconSvg="@Icons.Backup" />
     </SettingsSection>
 
     <SettingsSection Title="@L["Settings.Testing"]">
         <SettingRowLink Href="settings/testing" Label="@L["Settings.SampleData"]" Value="@L["Settings.SeedLebanon"]" IconSvg="@Icons.Flask" />
+        <button type="button"
+                class="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/40"
+                disabled="@_resetting"
+                @onclick="OpenReset">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-600 dark:text-red-400">
+                @((MarkupString)Icons.Trash)
+            </div>
+            <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-red-700 dark:text-red-400">@L["Settings.Testing.ResetDb"]</p>
+                <p class="truncate text-xs text-muted-foreground">@L["Settings.Testing.ResetDbHint"]</p>
+            </div>
+        </button>
     </SettingsSection>
 
     <SettingsSection Title="@L["Settings.About"]">
@@ -76,10 +99,39 @@
     </SettingsSection>
 </div>
 
+<ConfirmDialog Open="_resetOpen"
+               Title="@L["Settings.Testing.ResetDbTitle"]"
+               OnClose="CancelReset">
+    <ChildContent>
+        <p>@L["Settings.Testing.ResetDbConfirm"]</p>
+    </ChildContent>
+    <Footer>
+        <button type="button"
+                class="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                disabled="@_resetting"
+                @onclick="CancelReset">
+            @L["Common.Cancel"]
+        </button>
+        <button type="button"
+                class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500/90 disabled:opacity-50"
+                disabled="@_resetting"
+                @onclick="ConfirmResetAsync">
+            @(_resetting ? L["Common.Deleting"] : L["Settings.Testing.ResetDbAction"])
+        </button>
+    </Footer>
+</ConfirmDialog>
+
 @code {
     private bool _loading = true;
+    private bool _resetOpen;
+    private bool _resetting;
     private GetPreferencesResponse? _prefs;
     private ProfileResponse? _profile;
+    private LicenseRemaining? _remaining;
+
+    private string SubscriptionValue => _remaining is null
+        ? L["Common.NotSet"].Value
+        : L["Settings.Subscription.Value", FormatHelper.Number(_remaining.DaysLeft), FormatHelper.Date(_remaining.RenewOn)].Value;
 
     private string LogoLabel =>
         !string.IsNullOrWhiteSpace(_profile?.LogoUrl) ? L["Common.Configured"].Value
@@ -102,6 +154,7 @@
     {
         _prefs = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
         _profile = await UiActions.RunAsync(Toast, () => AppUserService.GetAsync());
+        _remaining = await LicenseService.GetRemainingAsync();
         _loading = false;
     }
 
@@ -127,6 +180,37 @@
 
     private string EnabledLabel(bool enabled) => enabled ? L["Common.Enabled"].Value : L["Common.Disabled"].Value;
 
+    private void OpenReset()
+    {
+        if (_resetting)
+            return;
+        _resetOpen = true;
+    }
+
+    private void CancelReset()
+    {
+        if (_resetting)
+            return;
+        _resetOpen = false;
+    }
+
+    private async Task ConfirmResetAsync()
+    {
+        if (_resetting)
+            return;
+
+        _resetting = true;
+        try
+        {
+            await UiActions.RunAsync(Toast, () => DatabaseReset.ResetAsync());
+        }
+        finally
+        {
+            _resetting = false;
+            _resetOpen = false;
+        }
+    }
+
     private static class Icons
     {
         public const string Zap = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h6l-2 8 10-12h-6l2-8z"/></svg>""";
@@ -139,5 +223,6 @@
         public const string Spreadsheet = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg>""";
         public const string Backup = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>""";
         public const string Flask = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>""";
+        public const string Trash = """<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>""";
     }
 }

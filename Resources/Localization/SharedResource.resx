@@ -425,6 +425,30 @@
   <data name="License.Activate.Submit" xml:space="preserve">
     <value>Renew subscription</value>
   </data>
+  <data name="License.Or" xml:space="preserve">
+    <value>or</value>
+  </data>
+  <data name="License.Restore" xml:space="preserve">
+    <value>Restore backup</value>
+  </data>
+  <data name="License.Restore.Hint" xml:space="preserve">
+    <value>If you reinstalled the app, restore a JSON backup to bring back your data and remaining time.</value>
+  </data>
+  <data name="License.Restore.Confirm" xml:space="preserve">
+    <value>Restore this backup? Customers, invoices, and the license in the file will replace what is on this computer.</value>
+  </data>
+  <data name="License.Contact.Title" xml:space="preserve">
+    <value>Contact the company</value>
+  </data>
+  <data name="License.Contact.Expired" xml:space="preserve">
+    <value>Your data was restored, but the subscription has ended. Please contact the company to continue.</value>
+  </data>
+  <data name="License.Contact.Tampered" xml:space="preserve">
+    <value>Your data was restored, but the license end date is not valid. Please contact the company.</value>
+  </data>
+  <data name="License.Contact.Missing" xml:space="preserve">
+    <value>Your data was restored, but this backup has no license. Please contact the company to activate the app.</value>
+  </data>
   <data name="Page.SettingsPricePerKw.Title" xml:space="preserve">
     <value>Price per Kilowatt</value>
   </data>
@@ -1100,6 +1124,12 @@
   <data name="Settings.BackupHint" xml:space="preserve">
     <value>Export or restore all data</value>
   </data>
+  <data name="Settings.Subscription" xml:space="preserve">
+    <value>Subscription</value>
+  </data>
+  <data name="Settings.Subscription.Value" xml:space="preserve">
+    <value>{0} days left · renew {1}</value>
+  </data>
   <data name="Settings.Backup.Export" xml:space="preserve">
     <value>Export backup</value>
   </data>
@@ -1165,6 +1195,21 @@
   </data>
   <data name="Settings.Testing.Seeded" xml:space="preserve">
     <value>Sample data seeded.</value>
+  </data>
+  <data name="Settings.Testing.ResetDb" xml:space="preserve">
+    <value>Delete database</value>
+  </data>
+  <data name="Settings.Testing.ResetDbHint" xml:space="preserve">
+    <value>Erase this computer's data and start over</value>
+  </data>
+  <data name="Settings.Testing.ResetDbTitle" xml:space="preserve">
+    <value>Delete the database?</value>
+  </data>
+  <data name="Settings.Testing.ResetDbConfirm" xml:space="preserve">
+    <value>This permanently deletes all customers, invoices, settings, and the license on this computer. You will need to activate again. This cannot be undone.</value>
+  </data>
+  <data name="Settings.Testing.ResetDbAction" xml:space="preserve">
+    <value>Delete everything</value>
   </data>
   <data name="Settings.WhatsApp.Unavailable" xml:space="preserve">
     <value>WhatsApp is not available in this offline build.</value>

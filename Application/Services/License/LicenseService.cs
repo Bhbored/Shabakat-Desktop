@@ -18,6 +18,8 @@ public sealed class LicenseService : ILicenseService
 
     public event Action? Changed;
 
+    private LicenseRestoreNotice _restoreNotice;
+
     public LicenseService(
         AppDbContext db,
         PasswordHasher<AppUser> hasher,
@@ -31,18 +33,19 @@ public sealed class LicenseService : ILicenseService
     public async Task<LicenseStatus> GetStatusAsync()
     {
         var user = await _db.AppUsers.AsNoTracking().FirstOrDefaultAsync();
-        if (user is null || string.IsNullOrWhiteSpace(user.PasswordHash))
-            return LicenseStatus.SetupRequired;
+        return Read(user).Status;
+    }
 
-        if (!LicenseHmac.Matches(user.LicenseStamp, user.PasswordHash, user.LicensedUntil))
-        {
-            _logger.LogWarning("License stamp is missing or does not match the stored expiry.");
-            return LicenseStatus.Expired;
-        }
+    public async Task<LicenseRemaining?> GetRemainingAsync()
+    {
+        var user = await _db.AppUsers.AsNoTracking().FirstOrDefaultAsync();
+        if (Read(user).Status != LicenseStatus.Active || user is null)
+            return null;
 
-        return DateTimeOffset.UtcNow < user.LicensedUntil
-            ? LicenseStatus.Active
-            : LicenseStatus.Expired;
+        var until = BeirutTime.ToLocal(user.LicensedUntil);
+        var now = BeirutTime.ToLocal(DateTimeOffset.UtcNow);
+        var daysLeft = Math.Max(0, (int)Math.Ceiling((until - now).TotalDays));
+        return new LicenseRemaining(daysLeft, DateOnly.FromDateTime(until.DateTime));
     }
 
     public async Task SetupAsync(string pin, DateOnly expiryDate, TimeOnly expiryTime)
@@ -88,7 +91,40 @@ public sealed class LicenseService : ILicenseService
         Changed?.Invoke();
     }
 
+    public async Task NotifyRestoredAsync()
+    {
+        var user = await _db.AppUsers.AsNoTracking().FirstOrDefaultAsync();
+        var (status, notice) = Read(user);
+        if (status != LicenseStatus.Active)
+            _restoreNotice = notice;
+        Changed?.Invoke();
+    }
+
+    public LicenseRestoreNotice TakeRestoreNotice()
+    {
+        var notice = _restoreNotice;
+        _restoreNotice = LicenseRestoreNotice.None;
+        return notice;
+    }
+
     public void NotifyChanged() => Changed?.Invoke();
+
+    private (LicenseStatus Status, LicenseRestoreNotice Notice) Read(AppUser? user)
+    {
+        if (user is null || string.IsNullOrWhiteSpace(user.PasswordHash))
+            return (LicenseStatus.SetupRequired, LicenseRestoreNotice.Missing);
+
+        if (!LicenseHmac.Matches(user.LicenseStamp, user.PasswordHash, user.LicensedUntil))
+        {
+            _logger.LogWarning("License stamp is missing or does not match the stored expiry.");
+            return (LicenseStatus.Expired, LicenseRestoreNotice.Tampered);
+        }
+
+        if (DateTimeOffset.UtcNow < user.LicensedUntil)
+            return (LicenseStatus.Active, LicenseRestoreNotice.None);
+
+        return (LicenseStatus.Expired, LicenseRestoreNotice.Expired);
+    }
 
     private static void EnsurePin(string pin)
     {
