@@ -8,7 +8,6 @@ public sealed class BackupFile
 
     public int Version { get; set; }
     public DateTime ExportedAt { get; set; }
-    public AppUser? AppUser { get; set; }
     public AppPreferences? Preferences { get; set; }
     public List<CustomerExportColumnPreference> ExportColumns { get; set; } = [];
     public List<Area> Areas { get; set; } = [];

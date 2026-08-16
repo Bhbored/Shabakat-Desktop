@@ -15,18 +15,15 @@ public sealed class BackupService : IBackupService
 
     private readonly IBackupRepository _backupRepository;
     private readonly ICultureService _cultureService;
-    private readonly IAppUserService _appUserService;
     private readonly ILogger<BackupService> _logger;
 
     public BackupService(
         IBackupRepository backupRepository,
         ICultureService cultureService,
-        IAppUserService appUserService,
         ILogger<BackupService> logger)
     {
         _backupRepository = backupRepository;
         _cultureService = cultureService;
-        _appUserService = appUserService;
         _logger = logger;
     }
 
@@ -62,7 +59,6 @@ public sealed class BackupService : IBackupService
         }
 
         _cultureService.Apply(file.Preferences?.Language ?? "en");
-        _appUserService.NotifyChanged();
         _logger.LogInformation("Restored backup version {Version} exported at {ExportedAt}", file.Version, file.ExportedAt);
     }
 

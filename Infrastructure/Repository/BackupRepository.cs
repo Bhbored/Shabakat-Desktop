@@ -20,7 +20,6 @@ public sealed class BackupRepository : IBackupRepository
     public async Task<BackupFile> LoadAsync() =>
         new()
         {
-            AppUser = await _db.AppUsers.AsNoTracking().FirstOrDefaultAsync(),
             Preferences = await _db.AppPreferences.AsNoTracking().FirstOrDefaultAsync(),
             ExportColumns = await _db.CustomerExportColumnPreferences.AsNoTracking().ToListAsync(),
             Areas = await _db.Areas.AsNoTracking().ToListAsync(),
@@ -59,10 +58,6 @@ public sealed class BackupRepository : IBackupRepository
             await _db.AmpereSchedules.ExecuteDeleteAsync();
             await _db.CustomerExportColumnPreferences.ExecuteDeleteAsync();
             await _db.AppPreferences.ExecuteDeleteAsync();
-            await _db.AppUsers.ExecuteDeleteAsync();
-
-            if (file.AppUser is not null)
-                await _db.AppUsers.AddAsync(file.AppUser);
 
             if (file.Preferences is not null)
             {
