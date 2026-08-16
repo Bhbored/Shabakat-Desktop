@@ -17,7 +17,9 @@ using Shabakat.Application.Services.MeterReadings;
 using Shabakat.Application.Services.Preferences;
 using Shabakat.Application.Services.Pricing;
 using Shabakat.Application.Services.Profile;
+using Shabakat.Application.Services.License;
 using Shabakat.Application.Services.Culture;
+using Microsoft.AspNetCore.Identity;
 using Shabakat.Application.Services.Theme;
 using Shabakat.Application.Services.Toasts;
 using Shabakat.Infrastructure.Persistence;
@@ -69,6 +71,8 @@ public static class DIContainer
         services.AddScoped<IAppPreferencesService, AppPreferencesService>();
         services.AddScoped<IBackupService, BackupService>();
         services.AddScoped<IAppUserService, AppUserService>();
+        services.AddSingleton(_ => new PasswordHasher<Shabakat.Domain.Entities.AppUser>());
+        services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
         services.AddScoped<IAreaService, AreaService>();
         services.AddScoped<IAmpereScheduleService, AmpereScheduleService>();

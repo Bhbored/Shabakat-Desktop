@@ -1,0 +1,94 @@
+@namespace Shabakat.Components.Features.Activation
+@inject ILicenseService LicenseService
+@inject IToastService Toast
+@inject IStringLocalizer<SharedResource> L
+
+<div class="flex min-h-dvh items-center justify-center bg-background px-4 py-8">
+    <div class="w-full max-w-md space-y-6 rounded-[28px] border border-border bg-card p-6 shadow-[0_20px_60px_rgba(0,0,0,0.05)] sm:p-8">
+        <div>
+            <h1 class="text-2xl font-semibold text-foreground">@(IsSetup ? L["License.Setup.Title"] : L["License.Activate.Title"])</h1>
+            <p class="mt-2 text-sm text-muted-foreground">@(IsSetup ? L["License.Setup.Subtitle"] : L["License.Activate.Subtitle"])</p>
+        </div>
+
+        <label class="block space-y-2">
+            <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">@L["License.Pin"]</span>
+            <input type="password"
+                   autocomplete="off"
+                   class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                   @bind="_pin" />
+        </label>
+
+        <label class="block space-y-2">
+            <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">@L["License.ExpiryDate"]</span>
+            <input type="date"
+                   class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                   @bind="_expiryDate"
+                   @bind:format="yyyy-MM-dd" />
+        </label>
+
+        <div class="space-y-2">
+            <span class="block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">@L["License.ExpiryTime"]</span>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="block space-y-1">
+                    <span class="block text-xs text-muted-foreground">@L["License.Hour"]</span>
+                    <select class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                            @bind="_hour">
+                        @for (var h = 0; h < 24; h++)
+                        {
+                            <option value="@h">@h.ToString("00")</option>
+                        }
+                    </select>
+                </label>
+                <label class="block space-y-1">
+                    <span class="block text-xs text-muted-foreground">@L["License.Minute"]</span>
+                    <select class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                            @bind="_minute">
+                        @for (var m = 0; m < 60; m++)
+                        {
+                            <option value="@m">@m.ToString("00")</option>
+                        }
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <p class="text-xs text-muted-foreground">@L["License.BeirutHint"]</p>
+
+        <button type="button"
+                class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+                disabled="@_saving"
+                @onclick="SubmitAsync">
+            @(_saving ? L["Common.Saving"] : IsSetup ? L["License.Setup.Submit"] : L["License.Activate.Submit"])
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsSetup { get; set; }
+
+    private string _pin = "";
+    private bool _saving;
+    private DateOnly _expiryDate = DateOnly.FromDateTime(DateTime.Today.AddYears(1));
+    private int _hour;
+    private int _minute;
+
+    private async Task SubmitAsync()
+    {
+        _saving = true;
+        try
+        {
+            await UiActions.RunAsync(Toast, async () =>
+            {
+                var expiryTime = new TimeOnly(_hour, _minute);
+                if (IsSetup)
+                    await LicenseService.SetupAsync(_pin, _expiryDate, expiryTime);
+                else
+                    await LicenseService.RenewAsync(_pin, _expiryDate, expiryTime);
+            });
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

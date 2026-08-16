@@ -10,21 +10,17 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
     {
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.Username)
-            .IsRequired()
-            .HasMaxLength(100);
-
         builder.Property(e => e.PasswordHash)
             .IsRequired()
             .HasMaxLength(500);
+
+        builder.Property(e => e.LicensedUntil)
+            .IsRequired();
 
         builder.Property(e => e.BusinessName)
             .HasMaxLength(200);
 
         builder.Property(e => e.LogoUrl)
             .HasMaxLength(500);
-
-        builder.HasIndex(e => e.Username)
-            .IsUnique();
     }
 }

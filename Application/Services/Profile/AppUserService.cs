@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Application.DTOs.Profile;
 using Shabakat.Application.Mappers;
-using Shabakat.Domain.Entities;
 using Shabakat.Domain.Exceptions;
 using Shabakat.Infrastructure.Persistence;
 
@@ -45,24 +44,14 @@ public sealed class AppUserService : IAppUserService
             throw new DomainException("Logo path cannot exceed 500 characters.");
 
         var user = await _db.AppUsers.FirstOrDefaultAsync();
-        var isCreate = user is null;
         if (user is null)
-        {
-            user = new AppUser
-            {
-                BusinessName = businessName,
-                LogoUrl = logoUrl
-            };
-            await _db.AppUsers.AddAsync(user);
-        }
-        else
-        {
-            user.BusinessName = businessName;
-            user.LogoUrl = logoUrl;
-        }
+            throw new DomainException("Activate the app before setting a company profile.");
+
+        user.BusinessName = businessName;
+        user.LogoUrl = logoUrl;
 
         await _db.SaveChangesAsync();
-        _logger.LogInformation("{Action} company profile {UserId}", isCreate ? "Created" : "Updated", user.Id);
+        _logger.LogInformation("Updated company profile {UserId}", user.Id);
         NotifyChanged();
         return user.ToResponse();
     }

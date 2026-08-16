@@ -1,23 +1,44 @@
 @namespace Shabakat.Components
 @implements IDisposable
 @inject ICultureService CultureService
+@inject ILicenseService LicenseService
 @inject IJSRuntime Js
 
 <div class="h-full min-h-full bg-background">
-    <Routes @key="CultureService.Language" />
+    @if (_status == LicenseStatus.SetupRequired)
+    {
+        <LicenseGate IsSetup="true" />
+    }
+    else if (_status == LicenseStatus.Expired)
+    {
+        <LicenseGate IsSetup="false" />
+    }
+    else if (_status == LicenseStatus.Active)
+    {
+        <Routes @key="CultureService.Language" />
+    }
 
     @if (!_splashDone)
     {
         <AppSplash OnFinished="HideSplash" />
     }
+
+    <Toaster />
 </div>
 
 @code {
     private bool _splashDone;
+    private LicenseStatus? _status;
 
     protected override void OnInitialized()
     {
         CultureService.Changed += OnCultureChanged;
+        LicenseService.Changed += OnLicenseChanged;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshStatusAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -34,6 +55,17 @@
         StateHasChanged();
     });
 
+    private void OnLicenseChanged() => _ = InvokeAsync(async () =>
+    {
+        await RefreshStatusAsync();
+        StateHasChanged();
+    });
+
+    private async Task RefreshStatusAsync()
+    {
+        _status = await LicenseService.GetStatusAsync();
+    }
+
     private async Task ApplyDocumentCultureAsync()
     {
         var lang = CultureService.IsRtl ? "ar" : "en";
@@ -48,5 +80,6 @@
     public void Dispose()
     {
         CultureService.Changed -= OnCultureChanged;
+        LicenseService.Changed -= OnLicenseChanged;
     }
 }

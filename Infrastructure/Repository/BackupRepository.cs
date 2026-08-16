@@ -9,8 +9,8 @@ namespace Shabakat.Infrastructure.Repository;
 
 public sealed class BackupRepository : IBackupRepository
 {
-    private const int LoadSteps = 13;
-    private const int ReplaceSteps = 27;
+    private const int LoadSteps = 14;
+    private const int ReplaceSteps = 28;
 
     private readonly AppDbContext _db;
     private readonly ILogger<BackupRepository> _logger;
@@ -26,6 +26,9 @@ public sealed class BackupRepository : IBackupRepository
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var step = 0;
+
+        destination.AppUser = await _db.AppUsers.AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+        yield return Progress(++step, LoadSteps);
 
         destination.Preferences = await _db.AppPreferences.AsNoTracking().FirstOrDefaultAsync(cancellationToken);
         yield return Progress(++step, LoadSteps);
@@ -105,6 +108,14 @@ public sealed class BackupRepository : IBackupRepository
             await _db.CustomerExportColumnPreferences.ExecuteDeleteAsync(cancellationToken);
             yield return Progress(++step, ReplaceSteps);
             await _db.AppPreferences.ExecuteDeleteAsync(cancellationToken);
+            yield return Progress(++step, ReplaceSteps);
+
+            if (file.AppUser is not null)
+            {
+                await _db.AppUsers.ExecuteDeleteAsync(cancellationToken);
+                await _db.AppUsers.AddAsync(file.AppUser, cancellationToken);
+            }
+
             yield return Progress(++step, ReplaceSteps);
 
             if (file.Preferences is not null)

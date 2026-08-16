@@ -389,6 +389,42 @@
   <data name="Page.SettingsBackup.Subtitle" xml:space="preserve">
     <value>تصدير أو استبدال قاعدة البيانات بالكامل كملف JSON</value>
   </data>
+  <data name="License.Setup.Title" xml:space="preserve">
+    <value>تفعيل شبكات</value>
+  </data>
+  <data name="License.Setup.Subtitle" xml:space="preserve">
+    <value>عيّن مفتاح التفعيل ونهاية الاشتراك بتوقيت بيروت.</value>
+  </data>
+  <data name="License.Activate.Title" xml:space="preserve">
+    <value>انتهى الاشتراك</value>
+  </data>
+  <data name="License.Activate.Subtitle" xml:space="preserve">
+    <value>أدخل مفتاح التفعيل وتاريخ نهاية جديداً للمتابعة.</value>
+  </data>
+  <data name="License.Pin" xml:space="preserve">
+    <value>مفتاح التفعيل</value>
+  </data>
+  <data name="License.ExpiryDate" xml:space="preserve">
+    <value>تاريخ الانتهاء</value>
+  </data>
+  <data name="License.ExpiryTime" xml:space="preserve">
+    <value>وقت الانتهاء</value>
+  </data>
+  <data name="License.Hour" xml:space="preserve">
+    <value>الساعة</value>
+  </data>
+  <data name="License.Minute" xml:space="preserve">
+    <value>الدقيقة</value>
+  </data>
+  <data name="License.BeirutHint" xml:space="preserve">
+    <value>التاريخ والوقت بتوقيت بيروت (آسيا/بيروت).</value>
+  </data>
+  <data name="License.Setup.Submit" xml:space="preserve">
+    <value>تفعيل</value>
+  </data>
+  <data name="License.Activate.Submit" xml:space="preserve">
+    <value>تجديد الاشتراك</value>
+  </data>
   <data name="Page.SettingsPricePerKw.Title" xml:space="preserve">
     <value>سعر الكيلوواط</value>
   </data>

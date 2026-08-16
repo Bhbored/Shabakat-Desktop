@@ -16,15 +16,18 @@ public sealed class BackupService : IBackupService
 
     private readonly IBackupRepository _backupRepository;
     private readonly ICultureService _cultureService;
+    private readonly ILicenseService _licenseService;
     private readonly ILogger<BackupService> _logger;
 
     public BackupService(
         IBackupRepository backupRepository,
         ICultureService cultureService,
+        ILicenseService licenseService,
         ILogger<BackupService> logger)
     {
         _backupRepository = backupRepository;
         _cultureService = cultureService;
+        _licenseService = licenseService;
         _logger = logger;
     }
 
@@ -67,6 +70,7 @@ public sealed class BackupService : IBackupService
             yield return 0.08 + progress * 0.9;
 
         _cultureService.Apply(file.Preferences?.Language ?? "en");
+        _licenseService.NotifyChanged();
         _logger.LogInformation("Restored backup version {Version} exported at {ExportedAt}", file.Version, file.ExportedAt);
         yield return 1d;
     }
