@@ -2,12 +2,12 @@ namespace Shabakat.Application.Helper;
 
 public static class BackupFilePicker
 {
-    public static async Task<bool> SaveAsync(string json, string suggestedFileName)
+    public static async Task<string?> PickSavePathAsync(string suggestedFileName)
     {
         var window = Microsoft.Maui.Controls.Application.Current?.Windows.FirstOrDefault();
         var native = window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
         if (native is null)
-            return false;
+            return null;
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(native);
         var picker = new Windows.Storage.Pickers.FileSavePicker();
@@ -17,11 +17,7 @@ public static class BackupFilePicker
         picker.FileTypeChoices.Add("JSON backup", [".json"]);
 
         var dest = await picker.PickSaveFileAsync();
-        if (dest is null)
-            return false;
-
-        await File.WriteAllTextAsync(dest.Path, json);
-        return true;
+        return dest?.Path;
     }
 
     public static async Task<string?> OpenAsync()

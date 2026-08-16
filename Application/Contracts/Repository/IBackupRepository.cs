@@ -4,6 +4,6 @@ namespace Shabakat.Application.Contracts.Repository;
 
 public interface IBackupRepository
 {
-    Task<BackupFile> LoadAsync();
-    Task ReplaceAsync(BackupFile file);
+    IAsyncEnumerable<double> LoadAsync(BackupFile destination, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<double> ReplaceAsync(BackupFile file, CancellationToken cancellationToken = default);
 }

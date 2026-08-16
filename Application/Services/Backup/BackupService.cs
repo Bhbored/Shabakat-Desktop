@@ -1,10 +1,11 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.Logging;
+using Shabakat.Application.Backup;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
-using Shabakat.Application.Backup;
 using Shabakat.Domain.Exceptions;
 
 namespace Shabakat.Application.Services.Backup;
@@ -27,39 +28,73 @@ public sealed class BackupService : IBackupService
         _logger = logger;
     }
 
-    public async Task<string> ExportAsync()
+    public async IAsyncEnumerable<double> ExportAsync(
+        string destinationPath,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var file = await _backupRepository.LoadAsync();
-        file.Version = BackupFile.CurrentVersion;
-        file.ExportedAt = DateTime.Now;
+        var file = new BackupFile
+        {
+            Version = BackupFile.CurrentVersion,
+            ExportedAt = DateTime.Now
+        };
+
+        await foreach (var progress in _backupRepository.LoadAsync(file, cancellationToken))
+            yield return progress * 0.9;
+
+        var json = JsonSerializer.Serialize(file, JsonOptions);
+        yield return 0.95;
+
+        await File.WriteAllTextAsync(destinationPath, json, cancellationToken);
         _logger.LogInformation(
             "Exported backup version {Version} at {ExportedAt}",
             file.Version,
             file.ExportedAt);
-        return JsonSerializer.Serialize(file, JsonOptions);
+        yield return 1d;
     }
 
-    public async Task RestoreAsync(string json)
+    public async IAsyncEnumerable<double> RestoreAsync(
+        string json,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        yield return 0.02;
         var file = Parse(json);
         if (file.Version != BackupFile.CurrentVersion)
             throw new DomainException("This backup file is not supported.");
 
-        try
-        {
-            await _backupRepository.ReplaceAsync(file);
-        }
-        catch (DomainException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new DomainException("Could not restore this backup file.", ex);
-        }
+        yield return 0.08;
+
+        await foreach (var progress in WithRestoreErrors(_backupRepository.ReplaceAsync(file, cancellationToken)))
+            yield return 0.08 + progress * 0.9;
 
         _cultureService.Apply(file.Preferences?.Language ?? "en");
         _logger.LogInformation("Restored backup version {Version} exported at {ExportedAt}", file.Version, file.ExportedAt);
+        yield return 1d;
+    }
+
+    private static async IAsyncEnumerable<double> WithRestoreErrors(IAsyncEnumerable<double> source)
+    {
+        await using var enumerator = source.GetAsyncEnumerator();
+        while (true)
+        {
+            bool moved;
+            try
+            {
+                moved = await enumerator.MoveNextAsync();
+            }
+            catch (DomainException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new DomainException("Could not restore this backup file.", ex);
+            }
+
+            if (!moved)
+                yield break;
+
+            yield return enumerator.Current;
+        }
     }
 
     private static BackupFile Parse(string json)
@@ -113,7 +148,6 @@ public sealed class BackupService : IBackupService
             Converters = { new JsonStringEnumConverter() }
         };
     }
-
 
     private static void IgnoreNavigationsAndComputed(JsonTypeInfo info)
     {

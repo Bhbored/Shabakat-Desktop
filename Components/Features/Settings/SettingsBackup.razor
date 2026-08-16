@@ -10,11 +10,25 @@
             <p class="mt-1 text-xs text-muted-foreground">@L["Page.SettingsBackup.Subtitle"]</p>
         </div>
 
+        @if (_busy || _progress > 0)
+        {
+            <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>@ProgressLabel</span>
+                    <span>@((_progress * 100).ToString("0"))%</span>
+                </div>
+                <div class="h-2.5 overflow-hidden rounded-full bg-muted">
+                    <div class="h-full rounded-full bg-primary transition-[width] duration-300"
+                         style="width: @((_progress * 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                </div>
+            </div>
+        }
+
         <button type="button"
                 class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
                 disabled="@_busy"
                 @onclick="ExportAsync">
-            @(_busy && _exporting ? L["Settings.Backup.Exporting"] : L["Settings.Backup.Export"])
+            @(_exporting ? L["Settings.Backup.Exporting"] : L["Settings.Backup.Export"])
         </button>
         <p class="text-xs text-muted-foreground">@L["Settings.Backup.ExportHint"]</p>
 
@@ -22,7 +36,7 @@
                 class="w-full rounded-2xl border border-red-600/40 bg-red-600/10 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-600/15 disabled:opacity-50 dark:text-red-400"
                 disabled="@_busy"
                 @onclick="BeginRestoreAsync">
-            @(_busy && _restoring ? L["Settings.Backup.Restoring"] : L["Settings.Backup.Restore"])
+            @(_restoring ? L["Settings.Backup.Restoring"] : L["Settings.Backup.Restore"])
         </button>
         <p class="text-xs text-muted-foreground">@L["Settings.Backup.RestoreHint"]</p>
     </div>
@@ -55,25 +69,44 @@
     private bool _exporting;
     private bool _restoring;
     private bool _confirmOpen;
+    private double _progress;
     private string? _pendingJson;
+
+    private string ProgressLabel =>
+        _exporting ? L["Settings.Backup.Exporting"].Value
+        : _restoring ? L["Settings.Backup.Restoring"].Value
+        : L["Common.Done"].Value;
 
     private async Task ExportAsync()
     {
         if (_busy)
             return;
 
+        var fileName = $"shabakat-backup-{DateTime.Now:yyyyMMdd-HHmm}.json";
+        var path = await BackupFilePicker.PickSavePathAsync(fileName);
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
         _busy = true;
         _exporting = true;
+        _progress = 0;
         try
         {
-            var json = await UiActions.RunAsync(Toast, () => BackupService.ExportAsync());
-            if (json is null)
-                return;
+            await foreach (var value in BackupService.ExportAsync(path))
+            {
+                _progress = value;
+                await InvokeAsync(StateHasChanged);
+            }
 
-            var fileName = $"shabakat-backup-{DateTime.Now:yyyyMMdd-HHmm}.json";
-            var saved = await BackupFilePicker.SaveAsync(json, fileName);
-            if (saved)
-                Toast.Success(L["Settings.Backup.Exported"].Value);
+            Toast.Success(L["Settings.Backup.Exported"].Value);
+        }
+        catch (DomainException ex)
+        {
+            Toast.Error(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message);
         }
         finally
         {
@@ -109,17 +142,31 @@
         if (_busy || string.IsNullOrWhiteSpace(_pendingJson))
             return;
 
+        var json = _pendingJson;
+        _confirmOpen = false;
+        _pendingJson = null;
         _busy = true;
         _restoring = true;
+        _progress = 0;
+        await InvokeAsync(StateHasChanged);
+
         try
         {
-            var json = _pendingJson;
-            await UiActions.RunAsync(
-                Toast,
-                () => BackupService.RestoreAsync(json),
-                L["Settings.Backup.Restored"].Value);
-            _confirmOpen = false;
-            _pendingJson = null;
+            await foreach (var value in BackupService.RestoreAsync(json))
+            {
+                _progress = value;
+                await InvokeAsync(StateHasChanged);
+            }
+
+            Toast.Success(L["Settings.Backup.Restored"].Value);
+        }
+        catch (DomainException ex)
+        {
+            Toast.Error(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message);
         }
         finally
         {

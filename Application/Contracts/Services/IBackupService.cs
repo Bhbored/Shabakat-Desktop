@@ -1,7 +1,9 @@
+using Shabakat.Application.Backup;
+
 namespace Shabakat.Application.Contracts.Services;
 
 public interface IBackupService
 {
-    Task<string> ExportAsync();
-    Task RestoreAsync(string json);
+    IAsyncEnumerable<double> ExportAsync(string destinationPath, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<double> RestoreAsync(string json, CancellationToken cancellationToken = default);
 }
