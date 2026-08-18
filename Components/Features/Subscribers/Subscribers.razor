@@ -2,7 +2,6 @@
 @inject ICustomerService CustomerService
 @inject IMeterReadingService MeterReadingService
 @inject IAreaService AreaService
-@inject IDistributionBoxService BoxService
 @inject IAmpereScheduleService AmpereScheduleService
 @inject IAppPreferencesService PreferencesService
 @inject ICustomerExportService ExportService
@@ -18,7 +17,6 @@
                         RelationFilter="@_relationFilter"
                         StatusFilter="@_statusFilter"
                         TotalCount="_totalCount"
-                        Areas="_areas"
                         Schedules="_schedules"
                         SearchFieldChanged="OnSearchFieldChanged"
                         SearchTermChanged="OnSearchTermChanged"
@@ -57,8 +55,6 @@
                      AmpereSchedulePricingEnabled="_ampereSchedulePricingEnabled"
                      ShowInitialMeterReading="_showInitialMeterReading"
                      Form="_form"
-                     Areas="_areas"
-                     FilteredBoxes="FilteredBoxes"
                      Schedules="_schedules"
                      OnClose="CloseForm"
                      OnSave="SaveFormAsync"
@@ -100,7 +96,6 @@
 @code {
     private readonly List<CustomerSummaryResponse> _items = [];
     private readonly List<AreaResponse> _areas = [];
-    private readonly List<DistributionBoxResponse> _boxes = [];
     private readonly List<AmpereScheduleResponse> _schedules = [];
     private readonly List<MeterReadingResponse> _meterReadings = [];
 
@@ -140,11 +135,6 @@
     private decimal _meterValue;
     private DateTime? _meterDate;
 
-    private IEnumerable<DistributionBoxResponse> FilteredBoxes =>
-        string.IsNullOrEmpty(_form.AreaId)
-            ? _boxes
-            : _boxes.Where(b => b.AreaId.ToString() == _form.AreaId);
-
     private string _readingToDeleteLabel =>
         _readingToDelete is null ? "" : L["Subscribers.ReadingValue", FormatHelper.Number(_readingToDelete.ReadingValue)].Value;
 
@@ -157,14 +147,11 @@
     private async Task LoadLookupsAsync()
     {
         var areas = await UiActions.RunAsync(Toast, () => AreaService.GetAllAsync()) ?? [];
-        var boxes = await UiActions.RunAsync(Toast, () => BoxService.GetAllUnpagedAsync()) ?? [];
         var schedules = await UiActions.RunAsync(Toast, () => AmpereScheduleService.GetAllAsync()) ?? [];
         var prefs = await UiActions.RunAsync(Toast, () => PreferencesService.GetAsync());
         _ampereSchedulePricingEnabled = prefs?.AmpereSchedulePricingEnabled == true;
         _areas.Clear();
         _areas.AddRange(areas);
-        _boxes.Clear();
-        _boxes.AddRange(boxes);
         _schedules.Clear();
         _schedules.AddRange(schedules);
     }

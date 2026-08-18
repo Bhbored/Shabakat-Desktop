@@ -7,6 +7,7 @@ public interface IDistributionBoxService
 {
     Task<PagedResponse<DistributionBoxResponse>> GetAllAsync(DistributionBoxFilterRequest filter);
     Task<IEnumerable<DistributionBoxResponse>> GetAllUnpagedAsync();
+    Task<DistributionBoxResponse> GetByIdAsync(Guid id);
     Task<DistributionBoxResponse> CreateAsync(CreateDistributionBoxRequest request);
     Task<DistributionBoxResponse> UpdateAsync(Guid id, UpdateDistributionBoxRequest request);
     Task DeleteAsync(Guid id);

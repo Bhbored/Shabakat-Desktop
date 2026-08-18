@@ -575,6 +575,27 @@
   <data name="CustomerSearch.All" xml:space="preserve">
     <value>All customers</value>
   </data>
+  <data name="AreaSearch.Placeholder" xml:space="preserve">
+    <value>Select area</value>
+  </data>
+  <data name="AreaSearch.Search" xml:space="preserve">
+    <value>Search areas...</value>
+  </data>
+  <data name="AreaSearch.None" xml:space="preserve">
+    <value>No areas found.</value>
+  </data>
+  <data name="AreaSearch.All" xml:space="preserve">
+    <value>All areas</value>
+  </data>
+  <data name="BoxSearch.Placeholder" xml:space="preserve">
+    <value>Select box</value>
+  </data>
+  <data name="BoxSearch.Search" xml:space="preserve">
+    <value>Search boxes...</value>
+  </data>
+  <data name="BoxSearch.None" xml:space="preserve">
+    <value>No boxes found.</value>
+  </data>
   <data name="Table.InvoiceNumber" xml:space="preserve">
     <value>Invoice #</value>
   </data>

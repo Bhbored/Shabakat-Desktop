@@ -82,29 +82,21 @@
                     }
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Common.Area"]</label>
-                        <select class="@InputClass" @bind="Form.AreaId" @bind:after="NotifyAreaChangedAsync">
-                            <option value="">@L["Field.OptionalArea"]</option>
-                            @foreach (var area in Areas)
-                            {
-                                <option value="@area.Id">@area.Name</option>
-                            }
-                        </select>
+                        <AreaSearchSelect Value="@Form.AreaId"
+                                          ValueChanged="OnAreaValueChangedAsync"
+                                          AllowEmpty="true"
+                                          EmptyLabel="@L["Field.OptionalArea"]" />
                         <p class="mt-1.5 min-h-10 text-xs text-muted-foreground">@L["Subscribers.AreaHint"]</p>
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Field.DistributionBox"]</label>
-                        <select class="@InputClass" disabled="@(!FilteredBoxes.Any())" @bind="Form.BoxId">
-                            <option value="">@L["Field.NoBox"]</option>
-                            @foreach (var box in FilteredBoxes)
-                            {
-                                <option value="@box.Id">@box.Name</option>
-                            }
-                        </select>
-                        <p class="mt-1.5 min-h-10 text-xs text-muted-foreground">
-                            @(FilteredBoxes.Any()
-                                ? L["Subscribers.BoxHint"]
-                                : L["Subscribers.NoBoxes"])
-                        </p>
+                        <BoxSearchSelect @key="Form.AreaId"
+                                         Value="@Form.BoxId"
+                                         ValueChanged="OnBoxValueChanged"
+                                         AreaId="@Form.AreaId"
+                                         AllowEmpty="true"
+                                         EmptyLabel="@L["Field.NoBox"]" />
+                        <p class="mt-1.5 min-h-10 text-xs text-muted-foreground">@L["Subscribers.BoxHint"]</p>
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Common.Building"]</label>
@@ -208,8 +200,6 @@
     [Parameter] public bool AmpereSchedulePricingEnabled { get; set; }
     [Parameter] public bool ShowInitialMeterReading { get; set; }
     [Parameter] public SubscriberFormModel? Form { get; set; }
-    [Parameter] public IReadOnlyList<AreaResponse> Areas { get; set; } = [];
-    [Parameter] public IEnumerable<DistributionBoxResponse> FilteredBoxes { get; set; } = [];
     [Parameter] public IReadOnlyList<AmpereScheduleResponse> Schedules { get; set; } = [];
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnSave { get; set; }
@@ -224,5 +214,18 @@
     };
 
     private Task NotifyPlanChangedAsync() => OnPlanChanged.InvokeAsync();
-    private Task NotifyAreaChangedAsync() => OnAreaChanged.InvokeAsync();
+
+    private async Task OnAreaValueChangedAsync(string value)
+    {
+        if (Form is null) return;
+        Form.AreaId = value;
+        await OnAreaChanged.InvokeAsync();
+    }
+
+    private Task OnBoxValueChanged(string value)
+    {
+        if (Form is not null)
+            Form.BoxId = value;
+        return Task.CompletedTask;
+    }
 }

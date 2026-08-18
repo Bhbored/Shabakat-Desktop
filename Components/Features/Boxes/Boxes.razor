@@ -8,7 +8,6 @@
 <div class="space-y-4" @onclick="CloseMenu">
     <BoxesToolbar Search="@_searchTerm"
                   AreaFilter="@_areaFilter"
-                  Areas="_areas"
                   Total="_totalCount"
                   Disabled="@(_loading || _areas.Count == 0)"
                   SearchChanged="OnSearchChangedAsync"
@@ -46,7 +45,6 @@
               InitialAreaId="_formAreaId"
               InitialLocationNote="@_formLocationNote"
               InitialNotes="@_formNotes"
-              Areas="_areas"
               Saving="_saving"
               OnClose="CloseForm"
               OnSave="SaveAsync" />

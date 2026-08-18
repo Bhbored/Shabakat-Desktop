@@ -1,5 +1,5 @@
 @namespace Shabakat.Components.Shared
-@inject ICustomerService CustomerService
+@inject IAreaService AreaService
 @inject IStringLocalizer<SharedResource> L
 @implements IDisposable
 
@@ -24,7 +24,7 @@
                 <input @ref="_searchInput"
                        type="text"
                        class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
-                       placeholder="@L["CustomerSearch.Search"]"
+                       placeholder="@L["AreaSearch.Search"]"
                        value="@_search"
                        @oninput="OnSearchInput"
                        @onclick:stopPropagation="true" />
@@ -50,21 +50,17 @@
                 }
                 else if (_items.Count == 0)
                 {
-                    <p class="px-3 py-4 text-sm text-muted-foreground">@L["CustomerSearch.None"]</p>
+                    <p class="px-3 py-4 text-sm text-muted-foreground">@L["AreaSearch.None"]</p>
                 }
                 else
                 {
-                    @foreach (var customer in _items)
+                    @foreach (var area in _items)
                     {
-                        var selected = string.Equals(Value, customer.Id.ToString(), StringComparison.OrdinalIgnoreCase);
+                        var selected = string.Equals(Value, area.Id.ToString(), StringComparison.OrdinalIgnoreCase);
                         <button type="button"
                                 class="@OptionClass(selected)"
-                                @onclick="() => SelectAsync(customer)">
-                            <span class="truncate font-medium">@customer.Name</span>
-                            @if (!string.IsNullOrWhiteSpace(customer.Phone))
-                            {
-                                <span class="truncate text-xs text-muted-foreground">@customer.Phone</span>
-                            }
+                                @onclick="() => SelectAsync(area)">
+                            <span class="truncate font-medium">@area.Name</span>
                         </button>
                     }
                 }
@@ -76,12 +72,11 @@
 @code {
     [Parameter] public string? Value { get; set; }
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
-    [Parameter] public EventCallback<CustomerSummaryResponse?> SelectedChanged { get; set; }
     [Parameter] public bool AllowEmpty { get; set; }
     [Parameter] public string EmptyLabel { get; set; } = "";
     [Parameter] public string Placeholder { get; set; } = "";
 
-    private readonly List<CustomerSummaryResponse> _items = [];
+    private readonly List<AreaResponse> _items = [];
     private CancellationTokenSource? _searchCts;
     private ElementReference _searchInput;
     private bool _open;
@@ -94,8 +89,8 @@
 
     private string DisplayLabel =>
         !string.IsNullOrWhiteSpace(_selectedName) ? _selectedName
-        : AllowEmpty ? (string.IsNullOrWhiteSpace(EmptyLabel) ? L["CustomerSearch.All"].Value : EmptyLabel)
-        : (string.IsNullOrWhiteSpace(Placeholder) ? L["CustomerSearch.Placeholder"].Value : Placeholder);
+        : AllowEmpty ? (string.IsNullOrWhiteSpace(EmptyLabel) ? L["AreaSearch.All"].Value : EmptyLabel)
+        : (string.IsNullOrWhiteSpace(Placeholder) ? L["AreaSearch.Placeholder"].Value : Placeholder);
 
     protected override async Task OnParametersSetAsync()
     {
@@ -109,7 +104,7 @@
             return;
         }
 
-        var match = _items.FirstOrDefault(c => c.Id == id);
+        var match = _items.FirstOrDefault(a => a.Id == id);
         if (match is not null)
         {
             _selectedName = match.Name;
@@ -118,8 +113,8 @@
 
         try
         {
-            var customer = await CustomerService.GetByIdAsync(id);
-            _selectedName = customer.Name;
+            var area = await AreaService.GetByIdAsync(id);
+            _selectedName = area.Name;
         }
         catch (DomainException)
         {
@@ -181,15 +176,17 @@
         _loading = true;
         try
         {
-            var page = await CustomerService.GetAllAsync(new CustomerFilterRequest(
-                Name: string.IsNullOrWhiteSpace(_search) ? null : _search.Trim(),
-                PageNumber: 1,
-                PageSize: 20));
+            var areas = await AreaService.GetAllAsync();
             if (version != _loadVersion)
                 return;
 
+            var term = _search.Trim();
             _items.Clear();
-            _items.AddRange(page.Data);
+            _items.AddRange(string.IsNullOrWhiteSpace(term)
+                ? areas.OrderBy(a => a.Name).Take(20)
+                : areas.Where(a => a.Name.Contains(term, StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(a => a.Name)
+                    .Take(20));
         }
         catch (DomainException)
         {
@@ -209,16 +206,14 @@
         _selectedName = null;
         _boundValue = "";
         await ValueChanged.InvokeAsync("");
-        await SelectedChanged.InvokeAsync(null);
         Close();
     }
 
-    private async Task SelectAsync(CustomerSummaryResponse customer)
+    private async Task SelectAsync(AreaResponse area)
     {
-        _selectedName = customer.Name;
-        _boundValue = customer.Id.ToString();
+        _selectedName = area.Name;
+        _boundValue = area.Id.ToString();
         await ValueChanged.InvokeAsync(_boundValue);
-        await SelectedChanged.InvokeAsync(customer);
         Close();
     }
 

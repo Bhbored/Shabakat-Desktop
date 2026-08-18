@@ -23,14 +23,9 @@
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-foreground">@L["Common.Area"]</label>
-                    <InputSelect @bind-Value="_form.AreaId"
-                                 class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary">
-                        <option value="@Guid.Empty">@L["Boxes.SelectArea"]</option>
-                        @foreach (var area in Areas)
-                        {
-                            <option value="@area.Id">@area.Name</option>
-                        }
-                    </InputSelect>
+                    <AreaSearchSelect Value="@AreaValue"
+                                      ValueChanged="OnAreaValueChanged"
+                                      Placeholder="@L["Boxes.SelectArea"]" />
                     <ValidationMessage For="() => _form.AreaId" class="mt-1 text-xs text-red-500" />
                 </div>
             </div>
@@ -77,6 +72,7 @@
 
 @code {
     private BoxFormModel _form = new();
+    private bool _wasOpen;
 
     [Parameter] public bool Open { get; set; }
     [Parameter] public bool IsEdit { get; set; }
@@ -84,14 +80,15 @@
     [Parameter] public Guid InitialAreaId { get; set; }
     [Parameter] public string InitialLocationNote { get; set; } = "";
     [Parameter] public string InitialNotes { get; set; } = "";
-    [Parameter] public IReadOnlyList<AreaResponse> Areas { get; set; } = [];
     [Parameter] public bool Saving { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback<BoxFormValues> OnSave { get; set; }
 
+    private string AreaValue => _form.AreaId == Guid.Empty ? "" : _form.AreaId.ToString();
+
     protected override void OnParametersSet()
     {
-        if (Open)
+        if (Open && !_wasOpen)
         {
             _form = new BoxFormModel
             {
@@ -101,6 +98,14 @@
                 Notes = InitialNotes
             };
         }
+
+        _wasOpen = Open;
+    }
+
+    private Task OnAreaValueChanged(string value)
+    {
+        _form.AreaId = Guid.TryParse(value, out var id) ? id : Guid.Empty;
+        return Task.CompletedTask;
     }
 
     private async Task HandleSubmitAsync()

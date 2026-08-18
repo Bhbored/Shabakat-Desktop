@@ -1,11 +1,12 @@
 @namespace Shabakat.Components.Shared
-@inject ICustomerService CustomerService
+@inject IDistributionBoxService BoxService
 @inject IStringLocalizer<SharedResource> L
 @implements IDisposable
 
 <div class="relative">
     <button type="button"
-            class="flex h-[2.625rem] w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3 text-left text-sm text-foreground outline-none transition hover:bg-muted/40 focus:border-primary"
+            class="flex h-[2.625rem] w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3 text-left text-sm text-foreground outline-none transition hover:bg-muted/40 focus:border-primary disabled:opacity-50"
+            disabled="@Disabled"
             @onclick="ToggleAsync">
         <span class="truncate @(string.IsNullOrWhiteSpace(DisplayLabel) ? "text-muted-foreground" : "")">@DisplayLabel</span>
         <svg class="h-4 w-4 shrink-0 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -24,7 +25,7 @@
                 <input @ref="_searchInput"
                        type="text"
                        class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
-                       placeholder="@L["CustomerSearch.Search"]"
+                       placeholder="@L["BoxSearch.Search"]"
                        value="@_search"
                        @oninput="OnSearchInput"
                        @onclick:stopPropagation="true" />
@@ -50,20 +51,20 @@
                 }
                 else if (_items.Count == 0)
                 {
-                    <p class="px-3 py-4 text-sm text-muted-foreground">@L["CustomerSearch.None"]</p>
+                    <p class="px-3 py-4 text-sm text-muted-foreground">@L["BoxSearch.None"]</p>
                 }
                 else
                 {
-                    @foreach (var customer in _items)
+                    @foreach (var box in _items)
                     {
-                        var selected = string.Equals(Value, customer.Id.ToString(), StringComparison.OrdinalIgnoreCase);
+                        var selected = string.Equals(Value, box.Id.ToString(), StringComparison.OrdinalIgnoreCase);
                         <button type="button"
                                 class="@OptionClass(selected)"
-                                @onclick="() => SelectAsync(customer)">
-                            <span class="truncate font-medium">@customer.Name</span>
-                            @if (!string.IsNullOrWhiteSpace(customer.Phone))
+                                @onclick="() => SelectAsync(box)">
+                            <span class="truncate font-medium">@box.Name</span>
+                            @if (!string.IsNullOrWhiteSpace(box.AreaName))
                             {
-                                <span class="truncate text-xs text-muted-foreground">@customer.Phone</span>
+                                <span class="truncate text-xs text-muted-foreground">@box.AreaName</span>
                             }
                         </button>
                     }
@@ -76,12 +77,13 @@
 @code {
     [Parameter] public string? Value { get; set; }
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
-    [Parameter] public EventCallback<CustomerSummaryResponse?> SelectedChanged { get; set; }
+    [Parameter] public string? AreaId { get; set; }
     [Parameter] public bool AllowEmpty { get; set; }
     [Parameter] public string EmptyLabel { get; set; } = "";
     [Parameter] public string Placeholder { get; set; } = "";
+    [Parameter] public bool Disabled { get; set; }
 
-    private readonly List<CustomerSummaryResponse> _items = [];
+    private readonly List<DistributionBoxResponse> _items = [];
     private CancellationTokenSource? _searchCts;
     private ElementReference _searchInput;
     private bool _open;
@@ -91,14 +93,21 @@
     private string _search = "";
     private string? _selectedName;
     private string? _boundValue;
+    private string? _boundAreaId;
 
     private string DisplayLabel =>
         !string.IsNullOrWhiteSpace(_selectedName) ? _selectedName
-        : AllowEmpty ? (string.IsNullOrWhiteSpace(EmptyLabel) ? L["CustomerSearch.All"].Value : EmptyLabel)
-        : (string.IsNullOrWhiteSpace(Placeholder) ? L["CustomerSearch.Placeholder"].Value : Placeholder);
+        : AllowEmpty ? (string.IsNullOrWhiteSpace(EmptyLabel) ? L["Field.NoBox"].Value : EmptyLabel)
+        : (string.IsNullOrWhiteSpace(Placeholder) ? L["BoxSearch.Placeholder"].Value : Placeholder);
 
     protected override async Task OnParametersSetAsync()
     {
+        var areaChanged = AreaId != _boundAreaId;
+        _boundAreaId = AreaId;
+
+        if (areaChanged && _open)
+            await LoadAsync();
+
         if (Value == _boundValue)
             return;
 
@@ -109,7 +118,7 @@
             return;
         }
 
-        var match = _items.FirstOrDefault(c => c.Id == id);
+        var match = _items.FirstOrDefault(b => b.Id == id);
         if (match is not null)
         {
             _selectedName = match.Name;
@@ -118,8 +127,8 @@
 
         try
         {
-            var customer = await CustomerService.GetByIdAsync(id);
-            _selectedName = customer.Name;
+            var box = await BoxService.GetByIdAsync(id);
+            _selectedName = box.Name;
         }
         catch (DomainException)
         {
@@ -144,6 +153,9 @@
 
     private async Task ToggleAsync()
     {
+        if (Disabled)
+            return;
+
         if (_open)
         {
             Close();
@@ -181,7 +193,9 @@
         _loading = true;
         try
         {
-            var page = await CustomerService.GetAllAsync(new CustomerFilterRequest(
+            Guid? areaId = Guid.TryParse(AreaId, out var parsed) ? parsed : null;
+            var page = await BoxService.GetAllAsync(new DistributionBoxFilterRequest(
+                AreaId: areaId,
                 Name: string.IsNullOrWhiteSpace(_search) ? null : _search.Trim(),
                 PageNumber: 1,
                 PageSize: 20));
@@ -209,16 +223,14 @@
         _selectedName = null;
         _boundValue = "";
         await ValueChanged.InvokeAsync("");
-        await SelectedChanged.InvokeAsync(null);
         Close();
     }
 
-    private async Task SelectAsync(CustomerSummaryResponse customer)
+    private async Task SelectAsync(DistributionBoxResponse box)
     {
-        _selectedName = customer.Name;
-        _boundValue = customer.Id.ToString();
+        _selectedName = box.Name;
+        _boundValue = box.Id.ToString();
         await ValueChanged.InvokeAsync(_boundValue);
-        await SelectedChanged.InvokeAsync(customer);
         Close();
     }
 

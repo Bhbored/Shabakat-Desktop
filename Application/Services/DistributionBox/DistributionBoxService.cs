@@ -43,6 +43,13 @@ public sealed class DistributionBoxService : IDistributionBoxService
         return boxes.Select(b => b.ToResponse());
     }
 
+    public async Task<DistributionBoxResponse> GetByIdAsync(Guid id)
+    {
+        var box = await _distributionBoxRepository.GetByIdWithDetailsAsync(id)
+            ?? throw new DomainException("Error.BoxNotFound");
+        return box.ToResponse();
+    }
+
     public async Task<DistributionBoxResponse> CreateAsync(CreateDistributionBoxRequest request)
     {
         await EnsureAreaExistsAsync(request.AreaId);

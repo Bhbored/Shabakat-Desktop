@@ -575,6 +575,27 @@
   <data name="CustomerSearch.All" xml:space="preserve">
     <value>كل الزبائن</value>
   </data>
+  <data name="AreaSearch.Placeholder" xml:space="preserve">
+    <value>اختر المنطقة</value>
+  </data>
+  <data name="AreaSearch.Search" xml:space="preserve">
+    <value>بحث عن مناطق...</value>
+  </data>
+  <data name="AreaSearch.None" xml:space="preserve">
+    <value>لم يتم العثور على مناطق.</value>
+  </data>
+  <data name="AreaSearch.All" xml:space="preserve">
+    <value>كل المناطق</value>
+  </data>
+  <data name="BoxSearch.Placeholder" xml:space="preserve">
+    <value>اختر الصندوق</value>
+  </data>
+  <data name="BoxSearch.Search" xml:space="preserve">
+    <value>بحث عن صناديق...</value>
+  </data>
+  <data name="BoxSearch.None" xml:space="preserve">
+    <value>لم يتم العثور على صناديق.</value>
+  </data>
   <data name="Table.InvoiceNumber" xml:space="preserve">
     <value>رقم الفاتورة</value>
   </data>

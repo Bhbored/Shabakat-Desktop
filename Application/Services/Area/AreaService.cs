@@ -25,6 +25,13 @@ public sealed class AreaService : IAreaService
         return areas.Select(a => a.ToResponse());
     }
 
+    public async Task<AreaResponse> GetByIdAsync(Guid id)
+    {
+        var area = await _areaRepository.GetByIdAsync(id)
+            ?? throw new DomainException("Error.AreaNotFound");
+        return area.ToResponse();
+    }
+
     public async Task<AreaResponse> CreateAsync(CreateAreaRequest request)
     {
         var area = new Domain.Entities.Area

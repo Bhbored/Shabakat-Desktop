@@ -12,18 +12,13 @@
                        value="@Search"
                        @oninput="OnSearchInput" />
             </label>
-            <label class="w-full sm:w-60">
+            <div class="w-full sm:w-60">
                 <span class="sr-only">@L["Filter.ByArea"]</span>
-                <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
-                        value="@AreaFilter"
-                        @onchange="OnAreaFilterChanged">
-                    <option value="">@L["Filter.AllAreas"]</option>
-                    @foreach (var area in Areas)
-                    {
-                        <option value="@area.Id">@area.Name</option>
-                    }
-                </select>
-            </label>
+                <AreaSearchSelect Value="@AreaFilter"
+                                  ValueChanged="AreaFilterChanged"
+                                  AllowEmpty="true"
+                                  EmptyLabel="@L["Filter.AllAreas"]" />
+            </div>
         </div>
         <button type="button"
                 class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
@@ -41,7 +36,6 @@
 @code {
     [Parameter] public string Search { get; set; } = "";
     [Parameter] public string AreaFilter { get; set; } = "";
-    [Parameter] public IReadOnlyList<AreaResponse> Areas { get; set; } = [];
     [Parameter] public int Total { get; set; }
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public EventCallback<string> SearchChanged { get; set; }
@@ -50,9 +44,6 @@
 
     private async Task OnSearchInput(ChangeEventArgs e)
         => await SearchChanged.InvokeAsync(e.Value?.ToString() ?? "");
-
-    private async Task OnAreaFilterChanged(ChangeEventArgs e)
-        => await AreaFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
 
     private Task HandleCreateAsync() => OnCreate.InvokeAsync();
 }

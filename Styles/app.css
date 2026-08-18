@@ -191,6 +191,17 @@
         inset-inline-start: 1.375rem;
     }
 
+    /* Painted so WebView2 hit-tests it; fixed so it covers the viewport after
+       sheet enter animation (which must not leave a transform containing block). */
+    .ui-click-away {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        background: rgba(0, 0, 0, 0.001);
+        pointer-events: auto;
+        cursor: default;
+    }
+
     @keyframes ui-fade-in {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -203,21 +214,21 @@
 
     @keyframes ui-sheet-in-left {
         from { transform: translateX(-100%); }
-        to { transform: translateX(0); }
+        to { transform: none; }
     }
 
     @keyframes ui-sheet-out-left {
-        from { transform: translateX(0); }
+        from { transform: none; }
         to { transform: translateX(-100%); }
     }
 
     @keyframes ui-sheet-in-right {
         from { transform: translateX(100%); }
-        to { transform: translateX(0); }
+        to { transform: none; }
     }
 
     @keyframes ui-sheet-out-right {
-        from { transform: translateX(0); }
+        from { transform: none; }
         to { transform: translateX(100%); }
     }
 
@@ -240,7 +251,7 @@
     }
 
     .ui-sheet-panel[data-side="start"][data-state="open"] {
-        animation: ui-sheet-in-left 360ms ease-out forwards;
+        animation: ui-sheet-in-left 360ms ease-out;
     }
 
     .ui-sheet-panel[data-side="start"][data-state="closed"] {
@@ -248,7 +259,7 @@
     }
 
     .ui-sheet-panel[data-side="end"][data-state="open"] {
-        animation: ui-sheet-in-right 360ms ease-out forwards;
+        animation: ui-sheet-in-right 360ms ease-out;
     }
 
     .ui-sheet-panel[data-side="end"][data-state="closed"] {
