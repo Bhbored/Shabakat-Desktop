@@ -17,7 +17,6 @@
                      DateFromChanged="OnDateFromChanged"
                      DateToChanged="OnDateToChanged"
                      OnFiltersChanged="ReloadFromFiltersAsync"
-                     OnResetFilters="ResetFiltersAsync"
                      OnBulkCreate="OpenBulk"
                      OnCreate="OpenCreate" />
 
@@ -190,16 +189,6 @@
 
     private async Task ReloadFromFiltersAsync()
     {
-        _pageNumber = 1;
-        await LoadAsync();
-    }
-
-    private async Task ResetFiltersAsync()
-    {
-        _customerFilter = "";
-        _statusFilter = "";
-        _dateFrom = null;
-        _dateTo = null;
         _pageNumber = 1;
         await LoadAsync();
     }

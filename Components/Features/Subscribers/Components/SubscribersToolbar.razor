@@ -2,29 +2,123 @@
 @inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4">
-    <div class="flex flex-wrap items-center gap-3 xl:flex-nowrap">
-        <div class="flex min-w-72 flex-1 gap-2">
-            <select class="w-36 shrink-0 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
+    <div class="flex flex-col gap-3 xl:flex-row xl:items-center">
+        <div class="flex min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-card focus-within:border-primary">
+            <select class="h-[2.625rem] w-32 shrink-0 border-0 border-e border-border bg-transparent px-3 text-sm text-foreground outline-none"
                     value="@SearchField"
                     @onchange="OnSearchFieldChanged">
                 <option value="name">@L["Common.Name"]</option>
                 <option value="phone">@L["Common.Phone"]</option>
             </select>
-            <input type="text"
-                   class="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none transition focus:border-primary"
+            <input type="search"
+                   class="h-[2.625rem] min-w-0 flex-1 bg-transparent px-4 text-sm text-foreground outline-none"
                    placeholder="@(SearchField == "phone" ? L["Filter.SearchSubscribersPhone"] : L["Filter.SearchSubscribersName"])"
                    value="@SearchTerm"
                    @oninput="OnSearchTermInput" />
         </div>
-        <div class="min-w-full xl:min-w-56">
+
+        <div class="min-w-52">
             <AreaSearchSelect Value="@AreaFilter"
                               ValueChanged="AreaFilterChanged"
                               AllowEmpty="true"
                               EmptyLabel="@L["Filter.AllAreas"]" />
         </div>
-        <div class="flex gap-2">
+
+        <div class="relative shrink-0">
             <button type="button"
-                    class="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                    class="inline-flex h-[2.625rem] items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
+                    @onclick="ToggleFilters"
+                    @onclick:stopPropagation="true">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                </svg>
+                @L["Filter.Button"]
+                @if (ActiveFilterCount > 0)
+                {
+                    <span class="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">@ActiveFilterCount</span>
+                }
+            </button>
+
+            @if (_filtersOpen)
+            {
+                <div class="ui-click-away"
+                     @onclick="CloseFilters"
+                     @onclick:stopPropagation="true"></div>
+                <div class="absolute end-0 z-[70] mt-1 w-[min(22rem,calc(100vw-2rem))] space-y-4 rounded-xl border border-border bg-popover p-4 text-popover-foreground shadow-[0_16px_40px_rgba(0,0,0,0.12)]"
+                     @onclick:stopPropagation="true">
+                    <div>
+                        <h2 class="font-semibold text-foreground">@L["Filter.Title"]</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">@L["Filter.SubscribersDescription"]</p>
+                    </div>
+
+                    <label class="block space-y-1.5">
+                        <span class="text-sm font-medium text-foreground">@L["Field.PlanType"]</span>
+                        <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                                value="@_draftPlan"
+                                @onchange="OnDraftPlanChanged">
+                            <option value="">@L["Filter.AllPlanTypes"]</option>
+                            <option value="@PlanType.Ampere">@L["PlanType.Ampere"]</option>
+                            <option value="@PlanType.Kilowatt">@L["PlanType.Kilowatt"]</option>
+                            <option value="@PlanType.FixedKilowatt">@L["PlanType.FixedKilowatt"]</option>
+                        </select>
+                    </label>
+
+                    <label class="block space-y-1.5">
+                        <span class="text-sm font-medium text-foreground">@L["Field.Relation"]</span>
+                        <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                                value="@_draftRelation"
+                                @onchange="OnDraftRelationChanged">
+                            <option value="">@L["Filter.AllRelations"]</option>
+                            <option value="@CustomerRelation.Friend">@L["Relation.Friend"]</option>
+                            <option value="@CustomerRelation.Family">@L["Relation.Family"]</option>
+                            <option value="@CustomerRelation.Owner">@L["Relation.Owner"]</option>
+                        </select>
+                    </label>
+
+                    <label class="block space-y-1.5">
+                        <span class="text-sm font-medium text-foreground">@L["Common.Status"]</span>
+                        <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                                value="@_draftStatus"
+                                @onchange="OnDraftStatusChanged">
+                            <option value="">@L["Filter.AllStatuses"]</option>
+                            <option value="@CustomerStatus.Active">@L["Status.Active"]</option>
+                            <option value="@CustomerStatus.Suspended">@L["Status.Suspended"]</option>
+                            <option value="@CustomerStatus.Terminated">@L["Status.Terminated"]</option>
+                        </select>
+                    </label>
+
+                    <label class="block space-y-1.5">
+                        <span class="text-sm font-medium text-foreground">@L["Field.AmpereSchedule"]</span>
+                        <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                                value="@_draftSchedule"
+                                @onchange="OnDraftScheduleChanged">
+                            <option value="">@L["Filter.AllSchedules"]</option>
+                            @foreach (var schedule in Schedules)
+                            {
+                                <option value="@schedule.Id">@schedule.Name</option>
+                            }
+                        </select>
+                    </label>
+
+                    <div class="flex items-center justify-between border-t border-border pt-4">
+                        <button type="button"
+                                class="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                                @onclick="ClearDrafts">
+                            @L["Common.Reset"]
+                        </button>
+                        <button type="button"
+                                class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                                @onclick="ApplyFiltersAsync">
+                            @L["Filter.Apply"]
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="flex gap-2 xl:ms-auto">
+            <button type="button"
+                    class="inline-flex h-[2.625rem] items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
                     disabled="@IsExporting"
                     @onclick="OnExport">
                 @if (IsExporting)
@@ -42,7 +136,7 @@
                 @L["Subscribers.ExportExcel"]
             </button>
             <button type="button"
-                    class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                    class="inline-flex h-[2.625rem] items-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground"
                     style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
                     @onclick="OnCreate">
                 @L["Subscribers.Add"]
@@ -50,41 +144,73 @@
         </div>
     </div>
 
-    <div class="flex flex-wrap items-center gap-3">
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                value="@PlanFilter"
-                @onchange="OnPlanFilterChanged">
-            <option value="">@L["Filter.AllPlanTypes"]</option>
-            <option value="@PlanType.Ampere">@L["PlanType.Ampere"]</option>
-            <option value="@PlanType.Kilowatt">@L["PlanType.Kilowatt"]</option>
-            <option value="@PlanType.FixedKilowatt">@L["PlanType.FixedKilowatt"]</option>
-        </select>
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                value="@ScheduleFilter"
-                @onchange="OnScheduleFilterChanged">
-            <option value="">@L["Filter.AllSchedules"]</option>
-            @foreach (var schedule in Schedules)
+    @if (ActiveFilterCount > 0)
+    {
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-sm text-muted-foreground">@L["Filter.Active"]:</span>
+            @if (!string.IsNullOrWhiteSpace(PlanFilter))
             {
-                <option value="@schedule.Id">@schedule.Name</option>
+                var planChip = $"{L["Field.PlanType"]}: {PlanLabel(PlanFilter)}";
+                <span class="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-sm text-foreground">
+                    @planChip
+                    <button type="button"
+                            class="rounded-full p-0.5 hover:bg-primary/15"
+                            aria-label="@L["Filter.Remove", planChip]"
+                            @onclick="RemovePlanAsync"
+                            @onclick:stopPropagation="true">
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                </span>
             }
-        </select>
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                value="@RelationFilter"
-                @onchange="OnRelationFilterChanged">
-            <option value="">@L["Filter.AllRelations"]</option>
-            <option value="@CustomerRelation.Friend">@L["Relation.Friend"]</option>
-            <option value="@CustomerRelation.Family">@L["Relation.Family"]</option>
-            <option value="@CustomerRelation.Owner">@L["Relation.Owner"]</option>
-        </select>
-        <select class="min-w-40 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                value="@StatusFilter"
-                @onchange="OnStatusFilterChanged">
-            <option value="">@L["Filter.AllStatuses"]</option>
-            <option value="@CustomerStatus.Active">@L["Status.Active"]</option>
-            <option value="@CustomerStatus.Suspended">@L["Status.Suspended"]</option>
-            <option value="@CustomerStatus.Terminated">@L["Status.Terminated"]</option>
-        </select>
-    </div>
+            @if (!string.IsNullOrWhiteSpace(RelationFilter))
+            {
+                var relationChip = $"{L["Field.Relation"]}: {RelationLabel(RelationFilter)}";
+                <span class="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-sm text-foreground">
+                    @relationChip
+                    <button type="button"
+                            class="rounded-full p-0.5 hover:bg-primary/15"
+                            aria-label="@L["Filter.Remove", relationChip]"
+                            @onclick="RemoveRelationAsync"
+                            @onclick:stopPropagation="true">
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                </span>
+            }
+            @if (!string.IsNullOrWhiteSpace(StatusFilter))
+            {
+                var statusChip = $"{L["Common.Status"]}: {StatusLabel(StatusFilter)}";
+                <span class="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-sm text-foreground">
+                    @statusChip
+                    <button type="button"
+                            class="rounded-full p-0.5 hover:bg-primary/15"
+                            aria-label="@L["Filter.Remove", statusChip]"
+                            @onclick="RemoveStatusAsync"
+                            @onclick:stopPropagation="true">
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                </span>
+            }
+            @if (!string.IsNullOrWhiteSpace(ScheduleFilter))
+            {
+                var scheduleChip = $"{L["Field.AmpereSchedule"]}: {(SelectedSchedule?.Name ?? ScheduleFilter)}";
+                <span class="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-sm text-foreground">
+                    @scheduleChip
+                    <button type="button"
+                            class="rounded-full p-0.5 hover:bg-primary/15"
+                            aria-label="@L["Filter.Remove", scheduleChip]"
+                            @onclick="RemoveScheduleAsync"
+                            @onclick:stopPropagation="true">
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                </span>
+            }
+            <button type="button"
+                    class="h-8 rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+                    @onclick="ClearAppliedAsync">
+                @L["Filter.ClearAll"]
+            </button>
+        </div>
+    }
 
     <p class="text-xs text-muted-foreground">
         @(TotalCount == 1 ? L["Count.Subscribers", TotalCount] : L["Count.SubscribersPlural", TotalCount])
@@ -108,9 +234,52 @@
     [Parameter] public EventCallback<string> ScheduleFilterChanged { get; set; }
     [Parameter] public EventCallback<string> RelationFilterChanged { get; set; }
     [Parameter] public EventCallback<string> StatusFilterChanged { get; set; }
+    [Parameter] public EventCallback OnFiltersChanged { get; set; }
     [Parameter] public bool IsExporting { get; set; }
     [Parameter] public EventCallback OnCreate { get; set; }
     [Parameter] public EventCallback OnExport { get; set; }
+
+    private bool _filtersOpen;
+    private string _draftPlan = "";
+    private string _draftRelation = "";
+    private string _draftStatus = "";
+    private string _draftSchedule = "";
+
+    private int ActiveFilterCount =>
+        (string.IsNullOrWhiteSpace(PlanFilter) ? 0 : 1)
+        + (string.IsNullOrWhiteSpace(RelationFilter) ? 0 : 1)
+        + (string.IsNullOrWhiteSpace(StatusFilter) ? 0 : 1)
+        + (string.IsNullOrWhiteSpace(ScheduleFilter) ? 0 : 1);
+
+    private AmpereScheduleResponse? SelectedSchedule =>
+        Guid.TryParse(ScheduleFilter, out var id)
+            ? Schedules.FirstOrDefault(s => s.Id == id)
+            : null;
+
+    private void ToggleFilters()
+    {
+        if (_filtersOpen)
+        {
+            CloseFilters();
+            return;
+        }
+
+        _draftPlan = PlanFilter;
+        _draftRelation = RelationFilter;
+        _draftStatus = StatusFilter;
+        _draftSchedule = ScheduleFilter;
+        _filtersOpen = true;
+    }
+
+    private void CloseFilters() => _filtersOpen = false;
+
+    private void ClearDrafts()
+    {
+        _draftPlan = "";
+        _draftRelation = "";
+        _draftStatus = "";
+        _draftSchedule = "";
+    }
 
     private Task OnSearchFieldChanged(ChangeEventArgs e) =>
         SearchFieldChanged.InvokeAsync(e.Value?.ToString() ?? "");
@@ -118,15 +287,82 @@
     private Task OnSearchTermInput(ChangeEventArgs e) =>
         SearchTermChanged.InvokeAsync(e.Value?.ToString() ?? "");
 
-    private Task OnPlanFilterChanged(ChangeEventArgs e) =>
-        PlanFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    private void OnDraftPlanChanged(ChangeEventArgs e) =>
+        _draftPlan = e.Value?.ToString() ?? "";
 
-    private Task OnScheduleFilterChanged(ChangeEventArgs e) =>
-        ScheduleFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    private void OnDraftRelationChanged(ChangeEventArgs e) =>
+        _draftRelation = e.Value?.ToString() ?? "";
 
-    private Task OnRelationFilterChanged(ChangeEventArgs e) =>
-        RelationFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    private void OnDraftStatusChanged(ChangeEventArgs e) =>
+        _draftStatus = e.Value?.ToString() ?? "";
 
-    private Task OnStatusFilterChanged(ChangeEventArgs e) =>
-        StatusFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    private void OnDraftScheduleChanged(ChangeEventArgs e) =>
+        _draftSchedule = e.Value?.ToString() ?? "";
+
+    private async Task ApplyFiltersAsync()
+    {
+        await PlanFilterChanged.InvokeAsync(_draftPlan);
+        await RelationFilterChanged.InvokeAsync(_draftRelation);
+        await StatusFilterChanged.InvokeAsync(_draftStatus);
+        await ScheduleFilterChanged.InvokeAsync(_draftSchedule);
+        _filtersOpen = false;
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task RemovePlanAsync()
+    {
+        await PlanFilterChanged.InvokeAsync("");
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task RemoveRelationAsync()
+    {
+        await RelationFilterChanged.InvokeAsync("");
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task RemoveStatusAsync()
+    {
+        await StatusFilterChanged.InvokeAsync("");
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task RemoveScheduleAsync()
+    {
+        await ScheduleFilterChanged.InvokeAsync("");
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task ClearAppliedAsync()
+    {
+        await PlanFilterChanged.InvokeAsync("");
+        await RelationFilterChanged.InvokeAsync("");
+        await StatusFilterChanged.InvokeAsync("");
+        await ScheduleFilterChanged.InvokeAsync("");
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private string PlanLabel(string value) => value switch
+    {
+        nameof(PlanType.Ampere) => L["PlanType.Ampere"].Value,
+        nameof(PlanType.Kilowatt) => L["PlanType.Kilowatt"].Value,
+        nameof(PlanType.FixedKilowatt) => L["PlanType.FixedKilowatt"].Value,
+        _ => value
+    };
+
+    private string RelationLabel(string value) => value switch
+    {
+        nameof(CustomerRelation.Friend) => L["Relation.Friend"].Value,
+        nameof(CustomerRelation.Family) => L["Relation.Family"].Value,
+        nameof(CustomerRelation.Owner) => L["Relation.Owner"].Value,
+        _ => value
+    };
+
+    private string StatusLabel(string value) => value switch
+    {
+        nameof(CustomerStatus.Active) => L["Status.Active"].Value,
+        nameof(CustomerStatus.Suspended) => L["Status.Suspended"].Value,
+        nameof(CustomerStatus.Terminated) => L["Status.Terminated"].Value,
+        _ => value
+    };
 }

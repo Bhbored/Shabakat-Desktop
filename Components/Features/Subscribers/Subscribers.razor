@@ -25,6 +25,7 @@
                         ScheduleFilterChanged="OnScheduleFilterChanged"
                         RelationFilterChanged="OnRelationFilterChanged"
                         StatusFilterChanged="OnStatusFilterChanged"
+                        OnFiltersChanged="ReloadFromFiltersAsync"
                         IsExporting="_exporting"
                         OnCreate="OpenCreate"
                         OnExport="ExportAsync" />
@@ -260,28 +261,28 @@
         }
     }
 
-    private async Task OnPlanFilterChanged(string value)
+    private Task OnPlanFilterChanged(string value)
     {
         _planFilter = value;
-        await ReloadFromFiltersAsync();
+        return Task.CompletedTask;
     }
 
-    private async Task OnScheduleFilterChanged(string value)
+    private Task OnScheduleFilterChanged(string value)
     {
         _scheduleFilter = value;
-        await ReloadFromFiltersAsync();
+        return Task.CompletedTask;
     }
 
-    private async Task OnRelationFilterChanged(string value)
+    private Task OnRelationFilterChanged(string value)
     {
         _relationFilter = value;
-        await ReloadFromFiltersAsync();
+        return Task.CompletedTask;
     }
 
-    private async Task OnStatusFilterChanged(string value)
+    private Task OnStatusFilterChanged(string value)
     {
         _statusFilter = value;
-        await ReloadFromFiltersAsync();
+        return Task.CompletedTask;
     }
 
     private async Task OnPageSizeChanged(int size)

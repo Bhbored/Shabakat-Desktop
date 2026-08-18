@@ -2,62 +2,153 @@
 @inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4">
-    <div class="flex flex-wrap items-end gap-3">
-        <div class="min-w-64 flex-1">
-            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Common.Customer"]</label>
+    <div class="flex flex-col gap-3 xl:flex-row xl:items-center">
+        <div class="min-w-0 flex-1">
             <CustomerSearchSelect Value="@CustomerFilter"
                                   ValueChanged="OnCustomerSelected"
                                   AllowEmpty="true"
                                   EmptyLabel="@L["CustomerSearch.All"].Value" />
         </div>
 
-        <div class="min-w-48">
-            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Common.Status"]</label>
-            <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                    value="@StatusFilter"
-                    @onchange="OnStatusFilterChanged">
-                <option value="">@L["Filter.AllStatuses"]</option>
-                <option value="@InvoiceStatus.Unpaid">@L["Status.Unpaid"]</option>
-                <option value="@InvoiceStatus.PartiallyPaid">@L["Status.PartiallyPaid"]</option>
-                <option value="@InvoiceStatus.Paid">@L["Status.Paid"]</option>
-            </select>
+        <div class="relative shrink-0">
+            <button type="button"
+                    class="inline-flex h-[2.625rem] items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
+                    @onclick="ToggleFilters"
+                    @onclick:stopPropagation="true">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                </svg>
+                @L["Filter.Button"]
+                @if (ActiveFilterCount > 0)
+                {
+                    <span class="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">@ActiveFilterCount</span>
+                }
+            </button>
+
+            @if (_filtersOpen)
+            {
+                <div class="ui-click-away"
+                     @onclick="CloseFilters"
+                     @onclick:stopPropagation="true"></div>
+                <div class="absolute end-0 z-[70] mt-1 w-[min(22rem,calc(100vw-2rem))] space-y-4 rounded-xl border border-border bg-popover p-4 text-popover-foreground shadow-[0_16px_40px_rgba(0,0,0,0.12)]"
+                     @onclick:stopPropagation="true">
+                    <div>
+                        <h2 class="font-semibold text-foreground">@L["Filter.Title"]</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">@L["Filter.InvoicesDescription"]</p>
+                    </div>
+
+                    <label class="block space-y-1.5">
+                        <span class="text-sm font-medium text-foreground">@L["Common.Status"]</span>
+                        <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                                value="@_draftStatus"
+                                @onchange="OnDraftStatusChanged">
+                            <option value="">@L["Filter.AllStatuses"]</option>
+                            <option value="@InvoiceStatus.Unpaid">@L["Status.Unpaid"]</option>
+                            <option value="@InvoiceStatus.PartiallyPaid">@L["Status.PartiallyPaid"]</option>
+                            <option value="@InvoiceStatus.Paid">@L["Status.Paid"]</option>
+                        </select>
+                    </label>
+
+                    <label class="block space-y-1.5">
+                        <span class="text-sm font-medium text-foreground">@L["Filter.IssueDateFrom"]</span>
+                        <input type="date"
+                               class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                               value="@DateText(_draftDateFrom)"
+                               @onchange="OnDraftDateFromChanged" />
+                    </label>
+
+                    <label class="block space-y-1.5">
+                        <span class="text-sm font-medium text-foreground">@L["Filter.IssueDateTo"]</span>
+                        <input type="date"
+                               class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                               value="@DateText(_draftDateTo)"
+                               @onchange="OnDraftDateToChanged" />
+                    </label>
+
+                    <div class="flex items-center justify-between border-t border-border pt-4">
+                        <button type="button"
+                                class="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                                @onclick="ClearDrafts">
+                            @L["Common.Reset"]
+                        </button>
+                        <button type="button"
+                                class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                                @onclick="ApplyFiltersAsync">
+                            @L["Filter.Apply"]
+                        </button>
+                    </div>
+                </div>
+            }
         </div>
 
-        <div class="min-w-44">
-            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Filter.IssueDateFrom"]</label>
-            <input type="date"
-                   class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                   value="@DateFromText"
-                   @onchange="OnDateFromChanged" />
+        <div class="flex gap-2 xl:ms-auto">
+            <button type="button"
+                    class="inline-flex h-[2.625rem] items-center rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
+                    @onclick="OnBulkCreate">
+                @L["Invoices.BulkGenerate"]
+            </button>
+            <button type="button"
+                    class="inline-flex h-[2.625rem] items-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground"
+                    style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
+                    @onclick="OnCreate">
+                @L["Invoices.Create"]
+            </button>
         </div>
-
-        <div class="min-w-44">
-            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Filter.IssueDateTo"]</label>
-            <input type="date"
-                   class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground"
-                   value="@DateToText"
-                   @onchange="OnDateToChanged" />
-        </div>
-
-        <button type="button"
-                class="rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground hover:bg-muted"
-                @onclick="OnResetFilters">
-            @L["Common.Reset"]
-        </button>
-
-        <button type="button"
-                class="rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground hover:bg-muted"
-                @onclick="OnBulkCreate">
-            @L["Invoices.BulkGenerate"]
-        </button>
-
-        <button type="button"
-                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
-                style="box-shadow: 0 0 16px rgba(245,192,0,0.25);"
-                @onclick="OnCreate">
-            @L["Invoices.Create"]
-        </button>
     </div>
+
+    @if (ActiveFilterCount > 0)
+    {
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-sm text-muted-foreground">@L["Filter.Active"]:</span>
+            @if (!string.IsNullOrWhiteSpace(StatusFilter))
+            {
+                var statusChip = $"{L["Common.Status"]}: {StatusLabel(StatusFilter)}";
+                <span class="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-sm text-foreground">
+                    @statusChip
+                    <button type="button"
+                            class="rounded-full p-0.5 hover:bg-primary/15"
+                            aria-label="@L["Filter.Remove", statusChip]"
+                            @onclick="RemoveStatusAsync"
+                            @onclick:stopPropagation="true">
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                </span>
+            }
+            @if (DateFrom.HasValue)
+            {
+                var fromChip = $"{L["Filter.IssueDateFrom"]}: {FormatHelper.Date(DateFrom.Value)}";
+                <span class="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-sm text-foreground">
+                    @fromChip
+                    <button type="button"
+                            class="rounded-full p-0.5 hover:bg-primary/15"
+                            aria-label="@L["Filter.Remove", fromChip]"
+                            @onclick="RemoveDateFromAsync"
+                            @onclick:stopPropagation="true">
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                </span>
+            }
+            @if (DateTo.HasValue)
+            {
+                var toChip = $"{L["Filter.IssueDateTo"]}: {FormatHelper.Date(DateTo.Value)}";
+                <span class="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-sm text-foreground">
+                    @toChip
+                    <button type="button"
+                            class="rounded-full p-0.5 hover:bg-primary/15"
+                            aria-label="@L["Filter.Remove", toChip]"
+                            @onclick="RemoveDateToAsync"
+                            @onclick:stopPropagation="true">
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                </span>
+            }
+            <button type="button"
+                    class="h-8 rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+                    @onclick="ClearAppliedAsync">
+                @L["Filter.ClearAll"]
+            </button>
+        </div>
+    }
 
     <p class="text-xs text-muted-foreground">
         @(TotalCount == 1 ? L["Count.Invoices", TotalCount] : L["Count.InvoicesPlural", TotalCount])
@@ -75,12 +166,59 @@
     [Parameter] public EventCallback<DateTime?> DateToChanged { get; set; }
     [Parameter] public int TotalCount { get; set; }
     [Parameter] public EventCallback OnFiltersChanged { get; set; }
-    [Parameter] public EventCallback OnResetFilters { get; set; }
     [Parameter] public EventCallback OnBulkCreate { get; set; }
     [Parameter] public EventCallback OnCreate { get; set; }
 
-    private string DateFromText => DateFrom?.ToString("yyyy-MM-dd") ?? "";
-    private string DateToText => DateTo?.ToString("yyyy-MM-dd") ?? "";
+    private bool _filtersOpen;
+    private string _draftStatus = "";
+    private DateTime? _draftDateFrom;
+    private DateTime? _draftDateTo;
+
+    private int ActiveFilterCount =>
+        (string.IsNullOrWhiteSpace(StatusFilter) ? 0 : 1)
+        + (DateFrom.HasValue ? 1 : 0)
+        + (DateTo.HasValue ? 1 : 0);
+
+    private void ToggleFilters()
+    {
+        if (_filtersOpen)
+        {
+            CloseFilters();
+            return;
+        }
+
+        _draftStatus = StatusFilter;
+        _draftDateFrom = DateFrom;
+        _draftDateTo = DateTo;
+        _filtersOpen = true;
+    }
+
+    private void CloseFilters() => _filtersOpen = false;
+
+    private void ClearDrafts()
+    {
+        _draftStatus = "";
+        _draftDateFrom = null;
+        _draftDateTo = null;
+    }
+
+    private void OnDraftStatusChanged(ChangeEventArgs e) =>
+        _draftStatus = e.Value?.ToString() ?? "";
+
+    private void OnDraftDateFromChanged(ChangeEventArgs e) =>
+        _draftDateFrom = ParseDate(e.Value?.ToString());
+
+    private void OnDraftDateToChanged(ChangeEventArgs e) =>
+        _draftDateTo = ParseDate(e.Value?.ToString());
+
+    private async Task ApplyFiltersAsync()
+    {
+        await StatusFilterChanged.InvokeAsync(_draftStatus);
+        await DateFromChanged.InvokeAsync(_draftDateFrom);
+        await DateToChanged.InvokeAsync(_draftDateTo);
+        _filtersOpen = false;
+        await OnFiltersChanged.InvokeAsync();
+    }
 
     private async Task OnCustomerSelected(string value)
     {
@@ -88,23 +226,42 @@
         await OnFiltersChanged.InvokeAsync();
     }
 
-    private async Task OnStatusFilterChanged(ChangeEventArgs e)
+    private async Task RemoveStatusAsync()
     {
-        await StatusFilterChanged.InvokeAsync(e.Value?.ToString() ?? "");
+        await StatusFilterChanged.InvokeAsync("");
         await OnFiltersChanged.InvokeAsync();
     }
 
-    private async Task OnDateFromChanged(ChangeEventArgs e)
+    private async Task RemoveDateFromAsync()
     {
-        await DateFromChanged.InvokeAsync(ParseDate(e.Value?.ToString()));
+        await DateFromChanged.InvokeAsync(null);
         await OnFiltersChanged.InvokeAsync();
     }
 
-    private async Task OnDateToChanged(ChangeEventArgs e)
+    private async Task RemoveDateToAsync()
     {
-        await DateToChanged.InvokeAsync(ParseDate(e.Value?.ToString()));
+        await DateToChanged.InvokeAsync(null);
         await OnFiltersChanged.InvokeAsync();
     }
+
+    private async Task ClearAppliedAsync()
+    {
+        await StatusFilterChanged.InvokeAsync("");
+        await DateFromChanged.InvokeAsync(null);
+        await DateToChanged.InvokeAsync(null);
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private string StatusLabel(string status) => status switch
+    {
+        nameof(InvoiceStatus.Unpaid) => L["Status.Unpaid"].Value,
+        nameof(InvoiceStatus.PartiallyPaid) => L["Status.PartiallyPaid"].Value,
+        nameof(InvoiceStatus.Paid) => L["Status.Paid"].Value,
+        _ => status
+    };
+
+    private static string DateText(DateTime? value) =>
+        value?.ToString("yyyy-MM-dd") ?? "";
 
     private static DateTime? ParseDate(string? text) =>
         string.IsNullOrWhiteSpace(text)

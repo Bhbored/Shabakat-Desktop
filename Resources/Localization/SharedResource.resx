@@ -2201,4 +2201,28 @@
   <data name="Error.Field.IndustrialTva" xml:space="preserve">
     <value>Industrial TVA</value>
   </data>
+  <data name="Filter.Button" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="Filter.Title" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="Filter.InvoicesDescription" xml:space="preserve">
+    <value>Narrow the invoice list using additional criteria.</value>
+  </data>
+  <data name="Filter.SubscribersDescription" xml:space="preserve">
+    <value>Narrow the subscriber list using additional criteria.</value>
+  </data>
+  <data name="Filter.Apply" xml:space="preserve">
+    <value>Apply filters</value>
+  </data>
+  <data name="Filter.Active" xml:space="preserve">
+    <value>Active filters</value>
+  </data>
+  <data name="Filter.ClearAll" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="Filter.Remove" xml:space="preserve">
+    <value>Remove {0}</value>
+  </data>
 </root>

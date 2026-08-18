@@ -2201,4 +2201,28 @@
   <data name="Error.Field.IndustrialTva" xml:space="preserve">
     <value>ضريبة الصناعي</value>
   </data>
+  <data name="Filter.Button" xml:space="preserve">
+    <value>فلاتر</value>
+  </data>
+  <data name="Filter.Title" xml:space="preserve">
+    <value>الفلاتر</value>
+  </data>
+  <data name="Filter.InvoicesDescription" xml:space="preserve">
+    <value>ضيّق قائمة الفواتير باستخدام معايير إضافية.</value>
+  </data>
+  <data name="Filter.SubscribersDescription" xml:space="preserve">
+    <value>ضيّق قائمة المشتركين باستخدام معايير إضافية.</value>
+  </data>
+  <data name="Filter.Apply" xml:space="preserve">
+    <value>تطبيق الفلاتر</value>
+  </data>
+  <data name="Filter.Active" xml:space="preserve">
+    <value>الفلاتر النشطة</value>
+  </data>
+  <data name="Filter.ClearAll" xml:space="preserve">
+    <value>مسح الكل</value>
+  </data>
+  <data name="Filter.Remove" xml:space="preserve">
+    <value>إزالة {0}</value>
+  </data>
 </root>
