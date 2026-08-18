@@ -239,20 +239,36 @@
         animation: ui-fade-out 200ms ease-in forwards;
     }
 
-    .ui-sheet-panel[data-side="left"][data-state="open"] {
-        animation: ui-sheet-in-left 500ms ease-out forwards;
+    .ui-sheet-panel[data-side="start"][data-state="open"] {
+        animation: ui-sheet-in-left 360ms ease-out forwards;
     }
 
-    .ui-sheet-panel[data-side="left"][data-state="closed"] {
-        animation: ui-sheet-out-left 300ms ease-in forwards;
+    .ui-sheet-panel[data-side="start"][data-state="closed"] {
+        animation: ui-sheet-out-left 220ms ease-in forwards;
     }
 
-    .ui-sheet-panel[data-side="right"][data-state="open"] {
-        animation: ui-sheet-in-right 500ms ease-out forwards;
+    .ui-sheet-panel[data-side="end"][data-state="open"] {
+        animation: ui-sheet-in-right 360ms ease-out forwards;
     }
 
-    .ui-sheet-panel[data-side="right"][data-state="closed"] {
-        animation: ui-sheet-out-right 300ms ease-in forwards;
+    .ui-sheet-panel[data-side="end"][data-state="closed"] {
+        animation: ui-sheet-out-right 220ms ease-in forwards;
+    }
+
+    html[dir="rtl"] .ui-sheet-panel[data-side="start"][data-state="open"] {
+        animation-name: ui-sheet-in-right;
+    }
+
+    html[dir="rtl"] .ui-sheet-panel[data-side="start"][data-state="closed"] {
+        animation-name: ui-sheet-out-right;
+    }
+
+    html[dir="rtl"] .ui-sheet-panel[data-side="end"][data-state="open"] {
+        animation-name: ui-sheet-in-left;
+    }
+
+    html[dir="rtl"] .ui-sheet-panel[data-side="end"][data-state="closed"] {
+        animation-name: ui-sheet-out-left;
     }
 
     .ui-dialog-panel[data-state="open"] {
