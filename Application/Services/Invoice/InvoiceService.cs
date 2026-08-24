@@ -908,6 +908,7 @@ public sealed class InvoiceService : IInvoiceService
         var createdOn = DateOnly.FromDateTime(invoice.CreatedAt);
         var paymentDueDate = BillingPeriodHelper.ResolvePaymentDueDate(
             createdOn, preferences.DueDate);
+        var arabicPrint = InvoiceSkipMessages.IsArabic(preferences.Language);
 
         var model = new InvoicePrintModel(
             CompanyName: companyName,
@@ -924,9 +925,9 @@ public sealed class InvoiceService : IInvoiceService
             TvaAmount: tvaAmount,
             ShowTva: invoice.TVA > 0,
             PreviousReading: previousReading,
-            PreviousReadingDate: previousReadingDate?.ToString("dd-MMM-yy"),
+            PreviousReadingDate: previousReadingDate is null ? null : FormatHelper.InvoicePrintDate(previousReadingDate.Value, arabicPrint),
             CurrentReading: currentReading,
-            CurrentReadingDate: currentReadingDate?.ToString("dd-MMM-yy"),
+            CurrentReadingDate: currentReadingDate is null ? null : FormatHelper.InvoicePrintDate(currentReadingDate.Value, arabicPrint),
             TotalConsumption: totalConsumption,
             ConsumptionCost: consumptionCost,
             SubtotalBeforeTva: subtotalBeforeTva,
@@ -934,10 +935,10 @@ public sealed class InvoiceService : IInvoiceService
             PaidAmount: invoice.PaidAmount,
             AmountDue: invoice.AmountDue,
             InvoiceStatus: invoice.InvoiceStatus.ToString(),
-            ConsumptionStart: invoice.IssueDate.ToString("dd-MMM-yy"),
-            ConsumptionEnd: invoice.DueDate.ToString("dd-MMM-yy"),
-            DueDate: paymentDueDate.ToString("dd-MMM-yy"),
-            CreatedDate: invoice.CreatedAt.ToString("dd-MMM-yy"),
+            ConsumptionStart: FormatHelper.InvoicePrintDate(invoice.IssueDate, arabicPrint),
+            ConsumptionEnd: FormatHelper.InvoicePrintDate(invoice.DueDate, arabicPrint),
+            DueDate: FormatHelper.InvoicePrintDate(paymentDueDate, arabicPrint),
+            CreatedDate: FormatHelper.InvoicePrintDate(invoice.CreatedAt, arabicPrint),
             IsKilowattPlan: isMeterKilowatt,
             IsFixedKilowattPlan: isFixedKilowatt);
 

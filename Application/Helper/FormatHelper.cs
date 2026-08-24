@@ -26,6 +26,32 @@ public static class FormatHelper
     public static string Date(DateTime value) =>
         value.ToString("dd MMM yyyy", Culture);
 
+    /// <summary>Invoice print header: <c>24-Aug-26</c> (en) or <c>24-آب-26</c> (ar, Levantine months, western digits).</summary>
+    public static string InvoicePrintDate(DateOnly value, bool arabic) =>
+        arabic ? ArabicPrintDate(value.Day, value.Month, value.Year) : value.ToString("dd-MMM-yy", UsdCulture);
+
+    public static string InvoicePrintDate(DateTime value, bool arabic) =>
+        InvoicePrintDate(DateOnly.FromDateTime(value), arabic);
+
+    private static readonly string[] LevantineMonths =
+    [
+        "كانون الثاني",
+        "شباط",
+        "آذار",
+        "نيسان",
+        "أيار",
+        "حزيران",
+        "تموز",
+        "آب",
+        "أيلول",
+        "تشرين الأول",
+        "تشرين الثاني",
+        "كانون الأول"
+    ];
+
+    private static string ArabicPrintDate(int day, int month, int year) =>
+        $"{day.ToString("00", CultureInfo.InvariantCulture)}-{LevantineMonths[month - 1]}-{(year % 100).ToString("00", CultureInfo.InvariantCulture)}";
+
     public static string Initials(string? name)
     {
         if (string.IsNullOrWhiteSpace(name))

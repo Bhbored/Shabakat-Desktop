@@ -1,0 +1,601 @@
+{
+  "version": 1,
+  "exportedAt": "2026-08-24T16:39:00",
+  "appUser": {
+    "id": "aaaaaaaa-0001-4000-8000-000000000001",
+    "createdAt": "2026-01-01T08:00:00",
+    "updatedAt": "2026-08-01T08:00:00",
+    "passwordHash": "AQAAAAIAAYagAAAAEExampleAspNetIdentityV3HashNotTheRawPin==",
+    "licensedUntil": "2027-01-01T00:00:00+03:00",
+    "licenseStamp": "hex-hmac-of-passwordHash-and-licensedUntil",
+    "businessName": "Shabakat Electric",
+    "logoUrl": "C:\\Users\\Example\\AppData\\Local\\Shabakat\\logo\\logo.png"
+  },
+  "preferences": {
+    "id": "aaaaaaaa-0002-4000-8000-000000000002",
+    "createdAt": "2026-01-01T08:00:00",
+    "updatedAt": "2026-08-01T08:00:00",
+    "pricePerKilowat": 0.22,
+    "pricePerAmp": 8.5,
+    "fixedCharge": 5,
+    "tva": 11,
+    "residentialPricePerAmp": 7.5,
+    "residentialPricePerKilowat": 0.18,
+    "residentialFixedCharge": 3,
+    "residentialTVA": 11,
+    "commercialPricePerAmp": 9,
+    "commercialPricePerKilowat": 0.24,
+    "commercialFixedCharge": 8,
+    "commercialTVA": 11,
+    "industrialPricePerAmp": 11,
+    "industrialPricePerKilowat": 0.28,
+    "industrialFixedCharge": 12,
+    "industrialTVA": 11,
+    "ampereSchedulePricingEnabled": true,
+    "ampereProrateByDaysEnabled": true,
+    "language": "en",
+    "dueDate": 31
+  },
+  "exportColumns": [
+    {
+      "id": "aaaaaaaa-0003-4000-8000-000000000003",
+      "createdAt": "2026-01-01T08:00:00",
+      "updatedAt": "2026-08-01T08:00:00",
+      "appPreferencesId": "aaaaaaaa-0002-4000-8000-000000000002",
+      "name": true,
+      "phone": true,
+      "address": true,
+      "building": true,
+      "floor": true,
+      "cableName": true,
+      "areaName": true,
+      "boxName": true,
+      "ampereScheduleName": true,
+      "customerType": true,
+      "plan": true,
+      "planValue": true,
+      "subscriptionDate": true,
+      "customerStatus": true,
+      "customerRelation": true,
+      "initialMeterReading": true,
+      "latestMeterReading": true,
+      "totalBilled": true,
+      "totalPaid": true,
+      "totalToPay": true
+    }
+  ],
+  "areas": [
+    {
+      "id": "bbbbbbbb-0001-4000-8000-000000000001",
+      "createdAt": "2026-01-02T09:00:00",
+      "updatedAt": "2026-01-02T09:00:00",
+      "name": "Hamra"
+    },
+    {
+      "id": "bbbbbbbb-0002-4000-8000-000000000002",
+      "createdAt": "2026-01-02T09:05:00",
+      "updatedAt": "2026-01-02T09:05:00",
+      "name": "Verdun"
+    }
+  ],
+  "distributionBoxes": [
+    {
+      "id": "cccccccc-0001-4000-8000-000000000001",
+      "createdAt": "2026-01-03T10:00:00",
+      "updatedAt": "2026-01-03T10:00:00",
+      "name": "Box A-12",
+      "areaId": "bbbbbbbb-0001-4000-8000-000000000001",
+      "locationNote": "Building 12 rooftop",
+      "notes": "Main feeder for block A"
+    },
+    {
+      "id": "cccccccc-0002-4000-8000-000000000002",
+      "createdAt": "2026-01-03T10:05:00",
+      "updatedAt": "2026-01-03T10:05:00",
+      "name": "Box B-01",
+      "areaId": "bbbbbbbb-0002-4000-8000-000000000002",
+      "locationNote": null,
+      "notes": null
+    }
+  ],
+  "ampereSchedules": [
+    {
+      "id": "dddddddd-0001-4000-8000-000000000001",
+      "createdAt": "2026-01-04T11:00:00",
+      "updatedAt": "2026-01-04T11:00:00",
+      "name": "8 hours",
+      "hoursPerDay": 8,
+      "pricePerAmp": 6.5,
+      "residentialPricePerAmp": 6,
+      "commercialPricePerAmp": 7,
+      "industrialPricePerAmp": 8
+    },
+    {
+      "id": "dddddddd-0002-4000-8000-000000000002",
+      "createdAt": "2026-01-04T11:05:00",
+      "updatedAt": "2026-01-04T11:05:00",
+      "name": "24 hours",
+      "hoursPerDay": 24,
+      "pricePerAmp": 10,
+      "residentialPricePerAmp": 9,
+      "commercialPricePerAmp": 11,
+      "industrialPricePerAmp": 13
+    }
+  ],
+  "customers": [
+    {
+      "id": "eeeeeeee-0001-4000-8000-000000000001",
+      "createdAt": "2026-02-01T12:00:00",
+      "updatedAt": "2026-06-01T12:00:00",
+      "name": "Ali Hassan",
+      "phone": "+96170111111",
+      "address": "Street 1, Hamra",
+      "building": "Building 12",
+      "floor": "3",
+      "cableName": "C-12-A",
+      "boxId": "cccccccc-0001-4000-8000-000000000001",
+      "ampereScheduleId": "dddddddd-0001-4000-8000-000000000001",
+      "customerType": "Residential",
+      "customerRelation": "Friend",
+      "subscriptionDate": "2025-03-15",
+      "priceOverride": 6.25,
+      "fixedChargeOverride": 2.5,
+      "tvaOverride": 11,
+      "customerStatus": "Active",
+      "plan": "Ampere",
+      "planValue": 10,
+      "areaId": "bbbbbbbb-0001-4000-8000-000000000001"
+    },
+    {
+      "id": "eeeeeeee-0002-4000-8000-000000000002",
+      "createdAt": "2026-02-02T12:00:00",
+      "updatedAt": "2026-06-02T12:00:00",
+      "name": "Nour Trading",
+      "phone": "+96170222222",
+      "address": "Main street, Verdun",
+      "building": "Plaza",
+      "floor": "Ground",
+      "cableName": "C-B-01",
+      "boxId": "cccccccc-0002-4000-8000-000000000002",
+      "ampereScheduleId": null,
+      "customerType": "Commercial",
+      "customerRelation": "Family",
+      "subscriptionDate": "2024-11-01",
+      "priceOverride": null,
+      "fixedChargeOverride": null,
+      "tvaOverride": null,
+      "customerStatus": "Active",
+      "plan": "Kilowatt",
+      "planValue": 0,
+      "areaId": "bbbbbbbb-0002-4000-8000-000000000002"
+    },
+    {
+      "id": "eeeeeeee-0003-4000-8000-000000000003",
+      "createdAt": "2026-02-03T12:00:00",
+      "updatedAt": "2026-06-03T12:00:00",
+      "name": "Metn Factory",
+      "phone": "+96170333333",
+      "address": "Industrial zone",
+      "building": "Hangar 4",
+      "floor": "1",
+      "cableName": "C-IND-4",
+      "boxId": "cccccccc-0001-4000-8000-000000000001",
+      "ampereScheduleId": "dddddddd-0002-4000-8000-000000000002",
+      "customerType": "Industrial",
+      "customerRelation": "Owner",
+      "subscriptionDate": "2023-06-20",
+      "priceOverride": 0.3,
+      "fixedChargeOverride": 15,
+      "tvaOverride": 0,
+      "customerStatus": "Suspended",
+      "plan": "FixedKilowatt",
+      "planValue": 500,
+      "areaId": "bbbbbbbb-0001-4000-8000-000000000001"
+    },
+    {
+      "id": "eeeeeeee-0004-4000-8000-000000000004",
+      "createdAt": "2026-02-04T12:00:00",
+      "updatedAt": "2026-07-01T12:00:00",
+      "name": "Minimal Subscriber",
+      "phone": null,
+      "address": null,
+      "building": null,
+      "floor": null,
+      "cableName": null,
+      "boxId": null,
+      "ampereScheduleId": null,
+      "customerType": "Residential",
+      "customerRelation": null,
+      "subscriptionDate": "2026-01-10",
+      "priceOverride": null,
+      "fixedChargeOverride": null,
+      "tvaOverride": null,
+      "customerStatus": "Terminated",
+      "plan": "Ampere",
+      "planValue": 5,
+      "areaId": null
+    }
+  ],
+  "meterReadings": [
+    {
+      "id": "ffffffff-0001-4000-8000-000000000001",
+      "createdAt": "2026-02-02T12:10:00",
+      "updatedAt": "2026-02-02T12:10:00",
+      "customerId": "eeeeeeee-0002-4000-8000-000000000002",
+      "readingValue": 1200.5,
+      "readingDate": "2026-02-01",
+      "isInitial": true
+    },
+    {
+      "id": "ffffffff-0002-4000-8000-000000000002",
+      "createdAt": "2026-03-02T12:10:00",
+      "updatedAt": "2026-03-02T12:10:00",
+      "customerId": "eeeeeeee-0002-4000-8000-000000000002",
+      "readingValue": 1348.75,
+      "readingDate": "2026-03-01",
+      "isInitial": false
+    },
+    {
+      "id": "ffffffff-0003-4000-8000-000000000003",
+      "createdAt": "2026-02-03T12:10:00",
+      "updatedAt": "2026-02-03T12:10:00",
+      "customerId": "eeeeeeee-0003-4000-8000-000000000003",
+      "readingValue": 8800,
+      "readingDate": "2026-02-01",
+      "isInitial": true
+    }
+  ],
+  "invoices": [
+    {
+      "id": "11111111-0001-4000-8000-000000000001",
+      "createdAt": "2026-03-01T09:00:00",
+      "updatedAt": "2026-03-01T09:00:00",
+      "customerId": "eeeeeeee-0001-4000-8000-000000000001",
+      "invoiceNumber": 1,
+      "issueDate": "2026-03-01",
+      "dueDate": "2026-03-31",
+      "fixedCharge": 2.5,
+      "tva": 11,
+      "totalAmount": 71.775,
+      "paidAmount": 0,
+      "billedConsumption": null,
+      "invoiceStatus": "Unpaid"
+    },
+    {
+      "id": "11111111-0002-4000-8000-000000000002",
+      "createdAt": "2026-03-02T09:00:00",
+      "updatedAt": "2026-03-15T14:00:00",
+      "customerId": "eeeeeeee-0002-4000-8000-000000000002",
+      "invoiceNumber": 2,
+      "issueDate": "2026-03-01",
+      "dueDate": "2026-03-31",
+      "fixedCharge": 8,
+      "tva": 11,
+      "totalAmount": 48.646,
+      "paidAmount": 20,
+      "billedConsumption": 148.25,
+      "invoiceStatus": "PartiallyPaid"
+    },
+    {
+      "id": "11111111-0003-4000-8000-000000000003",
+      "createdAt": "2026-03-03T09:00:00",
+      "updatedAt": "2026-03-03T09:30:00",
+      "customerId": "eeeeeeee-0003-4000-8000-000000000003",
+      "invoiceNumber": 3,
+      "issueDate": "2026-03-01",
+      "dueDate": "2026-03-31",
+      "fixedCharge": 15,
+      "tva": 0,
+      "totalAmount": 165,
+      "paidAmount": 165,
+      "billedConsumption": 500,
+      "invoiceStatus": "Paid"
+    }
+  ],
+  "payments": [
+    {
+      "id": "22222222-0001-4000-8000-000000000001",
+      "createdAt": "2026-03-15T14:00:00",
+      "updatedAt": "2026-03-15T14:00:00",
+      "customerId": "eeeeeeee-0002-4000-8000-000000000002",
+      "invoiceId": "11111111-0002-4000-8000-000000000002",
+      "amount": 20,
+      "paymentMethod": "Cash",
+      "paymentDate": "2026-03-15T14:00:00",
+      "notes": "Partial cash payment"
+    },
+    {
+      "id": "22222222-0002-4000-8000-000000000002",
+      "createdAt": "2026-03-03T09:30:00",
+      "updatedAt": "2026-03-03T09:30:00",
+      "customerId": "eeeeeeee-0003-4000-8000-000000000003",
+      "invoiceId": "11111111-0003-4000-8000-000000000003",
+      "amount": 165,
+      "paymentMethod": "Wish",
+      "paymentDate": "2026-03-03T09:30:00",
+      "notes": null
+    }
+  ],
+  "invoiceSkips": [
+    {
+      "id": "33333333-0001-4000-8000-000000000001",
+      "createdAt": "2026-04-01T09:00:00",
+      "updatedAt": "2026-04-01T09:00:00",
+      "customerId": "eeeeeeee-0002-4000-8000-000000000002",
+      "customerName": "Nour Trading",
+      "billingPeriodStart": "2026-04-01",
+      "billingPeriodEnd": "2026-04-30",
+      "reason": "No meter reading recorded for Nour Trading for the period 2026-04-01 to 2026-04-30. Record a meter reading before creating this invoice."
+    },
+    {
+      "id": "33333333-0002-4000-8000-000000000002",
+      "createdAt": "2026-03-01T09:05:00",
+      "updatedAt": "2026-03-01T09:05:00",
+      "customerId": "eeeeeeee-0001-4000-8000-000000000001",
+      "customerName": "Ali Hassan",
+      "billingPeriodStart": "2026-03-01",
+      "billingPeriodEnd": "2026-03-31",
+      "reason": "Ali Hassan already has an invoice for the period 2026-03-01 to 2026-03-31."
+    }
+  ],
+  "expenses": [
+    {
+      "id": "44444444-0001-4000-8000-000000000001",
+      "createdAt": "2026-03-10T16:00:00",
+      "updatedAt": "2026-03-10T16:00:00",
+      "expenseType": "Fuel",
+      "amount": 140.5,
+      "expenseDate": "2026-03-10",
+      "label": "Generator diesel",
+      "notes": "Station receipt #8821"
+    },
+    {
+      "id": "44444444-0002-4000-8000-000000000002",
+      "createdAt": "2026-03-12T16:00:00",
+      "updatedAt": "2026-03-12T16:00:00",
+      "expenseType": "Maintenance",
+      "amount": 75,
+      "expenseDate": "2026-03-12",
+      "label": "Box A-12 repair",
+      "notes": null
+    },
+    {
+      "id": "44444444-0003-4000-8000-000000000003",
+      "createdAt": "2026-03-20T16:00:00",
+      "updatedAt": "2026-03-20T16:00:00",
+      "expenseType": "Employees",
+      "amount": 400,
+      "expenseDate": "2026-03-20",
+      "label": "March wages",
+      "notes": "Two technicians"
+    },
+    {
+      "id": "44444444-0004-4000-8000-000000000004",
+      "createdAt": "2026-03-22T16:00:00",
+      "updatedAt": "2026-03-22T16:00:00",
+      "expenseType": "Other",
+      "amount": 18,
+      "expenseDate": "2026-03-22",
+      "label": null,
+      "notes": null
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "55555555-0001-4000-8000-000000000001",
+      "action": "CustomerCreated",
+      "entityType": "Customer",
+      "entityId": "eeeeeeee-0001-4000-8000-000000000001",
+      "summary": "Customer 'Ali Hassan' created",
+      "status": "Success",
+      "errorMessage": null,
+      "createdAt": "2026-02-01T12:00:00"
+    },
+    {
+      "id": "55555555-0002-4000-8000-000000000002",
+      "action": "CustomerUpdated",
+      "entityType": "Customer",
+      "entityId": "eeeeeeee-0001-4000-8000-000000000001",
+      "summary": "Customer 'Ali Hassan' updated",
+      "status": "Success",
+      "errorMessage": null,
+      "createdAt": "2026-06-01T12:00:00"
+    },
+    {
+      "id": "55555555-0003-4000-8000-000000000003",
+      "action": "InvoiceCreated",
+      "entityType": "Invoice",
+      "entityId": "11111111-0001-4000-8000-000000000001",
+      "summary": "Invoice #1 created for Ali Hassan",
+      "status": "Success",
+      "errorMessage": null,
+      "createdAt": "2026-03-01T09:00:00"
+    },
+    {
+      "id": "55555555-0004-4000-8000-000000000004",
+      "action": "InvoiceBulkCreated",
+      "entityType": "Invoice",
+      "entityId": null,
+      "summary": "Bulk invoices: 2 created, 1 skipped",
+      "status": "Success",
+      "errorMessage": null,
+      "createdAt": "2026-03-01T09:05:00"
+    },
+    {
+      "id": "55555555-0005-4000-8000-000000000005",
+      "action": "InvoicePaymentRecorded",
+      "entityType": "Payment",
+      "entityId": "11111111-0002-4000-8000-000000000002",
+      "summary": "Payment of 20.0000 recorded on invoice #2",
+      "status": "Success",
+      "errorMessage": null,
+      "createdAt": "2026-03-15T14:00:00"
+    },
+    {
+      "id": "55555555-0006-4000-8000-000000000006",
+      "action": "InvoiceFixedKilowattCharge",
+      "entityType": "Invoice",
+      "entityId": "11111111-0003-4000-8000-000000000003",
+      "summary": "Fixed kilowatt charge for Metn Factory (invoice #3)",
+      "status": "Success",
+      "errorMessage": null,
+      "createdAt": "2026-03-03T09:00:00"
+    },
+    {
+      "id": "55555555-0007-4000-8000-000000000007",
+      "action": "ExpenseCreated",
+      "entityType": "Expense",
+      "entityId": "44444444-0001-4000-8000-000000000001",
+      "summary": "Expense recorded (Fuel)",
+      "status": "Success",
+      "errorMessage": null,
+      "createdAt": "2026-03-10T16:00:00"
+    },
+    {
+      "id": "55555555-0008-4000-8000-000000000008",
+      "action": "ExpenseUpdated",
+      "entityType": "Expense",
+      "entityId": "44444444-0002-4000-8000-000000000002",
+      "summary": "Expense updated (Maintenance)",
+      "status": "Success",
+      "errorMessage": null,
+      "createdAt": "2026-03-12T16:30:00"
+    },
+    {
+      "id": "55555555-0009-4000-8000-000000000009",
+      "action": "ExpenseDeleted",
+      "entityType": "Expense",
+      "entityId": "44444444-0004-4000-8000-000000000004",
+      "summary": "Expense deleted",
+      "status": "Success",
+      "errorMessage": null,
+      "createdAt": "2026-03-23T10:00:00"
+    },
+    {
+      "id": "55555555-0010-4000-8000-000000000010",
+      "action": "CustomerDeleted",
+      "entityType": "Customer",
+      "entityId": "eeeeeeee-0004-4000-8000-000000000004",
+      "summary": "Customer 'Minimal Subscriber' deleted",
+      "status": "Failed",
+      "errorMessage": "Customer has related invoices and cannot be deleted.",
+      "createdAt": "2026-07-01T12:05:00"
+    }
+  ],
+  "auditLogDetails": [
+    {
+      "id": "66666666-0001-4000-8000-000000000001",
+      "auditLogId": "55555555-0001-4000-8000-000000000001",
+      "label": "Name",
+      "value": "Ali Hassan"
+    },
+    {
+      "id": "66666666-0002-4000-8000-000000000002",
+      "auditLogId": "55555555-0001-4000-8000-000000000001",
+      "label": "Plan",
+      "value": "Ampere"
+    },
+    {
+      "id": "66666666-0003-4000-8000-000000000003",
+      "auditLogId": "55555555-0001-4000-8000-000000000001",
+      "label": "Phone",
+      "value": "+96170111111"
+    },
+    {
+      "id": "66666666-0004-4000-8000-000000000004",
+      "auditLogId": "55555555-0001-4000-8000-000000000001",
+      "label": "Customer Type",
+      "value": "Residential"
+    },
+    {
+      "id": "66666666-0005-4000-8000-000000000005",
+      "auditLogId": "55555555-0003-4000-8000-000000000003",
+      "label": "Invoice Number",
+      "value": "1"
+    },
+    {
+      "id": "66666666-0006-4000-8000-000000000006",
+      "auditLogId": "55555555-0003-4000-8000-000000000003",
+      "label": "Customer Name",
+      "value": "Ali Hassan"
+    },
+    {
+      "id": "66666666-0007-4000-8000-000000000007",
+      "auditLogId": "55555555-0003-4000-8000-000000000003",
+      "label": "Plan",
+      "value": "Ampere"
+    },
+    {
+      "id": "66666666-0008-4000-8000-000000000008",
+      "auditLogId": "55555555-0003-4000-8000-000000000003",
+      "label": "Total Amount",
+      "value": "71.775"
+    },
+    {
+      "id": "66666666-0009-4000-8000-000000000009",
+      "auditLogId": "55555555-0003-4000-8000-000000000003",
+      "label": "Consumption Start",
+      "value": "2026-03-01"
+    },
+    {
+      "id": "66666666-0010-4000-8000-000000000010",
+      "auditLogId": "55555555-0003-4000-8000-000000000003",
+      "label": "Consumption End",
+      "value": "2026-03-31"
+    },
+    {
+      "id": "66666666-0011-4000-8000-000000000011",
+      "auditLogId": "55555555-0004-4000-8000-000000000004",
+      "label": "Created",
+      "value": "2"
+    },
+    {
+      "id": "66666666-0012-4000-8000-000000000012",
+      "auditLogId": "55555555-0004-4000-8000-000000000004",
+      "label": "Skipped",
+      "value": "1"
+    },
+    {
+      "id": "66666666-0013-4000-8000-000000000013",
+      "auditLogId": "55555555-0005-4000-8000-000000000005",
+      "label": "Invoice Number",
+      "value": "2"
+    },
+    {
+      "id": "66666666-0014-4000-8000-000000000014",
+      "auditLogId": "55555555-0005-4000-8000-000000000005",
+      "label": "Amount",
+      "value": "20"
+    },
+    {
+      "id": "66666666-0015-4000-8000-000000000015",
+      "auditLogId": "55555555-0005-4000-8000-000000000005",
+      "label": "Payment Method",
+      "value": "Cash"
+    },
+    {
+      "id": "66666666-0016-4000-8000-000000000016",
+      "auditLogId": "55555555-0006-4000-8000-000000000006",
+      "label": "Payment Amount",
+      "value": "165"
+    },
+    {
+      "id": "66666666-0017-4000-8000-000000000017",
+      "auditLogId": "55555555-0006-4000-8000-000000000006",
+      "label": "Billed Consumption",
+      "value": "500"
+    },
+    {
+      "id": "66666666-0018-4000-8000-000000000018",
+      "auditLogId": "55555555-0007-4000-8000-000000000007",
+      "label": "Expense Type",
+      "value": "Fuel"
+    },
+    {
+      "id": "66666666-0019-4000-8000-000000000019",
+      "auditLogId": "55555555-0007-4000-8000-000000000007",
+      "label": "Amount",
+      "value": "140.5"
+    }
+  ]
+}

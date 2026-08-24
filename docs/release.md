@@ -117,7 +117,7 @@ Uninstall does **not** delete AppData (customers, invoices, license). The next i
 1. Desktop shortcut opens Shabakat (window with the real UI, not stuck on *Loading...*).
 2. **Settings → Apps** shows the version you put in `Package.wxs`.
 3. If this PC already had a licensed MSI install, customers and license should still be there.
-4. If this is the first MSI on the PC, you get the activation screen. That is normal. Restore a JSON backup from the gate if you have one.
+4. If this is the first MSI on the PC, you get the activation screen. That is normal. Restore a JSON backup from the gate if you have one. Schema and SaaS mapping: [`docs/backup.md`](backup.md). Example dump: [`wwwroot/backup.example.json`](../wwwroot/backup.example.json).
 
 Do not test “the release” with `dotnet run`. That is a different folder and often a different AppData path.
 
