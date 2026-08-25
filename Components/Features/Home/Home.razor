@@ -105,7 +105,7 @@
         for (var i = 0; i < 18; i++)
         {
             var date = new DateOnly(now.Year, now.Month, 1).AddMonths(-i);
-            _periodOptions.Add(($"{date.Year}-{date.Month}", date.ToString("MMMM yyyy"), date.Year, date.Month));
+            _periodOptions.Add(($"{date.Year}-{date.Month}", FormatHelper.MonthYear(date.Year, date.Month), date.Year, date.Month));
         }
     }
 

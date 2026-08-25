@@ -16,7 +16,7 @@
             <input type="password"
                    autocomplete="off"
                    class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
-                   @bind="_pin" />
+                   @bind="_pin"/>
         </label>
 
         <label class="block space-y-2">
@@ -24,7 +24,7 @@
             <input type="date"
                    class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
                    @bind="_expiryDate"
-                   @bind:format="yyyy-MM-dd" />
+                   @bind:format="yyyy-MM-dd"/>
         </label>
 
         <div class="space-y-2">
@@ -73,7 +73,8 @@
                 </div>
                 <div class="h-2.5 overflow-hidden rounded-full bg-muted">
                     <div class="h-full rounded-full bg-primary transition-[width] duration-300"
-                         style="width: @((_progress * 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                         style="width: @((_progress * 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%">
+                    </div>
                 </div>
             </div>
         }
@@ -203,4 +204,5 @@
             _restoring = false;
         }
     }
+
 }

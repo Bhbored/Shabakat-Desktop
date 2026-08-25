@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Abstractions;
 using Shabakat.Application.Contracts.Repository;
@@ -73,7 +74,7 @@ public sealed class InvoiceService : IInvoiceService
     public async Task<InvoiceResponse> GetByIdAsync(Guid id)
     {
         var invoice = await _invoiceRepository.GetByIdWithPaymentsAsync(id)
-            ?? throw new DomainException("Error.InvoiceNotFound");
+                      ?? throw new DomainException("Error.InvoiceNotFound");
 
         return invoice.ToResponse();
     }
@@ -81,7 +82,7 @@ public sealed class InvoiceService : IInvoiceService
     public async Task CreateAsync(CreateInvoiceRequest request)
     {
         var customer = await _customerRepository.GetByIdWithInvoicesAsync(request.CustomerId)
-            ?? throw new DomainException("Error.CustomerNotFound");
+                       ?? throw new DomainException("Error.CustomerNotFound");
 
         if (customer.Plan == PlanType.FixedKilowatt)
         {
@@ -90,7 +91,7 @@ public sealed class InvoiceService : IInvoiceService
         }
 
         var preferences = await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("Error.PreferencesNotConfigured");
+                          ?? throw new DomainException("Error.PreferencesNotConfigured");
 
         var today = DateOnly.FromDateTime(DateTime.Now);
 
@@ -131,7 +132,7 @@ public sealed class InvoiceService : IInvoiceService
         }
 
         var preferences = await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("Error.PreferencesNotConfigured");
+                          ?? throw new DomainException("Error.PreferencesNotConfigured");
 
         var today = DateOnly.FromDateTime(DateTime.Now);
         var (ampereStart, ampereEnd) = BillingPeriodHelper.GetBillingMonthBounds(
@@ -140,7 +141,7 @@ public sealed class InvoiceService : IInvoiceService
             PlanType.Kilowatt, today);
 
         var customers = (await _customerRepository
-            .GetActiveWithoutInvoiceAsync(ampereStart, ampereEnd, kilowattStart, kilowattEnd))
+                .GetActiveWithoutInvoiceAsync(ampereStart, ampereEnd, kilowattStart, kilowattEnd))
             .ToList();
 
         if (planType is PlanType.Ampere or PlanType.Kilowatt)
@@ -172,8 +173,8 @@ public sealed class InvoiceService : IInvoiceService
                 PlanType.Ampere, nextMonthRef);
 
             var ampereNextMonth = (await _customerRepository
-                .GetActiveAmpereReadyForNextMonthAsync(
-                    ampereStart, ampereEnd, nextStart, nextEnd))
+                    .GetActiveAmpereReadyForNextMonthAsync(
+                        ampereStart, ampereEnd, nextStart, nextEnd))
                 .ToList();
 
             foreach (var customer in ampereNextMonth)
@@ -277,7 +278,7 @@ public sealed class InvoiceService : IInvoiceService
         await _invoiceRepository.ExecuteInTransactionAsync(async () =>
         {
             var invoice = await _invoiceRepository.GetByIdForUpdateAsync(invoiceId)
-                ?? throw new DomainException("Error.InvoiceNotFound");
+                          ?? throw new DomainException("Error.InvoiceNotFound");
 
             if (invoice.InvoiceStatus == InvoiceStatus.Paid)
                 throw new DomainException("Error.InvoiceAlreadyPaid");
@@ -328,7 +329,7 @@ public sealed class InvoiceService : IInvoiceService
     public async Task<InvoiceResponse> UpdateAsync(Guid id, UpdateInvoiceRequest request)
     {
         var invoice = await _invoiceRepository.GetByIdWithPaymentsAsync(id)
-            ?? throw new DomainException("Error.InvoiceNotFound");
+                      ?? throw new DomainException("Error.InvoiceNotFound");
 
         var newConsumptionStart = request.ConsumptionStart ?? invoice.IssueDate;
         var newConsumptionEnd = request.ConsumptionEnd ?? invoice.DueDate;
@@ -352,7 +353,7 @@ public sealed class InvoiceService : IInvoiceService
     public async Task DeleteAsync(Guid id)
     {
         var invoice = await _invoiceRepository.GetByIdWithPaymentsAsync(id)
-            ?? throw new DomainException("Error.InvoiceNotFound");
+                      ?? throw new DomainException("Error.InvoiceNotFound");
 
         if (invoice.InvoiceStatus != InvoiceStatus.Unpaid)
         {
@@ -385,7 +386,7 @@ public sealed class InvoiceService : IInvoiceService
         FixedKilowattCalculateRequest request)
     {
         var preferences = await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("Error.PreferencesNotConfigured");
+                          ?? throw new DomainException("Error.PreferencesNotConfigured");
 
         var rates = _pricingService.GetRates(
             request.CustomerType, PlanType.FixedKilowatt, preferences);
@@ -421,7 +422,7 @@ public sealed class InvoiceService : IInvoiceService
             throw new DomainException("Error.FixedKwPaymentMethodRequired");
 
         var preferences = await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("Error.PreferencesNotConfigured");
+                          ?? throw new DomainException("Error.PreferencesNotConfigured");
 
         var rates = _pricingService.GetRates(customer, preferences);
         if (rates.UnitPrice <= 0)
@@ -599,7 +600,7 @@ public sealed class InvoiceService : IInvoiceService
     private static InvoiceStatus ComputeStatus(decimal paid, decimal total) =>
         paid <= 0 ? InvoiceStatus.Unpaid :
         paid >= total ? InvoiceStatus.Paid :
-                        InvoiceStatus.PartiallyPaid;
+        InvoiceStatus.PartiallyPaid;
 
     private enum StandardInvoicePrepareError
     {
@@ -828,14 +829,78 @@ public sealed class InvoiceService : IInvoiceService
 
     public async Task<string> RenderPrintHtmlAsync(Guid invoiceId)
     {
+        var (model, language) = await BuildPrintModelAsync(invoiceId);
+        try
+        {
+            return _templateRenderer.Render(model, language);
+        }
+        catch (FileNotFoundException)
+        {
+            throw new DomainException("Error.PrintTemplateNotFound");
+        }
+    }
+
+    public async IAsyncEnumerable<double> ExportBillingRunPdfAsync(
+        int year,
+        int month,
+        string destinationPath,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        if (month is < 1 or > 12)
+            throw new DomainException("Error.MonthRange");
+
+        var selectedStart = new DateOnly(year, month, 1);
+        var selectedEnd = selectedStart.AddMonths(1).AddDays(-1);
+        var previousStart = selectedStart.AddMonths(-1);
+        var previousEnd = selectedStart.AddDays(-1);
+
+        var invoices = await _invoiceRepository.GetForIssueDateRangesAsync(
+            selectedStart, selectedEnd, previousStart, previousEnd);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (invoices.Count == 0)
+            throw new DomainException("Error.InvoiceExportEmpty");
+
+        // Same HTML templates as single print; language comes from Settings (preferences).
+        var htmlPages = new List<string>(invoices.Count);
+        var total = invoices.Count;
+        for (var i = 0; i < invoices.Count; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                var (model, language) = await BuildPrintModelAsync(invoices[i].Id);
+                htmlPages.Add(_templateRenderer.Render(model, language));
+            }
+            catch (FileNotFoundException)
+            {
+                throw new DomainException("Error.PrintTemplateNotFound");
+            }
+
+            yield return (i + 1) / (double)(total + 1);
+        }
+
+        var combinedHtml = InvoicePdfBuilder.CombineHtmlDocuments(htmlPages);
+        await InvoicePdfBuilder.WriteHtmlAsPdfAsync(combinedHtml, destinationPath, cancellationToken);
+        _logger.LogInformation(
+            "Exported {Count} invoices for billing run {Year}-{Month:00} to {Path}",
+            htmlPages.Count,
+            year,
+            month,
+            destinationPath);
+        yield return 1d;
+    }
+
+    private async Task<(InvoicePrintModel Model, string Language)> BuildPrintModelAsync(Guid invoiceId)
+    {
         var invoice = await _invoiceRepository.GetByIdForPrintAsync(invoiceId)
-            ?? throw new DomainException("Error.InvoiceNotFound");
+                      ?? throw new DomainException("Error.InvoiceNotFound");
 
         var customer = invoice.Customer
-            ?? throw new DomainException("Error.CustomerNotFound");
+                       ?? throw new DomainException("Error.CustomerNotFound");
 
         var preferences = await _preferencesRepository.GetAsync()
-            ?? throw new DomainException("Error.PreferencesNotConfigured");
+                          ?? throw new DomainException("Error.PreferencesNotConfigured");
 
         var profile = await _appUserService.GetAsync();
         var companyName = profile?.BusinessName?.Trim() ?? string.Empty;
@@ -878,12 +943,12 @@ public sealed class InvoiceService : IInvoiceService
         else if (isFixedKilowatt)
         {
             totalConsumption = invoice.BilledConsumption
-                ?? InvoiceCalculationHelper.CalculateFixedKilowattConsumption(
-                    invoice.TotalAmount,
-                    customer.PlanValue,
-                    unitPrice,
-                    invoice.FixedCharge,
-                    invoice.TVA);
+                               ?? InvoiceCalculationHelper.CalculateFixedKilowattConsumption(
+                                   invoice.TotalAmount,
+                                   customer.PlanValue,
+                                   unitPrice,
+                                   invoice.FixedCharge,
+                                   invoice.TVA);
             consumptionCost = Math.Round((totalConsumption ?? 0m) * unitPrice, 4);
 
             var latestReading = await _meterReadingRepository.GetLatestForCustomerAsync(customer.Id);
@@ -925,9 +990,13 @@ public sealed class InvoiceService : IInvoiceService
             TvaAmount: tvaAmount,
             ShowTva: invoice.TVA > 0,
             PreviousReading: previousReading,
-            PreviousReadingDate: previousReadingDate is null ? null : FormatHelper.InvoicePrintDate(previousReadingDate.Value, arabicPrint),
+            PreviousReadingDate: previousReadingDate is null
+                ? null
+                : FormatHelper.InvoicePrintDate(previousReadingDate.Value, arabicPrint),
             CurrentReading: currentReading,
-            CurrentReadingDate: currentReadingDate is null ? null : FormatHelper.InvoicePrintDate(currentReadingDate.Value, arabicPrint),
+            CurrentReadingDate: currentReadingDate is null
+                ? null
+                : FormatHelper.InvoicePrintDate(currentReadingDate.Value, arabicPrint),
             TotalConsumption: totalConsumption,
             ConsumptionCost: consumptionCost,
             SubtotalBeforeTva: subtotalBeforeTva,
@@ -942,13 +1011,6 @@ public sealed class InvoiceService : IInvoiceService
             IsKilowattPlan: isMeterKilowatt,
             IsFixedKilowattPlan: isFixedKilowatt);
 
-        try
-        {
-            return _templateRenderer.Render(model, preferences.Language);
-        }
-        catch (FileNotFoundException)
-        {
-            throw new DomainException("Error.PrintTemplateNotFound");
-        }
+        return (model, preferences.Language);
     }
 }

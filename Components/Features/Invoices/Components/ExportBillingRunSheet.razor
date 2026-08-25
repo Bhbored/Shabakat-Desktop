@@ -1,0 +1,138 @@
+@namespace Shabakat.Components.Features.Invoices.Components
+@inject IStringLocalizer<SharedResource> L
+@inject ICultureService CultureService
+@implements IDisposable
+
+<ConfirmDialog Open="Open"
+               Title="@L["Invoices.ExportMonthTitle"].Value"
+               Description="@L["Invoices.ExportMonthHint"].Value"
+               MaxWidthClass="max-w-sm"
+               OnClose="OnClose">
+    <ChildContent>
+        @if (Exporting || Progress > 0)
+        {
+            <div class="space-y-2 text-foreground">
+                <div class="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>@L["Invoices.Exporting"]</span>
+                    <span>@((Progress * 100).ToString("0"))%</span>
+                </div>
+                <div class="h-2.5 overflow-hidden rounded-full bg-muted">
+                    <div class="h-full rounded-full bg-primary transition-[width] duration-300"
+                         style="width: @((Progress * 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="space-y-3 text-foreground">
+                <div>
+                    <p class="mb-2 text-sm font-medium">@L["Invoices.ExportMonthLabel"]</p>
+                    <div class="max-h-56 overflow-y-auto rounded-xl border border-border"
+                         role="listbox"
+                         aria-label="@L["Invoices.ExportMonthLabel"]">
+                        @foreach (var option in _options)
+                        {
+                            var selected = option.Key == SelectedKey;
+                            <button type="button"
+                                    role="option"
+                                    aria-selected="@selected"
+                                    class="flex w-full items-center justify-between border-b border-border px-3 py-2.5 text-start text-sm last:border-b-0 @(selected ? "bg-primary/15 font-medium text-foreground" : "text-foreground hover:bg-muted")"
+                                    @onclick="() => SelectMonthAsync(option.Key)">
+                                <span>@option.Label</span>
+                                @if (selected)
+                                {
+                                    <svg class="h-4 w-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                }
+                            </button>
+                        }
+                    </div>
+                </div>
+                <p class="text-xs leading-relaxed text-muted-foreground">@L["Invoices.ExportMonthRule"]</p>
+            </div>
+        }
+    </ChildContent>
+    <Footer>
+        <button type="button"
+                class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted"
+                disabled="@Exporting"
+                @onclick="OnClose">
+            @L["Common.Cancel"]
+        </button>
+        <button type="button"
+                class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                disabled="@(Exporting || string.IsNullOrWhiteSpace(SelectedKey))"
+                @onclick="OnExport">
+            @(Exporting ? L["Invoices.Exporting"] : L["Invoices.ExportMonth"])
+        </button>
+    </Footer>
+</ConfirmDialog>
+
+@code {
+    private readonly List<(string Key, string Label, int Year, int Month)> _options = [];
+
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public bool Exporting { get; set; }
+    [Parameter] public double Progress { get; set; }
+    [Parameter] public string SelectedKey { get; set; } = "";
+    [Parameter] public EventCallback<string> SelectedKeyChanged { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnExport { get; set; }
+
+    protected override void OnInitialized()
+    {
+        CultureService.Changed += OnCultureChanged;
+        RebuildOptions();
+        EnsureSelection();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (_options.Count == 0)
+            RebuildOptions();
+        EnsureSelection();
+    }
+
+    private void RebuildOptions()
+    {
+        _options.Clear();
+        // Include next month first so Ampere bulk (often created ahead) can be exported as that billing run.
+        var cursor = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(1);
+        for (var i = 0; i < 19; i++)
+        {
+            var date = cursor.AddMonths(-i);
+            _options.Add(($"{date.Year}-{date.Month}", FormatHelper.MonthYear(date.Year, date.Month), date.Year, date.Month));
+        }
+    }
+
+    private void EnsureSelection()
+    {
+        if (_options.Count == 0)
+            return;
+        if (_options.Any(o => o.Key == SelectedKey))
+            return;
+
+        var current = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, 1);
+        var currentKey = $"{current.Year}-{current.Month}";
+        SelectedKey = _options.Any(o => o.Key == currentKey)
+            ? currentKey
+            : _options[0].Key;
+        _ = SelectedKeyChanged.InvokeAsync(SelectedKey);
+    }
+
+    private async Task SelectMonthAsync(string key)
+    {
+        SelectedKey = key;
+        await SelectedKeyChanged.InvokeAsync(SelectedKey);
+    }
+
+    private void OnCultureChanged() => _ = InvokeAsync(() =>
+    {
+        RebuildOptions();
+        StateHasChanged();
+        return Task.CompletedTask;
+    });
+
+    public void Dispose() => CultureService.Changed -= OnCultureChanged;
+}

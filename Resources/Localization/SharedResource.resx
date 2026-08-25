@@ -821,6 +821,27 @@
   <data name="Invoices.BulkGenerate" xml:space="preserve">
     <value>Bulk Generate</value>
   </data>
+  <data name="Invoices.ExportMonth" xml:space="preserve">
+    <value>Export month PDF</value>
+  </data>
+  <data name="Invoices.ExportMonthTitle" xml:space="preserve">
+    <value>Export billing-run PDF</value>
+  </data>
+  <data name="Invoices.ExportMonthHint" xml:space="preserve">
+    <value>Save one multi-page PDF for the billing-run month.</value>
+  </data>
+  <data name="Invoices.ExportMonthLabel" xml:space="preserve">
+    <value>Billing run month</value>
+  </data>
+  <data name="Invoices.ExportMonthRule" xml:space="preserve">
+    <value>Ampere invoices from the selected month + Kilowatt invoices from the previous month. Fixed Kilowatt excluded.</value>
+  </data>
+  <data name="Invoices.Exporting" xml:space="preserve">
+    <value>Exporting...</value>
+  </data>
+  <data name="Invoices.ExportMonthDone" xml:space="preserve">
+    <value>Invoice PDF exported</value>
+  </data>
   <data name="Invoices.BulkTitle" xml:space="preserve">
     <value>Bulk create invoices</value>
   </data>
@@ -2035,6 +2056,12 @@
   </data>
   <data name="Error.InvoiceNotFound" xml:space="preserve">
     <value>Invoice not found.</value>
+  </data>
+  <data name="Error.InvoiceExportEmpty" xml:space="preserve">
+    <value>No invoices found for that billing-run month.</value>
+  </data>
+  <data name="Error.InvoiceExportPdfFailed" xml:space="preserve">
+    <value>Could not create the invoice PDF. Make sure Microsoft Edge is installed, then try again.</value>
   </data>
   <data name="Error.InvoiceAlreadyPaid" xml:space="preserve">
     <value>This invoice is already fully paid.</value>

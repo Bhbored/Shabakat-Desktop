@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.DTOs.Invoices;
 using Shabakat.Domain.Entities;
+using Shabakat.Domain.Enums;
 using Shabakat.Infrastructure.Persistence;
 
 namespace Shabakat.Infrastructure.Repository;
@@ -64,6 +65,25 @@ public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepo
             .Include(i => i.Payments)
                 .ThenInclude(p => p.Customer)
             .OrderByDescending(i => i.InvoiceNumber)
+            .ToListAsync();
+
+    public async Task<IReadOnlyList<Invoice>> GetForIssueDateRangesAsync(
+        DateOnly selectedMonthStart,
+        DateOnly selectedMonthEnd,
+        DateOnly previousMonthStart,
+        DateOnly previousMonthEnd)
+        => await _dbSet
+            .AsNoTracking()
+            .Include(i => i.Customer)
+            .Where(i =>
+                (i.Customer.Plan == PlanType.Ampere
+                    && i.IssueDate >= selectedMonthStart
+                    && i.IssueDate <= selectedMonthEnd)
+                || (i.Customer.Plan == PlanType.Kilowatt
+                    && i.IssueDate >= previousMonthStart
+                    && i.IssueDate <= previousMonthEnd))
+            .OrderBy(i => i.IssueDate)
+            .ThenBy(i => i.InvoiceNumber)
             .ToListAsync();
 
     public async Task<bool> ExistsForCustomerInPeriodAsync(

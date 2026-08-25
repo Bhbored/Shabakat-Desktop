@@ -33,6 +33,20 @@ public static class FormatHelper
     public static string InvoicePrintDate(DateTime value, bool arabic) =>
         InvoicePrintDate(DateOnly.FromDateTime(value), arabic);
 
+    public static string MonthYear(int year, int month)
+    {
+        if (month is < 1 or > 12)
+            throw new ArgumentOutOfRangeException(nameof(month));
+
+        if (IsArabic)
+            return $"{LevantineMonths[month - 1]} {year.ToString(CultureInfo.InvariantCulture)}";
+
+        return new DateOnly(year, month, 1).ToString("MMMM yyyy", UsdCulture);
+    }
+
+    private static bool IsArabic =>
+        Culture.TwoLetterISOLanguageName.Equals("ar", StringComparison.OrdinalIgnoreCase);
+
     private static readonly string[] LevantineMonths =
     [
         "كانون الثاني",

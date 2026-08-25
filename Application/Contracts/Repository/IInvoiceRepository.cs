@@ -10,6 +10,11 @@ public interface IInvoiceRepository : IGenericRepository<Invoice>
     Task<Invoice?> GetByIdForPrintAsync(Guid id);
     Task<(IEnumerable<Invoice> Items, int TotalCount)> GetAllPagedAsync(InvoiceFilterRequest filter);
     Task<IEnumerable<Invoice>> GetAllWithCustomerAsync();
+    Task<IReadOnlyList<Invoice>> GetForIssueDateRangesAsync(
+        DateOnly selectedMonthStart,
+        DateOnly selectedMonthEnd,
+        DateOnly previousMonthStart,
+        DateOnly previousMonthEnd);
     Task<bool> ExistsForCustomerInPeriodAsync(Guid customerId, DateOnly periodStart, DateOnly periodEnd);
     Task<Invoice?> GetByIdForUpdateAsync(Guid id);
 }

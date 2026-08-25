@@ -17,6 +17,7 @@
                      DateFromChanged="OnDateFromChanged"
                      DateToChanged="OnDateToChanged"
                      OnFiltersChanged="ReloadFromFiltersAsync"
+                     OnExportMonth="OpenExportMonth"
                      OnBulkCreate="OpenBulk"
                      OnCreate="OpenCreate" />
 
@@ -55,6 +56,14 @@
                         OnClose="CloseBulk"
                         OnSave="BulkCreateAsync" />
 
+<ExportBillingRunSheet Open="_showExportMonth"
+                       Exporting="_exporting"
+                       Progress="_exportProgress"
+                       SelectedKey="@_exportMonthKey"
+                       SelectedKeyChanged="OnExportMonthKeyChanged"
+                       OnClose="CloseExportMonth"
+                       OnExport="ExportBillingRunAsync" />
+
 <PayInvoiceSheet Open="_showPay"
                  Invoice="_payInvoice"
                  Model="_pay"
@@ -82,13 +91,17 @@
 
     private bool _loading = true;
     private bool _saving;
+    private bool _exporting;
     private bool _showCreate;
     private bool _showBulk;
+    private bool _showExportMonth;
     private bool _showPay;
     private bool _showDetails;
     private bool _detailsLoading;
     private bool _ampereProrateByDaysEnabled;
     private Guid? _openMenuId;
+    private double _exportProgress;
+    private string _exportMonthKey = "";
 
     private string _customerFilter = "";
     private string _statusFilter = "";
@@ -319,6 +332,75 @@
     {
         _showBulk = false;
         _bulkResult = null;
+    }
+
+    private void OpenExportMonth()
+    {
+        _openMenuId = null;
+        _exportProgress = 0;
+        _showExportMonth = true;
+    }
+
+    private void CloseExportMonth()
+    {
+        if (_exporting) return;
+        _showExportMonth = false;
+        _exportProgress = 0;
+    }
+
+    private Task OnExportMonthKeyChanged(string value)
+    {
+        _exportMonthKey = value;
+        return Task.CompletedTask;
+    }
+
+    private async Task ExportBillingRunAsync()
+    {
+        if (_exporting || !TryParseMonthKey(_exportMonthKey, out var year, out var month))
+            return;
+
+        var fileName = $"shabakat-invoices-{year:0000}-{month:00}.pdf";
+        var path = await InvoicePdfFilePicker.PickSavePathAsync(fileName);
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        _exporting = true;
+        _exportProgress = 0;
+        try
+        {
+            await foreach (var value in InvoiceService.ExportBillingRunPdfAsync(year, month, path))
+            {
+                _exportProgress = value;
+                await InvokeAsync(StateHasChanged);
+            }
+
+            Toast.Success(L["Invoices.ExportMonthDone"].Value);
+            _showExportMonth = false;
+            _exportProgress = 0;
+        }
+        catch (DomainException ex)
+        {
+            Toast.Error(ex);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex);
+        }
+        finally
+        {
+            _exporting = false;
+        }
+    }
+
+    private static bool TryParseMonthKey(string key, out int year, out int month)
+    {
+        year = 0;
+        month = 0;
+        var parts = key.Split('-', 2);
+        return parts.Length == 2
+            && int.TryParse(parts[0], out year)
+            && int.TryParse(parts[1], out month)
+            && month is >= 1 and <= 12;
     }
 
     private async Task BulkCreateAsync()

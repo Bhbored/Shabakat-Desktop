@@ -821,6 +821,27 @@
   <data name="Invoices.BulkGenerate" xml:space="preserve">
     <value>توليد جماعي</value>
   </data>
+  <data name="Invoices.ExportMonth" xml:space="preserve">
+    <value>تصدير PDF للشهر</value>
+  </data>
+  <data name="Invoices.ExportMonthTitle" xml:space="preserve">
+    <value>تصدير PDF لجولة الفوترة</value>
+  </data>
+  <data name="Invoices.ExportMonthHint" xml:space="preserve">
+    <value>احفظ ملف PDF متعدد الصفحات لجولة الفوترة.</value>
+  </data>
+  <data name="Invoices.ExportMonthLabel" xml:space="preserve">
+    <value>شهر جولة الفوترة</value>
+  </data>
+  <data name="Invoices.ExportMonthRule" xml:space="preserve">
+    <value>فواتير الأمبير من الشهر المحدد + فواتير الكيلوواط من الشهر السابق. كيلوواط ثابت مستبعد.</value>
+  </data>
+  <data name="Invoices.Exporting" xml:space="preserve">
+    <value>جارٍ التصدير...</value>
+  </data>
+  <data name="Invoices.ExportMonthDone" xml:space="preserve">
+    <value>تم تصدير PDF الفواتير</value>
+  </data>
   <data name="Invoices.BulkTitle" xml:space="preserve">
     <value>إنشاء فواتير جماعي</value>
   </data>
@@ -2035,6 +2056,12 @@
   </data>
   <data name="Error.InvoiceNotFound" xml:space="preserve">
     <value>الفاتورة غير موجودة.</value>
+  </data>
+  <data name="Error.InvoiceExportEmpty" xml:space="preserve">
+    <value>لا توجد فواتير لشهر جولة الفوترة هذا.</value>
+  </data>
+  <data name="Error.InvoiceExportPdfFailed" xml:space="preserve">
+    <value>تعذّر إنشاء PDF الفواتير. تأكد من تثبيت Microsoft Edge ثم أعد المحاولة.</value>
   </data>
   <data name="Error.InvoiceAlreadyPaid" xml:space="preserve">
     <value>هذه الفاتورة مدفوعة بالكامل.</value>

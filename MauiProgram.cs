@@ -33,10 +33,7 @@ namespace Shabakat
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                });
+                .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
 
             builder.Configuration
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
@@ -46,9 +43,9 @@ namespace Shabakat
             builder.Services.RegisterDependencies(builder.Configuration);
 
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.SetMinimumLevel(LogLevel.Debug);
-    		builder.Logging.AddDebug();
+            builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Logging.SetMinimumLevel(LogLevel.Debug);
+            builder.Logging.AddDebug();
             builder.AddMauiDevFlowAgent();
 #endif
 
