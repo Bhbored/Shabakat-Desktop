@@ -31,6 +31,7 @@ public class AppDbContext : DbContext
     public DbSet<InvoiceSkip> InvoiceSkips => Set<InvoiceSkip>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<AuditLogDetails> AuditLogDetails => Set<AuditLogDetails>();
+    public DbSet<CloudBackupState> CloudBackupStates => Set<CloudBackupState>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

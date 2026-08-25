@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -53,6 +54,26 @@ public sealed class BackupService : IBackupService
             file.Version,
             file.ExportedAt);
         yield return 1d;
+    }
+
+    public async Task<byte[]> ExportJsonBytesAsync(CancellationToken cancellationToken = default)
+    {
+        var file = new BackupFile
+        {
+            Version = BackupFile.CurrentVersion,
+            ExportedAt = DateTime.Now
+        };
+
+        await foreach (var _ in _backupRepository.LoadAsync(file, cancellationToken))
+        {
+        }
+
+        var json = JsonSerializer.Serialize(file, JsonOptions);
+        _logger.LogInformation(
+            "Built JSON backup version {Version} at {ExportedAt}",
+            file.Version,
+            file.ExportedAt);
+        return Encoding.UTF8.GetBytes(json);
     }
 
     public async IAsyncEnumerable<double> RestoreAsync(

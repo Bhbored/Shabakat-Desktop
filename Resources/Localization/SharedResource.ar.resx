@@ -1184,6 +1184,33 @@
   <data name="Settings.Backup.Restored" xml:space="preserve">
     <value>تمت استعادة النسخة الاحتياطية</value>
   </data>
+  <data name="Settings.Backup.Cloud" xml:space="preserve">
+    <value>النسخ السحابي</value>
+  </data>
+  <data name="Settings.Backup.CloudHint" xml:space="preserve">
+    <value>طالما التطبيق مفتوح، يُرفع لقطة JSON إلى Cloudflare R2 تقريباً مرة كل أسبوع. الرفع اليدوي محدود بمرة كل 15 دقيقة. الاستعادة ما زالت من ملف محلي.</value>
+  </data>
+  <data name="Settings.Backup.CloudNotConfigured" xml:space="preserve">
+    <value>النسخ السحابي غير مُعدّ على هذا التثبيت. عيّن WorkerUrl وSecret في appsettings.Local.json.</value>
+  </data>
+  <data name="Settings.Backup.CloudEnabled" xml:space="preserve">
+    <value>الرفع التلقائي</value>
+  </data>
+  <data name="Settings.Backup.CloudLastSuccess" xml:space="preserve">
+    <value>آخر رفع {0}</value>
+  </data>
+  <data name="Settings.Backup.CloudNever" xml:space="preserve">
+    <value>لم يُرفع إلى السحابة بعد</value>
+  </data>
+  <data name="Settings.Backup.CloudUploadNow" xml:space="preserve">
+    <value>رفع الآن</value>
+  </data>
+  <data name="Settings.Backup.CloudUploading" xml:space="preserve">
+    <value>جارٍ الرفع...</value>
+  </data>
+  <data name="Settings.Backup.CloudUploaded" xml:space="preserve">
+    <value>تم رفع النسخة السحابية</value>
+  </data>
   <data name="Settings.SampleData" xml:space="preserve">
     <value>بيانات تجريبية</value>
   </data>
@@ -2101,6 +2128,18 @@
   </data>
   <data name="Error.BackupInvalid" xml:space="preserve">
     <value>ملف النسخة الاحتياطية غير صالح.</value>
+  </data>
+  <data name="Error.CloudBackupNotConfigured" xml:space="preserve">
+    <value>النسخ السحابي غير مُعدّ.</value>
+  </data>
+  <data name="Error.CloudBackupDisabled" xml:space="preserve">
+    <value>النسخ السحابي متوقف.</value>
+  </data>
+  <data name="Error.CloudBackupFailed" xml:space="preserve">
+    <value>فشل رفع النسخة السحابية. راجع آخر خطأ في الإعدادات.</value>
+  </data>
+  <data name="Error.CloudBackupRateLimited" xml:space="preserve">
+    <value>يرجى الانتظار حوالي {0} دقيقة قبل الرفع مجدداً.</value>
   </data>
   <data name="Error.DatabaseResetFailed" xml:space="preserve">
     <value>تعذّر حذف ملف قاعدة البيانات.</value>

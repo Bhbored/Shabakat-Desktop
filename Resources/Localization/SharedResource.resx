@@ -1184,6 +1184,33 @@
   <data name="Settings.Backup.Restored" xml:space="preserve">
     <value>Backup restored</value>
   </data>
+  <data name="Settings.Backup.Cloud" xml:space="preserve">
+    <value>Cloud backup</value>
+  </data>
+  <data name="Settings.Backup.CloudHint" xml:space="preserve">
+    <value>While the app is open, a JSON snapshot is uploaded to Cloudflare R2 about once a week. Manual upload is limited to once every 15 minutes. Restore still uses a local file.</value>
+  </data>
+  <data name="Settings.Backup.CloudNotConfigured" xml:space="preserve">
+    <value>Cloud backup is not configured on this install. Set WorkerUrl and Secret in appsettings.Local.json.</value>
+  </data>
+  <data name="Settings.Backup.CloudEnabled" xml:space="preserve">
+    <value>Automatic upload</value>
+  </data>
+  <data name="Settings.Backup.CloudLastSuccess" xml:space="preserve">
+    <value>Last uploaded {0}</value>
+  </data>
+  <data name="Settings.Backup.CloudNever" xml:space="preserve">
+    <value>No cloud upload yet</value>
+  </data>
+  <data name="Settings.Backup.CloudUploadNow" xml:space="preserve">
+    <value>Upload now</value>
+  </data>
+  <data name="Settings.Backup.CloudUploading" xml:space="preserve">
+    <value>Uploading...</value>
+  </data>
+  <data name="Settings.Backup.CloudUploaded" xml:space="preserve">
+    <value>Cloud backup uploaded</value>
+  </data>
   <data name="Settings.SampleData" xml:space="preserve">
     <value>Sample data</value>
   </data>
@@ -2101,6 +2128,18 @@
   </data>
   <data name="Error.BackupInvalid" xml:space="preserve">
     <value>This backup file is not valid.</value>
+  </data>
+  <data name="Error.CloudBackupNotConfigured" xml:space="preserve">
+    <value>Cloud backup is not configured.</value>
+  </data>
+  <data name="Error.CloudBackupDisabled" xml:space="preserve">
+    <value>Cloud backup is turned off.</value>
+  </data>
+  <data name="Error.CloudBackupFailed" xml:space="preserve">
+    <value>Cloud backup upload failed. Check Settings for the last error.</value>
+  </data>
+  <data name="Error.CloudBackupRateLimited" xml:space="preserve">
+    <value>Please wait about {0} minute(s) before uploading again.</value>
   </data>
   <data name="Error.DatabaseResetFailed" xml:space="preserve">
     <value>Could not delete the database file.</value>

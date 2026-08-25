@@ -1,0 +1,6 @@
+{
+  "CloudBackup": {
+    "WorkerUrl": "https://shabakat-backup-worker.YOUR_SUBDOMAIN.workers.dev",
+    "Secret": "replace-with-the-same-value-as-BACKUP_APP_SECRET"
+  }
+}

@@ -47,6 +47,9 @@
         <Compile Remove="docs\**" />
         <Content Remove="docs\**" />
         <None Remove="docs\**" />
+        <Compile Remove="cloudflare\**" />
+        <Content Remove="cloudflare\**" />
+        <None Remove="cloudflare\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -86,6 +89,8 @@
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
 		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Maui.DevFlow.Agent" Version="0.1.0-preview.12.26368.2" />
@@ -116,6 +121,12 @@
         <Content Include="Infrastructure\Templates\invoice.ar.html">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Link>Templates\invoice.ar.html</Link>
+        </Content>
+        <Content Update="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Update="appsettings.Local.json" Condition="Exists('appsettings.Local.json')">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 

@@ -1,5 +1,6 @@
 @page "/settings/backup"
 @inject IBackupService BackupService
+@inject ICloudBackupService CloudBackupService
 @inject ILicenseService LicenseService
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
@@ -40,6 +41,46 @@
             @(_restoring ? L["Settings.Backup.Restoring"] : L["Settings.Backup.Restore"])
         </button>
         <p class="text-xs text-muted-foreground">@L["Settings.Backup.RestoreHint"]</p>
+
+        <div class="border-t border-border pt-5">
+            <p class="text-sm font-medium text-foreground">@L["Settings.Backup.Cloud"]</p>
+            <p class="mt-1 text-xs text-muted-foreground">@L["Settings.Backup.CloudHint"]</p>
+        </div>
+
+        @if (_cloud is null)
+        {
+            <p class="text-sm text-muted-foreground">@L["Settings.LoadingPrefs"]</p>
+        }
+        else if (!_cloud.Configured)
+        {
+            <p class="text-xs text-muted-foreground">@L["Settings.Backup.CloudNotConfigured"]</p>
+        }
+        else
+        {
+            <div class="rounded-2xl border border-border bg-background px-4 py-4">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <p class="text-sm font-medium text-foreground">@L["Settings.Backup.CloudEnabled"]</p>
+                        <p class="text-xs text-muted-foreground">@CloudStatusText</p>
+                    </div>
+                    <label class="relative inline-flex cursor-pointer items-center">
+                        <input type="checkbox" class="peer sr-only" checked="@_cloud.Enabled" disabled="@_busy"
+                               @onchange="ToggleCloudAsync" />
+                        <span class="ui-toggle"></span>
+                    </label>
+                </div>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(_cloud.LastError))
+            {
+                <p class="text-xs text-red-600 dark:text-red-400">@_cloud.LastError</p>
+            }
+            <button type="button"
+                    class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+                    disabled="@(_busy || !_cloud.Enabled)"
+                    @onclick="UploadCloudAsync">
+                @(_uploadingCloud ? L["Settings.Backup.CloudUploading"] : L["Settings.Backup.CloudUploadNow"])
+            </button>
+        }
     </div>
 </SettingsScaffold>
 
@@ -69,14 +110,32 @@
     private bool _busy;
     private bool _exporting;
     private bool _restoring;
+    private bool _uploadingCloud;
     private bool _confirmOpen;
     private double _progress;
     private string? _pendingJson;
+    private CloudBackupStatusResponse? _cloud;
 
     private string ProgressLabel =>
         _exporting ? L["Settings.Backup.Exporting"].Value
         : _restoring ? L["Settings.Backup.Restoring"].Value
+        : _uploadingCloud ? L["Settings.Backup.CloudUploading"].Value
         : L["Common.Done"].Value;
+
+    private string CloudStatusText
+    {
+        get
+        {
+            if (_cloud?.LastSuccessfulUploadAt is { } at)
+                return string.Format(L["Settings.Backup.CloudLastSuccess"].Value, FormatHelper.Date(at.ToLocalTime()));
+            return L["Settings.Backup.CloudNever"].Value;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _cloud = await CloudBackupService.GetStatusAsync();
+    }
 
     private async Task ExportAsync()
     {
@@ -113,6 +172,63 @@
         {
             _busy = false;
             _exporting = false;
+        }
+    }
+
+    private async Task ToggleCloudAsync(ChangeEventArgs args)
+    {
+        if (_busy || _cloud is null)
+            return;
+
+        var enabled = args.Value is true || string.Equals(args.Value?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
+        _busy = true;
+        try
+        {
+            await CloudBackupService.SetEnabledAsync(enabled);
+            _cloud = await CloudBackupService.GetStatusAsync();
+        }
+        catch (DomainException ex)
+        {
+            Toast.Error(ex);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task UploadCloudAsync()
+    {
+        if (_busy)
+            return;
+
+        _busy = true;
+        _uploadingCloud = true;
+        _progress = 0;
+        try
+        {
+            await CloudBackupService.UploadNowAsync();
+            _cloud = await CloudBackupService.GetStatusAsync();
+            Toast.Success(L["Settings.Backup.CloudUploaded"].Value);
+        }
+        catch (DomainException ex)
+        {
+            _cloud = await CloudBackupService.GetStatusAsync();
+            Toast.Error(ex);
+        }
+        catch (Exception ex)
+        {
+            _cloud = await CloudBackupService.GetStatusAsync();
+            Toast.Error(ex);
+        }
+        finally
+        {
+            _busy = false;
+            _uploadingCloud = false;
         }
     }
 

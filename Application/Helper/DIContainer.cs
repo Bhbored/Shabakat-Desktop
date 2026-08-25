@@ -1,8 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Shabakat.Application.Contracts.Abstractions;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.Contracts.Services;
+using Shabakat.Application.Options;
 using Shabakat.Application.Services.AmpereSchedules;
 using Shabakat.Application.Services.Areas;
 using Shabakat.Application.Services.AuditLogs;
@@ -19,7 +22,6 @@ using Shabakat.Application.Services.Pricing;
 using Shabakat.Application.Services.Profile;
 using Shabakat.Application.Services.License;
 using Shabakat.Application.Services.Culture;
-using Microsoft.AspNetCore.Identity;
 using Shabakat.Application.Services.Theme;
 using Shabakat.Application.Services.Toasts;
 using Shabakat.Infrastructure.Persistence;
@@ -57,9 +59,16 @@ public static class DIContainer
         return services;
     }
 
-    public static IServiceCollection RegisterDependencies(this IServiceCollection services)
+    public static IServiceCollection RegisterDependencies(this IServiceCollection services, IConfiguration configuration)
     {
         services.RegisterDataBase();
+
+        services.Configure<CloudBackupOptions>(configuration.GetSection(CloudBackupOptions.SectionName));
+        services.AddHttpClient(nameof(CloudBackupService), client =>
+        {
+            client.Timeout = TimeSpan.FromMinutes(5);
+        });
+        services.AddHostedService<CloudBackupHostedService>();
 
         services.AddLocalization();
         services.AddSingleton<ICultureService, CultureService>();
@@ -70,6 +79,7 @@ public static class DIContainer
         services.AddScoped<IPricingService, PricingService>();
         services.AddScoped<IAppPreferencesService, AppPreferencesService>();
         services.AddScoped<IBackupService, BackupService>();
+        services.AddScoped<ICloudBackupService, CloudBackupService>();
         services.AddScoped<IAppUserService, AppUserService>();
         services.AddSingleton(_ => new PasswordHasher<Shabakat.Domain.Entities.AppUser>());
         services.AddScoped<ILicenseService, LicenseService>();

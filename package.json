@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "tw:build": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/app.css --minify",
-    "tw:watch": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/app.css --watch"
+    "tw:watch": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/app.css --watch",
+    "deploy:backup-worker": "npm --prefix cloudflare/backup-worker exec -- wrangler deploy -c ./wrangler.toml",
+    "preview:backup-worker": "npm --prefix cloudflare/backup-worker exec -- wrangler dev -c ./wrangler.toml"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +17,7 @@
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.3",
     "eslint": "^10.8.1",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "wrangler": "^4.125.0"
   }
 }

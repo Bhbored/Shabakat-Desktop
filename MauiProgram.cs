@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.DevFlow.Agent;
 using Shabakat.Application.Contracts.Services;
@@ -37,8 +38,12 @@ namespace Shabakat
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
 
+            builder.Configuration
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+                .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false);
+
             builder.Services.AddMauiBlazorWebView();
-            builder.Services.RegisterDependencies();
+            builder.Services.RegisterDependencies(builder.Configuration);
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
