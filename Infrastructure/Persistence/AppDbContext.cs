@@ -11,10 +11,6 @@ public class AppDbContext : DbContext
     {
     }
 
-    /// <summary>
-    /// When true, save-time timestamp stamps keep the entity's existing CreatedAt/UpdatedAt
-    /// (used when restoring a backup).
-    /// </summary>
     public bool PreserveTimestamps { get; set; }
 
     public DbSet<AppUser> AppUsers => Set<AppUser>();

@@ -121,12 +121,6 @@ window.shabakatDashboardChart = (function () {
       }
     });
 
-    // Match Recharts tooltip shadow.
-    var tooltipEl = canvas.parentElement && canvas.parentElement.querySelector("canvas");
-    if (tooltipEl) {
-      // no-op: Chart.js draws tooltip on canvas; box-shadow approximated via border/padding above
-    }
-
     return true;
   }
 

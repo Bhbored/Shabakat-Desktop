@@ -861,7 +861,6 @@ public sealed class InvoiceService : IInvoiceService
         if (invoices.Count == 0)
             throw new DomainException("Error.InvoiceExportEmpty");
 
-        // Same HTML templates as single print; language comes from Settings (preferences).
         var htmlPages = new List<string>(invoices.Count);
         var total = invoices.Count;
         for (var i = 0; i < invoices.Count; i++)

@@ -26,7 +26,6 @@ public static class FormatHelper
     public static string Date(DateTime value) =>
         value.ToString("dd MMM yyyy", Culture);
 
-    /// <summary>Invoice print header: <c>24-Aug-26</c> (en) or <c>24-آب-26</c> (ar, Levantine months, western digits).</summary>
     public static string InvoicePrintDate(DateOnly value, bool arabic) =>
         arabic ? ArabicPrintDate(value.Day, value.Month, value.Year) : value.ToString("dd-MMM-yy", UsdCulture);
 

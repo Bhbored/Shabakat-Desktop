@@ -4,9 +4,6 @@ using Shabakat.Domain.Exceptions;
 
 namespace Shabakat.Application.Services.Invoices;
 
-/// <summary>
-/// Builds a multi-invoice PDF from the same HTML templates used by single-invoice print.
-/// </summary>
 public static class InvoicePdfBuilder
 {
     public static string CombineHtmlDocuments(IReadOnlyList<string> documents)
@@ -113,7 +110,7 @@ public static class InvoicePdfBuilder
         }
         finally
         {
-            try { File.Delete(tempHtml); } catch { /* ignore */ }
+            try { File.Delete(tempHtml); } catch { }
         }
     }
 

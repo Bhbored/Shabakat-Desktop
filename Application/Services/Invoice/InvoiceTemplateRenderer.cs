@@ -279,7 +279,6 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
         }
         catch (Exception)
         {
-            // Unpackaged output folder fallback
         }
 
         var candidates = new[]

@@ -97,7 +97,6 @@
     private void RebuildOptions()
     {
         _options.Clear();
-        // Include next month first so Ampere bulk (often created ahead) can be exported as that billing run.
         var cursor = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(1);
         for (var i = 0; i < 19; i++)
         {
