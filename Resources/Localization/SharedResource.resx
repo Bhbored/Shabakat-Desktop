@@ -2294,4 +2294,25 @@
   <data name="Filter.Remove" xml:space="preserve">
     <value>Remove {0}</value>
   </data>
+  <data name="Filter.PaymentTiming" xml:space="preserve">
+    <value>Payment timing</value>
+  </data>
+  <data name="Filter.AllDueTimings" xml:space="preserve">
+    <value>All due dates</value>
+  </data>
+  <data name="Filter.DueToday" xml:space="preserve">
+    <value>Due today</value>
+  </data>
+  <data name="Filter.DueSoon" xml:space="preserve">
+    <value>Due in 7 days</value>
+  </data>
+  <data name="Invoices.NoOverdue" xml:space="preserve">
+    <value>No overdue invoices.</value>
+  </data>
+  <data name="Invoices.NoDueToday" xml:space="preserve">
+    <value>No invoices are due today.</value>
+  </data>
+  <data name="Invoices.NoDueSoon" xml:space="preserve">
+    <value>No invoices are due in the next 7 days.</value>
+  </data>
 </root>

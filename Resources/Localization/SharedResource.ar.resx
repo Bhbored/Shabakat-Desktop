@@ -2294,4 +2294,25 @@
   <data name="Filter.Remove" xml:space="preserve">
     <value>إزالة {0}</value>
   </data>
+  <data name="Filter.PaymentTiming" xml:space="preserve">
+    <value>موعد الاستحقاق</value>
+  </data>
+  <data name="Filter.AllDueTimings" xml:space="preserve">
+    <value>كل مواعيد الاستحقاق</value>
+  </data>
+  <data name="Filter.DueToday" xml:space="preserve">
+    <value>مستحقة اليوم</value>
+  </data>
+  <data name="Filter.DueSoon" xml:space="preserve">
+    <value>مستحقة خلال 7 أيام</value>
+  </data>
+  <data name="Invoices.NoOverdue" xml:space="preserve">
+    <value>لا توجد فواتير متأخرة.</value>
+  </data>
+  <data name="Invoices.NoDueToday" xml:space="preserve">
+    <value>لا توجد فواتير مستحقة اليوم.</value>
+  </data>
+  <data name="Invoices.NoDueSoon" xml:space="preserve">
+    <value>لا توجد فواتير مستحقة خلال الأيام السبعة القادمة.</value>
+  </data>
 </root>

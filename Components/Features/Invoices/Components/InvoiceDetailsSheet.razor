@@ -20,7 +20,9 @@
                     <p class="text-sm text-muted-foreground">@L["Invoices.CreatedOn", FormatHelper.Date(Invoice.CreatedAt)]</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <InvoiceStatusBadge Status="@ToBadgeStatus(Invoice.InvoiceStatus)" />
+                    <InvoiceStatusBadge Status="@ToBadgeStatus(Invoice.InvoiceStatus)"
+                                        PaymentDueDate="Invoice.PaymentDueDate"
+                                        AmountDue="Invoice.AmountDue" />
                     <button type="button"
                             class="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:bg-muted"
                             @onclick="OnPrint">

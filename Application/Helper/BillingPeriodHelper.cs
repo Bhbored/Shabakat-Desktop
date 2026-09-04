@@ -40,18 +40,20 @@ public static class BillingPeriodHelper
 
     public static DateOnly ResolvePaymentDueDate(DateOnly referenceToday, int preferenceDueDate)
     {
-        var thisMonthDay = Math.Min(
-            preferenceDueDate,
-            DateTime.DaysInMonth(referenceToday.Year, referenceToday.Month));
+        var thisMonthDueDate = ResolveScheduledPaymentDueDate(referenceToday, preferenceDueDate);
 
-        if (referenceToday.Day <= thisMonthDay)
-            return new DateOnly(referenceToday.Year, referenceToday.Month, thisMonthDay);
+        if (referenceToday <= thisMonthDueDate)
+            return thisMonthDueDate;
 
         var nextMonth = referenceToday.AddMonths(1);
-        var nextMonthDay = Math.Min(
-            preferenceDueDate,
-            DateTime.DaysInMonth(nextMonth.Year, nextMonth.Month));
-        return new DateOnly(nextMonth.Year, nextMonth.Month, nextMonthDay);
+        return ResolveScheduledPaymentDueDate(nextMonth, preferenceDueDate);
+    }
+
+    public static DateOnly ResolveScheduledPaymentDueDate(DateOnly month, int preferenceDueDate)
+    {
+        var safeDay = Math.Clamp(preferenceDueDate, 1, 31);
+        var day = Math.Min(safeDay, DateTime.DaysInMonth(month.Year, month.Month));
+        return new DateOnly(month.Year, month.Month, day);
     }
 
     public static DateOnly ResolveKilowattMeterReadingPeriodEnd(

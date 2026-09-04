@@ -1,37 +1,59 @@
 @namespace Shabakat.Components.Shared
 @inject IStringLocalizer<SharedResource> L
 
-@switch (Status)
-{
-    case "paid":
-        <span class="inline-flex items-center gap-1 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-xs font-medium text-emerald-400">
-            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            @L["Status.Paid"]
-        </span>
-        break;
-    case "unpaid":
-        <span class="inline-flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-xs font-medium text-amber-400">
-            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            @L["Status.Unpaid"]
-        </span>
-        break;
-    case "overdue":
+<span class="inline-flex flex-wrap items-center gap-1">
+    @if (IsOverdue)
+    {
         <span class="inline-flex items-center gap-1 rounded-full border border-red-400/20 bg-red-400/10 px-2 py-0.5 text-xs font-medium text-red-400">
             <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             @L["Status.Overdue"]
         </span>
-        break;
-    case "partiallyPaid":
-        <span class="inline-flex items-center gap-1 rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-xs font-medium text-blue-400">
-            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/></svg>
-            @L["Status.PartiallyPaid"]
-        </span>
-        break;
-    default:
-        <span class="text-muted-foreground">@L["Common.Dash"]</span>
-        break;
-}
+    }
+
+    @if (!IsOverdue || NormalizedStatus == "partiallyPaid")
+    {
+        @switch (NormalizedStatus)
+        {
+            case "paid":
+                <span class="inline-flex items-center gap-1 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-xs font-medium text-emerald-400">
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    @L["Status.Paid"]
+                </span>
+                break;
+            case "unpaid":
+                <span class="inline-flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-xs font-medium text-amber-400">
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    @L["Status.Unpaid"]
+                </span>
+                break;
+            case "partiallyPaid":
+                <span class="inline-flex items-center gap-1 rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-xs font-medium text-blue-400">
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/></svg>
+                    @L["Status.PartiallyPaid"]
+                </span>
+                break;
+            case "overdue":
+                break;
+            default:
+                <span class="text-muted-foreground">@L["Common.Dash"]</span>
+                break;
+        }
+    }
+</span>
 
 @code {
     [Parameter] public string Status { get; set; } = "";
+    [Parameter] public DateOnly? PaymentDueDate { get; set; }
+    [Parameter] public decimal? AmountDue { get; set; }
+
+    private string NormalizedStatus =>
+        Status.Equals(nameof(InvoiceStatus.PartiallyPaid), StringComparison.OrdinalIgnoreCase)
+            ? "partiallyPaid"
+            : Status.ToLowerInvariant();
+
+    private bool IsOverdue =>
+        NormalizedStatus == "overdue"
+        || (PaymentDueDate.HasValue
+            && AmountDue.GetValueOrDefault() > 0
+            && PaymentDueDate.Value < DateOnly.FromDateTime(DateTime.Today));
 }

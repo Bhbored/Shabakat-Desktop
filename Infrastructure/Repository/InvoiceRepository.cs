@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shabakat.Application.Contracts.Repository;
 using Shabakat.Application.DTOs.Invoices;
+using Shabakat.Application.Helper;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Enums;
 using Shabakat.Infrastructure.Persistence;
@@ -28,7 +29,9 @@ public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepo
             .FirstOrDefaultAsync(i => i.Id == id);
 
     public async Task<(IEnumerable<Invoice> Items, int TotalCount)> GetAllPagedAsync(
-        InvoiceFilterRequest filter)
+        InvoiceFilterRequest filter,
+        int paymentDueDay,
+        DateOnly today)
     {
         var query = _dbSet
             .Include(i => i.Customer)
@@ -45,6 +48,53 @@ public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepo
 
         if (filter.ConsumptionStartTo.HasValue)
             query = query.Where(i => i.IssueDate <= filter.ConsumptionStartTo.Value);
+
+        if (filter.DueTiming.HasValue)
+        {
+            query = query.Where(i => i.AmountDue > 0);
+
+            var currentDue = BillingPeriodHelper.ResolveScheduledPaymentDueDate(today, paymentDueDay);
+            var previousDue = BillingPeriodHelper.ResolveScheduledPaymentDueDate(today.AddMonths(-1), paymentDueDay);
+            var nextDue = BillingPeriodHelper.ResolveScheduledPaymentDueDate(today.AddMonths(1), paymentDueDay);
+            var tomorrowStart = today.AddDays(1).ToDateTime(TimeOnly.MinValue);
+
+            switch (filter.DueTiming.Value)
+            {
+                case InvoiceDueTimingFilter.Overdue:
+                {
+                    var latestPastDue = currentDue < today ? currentDue : previousDue;
+                    var overdueCutoff = latestPastDue.AddDays(1).ToDateTime(TimeOnly.MinValue);
+                    query = query.Where(i => i.CreatedAt < overdueCutoff);
+                    break;
+                }
+                case InvoiceDueTimingFilter.DueToday:
+                    if (currentDue != today)
+                    {
+                        query = query.Where(_ => false);
+                    }
+                    else
+                    {
+                        var cycleStart = previousDue.AddDays(1).ToDateTime(TimeOnly.MinValue);
+                        query = query.Where(i => i.CreatedAt >= cycleStart && i.CreatedAt < tomorrowStart);
+                    }
+                    break;
+                case InvoiceDueTimingFilter.DueSoon:
+                {
+                    var upcomingDue = currentDue > today ? currentDue : nextDue;
+                    if (upcomingDue > today.AddDays(7))
+                    {
+                        query = query.Where(_ => false);
+                    }
+                    else
+                    {
+                        var priorDue = upcomingDue == currentDue ? previousDue : currentDue;
+                        var cycleStart = priorDue.AddDays(1).ToDateTime(TimeOnly.MinValue);
+                        query = query.Where(i => i.CreatedAt >= cycleStart && i.CreatedAt < tomorrowStart);
+                    }
+                    break;
+                }
+            }
+        }
 
         var totalCount = await query.CountAsync();
         var pageSize = Math.Max(1, filter.PageSize);

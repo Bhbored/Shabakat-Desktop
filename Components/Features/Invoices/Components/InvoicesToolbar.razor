@@ -50,6 +50,18 @@
                     </label>
 
                     <label class="block space-y-1.5">
+                        <span class="text-sm font-medium text-foreground">@L["Filter.PaymentTiming"]</span>
+                        <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                                value="@_draftDueTiming"
+                                @onchange="OnDraftDueTimingChanged">
+                            <option value="">@L["Filter.AllDueTimings"]</option>
+                            <option value="@InvoiceDueTimingFilter.Overdue">@L["Status.Overdue"]</option>
+                            <option value="@InvoiceDueTimingFilter.DueToday">@L["Filter.DueToday"]</option>
+                            <option value="@InvoiceDueTimingFilter.DueSoon">@L["Filter.DueSoon"]</option>
+                        </select>
+                    </label>
+
+                    <label class="block space-y-1.5">
                         <span class="text-sm font-medium text-foreground">@L["Filter.IssueDateFrom"]</span>
                         <input type="date"
                                class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
@@ -105,6 +117,20 @@
     {
         <div class="flex flex-wrap items-center gap-2">
             <span class="text-sm text-muted-foreground">@L["Filter.Active"]:</span>
+            @if (!string.IsNullOrWhiteSpace(DueTimingFilter))
+            {
+                var timingChip = $"{L["Filter.PaymentTiming"]}: {TimingLabel(DueTimingFilter)}";
+                <span class="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-sm text-foreground">
+                    @timingChip
+                    <button type="button"
+                            class="rounded-full p-0.5 hover:bg-primary/15"
+                            aria-label="@L["Filter.Remove", timingChip]"
+                            @onclick="RemoveDueTimingAsync"
+                            @onclick:stopPropagation="true">
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                </span>
+            }
             @if (!string.IsNullOrWhiteSpace(StatusFilter))
             {
                 var statusChip = $"{L["Common.Status"]}: {StatusLabel(StatusFilter)}";
@@ -165,6 +191,8 @@
     [Parameter] public EventCallback<string> CustomerFilterChanged { get; set; }
     [Parameter] public string StatusFilter { get; set; } = "";
     [Parameter] public EventCallback<string> StatusFilterChanged { get; set; }
+    [Parameter] public string DueTimingFilter { get; set; } = "";
+    [Parameter] public EventCallback<string> DueTimingFilterChanged { get; set; }
     [Parameter] public DateTime? DateFrom { get; set; }
     [Parameter] public EventCallback<DateTime?> DateFromChanged { get; set; }
     [Parameter] public DateTime? DateTo { get; set; }
@@ -177,11 +205,13 @@
 
     private bool _filtersOpen;
     private string _draftStatus = "";
+    private string _draftDueTiming = "";
     private DateTime? _draftDateFrom;
     private DateTime? _draftDateTo;
 
     private int ActiveFilterCount =>
         (string.IsNullOrWhiteSpace(StatusFilter) ? 0 : 1)
+        + (string.IsNullOrWhiteSpace(DueTimingFilter) ? 0 : 1)
         + (DateFrom.HasValue ? 1 : 0)
         + (DateTo.HasValue ? 1 : 0);
 
@@ -194,6 +224,7 @@
         }
 
         _draftStatus = StatusFilter;
+        _draftDueTiming = DueTimingFilter;
         _draftDateFrom = DateFrom;
         _draftDateTo = DateTo;
         _filtersOpen = true;
@@ -204,12 +235,25 @@
     private void ClearDrafts()
     {
         _draftStatus = "";
+        _draftDueTiming = "";
         _draftDateFrom = null;
         _draftDateTo = null;
     }
 
-    private void OnDraftStatusChanged(ChangeEventArgs e) =>
+    private void OnDraftStatusChanged(ChangeEventArgs e)
+    {
         _draftStatus = e.Value?.ToString() ?? "";
+        if (_draftStatus.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase))
+            _draftDueTiming = "";
+    }
+
+    private void OnDraftDueTimingChanged(ChangeEventArgs e)
+    {
+        _draftDueTiming = e.Value?.ToString() ?? "";
+        if (!string.IsNullOrWhiteSpace(_draftDueTiming)
+            && _draftStatus.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase))
+            _draftStatus = "";
+    }
 
     private void OnDraftDateFromChanged(ChangeEventArgs e) =>
         _draftDateFrom = ParseDate(e.Value?.ToString());
@@ -220,6 +264,7 @@
     private async Task ApplyFiltersAsync()
     {
         await StatusFilterChanged.InvokeAsync(_draftStatus);
+        await DueTimingFilterChanged.InvokeAsync(_draftDueTiming);
         await DateFromChanged.InvokeAsync(_draftDateFrom);
         await DateToChanged.InvokeAsync(_draftDateTo);
         _filtersOpen = false;
@@ -253,8 +298,15 @@
     private async Task ClearAppliedAsync()
     {
         await StatusFilterChanged.InvokeAsync("");
+        await DueTimingFilterChanged.InvokeAsync("");
         await DateFromChanged.InvokeAsync(null);
         await DateToChanged.InvokeAsync(null);
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task RemoveDueTimingAsync()
+    {
+        await DueTimingFilterChanged.InvokeAsync("");
         await OnFiltersChanged.InvokeAsync();
     }
 
@@ -264,6 +316,14 @@
         nameof(InvoiceStatus.PartiallyPaid) => L["Status.PartiallyPaid"].Value,
         nameof(InvoiceStatus.Paid) => L["Status.Paid"].Value,
         _ => status
+    };
+
+    private string TimingLabel(string timing) => timing switch
+    {
+        nameof(InvoiceDueTimingFilter.Overdue) => L["Status.Overdue"].Value,
+        nameof(InvoiceDueTimingFilter.DueToday) => L["Filter.DueToday"].Value,
+        nameof(InvoiceDueTimingFilter.DueSoon) => L["Filter.DueSoon"].Value,
+        _ => timing
     };
 
     private static string DateText(DateTime? value) =>

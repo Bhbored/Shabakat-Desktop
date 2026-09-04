@@ -56,8 +56,9 @@ public sealed class InvoiceService : IInvoiceService
 
     public async Task<PagedResponse<InvoiceSummaryResponse>> GetAllAsync(InvoiceFilterRequest filter)
     {
-        var (items, totalCount) = await _invoiceRepository.GetAllPagedAsync(filter);
         var paymentDueDay = await GetPaymentDueDayAsync();
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var (items, totalCount) = await _invoiceRepository.GetAllPagedAsync(filter, paymentDueDay, today);
 
         return PagedResponse<InvoiceSummaryResponse>.Create(
             data: items.Select(i => i.ToSummary(paymentDueDay)),

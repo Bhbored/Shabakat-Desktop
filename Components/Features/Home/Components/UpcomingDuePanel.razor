@@ -46,7 +46,9 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(invoice.AmountDue)</span>
-                            <InvoiceStatusBadge Status="@ResolveStatus(invoice.PaymentDueDate)" />
+                            <InvoiceStatusBadge Status="@ToBadgeStatus(invoice.InvoiceStatus)"
+                                                PaymentDueDate="invoice.PaymentDueDate"
+                                                AmountDue="invoice.AmountDue" />
                         </div>
                     </div>
                 }
@@ -65,9 +67,8 @@
     [Parameter] public IReadOnlyList<InvoiceSummaryResponse> Items { get; set; } = [];
     [Parameter] public bool IsLoading { get; set; }
 
-    private static string ResolveStatus(DateOnly dueDate)
-    {
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        return dueDate < today ? "overdue" : "unpaid";
-    }
+    private static string ToBadgeStatus(string status) =>
+        status.Equals(nameof(InvoiceStatus.PartiallyPaid), StringComparison.OrdinalIgnoreCase)
+            ? "partiallyPaid"
+            : status.ToLowerInvariant();
 }

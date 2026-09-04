@@ -8,7 +8,7 @@
 else if (Items.Count == 0)
 {
     <section class="rounded-2xl border border-border bg-card">
-        <div class="px-4 py-10 text-sm text-muted-foreground">@L["Empty.Invoices"]</div>
+        <div class="px-4 py-10 text-sm text-muted-foreground">@EmptyMessage</div>
     </section>
 }
 else
@@ -61,6 +61,7 @@ else
 @code {
     [Parameter] public IReadOnlyList<InvoiceSummaryResponse> Items { get; set; } = [];
     [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string EmptyMessage { get; set; } = "";
     [Parameter] public Guid? OpenMenuId { get; set; }
     [Parameter] public int PageNumber { get; set; } = 1;
     [Parameter] public int PageSize { get; set; } = 10;

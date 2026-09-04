@@ -8,11 +8,13 @@
 <div class="space-y-4" @onclick="CloseMenu">
     <InvoicesToolbar CustomerFilter="@_customerFilter"
                      StatusFilter="@_statusFilter"
+                     DueTimingFilter="@_dueTimingFilter"
                      DateFrom="_dateFrom"
                      DateTo="_dateTo"
                      TotalCount="_totalCount"
                      CustomerFilterChanged="OnCustomerFilterChanged"
                      StatusFilterChanged="OnStatusFilterChanged"
+                     DueTimingFilterChanged="OnDueTimingFilterChanged"
                      DateFromChanged="OnDateFromChanged"
                      DateToChanged="OnDateToChanged"
                      OnFiltersChanged="ReloadFromFiltersAsync"
@@ -22,6 +24,7 @@
 
     <InvoicesList Items="_items"
                   IsLoading="_loading"
+                  EmptyMessage="@EmptyMessage"
                   OpenMenuId="_openMenuId"
                   PageNumber="_pageNumber"
                   PageSize="_pageSize"
@@ -104,6 +107,7 @@
 
     private string _customerFilter = "";
     private string _statusFilter = "";
+    private string _dueTimingFilter = "";
     private DateTime? _dateFrom;
     private DateTime? _dateTo;
     private int _pageNumber = 1;
@@ -136,6 +140,7 @@
 
         Guid? customerId = Guid.TryParse(_customerFilter, out var c) ? c : null;
         InvoiceStatus? status = Enum.TryParse<InvoiceStatus>(_statusFilter, out var s) ? s : null;
+        InvoiceDueTimingFilter? dueTiming = Enum.TryParse<InvoiceDueTimingFilter>(_dueTimingFilter, out var d) ? d : null;
         DateOnly? from = _dateFrom.HasValue ? DateOnly.FromDateTime(_dateFrom.Value) : null;
         DateOnly? to = _dateTo.HasValue ? DateOnly.FromDateTime(_dateTo.Value) : null;
 
@@ -144,6 +149,7 @@
             InvoiceStatus: status,
             ConsumptionStartFrom: from,
             ConsumptionStartTo: to,
+            DueTiming: dueTiming,
             PageNumber: _pageNumber,
             PageSize: _pageSize);
 
@@ -178,8 +184,27 @@
     private Task OnStatusFilterChanged(string value)
     {
         _statusFilter = value;
+        if (value.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase))
+            _dueTimingFilter = "";
         return Task.CompletedTask;
     }
+
+    private Task OnDueTimingFilterChanged(string value)
+    {
+        _dueTimingFilter = value;
+        if (!string.IsNullOrWhiteSpace(value)
+            && _statusFilter.Equals(nameof(InvoiceStatus.Paid), StringComparison.OrdinalIgnoreCase))
+            _statusFilter = "";
+        return Task.CompletedTask;
+    }
+
+    private string EmptyMessage => _dueTimingFilter switch
+    {
+        nameof(InvoiceDueTimingFilter.Overdue) => L["Invoices.NoOverdue"].Value,
+        nameof(InvoiceDueTimingFilter.DueToday) => L["Invoices.NoDueToday"].Value,
+        nameof(InvoiceDueTimingFilter.DueSoon) => L["Invoices.NoDueSoon"].Value,
+        _ => L["Empty.Invoices"].Value
+    };
 
     private Task OnDateFromChanged(DateTime? value)
     {
