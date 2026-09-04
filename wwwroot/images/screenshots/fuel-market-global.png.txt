@@ -1,0 +1,3 @@
+Replace this marker with a real 1280x720 capture named fuel-market-global.png.
+
+Capture the Fuel Market page with the Global view selected. Include the quote cards, range dropdown, price-history chart, source attribution, and latest-first accessible data table when practical.

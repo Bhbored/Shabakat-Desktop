@@ -149,7 +149,7 @@ SaaS should typically return a **file download** (or signed URL) instead of a lo
 6. For each invoice id:
    - Build print model (`BuildPrintModelAsync` — shared with single print).
    - Render HTML: `_templateRenderer.Render(model, preferences.Language)`.
-7. Combine HTML documents (one `.invoice` block per page, print CSS `page-break-after`).
+7. Combine HTML documents into portrait A4 pages, sizing each `.invoice` block to one-third of the page and inserting a page break after every third invoice.
 8. Convert combined HTML → one PDF (desktop uses Edge headless `--print-to-pdf`; SaaS should use Chromium/Playwright/Puppeteer or an HTML→PDF service — **same templates**, not a second layout).
 
 ### Print model + templates (must stay shared with single print)

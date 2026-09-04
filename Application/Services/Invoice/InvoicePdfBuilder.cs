@@ -33,28 +33,163 @@ public static class InvoicePdfBuilder
         sb.AppendLine("  <style>");
         sb.AppendLine(styles);
         sb.AppendLine("""
+                @page {
+                  size: 210mm 297mm;
+                  margin: 0;
+                }
+
                 @media print {
-                  body {
+                  html,
+                  body.invoice-sheet {
+                    width: 210mm !important;
+                    height: auto !important;
+                    margin: 0 !important;
                     background: #fff !important;
                     padding: 0 !important;
                     display: block !important;
                     min-height: auto !important;
                   }
-                  .invoice {
-                    width: 100% !important;
-                    min-height: auto !important;
+
+                  body.invoice-sheet > .invoice {
+                    width: 210mm !important;
+                    height: 99mm !important;
+                    min-height: 99mm !important;
+                    max-height: 99mm !important;
+                    margin: 0 !important;
+                    overflow: hidden !important;
                     border: none !important;
-                    page-break-after: always;
+                    page-break-after: auto !important;
                     page-break-inside: avoid;
+                    break-after: auto;
+                    break-inside: avoid-page;
                   }
-                  .invoice:last-of-type {
-                    page-break-after: auto;
+
+                  body.invoice-sheet > .invoice:nth-of-type(3n) {
+                    page-break-after: always !important;
+                    break-after: page;
+                  }
+
+                  body.invoice-sheet > .invoice:last-of-type {
+                    page-break-after: auto !important;
+                    break-after: auto;
+                  }
+
+                  body.invoice-sheet .header {
+                    padding: 1.5mm 4mm 1mm;
+                  }
+
+                  body.invoice-sheet .company-info h1 {
+                    font-size: 11pt;
+                    margin-bottom: 0;
+                  }
+
+                  body.invoice-sheet .company-info p,
+                  body.invoice-sheet .meta-item span,
+                  body.invoice-sheet .field span,
+                  body.invoice-sheet td,
+                  body.invoice-sheet .total-row {
+                    font-size: 8pt;
+                  }
+
+                  body.invoice-sheet .logo {
+                    max-height: 9mm;
+                  }
+
+                  body.invoice-sheet .logo-placeholder {
+                    width: 10mm;
+                    height: 10mm;
+                    font-size: 10pt;
+                  }
+
+                  body.invoice-sheet .meta-bar {
+                    padding: .8mm 4mm;
+                    gap: 1mm;
+                  }
+
+                  body.invoice-sheet .meta-item label,
+                  body.invoice-sheet .field label,
+                  body.invoice-sheet .section-title,
+                  body.invoice-sheet .reading-card label {
+                    font-size: 6.5pt;
+                  }
+
+                  body.invoice-sheet .body {
+                    flex: 0 0 auto;
+                    padding: 1mm 4mm .8mm;
+                    gap: .8mm;
+                  }
+
+                  body.invoice-sheet .section-title {
+                    margin-bottom: .6mm;
+                    padding-bottom: .25mm;
+                  }
+
+                  body.invoice-sheet .top-section,
+                  body.invoice-sheet .billing-row {
+                    gap: 2mm;
+                  }
+
+                  body.invoice-sheet .field {
+                    margin-bottom: .4mm;
+                  }
+
+                  body.invoice-sheet th,
+                  body.invoice-sheet td {
+                    padding: .5mm 1.5mm;
+                  }
+
+                  body.invoice-sheet th {
+                    font-size: 7pt;
+                  }
+
+                  body.invoice-sheet .readings {
+                    gap: 1mm;
+                  }
+
+                  body.invoice-sheet .reading-card {
+                    padding: .7mm;
+                  }
+
+                  body.invoice-sheet .reading-card label {
+                    margin-bottom: .25mm;
+                  }
+
+                  body.invoice-sheet .reading-card .value {
+                    font-size: 9pt;
+                  }
+
+                  body.invoice-sheet .reading-card .date,
+                  body.invoice-sheet .footer {
+                    font-size: 7pt;
+                  }
+
+                  body.invoice-sheet .reading-card .date {
+                    margin-top: .2mm;
+                  }
+
+                  body.invoice-sheet .totals {
+                    width: 42mm;
+                  }
+
+                  body.invoice-sheet .total-row {
+                    padding: .4mm 0;
+                  }
+
+                  body.invoice-sheet .total-row.due {
+                    margin-top: .4mm;
+                    padding: .7mm 0;
+                    font-size: 9pt;
+                  }
+
+                  body.invoice-sheet .footer {
+                    margin-top: 0;
+                    padding: .5mm 4mm;
                   }
                 }
             """);
         sb.AppendLine("  </style>");
         sb.AppendLine("</head>");
-        sb.AppendLine("<body>");
+        sb.AppendLine("<body class=\"invoice-sheet\">");
         sb.Append(body);
         sb.AppendLine("</body>");
         sb.AppendLine("</html>");

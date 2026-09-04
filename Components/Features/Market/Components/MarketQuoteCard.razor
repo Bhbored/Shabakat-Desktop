@@ -1,0 +1,28 @@
+@namespace Shabakat.Components.Features.Market.Components
+
+<article class="rounded-2xl border border-border bg-card p-4">
+    <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+            <p class="truncate text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">@Label</p>
+            <p class="mt-2 font-mono text-xl font-bold text-foreground">@Value</p>
+            @if (!string.IsNullOrWhiteSpace(Unit))
+            {
+                <p class="mt-1 text-xs text-muted-foreground">@Unit</p>
+            }
+        </div>
+        @if (ChangePercent.HasValue)
+        {
+            <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold @(ChangePercent.Value >= 0 ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500")">
+                <span aria-hidden="true">@(ChangePercent.Value >= 0 ? "↑" : "↓")</span>
+                @Math.Abs(ChangePercent.Value).ToString("0.00")%
+            </span>
+        }
+    </div>
+</article>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public string Unit { get; set; } = "";
+    [Parameter] public decimal? ChangePercent { get; set; }
+}

@@ -5,9 +5,10 @@ alwaysApply: true
 
 # Commit messages
 
+All staging and commits are manual repository-owner actions. Agents must never run `git add`, `git commit`, or otherwise stage or commit files, even when explicitly asked.
+
 When the user asks for a commit message (e.g. "provide the commit message", "commit message"):
 
-- **Do not** run `git commit` or stage files unless they explicitly ask to commit
 - **Only** reply with the message in chat (optionally in a fenced code block for easy copy)
 
 ## Format

@@ -1,0 +1,3 @@
+Replace this marker with a real 1280x720 capture named fuel-market-lebanon.png.
+
+Capture the Fuel Market page with the Lebanon view selected. Include the quote cards, price-history chart, source attribution, and latest-first accessible data table when practical.

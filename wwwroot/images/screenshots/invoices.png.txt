@@ -1,0 +1,3 @@
+Replace the existing invoices.png placeholder with a real 1280x720 capture.
+
+The refreshed capture should show the current customer search, filter dropdown, active filter chips, billing-run export, bulk generation, and create-invoice controls.
