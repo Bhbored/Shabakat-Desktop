@@ -99,6 +99,7 @@ public sealed class DashboardRepository : IDashboardRepository
 
     public async Task<IReadOnlyList<InvoiceSummaryResponse>> GetRecentlyPaidAsync(int take = 5)
     {
+        var paymentDueDay = await GetPaymentDueDayAsync();
         var items = await _db.Invoices
             .AsNoTracking()
             .Include(i => i.Customer)
@@ -107,22 +108,28 @@ public sealed class DashboardRepository : IDashboardRepository
             .Take(take)
             .ToListAsync();
 
-        return items.Select(i => i.ToSummary()).ToList();
+        return items.Select(i => i.ToSummary(paymentDueDay)).ToList();
     }
 
     public async Task<IReadOnlyList<InvoiceSummaryResponse>> GetUpcomingDueAsync(int take = 5)
     {
+        var paymentDueDay = await GetPaymentDueDayAsync();
         var items = await _db.Invoices
             .AsNoTracking()
             .Include(i => i.Customer)
             .Where(i => i.InvoiceStatus == InvoiceStatus.Unpaid
                      || i.InvoiceStatus == InvoiceStatus.PartiallyPaid)
-            .OrderBy(i => i.DueDate)
+            .OrderBy(i => i.CreatedAt)
             .Take(take)
             .ToListAsync();
 
-        return items.Select(i => i.ToSummary()).ToList();
+        return items.Select(i => i.ToSummary(paymentDueDay)).ToList();
     }
+
+    private async Task<int> GetPaymentDueDayAsync() =>
+        await _db.AppPreferences
+            .Select(p => (int?)p.DueDate)
+            .FirstOrDefaultAsync() ?? 31;
 
     private static IQueryable<Invoice> ApplyInvoicePeriodFilter(
         IQueryable<Invoice> query,

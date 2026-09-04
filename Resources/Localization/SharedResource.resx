@@ -1739,6 +1739,9 @@
   <data name="Invoices.PrintFailed" xml:space="preserve">
     <value>Unable to print invoice.</value>
   </data>
+  <data name="Invoices.PrintSaved" xml:space="preserve">
+    <value>Invoice PDF saved.</value>
+  </data>
   <data name="Invoices.Deleted" xml:space="preserve">
     <value>Invoice deleted successfully.</value>
   </data>

@@ -20,6 +20,7 @@ public interface IInvoiceService
     Task<IEnumerable<InvoiceSkippedResponse>> GetSkippedAsync();
     Task<FixedKilowattCalculateResponse> CalculateFixedKilowattAsync(FixedKilowattCalculateRequest request);
     Task<string> RenderPrintHtmlAsync(Guid invoiceId);
+    Task SaveInvoicePdfAsync(Guid invoiceId, string destinationPath);
     IAsyncEnumerable<double> ExportBillingRunPdfAsync(
         int year,
         int month,

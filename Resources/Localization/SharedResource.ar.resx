@@ -1739,6 +1739,9 @@
   <data name="Invoices.PrintFailed" xml:space="preserve">
     <value>تعذّر طباعة الفاتورة.</value>
   </data>
+  <data name="Invoices.PrintSaved" xml:space="preserve">
+    <value>تم حفظ الفاتورة PDF.</value>
+  </data>
   <data name="Invoices.Deleted" xml:space="preserve">
     <value>تم حذف الفاتورة بنجاح.</value>
   </data>

@@ -57,9 +57,10 @@ public sealed class InvoiceService : IInvoiceService
     public async Task<PagedResponse<InvoiceSummaryResponse>> GetAllAsync(InvoiceFilterRequest filter)
     {
         var (items, totalCount) = await _invoiceRepository.GetAllPagedAsync(filter);
+        var paymentDueDay = await GetPaymentDueDayAsync();
 
         return PagedResponse<InvoiceSummaryResponse>.Create(
-            data: items.Select(i => i.ToSummary()),
+            data: items.Select(i => i.ToSummary(paymentDueDay)),
             totalCount: totalCount,
             pageNumber: filter.PageNumber,
             pageSize: filter.PageSize);
@@ -68,7 +69,8 @@ public sealed class InvoiceService : IInvoiceService
     public async Task<IEnumerable<InvoiceResponse>> GetAllUnpagedAsync()
     {
         var items = await _invoiceRepository.GetAllWithCustomerAsync();
-        return items.Select(i => i.ToResponse());
+        var paymentDueDay = await GetPaymentDueDayAsync();
+        return items.Select(i => i.ToResponse(paymentDueDay));
     }
 
     public async Task<InvoiceResponse> GetByIdAsync(Guid id)
@@ -76,7 +78,8 @@ public sealed class InvoiceService : IInvoiceService
         var invoice = await _invoiceRepository.GetByIdWithPaymentsAsync(id)
                       ?? throw new DomainException("Error.InvoiceNotFound");
 
-        return invoice.ToResponse();
+        var paymentDueDay = await GetPaymentDueDayAsync();
+        return invoice.ToResponse(paymentDueDay);
     }
 
     public async Task CreateAsync(CreateInvoiceRequest request)
@@ -347,7 +350,14 @@ public sealed class InvoiceService : IInvoiceService
         await _invoiceRepository.SaveChangesAsync();
 
         _logger.LogInformation("Updated invoice {InvoiceId} (#{InvoiceNumber})", invoice.Id, invoice.InvoiceNumber);
-        return invoice.ToResponse();
+        var paymentDueDay = await GetPaymentDueDayAsync();
+        return invoice.ToResponse(paymentDueDay);
+    }
+
+    private async Task<int> GetPaymentDueDayAsync()
+    {
+        var preferences = await _preferencesRepository.GetAsync();
+        return preferences?.DueDate ?? 31;
     }
 
     public async Task DeleteAsync(Guid id)
@@ -838,6 +848,25 @@ public sealed class InvoiceService : IInvoiceService
         {
             throw new DomainException("Error.PrintTemplateNotFound");
         }
+    }
+
+    public async Task SaveInvoicePdfAsync(Guid invoiceId, string destinationPath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+
+        var (model, language) = await BuildPrintModelAsync(invoiceId);
+        string html;
+        try
+        {
+            html = _templateRenderer.Render(model, language);
+        }
+        catch (FileNotFoundException)
+        {
+            throw new DomainException("Error.PrintTemplateNotFound");
+        }
+
+        await InvoicePdfBuilder.WriteHtmlAsPdfAsync(html, destinationPath);
+        _logger.LogInformation("Exported invoice {InvoiceId} to {Path}", invoiceId, destinationPath);
     }
 
     public async IAsyncEnumerable<double> ExportBillingRunPdfAsync(

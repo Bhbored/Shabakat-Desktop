@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{{INVOICE_NUMBER}}</title>
+  <title>فاتورة #{{INVOICE_NUMBER}}</title>
   <style>
     :root {
       --text: #000;
@@ -11,15 +11,13 @@
       --border: #000;
       --border-light: #ccc;
       --bg: #f5f5f5;
-      --a4-width: 210mm;
-      --a4-height: 297mm;
-      --page-padding-x: 15mm;
-      --page-padding-y: 12mm;
+      --page-width: 155mm;
+      --page-min-height: 55mm;
     }
 
     @page {
-      size: A4 portrait;
-      margin: var(--page-padding-y) var(--page-padding-x);
+      size: 155mm 55mm;
+      margin: 0;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,22 +26,21 @@
       font-family: "Noto Sans Arabic", Tahoma, sans-serif;
       color: var(--text);
       background: #fff;
-      line-height: 1.55;
-      font-size: 10pt;
+      line-height: 1.0;
+      font-size: 5.5pt;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 12mm 0;
+      padding: 1mm 0;
     }
 
     .invoice {
-      width: var(--a4-width);
-      min-height: var(--a4-height);
+      width: var(--page-width);
+      min-height: var(--page-min-height);
       margin: 0 auto;
       background: #fff;
       border: 1px solid var(--border-light);
-      overflow: hidden;
       display: flex;
       flex-direction: column;
     }
@@ -52,26 +49,26 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding: 10mm 15mm 8mm;
+      padding: 0.5mm 3mm 0.4mm;
       background: #fff;
       color: var(--text);
-      border-bottom: 2px solid var(--border);
+      border-bottom: 1.5px solid var(--border);
     }
 
     .company-info h1 {
-      font-size: 18pt;
+      font-size: 8.5pt;
       font-weight: 700;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0;
     }
 
     .company-info p {
-      font-size: 10pt;
+      font-size: 5.5pt;
       color: var(--muted);
     }
 
     .logo {
-      max-height: 18mm;
-      max-width: 45mm;
+      max-height: 7mm;
+      max-width: 18mm;
       object-fit: contain;
       border: none;
       padding: 0;
@@ -79,95 +76,108 @@
     }
 
     .logo-placeholder {
-      width: 18mm;
-      height: 18mm;
+      width: 8mm;
+      height: 8mm;
       background: #fff;
       border: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14pt;
+      font-size: 8.5pt;
       font-weight: 700;
     }
 
     .meta-bar {
       display: flex;
       justify-content: space-between;
-      padding: 5mm 15mm;
+      padding: 0.3mm 3mm;
       background: #fff;
       border-bottom: 1px solid var(--border-light);
-      flex-wrap: wrap;
-      gap: 4mm;
-    }
-
-    .meta-item {
-      text-align: center;
-      min-width: 0;
+      flex-wrap: nowrap;
+      gap: 0.6mm;
     }
 
     .meta-item label {
-      display: block;
-      font-size: 7pt;
+      display: inline;
+      font-size: 5pt;
       letter-spacing: 0.02em;
       color: var(--muted);
-      margin-bottom: 0.1rem;
+      margin-bottom: 0;
     }
+    .meta-item label::after { content: " "; }
 
     .meta-item span {
       font-weight: 600;
-      font-size: 10pt;
+      font-size: 5.5pt;
     }
 
     .body {
       flex: 1;
-      padding: 8mm 15mm 6mm;
+      padding: 0.5mm 3mm 0.4mm;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6mm;
     }
 
     .section-title {
-      font-size: 8pt;
+      font-size: 5pt;
       letter-spacing: 0.04em;
       color: var(--text);
       font-weight: 700;
-      margin-bottom: 3mm;
-      padding-bottom: 1.5mm;
+      margin-bottom: 0.4mm;
+      padding-bottom: 0.2mm;
       border-bottom: 1px solid var(--border);
     }
 
-    .grid-2 {
+    .top-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8mm;
-      margin-bottom: 6mm;
+      gap: 0.8mm;
+      align-items: start;
     }
 
-    .field { margin-bottom: 2mm; }
-    .field label { font-size: 8pt; color: var(--muted); display: block; }
-    .field span { font-weight: 500; font-size: 10pt; }
+    .readings-block .section-title { display: none; }
+
+    .top-section .readings-block {
+      grid-column: 1 / -1;
+    }
+
+    .grid-2 {
+      display: contents;
+    }
+
+    .info-block {
+      min-width: 0;
+    }
+
+    .field { margin-bottom: 0.3mm; }
+    .field label { font-size: 5pt; color: var(--muted); display: block; }
+    .field span { font-weight: 500; font-size: 5.5pt; }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 6mm;
+      margin-bottom: 0;
       page-break-inside: avoid;
-      border: 1px solid var(--border);
+      border: 0.5px solid var(--border);
     }
 
     th {
       text-align: right;
-      padding: 2.5mm 3mm;
+      padding: 0.3mm 1.2mm;
       background: #fff;
       color: var(--text);
-      font-size: 8pt;
+      font-size: 5.5pt;
       letter-spacing: 0.02em;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 0.5px solid var(--border);
     }
 
     th:last-child { text-align: left; }
 
     td {
-      padding: 2.5mm 3mm;
-      border-bottom: 1px solid var(--border-light);
-      font-size: 9.5pt;
+      padding: 0.3mm 1.2mm;
+      border-bottom: 0.5px solid var(--border-light);
+      font-size: 5.5pt;
       text-align: right;
     }
 
@@ -176,77 +186,93 @@
     tr:last-child td { border-bottom: none; }
 
     .readings {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4mm;
-      margin-bottom: 6mm;
+      display: flex;
+      gap: 1.5mm;
       page-break-inside: avoid;
     }
 
     .reading-card {
+      flex: 1;
       background: #fff;
-      border: 1px solid var(--border-light);
-      padding: 3mm;
+      border: 0.5px solid var(--border-light);
+      padding: 0.3mm 1mm;
       text-align: center;
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      column-gap: 0.8mm;
+      row-gap: 0;
     }
 
     .reading-card.highlight {
       background: #fff;
-      border: 2px solid var(--border);
+      border: 1.5px solid var(--border);
       font-weight: 700;
     }
 
     .reading-card label {
-      display: block;
-      font-size: 7pt;
+      font-size: 5pt;
       color: var(--muted);
-      margin-bottom: 1mm;
     }
 
     .reading-card .value {
-      font-size: 13pt;
+      font-size: 6.5pt;
       font-weight: 700;
       color: var(--text);
     }
 
     .reading-card .date {
-      font-size: 8pt;
+      font-size: 5pt;
       color: var(--muted);
-      margin-top: 0.5mm;
+    }
+
+    .billing-section {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .billing-row {
+      display: flex;
+      gap: 0.8mm;
+      align-items: flex-start;
+    }
+
+    .billing-table {
+      flex: 1;
+      min-width: 0;
     }
 
     .totals {
-      margin-right: auto;
-      margin-left: 0;
-      width: 70mm;
+      width: 32mm;
+      flex-shrink: 0;
       page-break-inside: avoid;
     }
 
     .total-row {
       display: flex;
       justify-content: space-between;
-      padding: 1.5mm 0;
-      border-bottom: 1px solid var(--border-light);
-      font-size: 10pt;
+      padding: 0.3mm 0;
+      border-bottom: 0.5px solid var(--border-light);
+      font-size: 5.5pt;
     }
 
     .total-row.due {
-      margin-top: 2mm;
-      padding: 3mm 0;
-      font-size: 12pt;
+      margin-top: 0.6mm;
+      padding: 0.6mm 0;
+      font-size: 6.5pt;
       font-weight: 700;
       color: var(--text);
-      border-top: 2px solid var(--border);
+      border-top: 1.5px solid var(--border);
       border-bottom: none;
     }
 
     .footer {
       text-align: center;
-      padding: 4mm 15mm;
+      padding: 0.3mm 3mm;
       background: #fff;
       color: var(--muted);
-      font-size: 8.5pt;
-      border-top: 1px solid var(--border-light);
+      font-size: 5pt;
+      border-top: 0.5px solid var(--border-light);
       margin-top: auto;
     }
 
@@ -260,7 +286,7 @@
 
       .invoice {
         width: 100%;
-        min-height: auto;
+        min-height: var(--page-min-height);
         border: none;
         page-break-after: avoid;
       }
@@ -270,7 +296,7 @@
       body { padding: 0; }
       .invoice {
         width: 100%;
-        min-height: auto;
+        min-height: var(--page-min-height);
       }
     }
   </style>
@@ -282,6 +308,7 @@
         <h1>{{COMPANY_NAME}}</h1>
         <p>فاتورة كهرباء</p>
       </div>
+      <!-- {{LOGO_HTML}}: company logo image when LogoUrl is set, otherwise letter placeholder -->
       {{LOGO_HTML}}
     </header>
 
@@ -309,59 +336,64 @@
     </div>
 
     <div class="body">
-      <div class="grid-2">
-        <div>
+      <div class="top-section">
+        <div class="info-block">
           <h2 class="section-title">العميل</h2>
           <div class="field"><label>الاسم</label><span>{{CUSTOMER_NAME}}</span></div>
           {{CUSTOMER_PHONE_HTML}}
           {{CUSTOMER_ADDRESS_HTML}}
         </div>
-        <div>
+        <div class="info-block">
           <h2 class="section-title">خطة الخدمة</h2>
           <div class="field"><label>نوع الخطة</label><span>{{PLAN_TYPE}}</span></div>
           <div class="field"><label>قيمة الخطة</label><span>{{PLAN_VALUE}} {{PLAN_UNIT}}</span></div>
           <div class="field"><label>سعر الوحدة</label><span>{{UNIT_PRICE}}</span></div>
         </div>
+        {{READINGS_SECTION}}
       </div>
 
-      {{READINGS_SECTION}}
+      <div class="billing-section">
+        <h2 class="section-title">ملخص الفاتورة</h2>
+        <div class="billing-row">
+          <div class="billing-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>الوصف</th>
+                  <th>المبلغ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{CONSUMPTION_ROW}}
+                <tr>
+                  <td>الرسوم الثابتة (صيانة)</td>
+                  <td>{{FIXED_CHARGE}}</td>
+                </tr>
+                {{TVA_ROWS}}
+              </tbody>
+            </table>
+          </div>
 
-      <h2 class="section-title">ملخص الفاتورة</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>الوصف</th>
-            <th>المبلغ</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{CONSUMPTION_ROW}}
-          <tr>
-            <td>الرسوم الثابتة (صيانة)</td>
-            <td>{{FIXED_CHARGE}}</td>
-          </tr>
-          {{TVA_ROWS}}
-        </tbody>
-      </table>
-
-      <div class="totals">
-        <div class="total-row">
-          <span>المبلغ الإجمالي</span>
-          <span>{{TOTAL_AMOUNT}}</span>
-        </div>
-        <div class="total-row">
-          <span>المدفوع</span>
-          <span>{{PAID_AMOUNT}}</span>
-        </div>
-        <div class="total-row due">
-          <span>المبلغ المستحق</span>
-          <span>{{AMOUNT_DUE}}</span>
+          <div class="totals">
+            <div class="total-row">
+              <span>المبلغ الإجمالي</span>
+              <span>{{TOTAL_AMOUNT}}</span>
+            </div>
+            <div class="total-row">
+              <span>المدفوع</span>
+              <span>{{PAID_AMOUNT}}</span>
+            </div>
+            <div class="total-row due">
+              <span>المبلغ المستحق</span>
+              <span>{{AMOUNT_DUE}}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <footer class="footer">
-      شكراً لتعاملكم مع — {{COMPANY_NAME}}
+      شكراً لتعاملكم مع &mdash; {{COMPANY_NAME}}
     </footer>
   </div>
 </body>

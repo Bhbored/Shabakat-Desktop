@@ -3,7 +3,6 @@
 @inject ICustomerService CustomerService
 @inject IAppPreferencesService PreferencesService
 @inject IToastService Toast
-@inject IJSRuntime Js
 @inject IStringLocalizer<SharedResource> L
 
 <div class="space-y-4" @onclick="CloseMenu">
@@ -509,44 +508,27 @@
     private async Task PrintInvoiceAsync(InvoiceSummaryResponse inv)
     {
         _openMenuId = null;
-        await PrintByIdAsync(inv.Id, inv.InvoiceNumber);
+        await PrintByIdAsync(inv.Id, inv.CustomerName);
     }
 
     private async Task PrintDetailsAsync()
     {
         if (_details is null) return;
-        await PrintByIdAsync(_details.Id, _details.InvoiceNumber);
+        await PrintByIdAsync(_details.Id, _details.CustomerName);
     }
 
-    private async Task PrintByIdAsync(Guid invoiceId, int invoiceNumber)
+    private async Task PrintByIdAsync(Guid invoiceId, string customerName)
     {
-        var html = await UiActions.RunAsync(Toast, () => InvoiceService.RenderPrintHtmlAsync(invoiceId));
-        if (string.IsNullOrWhiteSpace(html))
-        {
-            Toast.Error(L["Invoices.PrintFailed"].Value);
+        var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        var fileName = $"{customerName}_{stamp}.pdf";
+        var path = await InvoicePdfFilePicker.PickSavePathAsync(fileName);
+        if (string.IsNullOrWhiteSpace(path))
             return;
-        }
 
-        var fileName = invoiceNumber.ToString();
-        var window = Microsoft.Maui.Controls.Application.Current?.Windows.FirstOrDefault();
-        var previousTitle = window?.Title;
-        try
-        {
-            if (window is not null)
-                window.Title = fileName;
-
-            await Task.Delay(50);
-            await Js.InvokeVoidAsync("shabakatPrintHtml", html, fileName);
-        }
-        catch
-        {
-            Toast.Error(L["Invoices.PrintFailed"].Value);
-        }
-        finally
-        {
-            if (window is not null)
-                window.Title = string.IsNullOrWhiteSpace(previousTitle) ? "Shabakat" : previousTitle;
-        }
+        await UiActions.RunAsync(
+            Toast,
+            () => InvoiceService.SaveInvoicePdfAsync(invoiceId, path),
+            L["Invoices.PrintSaved"].Value);
     }
 
     private void OpenDelete(InvoiceSummaryResponse inv)
@@ -581,6 +563,7 @@
             details.InvoiceStatus,
             details.ConsumptionStart,
             details.ConsumptionEnd,
+            details.PaymentDueDate,
             details.TotalAmount,
             details.PaidAmount,
             details.AmountDue,

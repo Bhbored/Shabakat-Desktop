@@ -42,11 +42,11 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-sm font-medium text-foreground">@invoice.CustomerName</p>
-                            <p class="text-xs text-muted-foreground">@L["Home.DueOn", FormatHelper.Date(invoice.ConsumptionEnd)]</p>
+                            <p class="text-xs text-muted-foreground">@L["Home.DueOn", FormatHelper.Date(invoice.PaymentDueDate)]</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="font-mono text-sm font-semibold text-foreground">@FormatHelper.Currency(invoice.AmountDue)</span>
-                            <InvoiceStatusBadge Status="@ResolveStatus(invoice.ConsumptionEnd)" />
+                            <InvoiceStatusBadge Status="@ResolveStatus(invoice.PaymentDueDate)" />
                         </div>
                     </div>
                 }

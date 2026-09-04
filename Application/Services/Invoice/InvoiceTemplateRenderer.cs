@@ -96,6 +96,7 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
         var kwhUnit = isArabic ? "كيلوواط" : "kWh";
 
         return $"""
+               <div class="readings-block">
                <h2 class="section-title">{title}</h2>
                <div class="readings">
                  <div class="reading-card">
@@ -112,6 +113,7 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
                    <label>{totalLabel}</label>
                    <div class="value">{FormatConsumption(m.TotalConsumption, kwhUnit)}</div>
                  </div>
+               </div>
                </div>
                """;
     }

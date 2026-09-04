@@ -1,5 +1,6 @@
 using Shabakat.Application.DTOs.Invoices;
 using Shabakat.Application.DTOs.Payment;
+using Shabakat.Application.Helper;
 using Shabakat.Domain.Entities;
 using Shabakat.Domain.Enums;
 
@@ -7,7 +8,7 @@ namespace Shabakat.Application.Mappers;
 
 public static class InvoiceMapper
 {
-    public static InvoiceSummaryResponse ToSummary(this Invoice i) =>
+    public static InvoiceSummaryResponse ToSummary(this Invoice i, int paymentDueDay) =>
         new(
             Id: i.Id,
             InvoiceNumber: i.InvoiceNumber,
@@ -15,6 +16,8 @@ public static class InvoiceMapper
             InvoiceStatus: i.InvoiceStatus.ToString(),
             ConsumptionStart: i.IssueDate,
             ConsumptionEnd: i.DueDate,
+            PaymentDueDate: BillingPeriodHelper.ResolvePaymentDueDate(
+                DateOnly.FromDateTime(i.CreatedAt), paymentDueDay),
             TotalAmount: i.TotalAmount,
             PaidAmount: i.PaidAmount,
             AmountDue: i.AmountDue,
@@ -22,7 +25,7 @@ public static class InvoiceMapper
             CreatedAt: i.CreatedAt,
             CanBeDeleted: i.InvoiceStatus == InvoiceStatus.Unpaid);
 
-    public static InvoiceResponse ToResponse(this Invoice i) =>
+    public static InvoiceResponse ToResponse(this Invoice i, int paymentDueDay) =>
         new(
             Id: i.Id,
             InvoiceNumber: i.InvoiceNumber,
@@ -32,6 +35,8 @@ public static class InvoiceMapper
             InvoiceStatus: i.InvoiceStatus.ToString(),
             ConsumptionStart: i.IssueDate,
             ConsumptionEnd: i.DueDate,
+            PaymentDueDate: BillingPeriodHelper.ResolvePaymentDueDate(
+                DateOnly.FromDateTime(i.CreatedAt), paymentDueDay),
             FixedCharge: i.FixedCharge,
             TVA: i.TVA,
             TotalAmount: i.TotalAmount,

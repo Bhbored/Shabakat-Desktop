@@ -151,7 +151,7 @@
                     .Take(5)
                     .ToList();
                 _upcomingDue = summary.UpcomingDue
-                    .OrderBy(i => i.ConsumptionEnd)
+                    .OrderBy(i => i.PaymentDueDate)
                     .Take(5)
                     .ToList();
             }
