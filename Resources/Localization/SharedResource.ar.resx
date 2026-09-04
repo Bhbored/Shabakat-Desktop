@@ -689,6 +689,9 @@
   <data name="Filter.AllAreas" xml:space="preserve">
     <value>كل المناطق</value>
   </data>
+  <data name="Filter.AllBoxes" xml:space="preserve">
+    <value>كل الصناديق</value>
+  </data>
   <data name="Filter.AllPlanTypes" xml:space="preserve">
     <value>كل أنواع الخطط</value>
   </data>
@@ -832,6 +835,18 @@
   </data>
   <data name="Invoices.ExportMonthLabel" xml:space="preserve">
     <value>شهر جولة الفوترة</value>
+  </data>
+  <data name="Invoices.ExportScope" xml:space="preserve">
+    <value>نطاق التصدير</value>
+  </data>
+  <data name="Invoices.ExportScopeHint" xml:space="preserve">
+    <value>صدّر كل المناطق، أو حدّد ملف PDF بمنطقة واحدة وأحد صناديقها.</value>
+  </data>
+  <data name="Invoices.ExportContinue" xml:space="preserve">
+    <value>متابعة</value>
+  </data>
+  <data name="Invoices.ExportBack" xml:space="preserve">
+    <value>رجوع</value>
   </data>
   <data name="Invoices.ExportMonthRule" xml:space="preserve">
     <value>فواتير الأمبير من الشهر المحدد + فواتير الكيلوواط من الشهر السابق. كيلوواط ثابت مستبعد.</value>

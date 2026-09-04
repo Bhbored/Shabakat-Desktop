@@ -874,6 +874,8 @@ public sealed class InvoiceService : IInvoiceService
         int year,
         int month,
         string destinationPath,
+        Guid? areaId = null,
+        Guid? boxId = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (month is < 1 or > 12)
@@ -885,7 +887,7 @@ public sealed class InvoiceService : IInvoiceService
         var previousEnd = selectedStart.AddDays(-1);
 
         var invoices = await _invoiceRepository.GetForIssueDateRangesAsync(
-            selectedStart, selectedEnd, previousStart, previousEnd);
+            selectedStart, selectedEnd, previousStart, previousEnd, areaId, boxId);
         cancellationToken.ThrowIfCancellationRequested();
 
         if (invoices.Count == 0)
@@ -912,10 +914,12 @@ public sealed class InvoiceService : IInvoiceService
         var combinedHtml = InvoicePdfBuilder.CombineHtmlDocuments(htmlPages);
         await InvoicePdfBuilder.WriteHtmlAsPdfAsync(combinedHtml, destinationPath, cancellationToken);
         _logger.LogInformation(
-            "Exported {Count} invoices for billing run {Year}-{Month:00} to {Path}",
+            "Exported {Count} invoices for billing run {Year}-{Month:00}, area {AreaId}, box {BoxId} to {Path}",
             htmlPages.Count,
             year,
             month,
+            areaId,
+            boxId,
             destinationPath);
         yield return 1d;
     }

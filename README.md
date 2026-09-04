@@ -228,6 +228,7 @@ What the product actually runs on and why:
   - From day 25: optional next-month Ampere catch-up
 - **Billing-run month PDF export**: one multi-page PDF with three invoices per portrait A4 page
   - Ampere invoices for selected month + Kilowatt for previous month
+  - Optional area filter, followed by an optional box filter scoped to that area
   - Same HTML templates as single print (`invoice.html` / `invoice.ar.html`)
   - Language from Settings
 - Single-invoice print (HTML → system print dialog)

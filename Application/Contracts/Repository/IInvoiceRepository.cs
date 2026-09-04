@@ -17,7 +17,9 @@ public interface IInvoiceRepository : IGenericRepository<Invoice>
         DateOnly selectedMonthStart,
         DateOnly selectedMonthEnd,
         DateOnly previousMonthStart,
-        DateOnly previousMonthEnd);
+        DateOnly previousMonthEnd,
+        Guid? areaId = null,
+        Guid? boxId = null);
     Task<bool> ExistsForCustomerInPeriodAsync(Guid customerId, DateOnly periodStart, DateOnly periodEnd);
     Task<Invoice?> GetByIdForUpdateAsync(Guid id);
 }

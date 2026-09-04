@@ -1,6 +1,8 @@
 ﻿@page "/invoices"
 @inject IInvoiceService InvoiceService
 @inject ICustomerService CustomerService
+@inject IAreaService AreaService
+@inject IDistributionBoxService DistributionBoxService
 @inject IAppPreferencesService PreferencesService
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
@@ -63,6 +65,10 @@
                        Progress="_exportProgress"
                        SelectedKey="@_exportMonthKey"
                        SelectedKeyChanged="OnExportMonthKeyChanged"
+                       SelectedAreaId="@_exportAreaId"
+                       SelectedAreaIdChanged="OnExportAreaIdChanged"
+                       SelectedBoxId="@_exportBoxId"
+                       SelectedBoxIdChanged="OnExportBoxIdChanged"
                        OnClose="CloseExportMonth"
                        OnExport="ExportBillingRunAsync" />
 
@@ -104,6 +110,8 @@
     private Guid? _openMenuId;
     private double _exportProgress;
     private string _exportMonthKey = "";
+    private string _exportAreaId = "";
+    private string _exportBoxId = "";
 
     private string _customerFilter = "";
     private string _statusFilter = "";
@@ -362,6 +370,8 @@
     {
         _openMenuId = null;
         _exportProgress = 0;
+        _exportAreaId = "";
+        _exportBoxId = "";
         _showExportMonth = true;
     }
 
@@ -378,12 +388,32 @@
         return Task.CompletedTask;
     }
 
+    private Task OnExportAreaIdChanged(string value)
+    {
+        _exportAreaId = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnExportBoxIdChanged(string value)
+    {
+        _exportBoxId = value;
+        return Task.CompletedTask;
+    }
+
     private async Task ExportBillingRunAsync()
     {
         if (_exporting || !TryParseMonthKey(_exportMonthKey, out var year, out var month))
             return;
 
-        var fileName = $"shabakat-invoices-{year:0000}-{month:00}.pdf";
+        Guid? areaId = Guid.TryParse(_exportAreaId, out var parsedAreaId) ? parsedAreaId : null;
+        Guid? boxId = Guid.TryParse(_exportBoxId, out var parsedBoxId) ? parsedBoxId : null;
+
+        var fileName = await UiActions.RunAsync(
+            Toast,
+            () => BuildBillingRunFileNameAsync(year, month, areaId, boxId));
+        if (string.IsNullOrWhiteSpace(fileName))
+            return;
+
         var path = await InvoicePdfFilePicker.PickSavePathAsync(fileName);
         if (string.IsNullOrWhiteSpace(path))
             return;
@@ -392,7 +422,8 @@
         _exportProgress = 0;
         try
         {
-            await foreach (var value in InvoiceService.ExportBillingRunPdfAsync(year, month, path))
+            await foreach (var value in InvoiceService.ExportBillingRunPdfAsync(
+                               year, month, path, areaId, boxId))
             {
                 _exportProgress = value;
                 await InvokeAsync(StateHasChanged);
@@ -425,6 +456,43 @@
             && int.TryParse(parts[0], out year)
             && int.TryParse(parts[1], out month)
             && month is >= 1 and <= 12;
+    }
+
+    private async Task<string> BuildBillingRunFileNameAsync(
+        int year,
+        int month,
+        Guid? areaId,
+        Guid? boxId)
+    {
+        var suffixes = new List<string>();
+
+        if (areaId.HasValue)
+        {
+            var area = await AreaService.GetByIdAsync(areaId.Value);
+            suffixes.Add(FileNamePart(area.Name, "area"));
+        }
+
+        if (boxId.HasValue)
+        {
+            var box = await DistributionBoxService.GetByIdAsync(boxId.Value);
+            suffixes.Add(FileNamePart(box.Name, "box"));
+        }
+
+        var suffix = suffixes.Count == 0 ? "" : $"_{string.Join("_", suffixes)}";
+        return $"shabakat-invoices-{year:0000}-{month:00}{suffix}.pdf";
+    }
+
+    private static string FileNamePart(string value, string fallback)
+    {
+        var cleaned = new string(value
+            .Select(character => char.IsLetterOrDigit(character) ? character : '-')
+            .ToArray())
+            .Trim('-');
+
+        while (cleaned.Contains("--", StringComparison.Ordinal))
+            cleaned = cleaned.Replace("--", "-", StringComparison.Ordinal);
+
+        return string.IsNullOrWhiteSpace(cleaned) ? fallback : cleaned;
     }
 
     private async Task BulkCreateAsync()

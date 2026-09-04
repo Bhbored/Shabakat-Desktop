@@ -121,8 +121,11 @@ public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepo
         DateOnly selectedMonthStart,
         DateOnly selectedMonthEnd,
         DateOnly previousMonthStart,
-        DateOnly previousMonthEnd)
-        => await _dbSet
+        DateOnly previousMonthEnd,
+        Guid? areaId = null,
+        Guid? boxId = null)
+    {
+        var query = _dbSet
             .AsNoTracking()
             .Include(i => i.Customer)
             .Where(i =>
@@ -131,10 +134,19 @@ public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepo
                     && i.IssueDate <= selectedMonthEnd)
                 || (i.Customer.Plan == PlanType.Kilowatt
                     && i.IssueDate >= previousMonthStart
-                    && i.IssueDate <= previousMonthEnd))
+                    && i.IssueDate <= previousMonthEnd));
+
+        if (areaId.HasValue)
+            query = query.Where(i => i.Customer != null && i.Customer.AreaId == areaId.Value);
+
+        if (boxId.HasValue)
+            query = query.Where(i => i.Customer != null && i.Customer.BoxId == boxId.Value);
+
+        return await query
             .OrderBy(i => i.IssueDate)
             .ThenBy(i => i.InvoiceNumber)
             .ToListAsync();
+    }
 
     public async Task<bool> ExistsForCustomerInPeriodAsync(
         Guid customerId, DateOnly periodStart, DateOnly periodEnd)

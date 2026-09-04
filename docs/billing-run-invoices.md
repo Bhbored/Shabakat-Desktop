@@ -124,6 +124,7 @@ Idempotency: desktop skips customers who already have an invoice whose `IssueDat
 ```csharp
 IAsyncEnumerable<double> ExportBillingRunPdfAsync(
     int year, int month, string destinationPath,
+    Guid? areaId = null, Guid? boxId = null,
     CancellationToken cancellationToken = default);
 // yields 0..1 progress; writes .pdf to destinationPath
 ```
@@ -142,6 +143,8 @@ SaaS should typically return a **file download** (or signed URL) instead of a lo
 (Ampere  && IssueDate in selected month)
 || (Kilowatt && IssueDate in previous month)
 // FixedKilowatt excluded
+// Optional areaId filters by Customer.AreaId
+// Optional boxId filters by Customer.BoxId
 // Order: IssueDate, InvoiceNumber
 ```
 
@@ -180,6 +183,7 @@ SaaS should typically return a **file download** (or signed URL) instead of a lo
 | Piece | Path |
 |---|---|
 | Month sheet + progress | [`Components/Features/Invoices/Components/ExportBillingRunSheet.razor`](../Components/Features/Invoices/Components/ExportBillingRunSheet.razor) |
+| Area / box scope | Area defaults to all; selecting an area reveals its boxes, which default to all |
 | Toolbar button | [`Components/Features/Invoices/Components/InvoicesToolbar.razor`](../Components/Features/Invoices/Components/InvoicesToolbar.razor) |
 | Orchestration (picker, `await foreach` progress, toast) | [`Components/Features/Invoices/Invoices.razor`](../Components/Features/Invoices/Invoices.razor) → `ExportBillingRunAsync` |
 | Save dialog | [`Application/Helper/InvoicePdfFilePicker.cs`](../Application/Helper/InvoicePdfFilePicker.cs) |

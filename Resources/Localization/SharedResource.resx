@@ -689,6 +689,9 @@
   <data name="Filter.AllAreas" xml:space="preserve">
     <value>All areas</value>
   </data>
+  <data name="Filter.AllBoxes" xml:space="preserve">
+    <value>All boxes</value>
+  </data>
   <data name="Filter.AllPlanTypes" xml:space="preserve">
     <value>All plan types</value>
   </data>
@@ -832,6 +835,18 @@
   </data>
   <data name="Invoices.ExportMonthLabel" xml:space="preserve">
     <value>Billing run month</value>
+  </data>
+  <data name="Invoices.ExportScope" xml:space="preserve">
+    <value>Export scope</value>
+  </data>
+  <data name="Invoices.ExportScopeHint" xml:space="preserve">
+    <value>Export every area, or narrow the PDF to one area and one of its boxes.</value>
+  </data>
+  <data name="Invoices.ExportContinue" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="Invoices.ExportBack" xml:space="preserve">
+    <value>Back</value>
   </data>
   <data name="Invoices.ExportMonthRule" xml:space="preserve">
     <value>Ampere invoices from the selected month + Kilowatt invoices from the previous month. Fixed Kilowatt excluded.</value>

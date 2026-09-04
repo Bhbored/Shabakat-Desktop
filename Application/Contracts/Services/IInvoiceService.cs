@@ -25,5 +25,7 @@ public interface IInvoiceService
         int year,
         int month,
         string destinationPath,
+        Guid? areaId = null,
+        Guid? boxId = null,
         CancellationToken cancellationToken = default);
 }
