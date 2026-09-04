@@ -1,11 +1,6 @@
-namespace Shabakat.Application.DTOs.Market;
+using Shabakat.Domain.Enums;
 
-public enum MarketRange
-{
-    OneMonth,
-    ThreeMonths,
-    OneYear
-}
+namespace Shabakat.Application.DTOs.Market;
 
 public sealed record MarketPricePointResponse(DateTimeOffset Timestamp, decimal Value);
 

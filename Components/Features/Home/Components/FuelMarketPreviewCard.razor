@@ -1,5 +1,6 @@
 @namespace Shabakat.Components.Features.Home.Components
-@inject IMarketPriceService MarketService
+@inject IGlobalMarketService GlobalMarketService
+@inject ILebanonMarketService LebanonMarketService
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
 
@@ -74,24 +75,24 @@
 
     private async Task LoadGlobalAsync()
     {
-        try { _global = await MarketService.GetGlobalAsync(MarketRange.OneMonth); }
+        try { _global = await GlobalMarketService.GetAsync(MarketRange.OneMonth); }
         catch (DomainException ex)
         {
             NotifyOnce(ex);
             _error = ex.Message;
-            _global = await MarketService.GetCachedGlobalAsync(MarketRange.OneMonth);
+            _global = await GlobalMarketService.GetCachedAsync(MarketRange.OneMonth);
             _stale |= _global is not null;
         }
     }
 
     private async Task LoadLebanonAsync()
     {
-        try { _lebanon = await MarketService.GetLebanonAsync(); }
+        try { _lebanon = await LebanonMarketService.GetAsync(); }
         catch (DomainException ex)
         {
             NotifyOnce(ex);
             _error ??= ex.Message;
-            _lebanon = await MarketService.GetCachedLebanonAsync();
+            _lebanon = await LebanonMarketService.GetCachedAsync();
             _stale |= _lebanon is not null;
         }
     }

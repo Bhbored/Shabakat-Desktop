@@ -25,6 +25,7 @@ using Shabakat.Application.Services.Culture;
 using Shabakat.Application.Services.Theme;
 using Shabakat.Application.Services.Toasts;
 using Shabakat.Application.Services.Market;
+using Shabakat.Application.Helper;
 using Shabakat.Infrastructure.Persistence;
 using Shabakat.Infrastructure.Persistence.Interceptors;
 using Shabakat.Infrastructure.Persistence.Seed;
@@ -95,7 +96,9 @@ public static class DIContainer
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddScoped<IToastService, ToastService>();
         services.AddSingleton<IMarketConnectivity, MauiMarketConnectivity>();
-        services.AddScoped<IMarketPriceService, MarketPriceService>();
+        services.AddSingleton<MarketDataHelper>();
+        services.AddScoped<IGlobalMarketService, GlobalMarketService>();
+        services.AddScoped<ILebanonMarketService, LebanonMarketService>();
         services.AddScoped<IPricingService, PricingService>();
         services.AddScoped<IAppPreferencesService, AppPreferencesService>();
         services.AddScoped<IBackupService, BackupService>();

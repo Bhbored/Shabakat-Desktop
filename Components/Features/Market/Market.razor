@@ -1,5 +1,6 @@
 @page "/fuel-market"
-@inject IMarketPriceService MarketService
+@inject IGlobalMarketService GlobalMarketService
+@inject ILebanonMarketService LebanonMarketService
 @inject IMarketConnectivity Connectivity
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
@@ -18,106 +19,141 @@
         </button>
     </header>
 
-    <section class="space-y-4 rounded-2xl border border-border bg-card p-5">
-        <div class="flex flex-wrap items-end justify-between gap-3">
-            <div>
-                <h2 class="text-lg font-semibold text-foreground">@L["Market.GlobalTitle"]</h2>
-                <p class="text-xs text-muted-foreground">@L["Market.GlobalHint"]</p>
-            </div>
-            <div class="flex gap-2" role="group" aria-label="@L["Market.ChartRange"]">
-                @foreach (var option in RangeOptions)
-                {
-                    <button type="button" class="@RangeClass(option.Range)" aria-pressed="@(_range == option.Range)" disabled="@_globalLoading" @onclick="() => ChangeRangeAsync(option.Range)">@option.Label</button>
-                }
-            </div>
+    <section class="rounded-2xl border border-border bg-card p-5">
+        <div class="inline-grid w-full grid-cols-2 gap-1 rounded-xl bg-muted p-1 sm:w-auto" role="group" aria-label="@L["Market.Title"]">
+            <button id="market-switch-lebanon"
+                    type="button"
+                    class="@MarketSwitchClass(MarketView.Lebanon)"
+                    aria-pressed="@(_activeMarket == MarketView.Lebanon)"
+                    aria-controls="market-panel-lebanon"
+                    @onclick="() => SwitchMarket(MarketView.Lebanon)">
+                @L["Market.LebanonTitle"]
+            </button>
+            <button id="market-switch-global"
+                    type="button"
+                    class="@MarketSwitchClass(MarketView.Global)"
+                    aria-pressed="@(_activeMarket == MarketView.Global)"
+                    aria-controls="market-panel-global"
+                    @onclick="() => SwitchMarket(MarketView.Global)">
+                @L["Market.GlobalTitle"]
+            </button>
         </div>
 
-        @if (_globalStale && _global is not null)
-        {
-            <MarketStaleBanner FetchedAt="_global.FetchedAt" Retrying="_globalLoading" OnRetry="RetryGlobalAsync" />
-        }
-
-        @if (_globalLoading && _global is null)
-        {
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                @for (var i = 0; i < 5; i++) { <SkeletonBone Class="h-28 rounded-2xl" /> }
-            </div>
-            <SkeletonBone Class="h-72 rounded-2xl" />
-        }
-        else if (_global is null)
-        {
-            <MarketSectionError ErrorKey="@(_globalError ?? "Error.Market.GlobalUnavailable")" Retrying="_globalLoading" OnRetry="RetryGlobalAsync" />
-        }
-        else
-        {
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                @foreach (var quote in _global.Quotes)
-                {
-                    <MarketQuoteCard Label="@InstrumentLabel(quote.Code)" Value="@FormatHelper.Number(quote.Price)" Unit="@quote.Unit" ChangePercent="quote.ChangePercent" />
-                }
-            </div>
-
-            <div class="rounded-2xl border border-border bg-muted/10 p-4">
-                <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div @key="_activeMarket" class="market-panel-swap mt-5" role="region" id="@ActivePanelId" aria-labelledby="@ActiveSwitchId">
+            @if (_activeMarket == MarketView.Lebanon)
+            {
+                <div class="space-y-4">
                     <div>
-                        <h3 class="font-semibold text-foreground">@L["Market.PriceHistory"]</h3>
-                        <p class="text-xs text-muted-foreground">@L["Market.UpdatedAt", _global.FetchedAt.LocalDateTime.ToString("g")]</p>
+                        <h2 class="text-lg font-semibold text-foreground">@L["Market.LebanonTitle"]</h2>
+                        <p class="text-xs text-muted-foreground">@L["Market.LebanonHint"]</p>
                     </div>
-                    <select class="h-11 min-w-52 rounded-xl border border-border bg-card px-3 text-sm text-foreground" value="@_selectedInstrument" @onchange="OnInstrumentChanged">
-                        @foreach (var quote in _global.Quotes)
-                        {
-                            <option value="@quote.Code">@InstrumentLabel(quote.Code)</option>
-                        }
-                    </select>
-                </div>
-                @if (SelectedQuote is { } selected)
-                {
-                    <MarketLineChart Series="@GlobalChartSeries(selected)" Unit="@selected.Unit" AriaLabel="@L["Market.ChartAria", InstrumentLabel(selected.Code)]" />
-                }
-            </div>
-            <p class="text-xs text-muted-foreground">@L["Market.DelayedDisclaimer"] <a class="text-primary underline-offset-4 hover:underline" href="https://finance.yahoo.com/markets/commodities/" target="_blank" rel="noreferrer">Yahoo Finance</a></p>
-        }
-    </section>
 
-    <section class="space-y-4 rounded-2xl border border-border bg-card p-5">
-        <div>
-            <h2 class="text-lg font-semibold text-foreground">@L["Market.LebanonTitle"]</h2>
-            <p class="text-xs text-muted-foreground">@L["Market.LebanonHint"]</p>
+                    @if (_lebanonStale && _lebanon is not null)
+                    {
+                        <MarketStaleBanner FetchedAt="_lebanon.FetchedAt" Retrying="_lebanonLoading" OnRetry="RetryLebanonAsync" />
+                    }
+
+                    @if (_lebanonLoading && _lebanon is null)
+                    {
+                        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                            @for (var i = 0; i < 4; i++) { <SkeletonBone Class="h-28 rounded-2xl" /> }
+                        </div>
+                        <SkeletonBone Class="h-72 rounded-2xl" />
+                    }
+                    else if (_lebanon is null)
+                    {
+                        <MarketSectionError ErrorKey="@(_lebanonError ?? "Error.Market.LebanonUnavailable")" Retrying="_lebanonLoading" OnRetry="RetryLebanonAsync" />
+                    }
+                    else
+                    {
+                        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                            @foreach (var quote in _lebanon.Quotes)
+                            {
+                                <MarketQuoteCard Label="@LebanonLabel(quote.Code)" Value="@FormatHelper.Number(quote.Price)" Unit="@quote.Currency" />
+                            }
+                        </div>
+                        <div class="rounded-2xl border border-border bg-muted/10 p-4">
+                            <div class="mb-4">
+                                <h3 class="font-semibold text-foreground">@L["Market.LebanonHistory"]</h3>
+                                <p class="text-xs text-muted-foreground">@L["Market.SourceDate", FormatHelper.Date(_lebanon.SourceDate.LocalDateTime)]</p>
+                            </div>
+                            <MarketLineChart Series="@LebanonChartSeries()" Unit="L.L." AriaLabel="@L["Market.LebanonChartAria"]" />
+                        </div>
+                        <p class="text-xs text-muted-foreground">@L["Market.Source"] <a class="text-primary underline-offset-4 hover:underline" href="https://www.iptgroup.com.lb/ipt/en/our-stations/fuel-prices" target="_blank" rel="noreferrer">IPT Group Lebanon</a></p>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="space-y-4">
+                    <div class="flex flex-wrap items-end justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-semibold text-foreground">@L["Market.GlobalTitle"]</h2>
+                            <p class="text-xs text-muted-foreground">@L["Market.GlobalHint"]</p>
+                        </div>
+                        <label class="relative block">
+                            <span class="sr-only">@L["Market.ChartRange"]</span>
+                            <select class="h-11 min-w-32 cursor-pointer rounded-xl border border-border bg-card px-3 pe-9 text-sm font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    value="@_range"
+                                    disabled="@_globalLoading"
+                                    aria-label="@L["Market.ChartRange"]"
+                                    @onchange="OnRangeChangedAsync">
+                                @foreach (var option in RangeOptions)
+                                {
+                                    <option value="@option.Range">@option.Label</option>
+                                }
+                            </select>
+                        </label>
+                    </div>
+
+                    @if (_globalStale && _global is not null)
+                    {
+                        <MarketStaleBanner FetchedAt="_global.FetchedAt" Retrying="_globalLoading" OnRetry="RetryGlobalAsync" />
+                    }
+
+                    @if (_globalLoading && _global is null)
+                    {
+                        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                            @for (var i = 0; i < 5; i++) { <SkeletonBone Class="h-28 rounded-2xl" /> }
+                        </div>
+                        <SkeletonBone Class="h-72 rounded-2xl" />
+                    }
+                    else if (_global is null)
+                    {
+                        <MarketSectionError ErrorKey="@(_globalError ?? "Error.Market.GlobalUnavailable")" Retrying="_globalLoading" OnRetry="RetryGlobalAsync" />
+                    }
+                    else
+                    {
+                        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                            @foreach (var quote in _global.Quotes)
+                            {
+                                <MarketQuoteCard Label="@InstrumentLabel(quote.Code)" Value="@FormatHelper.Number(quote.Price)" Unit="@quote.Unit" ChangePercent="quote.ChangePercent" />
+                            }
+                        </div>
+
+                        <div class="rounded-2xl border border-border bg-muted/10 p-4">
+                            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <h3 class="font-semibold text-foreground">@L["Market.PriceHistory"]</h3>
+                                    <p class="text-xs text-muted-foreground">@L["Market.UpdatedAt", _global.FetchedAt.LocalDateTime.ToString("g")]</p>
+                                </div>
+                                <select class="h-11 min-w-52 rounded-xl border border-border bg-card px-3 text-sm text-foreground" value="@_selectedInstrument" @onchange="OnInstrumentChanged">
+                                    @foreach (var quote in _global.Quotes)
+                                    {
+                                        <option value="@quote.Code">@InstrumentLabel(quote.Code)</option>
+                                    }
+                                </select>
+                            </div>
+                            @if (SelectedQuote is { } selected)
+                            {
+                                <MarketLineChart Series="@GlobalChartSeries(selected)" Unit="@selected.Unit" AriaLabel="@L["Market.ChartAria", InstrumentLabel(selected.Code)]" />
+                            }
+                        </div>
+                        <p class="text-xs text-muted-foreground">@L["Market.DelayedDisclaimer"] <a class="text-primary underline-offset-4 hover:underline" href="https://finance.yahoo.com/markets/commodities/" target="_blank" rel="noreferrer">Yahoo Finance</a></p>
+                    }
+                </div>
+            }
         </div>
-
-        @if (_lebanonStale && _lebanon is not null)
-        {
-            <MarketStaleBanner FetchedAt="_lebanon.FetchedAt" Retrying="_lebanonLoading" OnRetry="RetryLebanonAsync" />
-        }
-
-        @if (_lebanonLoading && _lebanon is null)
-        {
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                @for (var i = 0; i < 4; i++) { <SkeletonBone Class="h-28 rounded-2xl" /> }
-            </div>
-            <SkeletonBone Class="h-72 rounded-2xl" />
-        }
-        else if (_lebanon is null)
-        {
-            <MarketSectionError ErrorKey="@(_lebanonError ?? "Error.Market.LebanonUnavailable")" Retrying="_lebanonLoading" OnRetry="RetryLebanonAsync" />
-        }
-        else
-        {
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                @foreach (var quote in _lebanon.Quotes)
-                {
-                    <MarketQuoteCard Label="@LebanonLabel(quote.Code)" Value="@FormatHelper.Number(quote.Price)" Unit="@quote.Currency" />
-                }
-            </div>
-            <div class="rounded-2xl border border-border bg-muted/10 p-4">
-                <div class="mb-4">
-                    <h3 class="font-semibold text-foreground">@L["Market.LebanonHistory"]</h3>
-                    <p class="text-xs text-muted-foreground">@L["Market.SourceDate", FormatHelper.Date(_lebanon.SourceDate.LocalDateTime)]</p>
-                </div>
-                <MarketLineChart Series="@LebanonChartSeries()" Unit="L.L." AriaLabel="@L["Market.LebanonChartAria"]" />
-            </div>
-            <p class="text-xs text-muted-foreground">@L["Market.Source"] <a class="text-primary underline-offset-4 hover:underline" href="https://www.iptgroup.com.lb/ipt/en/our-stations/fuel-prices" target="_blank" rel="noreferrer">IPT Group Lebanon</a></p>
-        }
     </section>
 </div>
 
@@ -137,6 +173,15 @@
     private bool _lebanonStale;
     private bool _globalFailureNotified;
     private bool _lebanonFailureNotified;
+    private MarketView _activeMarket = MarketView.Lebanon;
+
+    private string ActivePanelId => _activeMarket == MarketView.Lebanon
+        ? "market-panel-lebanon"
+        : "market-panel-global";
+
+    private string ActiveSwitchId => _activeMarket == MarketView.Lebanon
+        ? "market-switch-lebanon"
+        : "market-switch-global";
 
     private IEnumerable<(MarketRange Range, string Label)> RangeOptions =>
     [
@@ -167,7 +212,7 @@
         _globalLoading = true;
         try
         {
-            _global = await MarketService.GetGlobalAsync(_range, force, _disposeCts.Token);
+            _global = await GlobalMarketService.GetAsync(_range, force, _disposeCts.Token);
             _globalError = null;
             _globalStale = false;
             _globalFailureNotified = false;
@@ -175,7 +220,7 @@
         catch (DomainException ex)
         {
             _globalError = ex.Message;
-            _global = await MarketService.GetCachedGlobalAsync(_range, _disposeCts.Token);
+            _global = await GlobalMarketService.GetCachedAsync(_range, _disposeCts.Token);
             _globalStale = _global is not null;
             NotifyOnce(ex, ref _globalFailureNotified);
         }
@@ -187,7 +232,7 @@
         _lebanonLoading = true;
         try
         {
-            _lebanon = await MarketService.GetLebanonAsync(force, _disposeCts.Token);
+            _lebanon = await LebanonMarketService.GetAsync(force, _disposeCts.Token);
             _lebanonError = null;
             _lebanonStale = false;
             _lebanonFailureNotified = false;
@@ -195,7 +240,7 @@
         catch (DomainException ex)
         {
             _lebanonError = ex.Message;
-            _lebanon = await MarketService.GetCachedLebanonAsync(_disposeCts.Token);
+            _lebanon = await LebanonMarketService.GetCachedAsync(_disposeCts.Token);
             _lebanonStale = _lebanon is not null;
             NotifyOnce(ex, ref _lebanonFailureNotified);
         }
@@ -213,8 +258,10 @@
     private Task RetryGlobalAsync() => LoadGlobalAsync(true);
     private Task RetryLebanonAsync() => LoadLebanonAsync(true);
 
-    private async Task ChangeRangeAsync(MarketRange range)
+    private async Task OnRangeChangedAsync(ChangeEventArgs args)
     {
+        if (!Enum.TryParse<MarketRange>(args.Value?.ToString(), out var range))
+            return;
         if (_range == range) return;
         _range = range;
         _global = null;
@@ -223,6 +270,13 @@
 
     private void OnInstrumentChanged(ChangeEventArgs e) =>
         _selectedInstrument = e.Value?.ToString() ?? "WTI";
+
+    private void SwitchMarket(MarketView market) => _activeMarket = market;
+
+    private string MarketSwitchClass(MarketView market) =>
+        _activeMarket == market
+            ? "h-11 cursor-pointer rounded-lg bg-card px-4 text-sm font-semibold text-foreground shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            : "h-11 cursor-pointer rounded-lg px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-card/60 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
     private void OnConnectivityChanged(object? sender, bool online) => _ = InvokeAsync(async () =>
     {
@@ -258,11 +312,6 @@
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
     }
 
-    private string RangeClass(MarketRange range) =>
-        _range == range
-            ? "h-11 rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground"
-            : "h-11 rounded-xl border border-border bg-card px-3 text-sm font-medium text-muted-foreground hover:bg-muted";
-
     private string InstrumentLabel(string code) => L[$"Market.Instrument.{code}"].Value;
     private string LebanonLabel(string code) => L[$"Market.Lebanon.{code}"].Value;
 
@@ -279,5 +328,11 @@
         _disposeCts.Cancel();
         _disposeCts.Dispose();
         return ValueTask.CompletedTask;
+    }
+
+    private enum MarketView
+    {
+        Lebanon,
+        Global
     }
 }

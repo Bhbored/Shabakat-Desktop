@@ -1,6 +1,6 @@
 using Shabakat.Application.DTOs.Market;
 
-namespace Shabakat.Components.Features.Market.Components;
+namespace Shabakat.Application.Models.Market;
 
 public sealed record MarketChartSeriesModel(
     string Label,

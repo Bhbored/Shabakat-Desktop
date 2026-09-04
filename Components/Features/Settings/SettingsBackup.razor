@@ -70,10 +70,6 @@
                     </label>
                 </div>
             </div>
-            @if (!string.IsNullOrWhiteSpace(_cloud.LastError))
-            {
-                <p class="text-xs text-red-600 dark:text-red-400">@_cloud.LastError</p>
-            }
             <button type="button"
                     class="w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary/80 disabled:opacity-50"
                     disabled="@(_busy || !_cloud.Enabled)"
