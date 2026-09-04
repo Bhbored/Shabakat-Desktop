@@ -1,0 +1,3 @@
+Replace the existing dashboard.png placeholder with a real 1280x720 capture.
+
+The refreshed capture should include the dashboard's fuel-market preview card.
