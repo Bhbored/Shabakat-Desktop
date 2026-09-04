@@ -1,0 +1,283 @@
+@page "/fuel-market"
+@inject IMarketPriceService MarketService
+@inject IMarketConnectivity Connectivity
+@inject IToastService Toast
+@inject IStringLocalizer<SharedResource> L
+@implements IAsyncDisposable
+
+<div class="space-y-5">
+    <header class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary">@L["Market.EnergyIntelligence"]</p>
+            <h1 class="mt-1 text-2xl font-bold text-foreground">@L["Market.Title"]</h1>
+            <p class="mt-1 max-w-2xl text-sm text-muted-foreground">@L["Market.Description"]</p>
+        </div>
+        <button type="button" class="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-50" disabled="@(_globalLoading || _lebanonLoading)" @onclick="RefreshAllAsync">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 20v-5h-5"/></svg>
+            @L["Market.Refresh"]
+        </button>
+    </header>
+
+    <section class="space-y-4 rounded-2xl border border-border bg-card p-5">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+            <div>
+                <h2 class="text-lg font-semibold text-foreground">@L["Market.GlobalTitle"]</h2>
+                <p class="text-xs text-muted-foreground">@L["Market.GlobalHint"]</p>
+            </div>
+            <div class="flex gap-2" role="group" aria-label="@L["Market.ChartRange"]">
+                @foreach (var option in RangeOptions)
+                {
+                    <button type="button" class="@RangeClass(option.Range)" aria-pressed="@(_range == option.Range)" disabled="@_globalLoading" @onclick="() => ChangeRangeAsync(option.Range)">@option.Label</button>
+                }
+            </div>
+        </div>
+
+        @if (_globalStale && _global is not null)
+        {
+            <MarketStaleBanner FetchedAt="_global.FetchedAt" Retrying="_globalLoading" OnRetry="RetryGlobalAsync" />
+        }
+
+        @if (_globalLoading && _global is null)
+        {
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                @for (var i = 0; i < 5; i++) { <SkeletonBone Class="h-28 rounded-2xl" /> }
+            </div>
+            <SkeletonBone Class="h-72 rounded-2xl" />
+        }
+        else if (_global is null)
+        {
+            <MarketSectionError ErrorKey="@(_globalError ?? "Error.Market.GlobalUnavailable")" Retrying="_globalLoading" OnRetry="RetryGlobalAsync" />
+        }
+        else
+        {
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                @foreach (var quote in _global.Quotes)
+                {
+                    <MarketQuoteCard Label="@InstrumentLabel(quote.Code)" Value="@FormatHelper.Number(quote.Price)" Unit="@quote.Unit" ChangePercent="quote.ChangePercent" />
+                }
+            </div>
+
+            <div class="rounded-2xl border border-border bg-muted/10 p-4">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="font-semibold text-foreground">@L["Market.PriceHistory"]</h3>
+                        <p class="text-xs text-muted-foreground">@L["Market.UpdatedAt", _global.FetchedAt.LocalDateTime.ToString("g")]</p>
+                    </div>
+                    <select class="h-11 min-w-52 rounded-xl border border-border bg-card px-3 text-sm text-foreground" value="@_selectedInstrument" @onchange="OnInstrumentChanged">
+                        @foreach (var quote in _global.Quotes)
+                        {
+                            <option value="@quote.Code">@InstrumentLabel(quote.Code)</option>
+                        }
+                    </select>
+                </div>
+                @if (SelectedQuote is { } selected)
+                {
+                    <MarketLineChart Series="@GlobalChartSeries(selected)" Unit="@selected.Unit" AriaLabel="@L["Market.ChartAria", InstrumentLabel(selected.Code)]" />
+                }
+            </div>
+            <p class="text-xs text-muted-foreground">@L["Market.DelayedDisclaimer"] <a class="text-primary underline-offset-4 hover:underline" href="https://finance.yahoo.com/markets/commodities/" target="_blank" rel="noreferrer">Yahoo Finance</a></p>
+        }
+    </section>
+
+    <section class="space-y-4 rounded-2xl border border-border bg-card p-5">
+        <div>
+            <h2 class="text-lg font-semibold text-foreground">@L["Market.LebanonTitle"]</h2>
+            <p class="text-xs text-muted-foreground">@L["Market.LebanonHint"]</p>
+        </div>
+
+        @if (_lebanonStale && _lebanon is not null)
+        {
+            <MarketStaleBanner FetchedAt="_lebanon.FetchedAt" Retrying="_lebanonLoading" OnRetry="RetryLebanonAsync" />
+        }
+
+        @if (_lebanonLoading && _lebanon is null)
+        {
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                @for (var i = 0; i < 4; i++) { <SkeletonBone Class="h-28 rounded-2xl" /> }
+            </div>
+            <SkeletonBone Class="h-72 rounded-2xl" />
+        }
+        else if (_lebanon is null)
+        {
+            <MarketSectionError ErrorKey="@(_lebanonError ?? "Error.Market.LebanonUnavailable")" Retrying="_lebanonLoading" OnRetry="RetryLebanonAsync" />
+        }
+        else
+        {
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                @foreach (var quote in _lebanon.Quotes)
+                {
+                    <MarketQuoteCard Label="@LebanonLabel(quote.Code)" Value="@FormatHelper.Number(quote.Price)" Unit="@quote.Currency" />
+                }
+            </div>
+            <div class="rounded-2xl border border-border bg-muted/10 p-4">
+                <div class="mb-4">
+                    <h3 class="font-semibold text-foreground">@L["Market.LebanonHistory"]</h3>
+                    <p class="text-xs text-muted-foreground">@L["Market.SourceDate", FormatHelper.Date(_lebanon.SourceDate.LocalDateTime)]</p>
+                </div>
+                <MarketLineChart Series="@LebanonChartSeries()" Unit="L.L." AriaLabel="@L["Market.LebanonChartAria"]" />
+            </div>
+            <p class="text-xs text-muted-foreground">@L["Market.Source"] <a class="text-primary underline-offset-4 hover:underline" href="https://www.iptgroup.com.lb/ipt/en/our-stations/fuel-prices" target="_blank" rel="noreferrer">IPT Group Lebanon</a></p>
+        }
+    </section>
+</div>
+
+@code {
+    private static readonly string[] ChartColors = ["#f5c000", "#38bdf8", "#22c55e", "#fb7185"];
+    private readonly CancellationTokenSource _disposeCts = new();
+    private readonly SemaphoreSlim _refreshGate = new(1, 1);
+    private GlobalMarketResponse? _global;
+    private LebanonMarketResponse? _lebanon;
+    private MarketRange _range = MarketRange.OneMonth;
+    private string _selectedInstrument = "WTI";
+    private string? _globalError;
+    private string? _lebanonError;
+    private bool _globalLoading = true;
+    private bool _lebanonLoading = true;
+    private bool _globalStale;
+    private bool _lebanonStale;
+    private bool _globalFailureNotified;
+    private bool _lebanonFailureNotified;
+
+    private IEnumerable<(MarketRange Range, string Label)> RangeOptions =>
+    [
+        (MarketRange.OneMonth, L["Market.Range.1M"].Value),
+        (MarketRange.ThreeMonths, L["Market.Range.3M"].Value),
+        (MarketRange.OneYear, L["Market.Range.1Y"].Value)
+    ];
+
+    private CommodityQuoteResponse? SelectedQuote =>
+        _global?.Quotes.FirstOrDefault(q => q.Code == _selectedInstrument) ?? _global?.Quotes.FirstOrDefault();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Connectivity.ConnectivityChanged += OnConnectivityChanged;
+        await LoadAllAsync(false);
+        _ = RefreshLoopAsync(_disposeCts.Token);
+    }
+
+    private async Task LoadAllAsync(bool force)
+    {
+        await _refreshGate.WaitAsync(_disposeCts.Token);
+        try { await Task.WhenAll(LoadGlobalAsync(force), LoadLebanonAsync(force)); }
+        finally { _refreshGate.Release(); }
+    }
+
+    private async Task LoadGlobalAsync(bool force)
+    {
+        _globalLoading = true;
+        try
+        {
+            _global = await MarketService.GetGlobalAsync(_range, force, _disposeCts.Token);
+            _globalError = null;
+            _globalStale = false;
+            _globalFailureNotified = false;
+        }
+        catch (DomainException ex)
+        {
+            _globalError = ex.Message;
+            _global = await MarketService.GetCachedGlobalAsync(_range, _disposeCts.Token);
+            _globalStale = _global is not null;
+            NotifyOnce(ex, ref _globalFailureNotified);
+        }
+        finally { _globalLoading = false; }
+    }
+
+    private async Task LoadLebanonAsync(bool force)
+    {
+        _lebanonLoading = true;
+        try
+        {
+            _lebanon = await MarketService.GetLebanonAsync(force, _disposeCts.Token);
+            _lebanonError = null;
+            _lebanonStale = false;
+            _lebanonFailureNotified = false;
+        }
+        catch (DomainException ex)
+        {
+            _lebanonError = ex.Message;
+            _lebanon = await MarketService.GetCachedLebanonAsync(_disposeCts.Token);
+            _lebanonStale = _lebanon is not null;
+            NotifyOnce(ex, ref _lebanonFailureNotified);
+        }
+        finally { _lebanonLoading = false; }
+    }
+
+    private void NotifyOnce(DomainException exception, ref bool notified)
+    {
+        if (notified) return;
+        Toast.Error(exception);
+        notified = true;
+    }
+
+    private Task RefreshAllAsync() => LoadAllAsync(true);
+    private Task RetryGlobalAsync() => LoadGlobalAsync(true);
+    private Task RetryLebanonAsync() => LoadLebanonAsync(true);
+
+    private async Task ChangeRangeAsync(MarketRange range)
+    {
+        if (_range == range) return;
+        _range = range;
+        _global = null;
+        await LoadGlobalAsync(false);
+    }
+
+    private void OnInstrumentChanged(ChangeEventArgs e) =>
+        _selectedInstrument = e.Value?.ToString() ?? "WTI";
+
+    private void OnConnectivityChanged(object? sender, bool online) => _ = InvokeAsync(async () =>
+    {
+        if (!online)
+        {
+            _globalStale = _global is not null;
+            _lebanonStale = _lebanon is not null;
+            _globalError ??= "Error.Market.NoConnection";
+            _lebanonError ??= "Error.Market.NoConnection";
+            if (!_globalFailureNotified || !_lebanonFailureNotified)
+                Toast.Error(new DomainException("Error.Market.NoConnection"));
+            _globalFailureNotified = true;
+            _lebanonFailureNotified = true;
+            StateHasChanged();
+            return;
+        }
+        await LoadAllAsync(true);
+        StateHasChanged();
+    });
+
+    private async Task RefreshLoopAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+                await InvokeAsync(async () =>
+                {
+                    await LoadAllAsync(true);
+                    StateHasChanged();
+                });
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+    }
+
+    private string RangeClass(MarketRange range) =>
+        _range == range
+            ? "h-11 rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground"
+            : "h-11 rounded-xl border border-border bg-card px-3 text-sm font-medium text-muted-foreground hover:bg-muted";
+
+    private string InstrumentLabel(string code) => L[$"Market.Instrument.{code}"].Value;
+    private string LebanonLabel(string code) => L[$"Market.Lebanon.{code}"].Value;
+
+    private IReadOnlyList<MarketChartSeriesModel> GlobalChartSeries(CommodityQuoteResponse quote) =>
+        [new(InstrumentLabel(quote.Code), quote.History, ChartColors[0])];
+
+    private IReadOnlyList<MarketChartSeriesModel> LebanonChartSeries() =>
+        _lebanon?.Series.Select((series, index) => new MarketChartSeriesModel(
+            LebanonLabel(series.Code), series.History, ChartColors[index % ChartColors.Length], index * 2)).ToList() ?? [];
+
+    public ValueTask DisposeAsync()
+    {
+        Connectivity.ConnectivityChanged -= OnConnectivityChanged;
+        _disposeCts.Cancel();
+        _disposeCts.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

@@ -2294,4 +2294,49 @@
   <data name="Filter.Remove" xml:space="preserve">
     <value>Remove {0}</value>
   </data>
+  <data name="Common.Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Common.Retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="Nav.FuelMarket" xml:space="preserve"><value>Fuel market</value></data>
+  <data name="Market.EnergyIntelligence" xml:space="preserve"><value>Energy intelligence</value></data>
+  <data name="Market.Title" xml:space="preserve"><value>Fuel market</value></data>
+  <data name="Market.Description" xml:space="preserve"><value>Track global energy futures and published fuel prices in Lebanon.</value></data>
+  <data name="Market.Refresh" xml:space="preserve"><value>Refresh data</value></data>
+  <data name="Market.Refreshing" xml:space="preserve"><value>Refreshing…</value></data>
+  <data name="Market.GlobalTitle" xml:space="preserve"><value>Global energy markets</value></data>
+  <data name="Market.GlobalHint" xml:space="preserve"><value>Delayed futures prices in USD. Data refreshes every five minutes.</value></data>
+  <data name="Market.LebanonTitle" xml:space="preserve"><value>Lebanon fuel prices</value></data>
+  <data name="Market.LebanonHint" xml:space="preserve"><value>Current published retail prices and their recent movement.</value></data>
+  <data name="Market.PriceHistory" xml:space="preserve"><value>Price history</value></data>
+  <data name="Market.LebanonHistory" xml:space="preserve"><value>Lebanon price history</value></data>
+  <data name="Market.ChartRange" xml:space="preserve"><value>Chart range</value></data>
+  <data name="Market.Range.1M" xml:space="preserve"><value>1M</value></data>
+  <data name="Market.Range.3M" xml:space="preserve"><value>3M</value></data>
+  <data name="Market.Range.1Y" xml:space="preserve"><value>1Y</value></data>
+  <data name="Market.UpdatedAt" xml:space="preserve"><value>Fetched {0}</value></data>
+  <data name="Market.SourceDate" xml:space="preserve"><value>Latest published point: {0}</value></data>
+  <data name="Market.Source" xml:space="preserve"><value>Source:</value></data>
+  <data name="Market.DelayedDisclaimer" xml:space="preserve"><value>Delayed market data for operational reference only. Source:</value></data>
+  <data name="Market.ShowDataTable" xml:space="preserve"><value>Show accessible data table</value></data>
+  <data name="Market.ChartAria" xml:space="preserve"><value>{0} price history chart</value></data>
+  <data name="Market.LebanonChartAria" xml:space="preserve"><value>Lebanon fuel price history chart</value></data>
+  <data name="Market.StaleData" xml:space="preserve"><value>Showing cached data fetched {0}. Live refresh is unavailable.</value></data>
+  <data name="Market.PreviewTitle" xml:space="preserve"><value>Fuel price pulse</value></data>
+  <data name="Market.OpenPage" xml:space="preserve"><value>Open market</value></data>
+  <data name="Market.PreviewStale" xml:space="preserve"><value>Some values are cached because live sources are unavailable.</value></data>
+  <data name="Market.Error.OfflineTitle" xml:space="preserve"><value>No internet connection</value></data>
+  <data name="Market.Error.SourceTitle" xml:space="preserve"><value>Price data unavailable</value></data>
+  <data name="Market.Instrument.WTI" xml:space="preserve"><value>WTI crude oil</value></data>
+  <data name="Market.Instrument.BRENT" xml:space="preserve"><value>Brent crude oil</value></data>
+  <data name="Market.Instrument.NATURAL_GAS" xml:space="preserve"><value>Natural gas</value></data>
+  <data name="Market.Instrument.RBOB" xml:space="preserve"><value>RBOB gasoline</value></data>
+  <data name="Market.Instrument.HEATING_OIL" xml:space="preserve"><value>Heating oil</value></data>
+  <data name="Market.Lebanon.UNL95" xml:space="preserve"><value>Unleaded 95</value></data>
+  <data name="Market.Lebanon.UNL98" xml:space="preserve"><value>Unleaded 98</value></data>
+  <data name="Market.Lebanon.DIESEL" xml:space="preserve"><value>Diesel</value></data>
+  <data name="Market.Lebanon.LPG" xml:space="preserve"><value>Gas (LPG)</value></data>
+  <data name="Error.Market.NoConnection" xml:space="preserve"><value>Connect to the internet, then try again. Cached prices remain available when possible.</value></data>
+  <data name="Error.Market.GlobalUnavailable" xml:space="preserve"><value>Global market prices could not be fetched. Please try again shortly.</value></data>
+  <data name="Error.Market.LebanonUnavailable" xml:space="preserve"><value>Lebanon fuel prices could not be fetched from IPT. Please try again shortly.</value></data>
+  <data name="Error.Market.InvalidResponse" xml:space="preserve"><value>A price source returned an unexpected response.</value></data>
+  <data name="Error.Market.Unavailable" xml:space="preserve"><value>Fuel market data is currently unavailable.</value></data>
 </root>

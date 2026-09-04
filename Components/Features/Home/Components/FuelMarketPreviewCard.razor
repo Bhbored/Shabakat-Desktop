@@ -1,0 +1,120 @@
+@namespace Shabakat.Components.Features.Home.Components
+@inject IMarketPriceService MarketService
+@inject IToastService Toast
+@inject IStringLocalizer<SharedResource> L
+
+<section class="rounded-2xl border border-border bg-card p-5">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-primary">@L["Market.EnergyIntelligence"]</p>
+            <h2 class="mt-1 text-lg font-semibold text-foreground">@L["Market.PreviewTitle"]</h2>
+        </div>
+        <a href="fuel-market" class="inline-flex h-11 items-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold text-foreground no-underline hover:bg-muted">
+            @L["Market.OpenPage"]
+            <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            @for (var i = 0; i < 4; i++) { <SkeletonBone Class="h-24 rounded-2xl" /> }
+        </div>
+    }
+    else if (PreviewItems.Count == 0)
+    {
+        <MarketSectionError ErrorKey="@(_error ?? "Error.Market.Unavailable")" OnRetry="LoadAsync" />
+    }
+    else
+    {
+        @if (_stale)
+        {
+            <div class="mb-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-500" role="status">@L["Market.PreviewStale"]</div>
+        }
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            @foreach (var item in PreviewItems)
+            {
+                <MarketQuoteCard Label="@item.Label" Value="@FormatHelper.Number(item.Value)" Unit="@item.Unit" ChangePercent="item.Change" />
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private GlobalMarketResponse? _global;
+    private LebanonMarketResponse? _lebanon;
+    private bool _loading = true;
+    private bool _stale;
+    private string? _error;
+    private string? _notifiedError;
+
+    private IReadOnlyList<(string Label, decimal Value, string Unit, decimal? Change)> PreviewItems
+    {
+        get
+        {
+            var items = new List<(string, decimal, string, decimal?)>();
+            AddGlobal(items, "BRENT");
+            AddGlobal(items, "WTI");
+            AddLebanon(items, "UNL95");
+            AddLebanon(items, "DIESEL");
+            return items;
+        }
+    }
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _stale = false;
+        _error = null;
+        await Task.WhenAll(LoadGlobalAsync(), LoadLebanonAsync());
+        _loading = false;
+    }
+
+    private async Task LoadGlobalAsync()
+    {
+        try { _global = await MarketService.GetGlobalAsync(MarketRange.OneMonth); }
+        catch (DomainException ex)
+        {
+            NotifyOnce(ex);
+            _error = ex.Message;
+            _global = await MarketService.GetCachedGlobalAsync(MarketRange.OneMonth);
+            _stale |= _global is not null;
+        }
+    }
+
+    private async Task LoadLebanonAsync()
+    {
+        try { _lebanon = await MarketService.GetLebanonAsync(); }
+        catch (DomainException ex)
+        {
+            NotifyOnce(ex);
+            _error ??= ex.Message;
+            _lebanon = await MarketService.GetCachedLebanonAsync();
+            _stale |= _lebanon is not null;
+        }
+    }
+
+    private void AddGlobal(List<(string, decimal, string, decimal?)> items, string code)
+    {
+        var quote = _global?.Quotes.FirstOrDefault(q => q.Code == code);
+        if (quote is not null)
+            items.Add((L[$"Market.Instrument.{code}"].Value, quote.Price, quote.Unit, quote.ChangePercent));
+    }
+
+    private void AddLebanon(List<(string, decimal, string, decimal?)> items, string code)
+    {
+        var quote = _lebanon?.Quotes.FirstOrDefault(q => q.Code == code);
+        if (quote is not null)
+            items.Add((L[$"Market.Lebanon.{code}"].Value, quote.Price, quote.Currency, null));
+    }
+
+    private void NotifyOnce(DomainException exception)
+    {
+        if (_notifiedError == exception.Message)
+            return;
+        Toast.Error(exception);
+        _notifiedError = exception.Message;
+    }
+}

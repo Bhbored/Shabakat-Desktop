@@ -24,6 +24,7 @@ using Shabakat.Application.Services.License;
 using Shabakat.Application.Services.Culture;
 using Shabakat.Application.Services.Theme;
 using Shabakat.Application.Services.Toasts;
+using Shabakat.Application.Services.Market;
 using Shabakat.Infrastructure.Persistence;
 using Shabakat.Infrastructure.Persistence.Interceptors;
 using Shabakat.Infrastructure.Persistence.Seed;
@@ -64,11 +65,28 @@ public static class DIContainer
         services.RegisterDataBase();
 
         services.Configure<CloudBackupOptions>(configuration.GetSection(CloudBackupOptions.SectionName));
+        services.Configure<MarketDataOptions>(configuration.GetSection(MarketDataOptions.SectionName));
         services.AddHttpClient(nameof(CloudBackupService), client =>
         {
             client.Timeout = TimeSpan.FromMinutes(5);
         });
         services.AddHostedService<CloudBackupHostedService>();
+        services.AddHttpClient("GlobalMarket", client =>
+        {
+            client.BaseAddress = new Uri(configuration["MarketData:YahooChartBaseUrl"]
+                ?? "https://query1.finance.yahoo.com/");
+            client.Timeout = TimeSpan.FromSeconds(12);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 Shabakat/1.0");
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+            client.MaxResponseContentBufferSize = 3_000_000;
+        });
+        services.AddHttpClient("LebanonMarket", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(12);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 Shabakat/1.0");
+            client.DefaultRequestHeaders.Accept.ParseAdd("text/html");
+            client.MaxResponseContentBufferSize = 3_000_000;
+        });
 
         services.AddLocalization();
         services.AddSingleton<ICultureService, CultureService>();
@@ -76,6 +94,8 @@ public static class DIContainer
         services.AddSingleton<IInvoiceTemplateRenderer, InvoiceTemplateRenderer>();
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddScoped<IToastService, ToastService>();
+        services.AddSingleton<IMarketConnectivity, MauiMarketConnectivity>();
+        services.AddScoped<IMarketPriceService, MarketPriceService>();
         services.AddScoped<IPricingService, PricingService>();
         services.AddScoped<IAppPreferencesService, AppPreferencesService>();
         services.AddScoped<IBackupService, BackupService>();

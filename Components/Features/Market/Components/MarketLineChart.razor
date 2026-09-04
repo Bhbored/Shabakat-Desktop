@@ -1,0 +1,94 @@
+@namespace Shabakat.Components.Features.Market.Components
+@inject IJSRuntime Js
+@inject IStringLocalizer<SharedResource> L
+@implements IAsyncDisposable
+
+<div>
+    <div class="relative h-72 w-full" role="img" aria-label="@AriaLabel">
+        <canvas id="@_canvasId" aria-hidden="true"></canvas>
+    </div>
+    <details class="mt-4 rounded-xl border border-border bg-muted/20">
+        <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-foreground">@L["Market.ShowDataTable"]</summary>
+        <div class="overflow-x-auto border-t border-border">
+            <table class="w-full min-w-[34rem] text-sm">
+                <thead>
+                    <tr>
+                        <th class="px-3 py-2 text-start text-muted-foreground">@L["Common.Date"]</th>
+                        @foreach (var item in Series)
+                        {
+                            <th class="px-3 py-2 text-end text-muted-foreground">@item.Label</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var index = 0; index < RowCount; index++)
+                    {
+                        <tr class="border-t border-border">
+                            <td class="px-3 py-2 text-foreground">@FormatHelper.Date(Series[0].Points[index].Timestamp.LocalDateTime)</td>
+                            @foreach (var item in Series)
+                            {
+                                <td class="px-3 py-2 text-end font-mono text-foreground">@FormatValue(item.Points[index].Value)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </details>
+</div>
+
+@code {
+    private readonly string _canvasId = $"market-chart-{Guid.NewGuid():N}";
+    private string? _fingerprint;
+    private bool _hasChart;
+
+    [Parameter] public IReadOnlyList<MarketChartSeriesModel> Series { get; set; } = [];
+    [Parameter] public string Unit { get; set; } = "";
+    [Parameter] public string AriaLabel { get; set; } = "";
+
+    private int RowCount => Series.Count == 0 ? 0 : Series.Min(s => s.Points.Count);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Series.Count == 0 || RowCount == 0)
+            return;
+
+        var fingerprint = $"{Unit}:{AriaLabel}:" + string.Join('|', Series.Select(s => $"{s.Label}:{s.Points.Count}:{s.Points[^1].Timestamp}:{s.Points[^1].Value}"));
+        if (fingerprint == _fingerprint)
+            return;
+        _fingerprint = fingerprint;
+
+        var labels = Series[0].Points.Take(RowCount)
+            .Select(p => p.Timestamp.LocalDateTime.ToString("d", System.Globalization.CultureInfo.CurrentCulture))
+            .ToArray();
+        var data = Series.Select(s => new
+        {
+            label = s.Label,
+            values = s.Points.Take(RowCount).Select(p => (double)p.Value).ToArray(),
+            color = s.Color,
+            dashLength = s.DashLength
+        }).ToArray();
+
+        try
+        {
+            _hasChart = await Js.InvokeAsync<bool>("shabakatMarketChart.render", _canvasId, labels, data, Unit, System.Globalization.CultureInfo.CurrentCulture.Name);
+            if (!_hasChart)
+                _fingerprint = null;
+        }
+        catch (JSException)
+        {
+            _fingerprint = null;
+        }
+    }
+
+    private string FormatValue(decimal value) => $"{FormatHelper.Number(value)} {Unit}".Trim();
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!_hasChart)
+            return;
+        try { await Js.InvokeVoidAsync("shabakatMarketChart.destroy", _canvasId); }
+        catch (JSDisconnectedException) { }
+        catch (JSException) { }
+    }
+}

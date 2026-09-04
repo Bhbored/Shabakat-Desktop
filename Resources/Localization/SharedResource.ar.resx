@@ -2294,4 +2294,49 @@
   <data name="Filter.Remove" xml:space="preserve">
     <value>إزالة {0}</value>
   </data>
+  <data name="Common.Date" xml:space="preserve"><value>التاريخ</value></data>
+  <data name="Common.Retry" xml:space="preserve"><value>إعادة المحاولة</value></data>
+  <data name="Nav.FuelMarket" xml:space="preserve"><value>سوق المحروقات</value></data>
+  <data name="Market.EnergyIntelligence" xml:space="preserve"><value>مؤشرات الطاقة</value></data>
+  <data name="Market.Title" xml:space="preserve"><value>سوق المحروقات</value></data>
+  <data name="Market.Description" xml:space="preserve"><value>تابع عقود الطاقة العالمية وأسعار المحروقات المنشورة في لبنان.</value></data>
+  <data name="Market.Refresh" xml:space="preserve"><value>تحديث البيانات</value></data>
+  <data name="Market.Refreshing" xml:space="preserve"><value>جارٍ التحديث…</value></data>
+  <data name="Market.GlobalTitle" xml:space="preserve"><value>أسواق الطاقة العالمية</value></data>
+  <data name="Market.GlobalHint" xml:space="preserve"><value>أسعار عقود آجلة مؤجلة بالدولار الأميركي، تُحدّث كل خمس دقائق.</value></data>
+  <data name="Market.LebanonTitle" xml:space="preserve"><value>أسعار المحروقات في لبنان</value></data>
+  <data name="Market.LebanonHint" xml:space="preserve"><value>أسعار البيع المنشورة حاليًا وحركتها الأخيرة.</value></data>
+  <data name="Market.PriceHistory" xml:space="preserve"><value>سجل الأسعار</value></data>
+  <data name="Market.LebanonHistory" xml:space="preserve"><value>سجل الأسعار في لبنان</value></data>
+  <data name="Market.ChartRange" xml:space="preserve"><value>مدة الرسم البياني</value></data>
+  <data name="Market.Range.1M" xml:space="preserve"><value>شهر</value></data>
+  <data name="Market.Range.3M" xml:space="preserve"><value>3 أشهر</value></data>
+  <data name="Market.Range.1Y" xml:space="preserve"><value>سنة</value></data>
+  <data name="Market.UpdatedAt" xml:space="preserve"><value>تم الجلب في {0}</value></data>
+  <data name="Market.SourceDate" xml:space="preserve"><value>آخر نقطة منشورة: {0}</value></data>
+  <data name="Market.Source" xml:space="preserve"><value>المصدر:</value></data>
+  <data name="Market.DelayedDisclaimer" xml:space="preserve"><value>بيانات سوق مؤجلة للاستئناس التشغيلي فقط. المصدر:</value></data>
+  <data name="Market.ShowDataTable" xml:space="preserve"><value>عرض جدول البيانات</value></data>
+  <data name="Market.ChartAria" xml:space="preserve"><value>رسم بياني لسجل سعر {0}</value></data>
+  <data name="Market.LebanonChartAria" xml:space="preserve"><value>رسم بياني لسجل أسعار المحروقات في لبنان</value></data>
+  <data name="Market.StaleData" xml:space="preserve"><value>يتم عرض بيانات مخزنة جُلبت في {0} لتعذر التحديث المباشر.</value></data>
+  <data name="Market.PreviewTitle" xml:space="preserve"><value>نبض أسعار المحروقات</value></data>
+  <data name="Market.OpenPage" xml:space="preserve"><value>فتح السوق</value></data>
+  <data name="Market.PreviewStale" xml:space="preserve"><value>بعض القيم مخزنة لتعذر الوصول إلى المصادر المباشرة.</value></data>
+  <data name="Market.Error.OfflineTitle" xml:space="preserve"><value>لا يوجد اتصال بالإنترنت</value></data>
+  <data name="Market.Error.SourceTitle" xml:space="preserve"><value>بيانات الأسعار غير متوفرة</value></data>
+  <data name="Market.Instrument.WTI" xml:space="preserve"><value>خام غرب تكساس</value></data>
+  <data name="Market.Instrument.BRENT" xml:space="preserve"><value>خام برنت</value></data>
+  <data name="Market.Instrument.NATURAL_GAS" xml:space="preserve"><value>الغاز الطبيعي</value></data>
+  <data name="Market.Instrument.RBOB" xml:space="preserve"><value>بنزين RBOB</value></data>
+  <data name="Market.Instrument.HEATING_OIL" xml:space="preserve"><value>زيت التدفئة</value></data>
+  <data name="Market.Lebanon.UNL95" xml:space="preserve"><value>بنزين 95 أوكتان</value></data>
+  <data name="Market.Lebanon.UNL98" xml:space="preserve"><value>بنزين 98 أوكتان</value></data>
+  <data name="Market.Lebanon.DIESEL" xml:space="preserve"><value>مازوت</value></data>
+  <data name="Market.Lebanon.LPG" xml:space="preserve"><value>غاز (LPG)</value></data>
+  <data name="Error.Market.NoConnection" xml:space="preserve"><value>اتصل بالإنترنت ثم أعد المحاولة. ستبقى الأسعار المخزنة ظاهرة عند توفرها.</value></data>
+  <data name="Error.Market.GlobalUnavailable" xml:space="preserve"><value>تعذر جلب أسعار الأسواق العالمية. يرجى المحاولة بعد قليل.</value></data>
+  <data name="Error.Market.LebanonUnavailable" xml:space="preserve"><value>تعذر جلب أسعار المحروقات في لبنان من IPT. يرجى المحاولة بعد قليل.</value></data>
+  <data name="Error.Market.InvalidResponse" xml:space="preserve"><value>أعاد مصدر الأسعار استجابة غير متوقعة.</value></data>
+  <data name="Error.Market.Unavailable" xml:space="preserve"><value>بيانات سوق المحروقات غير متوفرة حاليًا.</value></data>
 </root>
