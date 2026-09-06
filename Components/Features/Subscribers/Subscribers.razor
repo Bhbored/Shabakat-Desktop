@@ -33,7 +33,8 @@
                         OnFiltersChanged="ReloadFromFiltersAsync"
                         IsExporting="_exporting"
                         OnCreate="OpenCreate"
-                        OnExport="ExportAsync"/>
+                        OnExportOrganized="ExportOrganizedAsync"
+                        OnExportStacked="ExportStackedAsync"/>
 
     <SubscribersList Items="_items"
                      IsLoading="_loading"
@@ -344,7 +345,13 @@
         await CommitLocationFiltersAsync();
     }
 
-    private async Task ExportAsync()
+    private async Task ExportOrganizedAsync() =>
+        await ExportAsync(CustomerExportScope.Full);
+
+    private async Task ExportStackedAsync() =>
+        await ExportAsync(CustomerExportScope.Stacked);
+
+    private async Task ExportAsync(CustomerExportScope scope)
     {
         if (_exporting) return;
         _exporting = true;
@@ -358,7 +365,7 @@
             var file = await UiActions.RunAsync(
                 Toast,
                 () => ExportService.BuildAsync(
-                    new CustomerExportRequest(areaIds)));
+                    new CustomerExportRequest(areaIds, Scope: scope)));
 
             if (file is null)
                 return;

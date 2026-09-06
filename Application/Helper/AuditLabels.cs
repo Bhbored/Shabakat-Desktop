@@ -50,8 +50,10 @@ public static class AuditLabels
             nameof(AuditAction.ExpenseDeleted) => localizer["AuditSummary.ExpenseDeleted", expenseType],
             nameof(AuditAction.InvoiceCreated) => localizer["AuditSummary.InvoiceCreated", invoiceNumber, customerName],
             nameof(AuditAction.InvoiceBulkCreated) => localizer["AuditSummary.InvoiceBulkCreated", created, skipped],
-            nameof(AuditAction.InvoicePaymentRecorded) => localizer["AuditSummary.InvoicePaymentRecorded", amount, invoiceNumber],
-            nameof(AuditAction.InvoiceFixedKilowattCharge) => localizer["AuditSummary.InvoiceFixedKilowattCharge", customerName, invoiceNumber],
+            nameof(AuditAction.InvoicePaymentRecorded) => localizer["AuditSummary.InvoicePaymentRecorded", amount,
+                invoiceNumber],
+            nameof(AuditAction.InvoiceFixedKilowattCharge) => localizer["AuditSummary.InvoiceFixedKilowattCharge",
+                customerName, invoiceNumber],
             _ => null
         };
 
@@ -94,7 +96,8 @@ public static class AuditLabels
         return localized.ResourceNotFound ? label : localized.Value;
     }
 
-    public static string DetailValue(AuditLogResponse entry, string label, IStringLocalizer<SharedResource> localizer) =>
+    public static string DetailValue(AuditLogResponse entry, string label,
+        IStringLocalizer<SharedResource> localizer) =>
         DetailValue(label, Detail(entry, label), localizer);
 
     public static string DetailValue(string label, string value, IStringLocalizer<SharedResource> localizer)
@@ -109,10 +112,7 @@ public static class AuditLabels
             "expensetype" => $"ExpenseType.{value}",
             "paymentmethod" => $"PaymentMethod.{value}",
             _ => null
-        };
-
-        if (resourceKey is null)
-            resourceKey = TryEnumResourceKey(value);
+        } ?? TryEnumResourceKey(value);
 
         if (resourceKey is null)
             return value;

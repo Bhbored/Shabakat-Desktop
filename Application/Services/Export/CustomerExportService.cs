@@ -68,6 +68,9 @@ public sealed class CustomerExportService : ICustomerExportService
         CustomerExportRequest request,
         CancellationToken cancellationToken = default)
     {
+        if (request.Scope == CustomerExportScope.Stacked)
+            return await BuildStackedAsync(request, cancellationToken);
+
         var plan = await ResolvePlanAsync(request, cancellationToken);
 
         var exportedAt = DateTime.Now;
@@ -86,6 +89,30 @@ public sealed class CustomerExportService : ICustomerExportService
         }
 
         return BuildFile(workbook, plan, request, exportedAt);
+    }
+
+    private async Task<CustomerExportFile> BuildStackedAsync(
+        CustomerExportRequest request,
+        CancellationToken cancellationToken)
+    {
+        var columns = request.Columns is { Count: > 0 }
+            ? CustomerExportColumns.Resolve(request.Columns)
+            : await GetSelectedColumnsAsync(cancellationToken);
+
+        var prefs = await _preferencesRepository.GetAsync();
+        var language = prefs?.Language;
+        var arabic = CustomerExportLabels.IsArabic(language);
+        var rows = await _exportRepository.GetRowsAsync(request.AreaIds, cancellationToken);
+        var areas = await _exportRepository.GetAreasAsync(request.AreaIds, cancellationToken);
+
+        var exportedAt = DateTime.Now;
+        using var workbook = _workbookBuilder.Create(columns, exportedAt, language);
+        workbook.AddFlatSheet(CustomerExportLabels.StackedSheetName(arabic), rows);
+
+        return new CustomerExportFile(
+            workbook.ToBytes(),
+            BuildFileName(areas, request, exportedAt),
+            XlsxContentType);
     }
 
     private async Task<ExportPlan> ResolvePlanAsync(
@@ -276,9 +303,12 @@ public sealed class CustomerExportService : ICustomerExportService
     {
         var isSingleArea = request.AreaIds is { Count: 1 } && areas.Count == 1;
         var label = isSingleArea ? Slugify(areas[0].Name) : "all-areas";
-        var prefix = request.Scope == CustomerExportScope.AreasAndBoxes
-            ? "areas-boxes"
-            : "customers";
+        var prefix = request.Scope switch
+        {
+            CustomerExportScope.AreasAndBoxes => "areas-boxes",
+            CustomerExportScope.Stacked => "customers-stacked",
+            _ => "customers"
+        };
 
         return $"{prefix}-{label}-{exportedAt:yyyyMMdd-HHmm}.xlsx";
     }

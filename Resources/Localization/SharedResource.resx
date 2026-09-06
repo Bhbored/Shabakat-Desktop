@@ -743,6 +743,12 @@
   <data name="Subscribers.ExportExcel" xml:space="preserve">
     <value>Export Excel</value>
   </data>
+  <data name="Subscribers.ExportOrganized" xml:space="preserve">
+    <value>Organized (by area)</value>
+  </data>
+  <data name="Subscribers.ExportStacked" xml:space="preserve">
+    <value>Stacked (one sheet)</value>
+  </data>
   <data name="Subscribers.Add" xml:space="preserve">
     <value>+ Add Subscriber</value>
   </data>

@@ -14,6 +14,7 @@ public interface ICustomerExportWorkbookBuilder
 public interface ICustomerExportWorkbook : IDisposable
 {
     void AddSheet(CustomerExportSheet sheet);
+    void AddFlatSheet(string sheetName, IReadOnlyList<CustomerExportRow> rows);
     void AddStructureSheet(AreaStructureSheet sheet);
     void AddBoxSheet(CustomerExportBoxSheet sheet);
     void AddBoxStructureSheet(BoxStructureSheet sheet);

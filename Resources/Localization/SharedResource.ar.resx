@@ -743,6 +743,12 @@
   <data name="Subscribers.ExportExcel" xml:space="preserve">
     <value>تصدير إكسل</value>
   </data>
+  <data name="Subscribers.ExportOrganized" xml:space="preserve">
+    <value>منظّم (حسب المنطقة)</value>
+  </data>
+  <data name="Subscribers.ExportStacked" xml:space="preserve">
+    <value>مجمّع (ورقة واحدة)</value>
+  </data>
   <data name="Subscribers.Add" xml:space="preserve">
     <value>+ إضافة مشترك</value>
   </data>

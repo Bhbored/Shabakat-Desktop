@@ -74,6 +74,10 @@ public static class CustomerExportLabels
 
     public static string Customers(bool arabic) => arabic ? "الزبائن:" : "Customers:";
 
+    public static string StackedSheetName(bool arabic) => arabic ? "المشتركون" : "Subscribers";
+
+    public static string StackedTitle(bool arabic) => arabic ? "تقرير المشتركين" : "Subscribers report";
+
     public static string ExportedAt(bool arabic) => arabic ? "تاريخ التصدير:" : "Exported at:";
 
     public static string LocationNote(bool arabic) => arabic ? "ملاحظة الموقع:" : "Location Note:";

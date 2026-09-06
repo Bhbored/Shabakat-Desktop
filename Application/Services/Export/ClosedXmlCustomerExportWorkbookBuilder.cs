@@ -69,6 +69,44 @@ public sealed class ClosedXmlCustomerExportWorkbookBuilder : ICustomerExportWork
             AdjustColumns(worksheet);
         }
 
+        public void AddFlatSheet(string sheetName, IReadOnlyList<CustomerExportRow> rows)
+        {
+            var worksheet = AddLocalizedWorksheet(sheetName);
+
+            worksheet.Cell(1, 1).Value = CustomerExportLabels.StackedTitle(_arabic);
+            worksheet.Cell(1, 1).Style.Font.Bold = true;
+            worksheet.Cell(1, 1).Style.Font.FontSize = 14;
+            worksheet.Cell(2, 1).Value = CustomerExportLabels.Customers(_arabic);
+            worksheet.Cell(2, 2).Value = rows.Count;
+            worksheet.Cell(3, 1).Value = CustomerExportLabels.ExportedAt(_arabic);
+            worksheet.Cell(3, 2).Value = _exportedAt;
+            worksheet.Cell(3, 2).Style.DateFormat.Format = $"{DateFormat} hh:mm";
+            worksheet.Range(2, 1, 3, 1).Style.Font.Bold = true;
+
+            const int headerRow = 5;
+            WriteColumnHeaders(worksheet, headerRow);
+
+            var row = headerRow + 1;
+            foreach (var customer in rows)
+            {
+                for (var i = 0; i < _columns.Count; i++)
+                    WriteCell(worksheet.Cell(row, i + 1), _columns[i], customer);
+
+                row++;
+            }
+
+            if (rows.Count > 0 && HasMoneyColumns())
+                WriteTotalRow(worksheet, row, CustomerExportLabels.Total(_arabic), rows);
+
+            if (rows.Count > 0)
+            {
+                worksheet.Range(headerRow, 1, row - 1, _columns.Count).SetAutoFilter();
+                worksheet.SheetView.FreezeRows(headerRow);
+            }
+
+            AdjustColumns(worksheet);
+        }
+
         public void AddStructureSheet(AreaStructureSheet sheet)
         {
             var worksheet = AddLocalizedWorksheet(sheet.AreaName);

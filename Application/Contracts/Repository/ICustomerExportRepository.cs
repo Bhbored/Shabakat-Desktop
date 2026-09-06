@@ -15,6 +15,10 @@ public interface ICustomerExportRepository
     Task<IReadOnlyList<CustomerExportRow>> GetRowsWithoutAreaAsync(
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<CustomerExportRow>> GetRowsAsync(
+        IReadOnlyCollection<Guid>? areaIds,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<ExportBoxRow>> GetBoxesForAreaAsync(
         Guid areaId,
         CancellationToken cancellationToken = default);

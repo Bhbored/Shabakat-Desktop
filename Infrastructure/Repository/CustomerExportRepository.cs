@@ -47,6 +47,21 @@ public sealed class CustomerExportRepository : ICustomerExportRepository
             _db.Customers.Where(c => c.AreaId == null),
             cancellationToken);
 
+    public Task<IReadOnlyList<CustomerExportRow>> GetRowsAsync(
+        IReadOnlyCollection<Guid>? areaIds,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _db.Customers.AsQueryable();
+
+        if (areaIds is { Count: > 0 })
+        {
+            var ids = areaIds.Distinct().ToList();
+            query = query.Where(c => c.AreaId.HasValue && ids.Contains(c.AreaId.Value));
+        }
+
+        return LoadRowsAsync(query, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<ExportBoxRow>> GetBoxesForAreaAsync(
         Guid areaId,
         CancellationToken cancellationToken = default)
