@@ -1527,7 +1527,7 @@
     <value>Schedule details</value>
   </data>
   <data name="Ampere.DetailsHint" xml:space="preserve">
-    <value>Ampere schedule overview, pricing tiers, and assigned subscribers.</value>
+    <value>Ampere schedule overview and pricing tiers.</value>
   </data>
   <data name="Ampere.FormHint" xml:space="preserve">
     <value>Set hours per day and per-amp pricing tiers.</value>

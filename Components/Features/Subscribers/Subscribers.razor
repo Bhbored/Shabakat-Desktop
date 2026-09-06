@@ -1,6 +1,7 @@
 @page "/subscribers"
 @page "/subscribers/{AreaId:guid}"
 @page "/subscribers/{AreaId:guid}/{BoxId:guid}"
+@page "/subscribers/schedule/{ScheduleId:guid}"
 @inject ICustomerService CustomerService
 @inject IMeterReadingService MeterReadingService
 @inject IAreaService AreaService
@@ -140,6 +141,7 @@
 @code {
     [Parameter] public Guid? AreaId { get; set; }
     [Parameter] public Guid? BoxId { get; set; }
+    [Parameter] public Guid? ScheduleId { get; set; }
 
     private readonly List<CustomerSummaryResponse> _items = [];
     private readonly List<AreaResponse> _areas = [];
@@ -161,6 +163,7 @@
     private Guid? _openMenuId;
     private string _syncedRouteArea = "";
     private string _syncedRouteBox = "";
+    private string _syncedRouteSchedule = "";
     private CustomerResponse? _details;
     private CustomerSummaryResponse? _confirmDelete;
     private CustomerSummaryResponse? _confirmStatus;
@@ -204,7 +207,10 @@
 
         var routeArea = AreaId?.ToString() ?? "";
         var routeBox = BoxId?.ToString() ?? "";
-        if (routeArea == _syncedRouteArea && routeBox == _syncedRouteBox)
+        var routeSchedule = ScheduleId?.ToString() ?? "";
+        if (routeArea == _syncedRouteArea
+            && routeBox == _syncedRouteBox
+            && routeSchedule == _syncedRouteSchedule)
             return;
 
         SeedFiltersFromRoute();
@@ -216,18 +222,24 @@
     {
         _areaFilter = AreaId?.ToString() ?? "";
         _boxFilter = BoxId?.ToString() ?? "";
+        _scheduleFilter = ScheduleId?.ToString() ?? "";
         _syncedRouteArea = _areaFilter;
         _syncedRouteBox = _boxFilter;
+        _syncedRouteSchedule = _scheduleFilter;
     }
 
     private string BuildUrlFromFilters()
     {
         var hasArea = Guid.TryParse(_areaFilter, out var areaId);
         var hasBox = Guid.TryParse(_boxFilter, out var boxId);
+        var hasSchedule = Guid.TryParse(_scheduleFilter, out var scheduleId);
+
         if (hasArea && hasBox)
             return $"subscribers/{areaId}/{boxId}";
         if (hasArea)
             return $"subscribers/{areaId}";
+        if (hasSchedule)
+            return $"subscribers/schedule/{scheduleId}";
         return "subscribers";
     }
 
@@ -240,16 +252,25 @@
         return relative.Trim('/');
     }
 
+    private void SyncRouteFromFilters()
+    {
+        var hasArea = Guid.TryParse(_areaFilter, out var areaId);
+        var hasBox = Guid.TryParse(_boxFilter, out var boxId);
+        var hasSchedule = Guid.TryParse(_scheduleFilter, out var scheduleId);
+
+        _syncedRouteArea = hasArea ? areaId.ToString() : "";
+        _syncedRouteBox = hasBox ? boxId.ToString() : "";
+        _syncedRouteSchedule = !hasArea && hasSchedule ? scheduleId.ToString() : "";
+
+        var url = BuildUrlFromFilters();
+        if (!string.Equals(CurrentRelativePath(), url, StringComparison.OrdinalIgnoreCase))
+            Navigation.NavigateTo(url, replace: true);
+    }
+
     private async Task CommitLocationFiltersAsync()
     {
         _pageNumber = 1;
-        var url = BuildUrlFromFilters();
-        _syncedRouteArea = Guid.TryParse(_areaFilter, out var areaId) ? areaId.ToString() : "";
-        _syncedRouteBox = Guid.TryParse(_boxFilter, out var boxId) ? boxId.ToString() : "";
-
-        if (!string.Equals(CurrentRelativePath(), url, StringComparison.OrdinalIgnoreCase))
-            Navigation.NavigateTo(url, replace: true);
-
+        SyncRouteFromFilters();
         await LoadAsync();
     }
 
@@ -317,6 +338,7 @@
     private async Task ReloadFromFiltersAsync()
     {
         _pageNumber = 1;
+        SyncRouteFromFilters();
         await LoadAsync();
     }
 

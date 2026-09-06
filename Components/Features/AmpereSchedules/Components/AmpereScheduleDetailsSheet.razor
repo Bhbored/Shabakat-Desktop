@@ -1,5 +1,6 @@
 @namespace Shabakat.Components.Features.AmpereSchedules.Components
 @inject IStringLocalizer<SharedResource> L
+@inject NavigationManager Navigation
 
 <SideSheet Open="Open"
            Title="@(Schedule?.Name ?? L["Ampere.Details"].Value)"
@@ -45,126 +46,43 @@
             </div>
 
             <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
-                <div class="flex items-start gap-3">
-                    <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Ampere.HoursPerDay"]</p>
-                        <p class="mt-1 text-sm text-foreground">@L["Ampere.HoursPerDayValue", Schedule.HoursPerDay]</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Ampere.AssignedSubscribers"]</p>
-                        <p class="mt-1 text-sm text-foreground">@Schedule.CustomerCount</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Common.CreatedAt"]</p>
-                        <p class="mt-1 text-sm text-foreground">@FormatHelper.Date(Schedule.CreatedAt)</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="space-y-4 rounded-2xl border border-border bg-card p-5">
                 <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Ampere.AssignedSubscribers"]</h3>
-                        <p class="mt-2 text-sm text-muted-foreground">@L["Ampere.AssignedHint"]</p>
-                    </div>
-                    <span class="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-                        @((SubscribersPage?.TotalCount ?? 0) == 1
-                            ? L["Count.Subscribers", SubscribersPage?.TotalCount ?? 0]
-                            : L["Count.SubscribersPlural", SubscribersPage?.TotalCount ?? 0])
-                    </span>
-                </div>
-
-                @if (SubscribersLoading)
-                {
-                    <div class="space-y-3">
-                        @for (var i = 0; i < 3; i++)
-                        {
-                            <div class="rounded-2xl border border-border bg-muted/30 p-4">
-                                <div class="flex items-start gap-3">
-                                    <SkeletonBone Class="h-8 w-8 rounded-full" />
-                                    <div class="flex-1 space-y-2">
-                                        <SkeletonBone Class="h-4 w-32 rounded" />
-                                        <SkeletonBone Class="h-3 w-24 rounded" />
-                                    </div>
-                                </div>
+                    <div class="space-y-4 min-w-0 flex-1">
+                        <div class="flex items-start gap-3">
+                            <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             </div>
-                        }
-                    </div>
-                }
-                else if (SubscribersPage is null || !SubscribersPage.Data.Any())
-                {
-                    <p class="text-sm text-muted-foreground">@L["Ampere.NoneAssigned"]</p>
-                }
-                else
-                {
-                    <div class="space-y-3">
-                        @foreach (var sub in SubscribersPage.Data)
-                        {
-                            <div class="rounded-2xl border border-border bg-muted/20 p-4">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex items-start gap-3">
-                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                                             style="background-color: @FormatHelper.AvatarColor(sub.Name)">
-                                            @FormatHelper.Initials(sub.Name)
-                                        </div>
-                                        <div class="space-y-2">
-                                            <div>
-                                                <p class="text-sm font-semibold text-foreground">@sub.Name</p>
-                                                <p class="text-xs text-muted-foreground">@PlanLabel(sub.Plan) · @FormatHelper.Number(sub.PlanValue)</p>
-                                            </div>
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <StatusBadge Status="@sub.CustomerStatus" />
-                                                <span class="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">@FormatHelper.Date(sub.SubscriptionDate)</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Table.AmountDue"]</p>
-                                        <p class="mt-2 text-base font-semibold text-foreground">@FormatHelper.Currency(sub.AmountDue)</p>
-                                    </div>
-                                </div>
-                                <div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-                                    <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg>
-                                    <span class="font-mono">@(string.IsNullOrWhiteSpace(sub.Phone) ? L["Common.NotSet"].Value : sub.Phone)</span>
-                                </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Ampere.HoursPerDay"]</p>
+                                <p class="mt-1 text-sm text-foreground">@L["Ampere.HoursPerDayValue", Schedule.HoursPerDay]</p>
                             </div>
-                        }
-                    </div>
-                }
-
-                @if (SubscribersPage is { TotalPages: > 1 })
-                {
-                    <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                        <span class="text-sm text-muted-foreground">@L["Pager.PageOf", SubscribersPage.PageNumber, SubscribersPage.TotalPages]</span>
-                        <div class="flex gap-2">
-                            <button type="button"
-                                    class="rounded-xl border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-40"
-                                    disabled="@(!SubscribersPage.HasPreviousPage || SubscribersLoading)"
-                                    @onclick="() => OnSubscribersPageChanged.InvokeAsync(SubscribersPage.PageNumber - 1)">
-                                @L["Common.Previous"]
-                            </button>
-                            <button type="button"
-                                    class="rounded-xl border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-40"
-                                    disabled="@(!SubscribersPage.HasNextPage || SubscribersLoading)"
-                                    @onclick="() => OnSubscribersPageChanged.InvokeAsync(SubscribersPage.PageNumber + 1)">
-                                @L["Common.Next"]
-                            </button>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Ampere.AssignedSubscribers"]</p>
+                                <p class="mt-1 text-sm text-foreground">@Schedule.CustomerCount</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">@L["Common.CreatedAt"]</p>
+                                <p class="mt-1 text-sm text-foreground">@FormatHelper.Date(Schedule.CreatedAt)</p>
+                            </div>
                         </div>
                     </div>
-                }
+                    <button type="button"
+                            class="inline-flex shrink-0 items-center gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                            @onclick="NavigateToSubscribers">
+                        <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+                        @L["Areas.ViewSubscribers"]
+                    </button>
+                </div>
             </div>
         </div>
     }
@@ -173,16 +91,13 @@
 @code {
     [Parameter] public bool Open { get; set; }
     [Parameter] public AmpereScheduleResponse? Schedule { get; set; }
-    [Parameter] public PagedResponse<CustomerSummaryResponse>? SubscribersPage { get; set; }
-    [Parameter] public bool SubscribersLoading { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
-    [Parameter] public EventCallback<int> OnSubscribersPageChanged { get; set; }
 
-    private string PlanLabel(string plan) => plan switch
+    private void NavigateToSubscribers()
     {
-        nameof(PlanType.Ampere) => L["PlanType.Ampere"].Value,
-        nameof(PlanType.FixedKilowatt) => L["PlanType.FixedKilowatt"].Value,
-        nameof(PlanType.Kilowatt) => L["PlanType.Kilowatt"].Value,
-        _ => plan
-    };
+        if (Schedule is null)
+            return;
+
+        Navigation.NavigateTo($"subscribers/schedule/{Schedule.Id}");
+    }
 }

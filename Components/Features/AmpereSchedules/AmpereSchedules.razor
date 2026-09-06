@@ -1,6 +1,5 @@
 @page "/ampere-schedules"
 @inject IAmpereScheduleService AmpereScheduleService
-@inject ICustomerService CustomerService
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
 
@@ -22,10 +21,7 @@
 
 <AmpereScheduleDetailsSheet Open="_showDetails"
                             Schedule="_selected"
-                            SubscribersPage="_subscribersPage"
-                            SubscribersLoading="_subscribersLoading"
-                            OnClose="CloseDetails"
-                            OnSubscribersPageChanged="LoadSubscribersPageAsync" />
+                            OnClose="CloseDetails" />
 
 <AmpereScheduleFormSheet Open="_showForm"
                          IsEdit="@(_editingId is not null)"
@@ -65,10 +61,6 @@
     private AmpereScheduleResponse? _selected;
     private AmpereScheduleResponse? _pendingDelete;
 
-    private bool _subscribersLoading;
-    private int _subscriberPage = 1;
-    private PagedResponse<CustomerSummaryResponse>? _subscribersPage;
-
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
     private async Task LoadAsync()
@@ -106,34 +98,17 @@
     private void ToggleMenu(Guid id) => _menuId = _menuId == id ? null : id;
     private void CloseMenu() => _menuId = null;
 
-    private async Task OpenDetails(AmpereScheduleResponse schedule)
+    private void OpenDetails(AmpereScheduleResponse schedule)
     {
         CloseMenu();
         _selected = schedule;
         _showDetails = true;
-        _subscriberPage = 1;
-        await LoadSubscribersPageAsync(1);
     }
 
     private void CloseDetails()
     {
         _showDetails = false;
         _selected = null;
-        _subscribersPage = null;
-    }
-
-    private async Task LoadSubscribersPageAsync(int page)
-    {
-        if (_selected is null || page < 1) return;
-        _subscribersLoading = true;
-        _subscriberPage = page;
-        _subscribersPage = await UiActions.RunAsync(
-            Toast,
-            () => CustomerService.GetAllAsync(new CustomerFilterRequest(
-                AmpereScheduleId: _selected.Id,
-                PageNumber: page,
-                PageSize: 10)));
-        _subscribersLoading = false;
     }
 
     private void OpenCreate()

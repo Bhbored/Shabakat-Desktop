@@ -1527,7 +1527,7 @@
     <value>تفاصيل الجدول</value>
   </data>
   <data name="Ampere.DetailsHint" xml:space="preserve">
-    <value>نظرة على جدول الأمبير وشرائح التسعير والمشتركين المعيّنين.</value>
+    <value>نظرة على جدول الأمبير وشرائح التسعير.</value>
   </data>
   <data name="Ampere.FormHint" xml:space="preserve">
     <value>تعيين الساعات يومياً وشرائح التسعير لكل أمبير.</value>
