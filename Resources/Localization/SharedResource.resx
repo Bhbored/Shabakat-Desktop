@@ -1515,7 +1515,7 @@
     <value>Optional internal note...</value>
   </data>
   <data name="Boxes.DetailsHint" xml:space="preserve">
-    <value>Review physical box metadata, area placement, and assigned subscribers.</value>
+    <value>Physical box overview and area placement.</value>
   </data>
   <data name="Ampere.Details" xml:space="preserve">
     <value>Schedule details</value>
@@ -1543,6 +1543,9 @@
   </data>
   <data name="Areas.ViewSubscribers" xml:space="preserve">
     <value>View subscribers</value>
+  </data>
+  <data name="Areas.ViewBoxes" xml:space="preserve">
+    <value>View boxes</value>
   </data>
   <data name="Audit.EventTitle" xml:space="preserve">
     <value>Audit Event</value>

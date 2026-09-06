@@ -1515,7 +1515,7 @@
     <value>ملاحظة داخلية اختيارية...</value>
   </data>
   <data name="Boxes.DetailsHint" xml:space="preserve">
-    <value>مراجعة بيانات الصندوق وموقعه في المنطقة والمشتركين المعيّنين.</value>
+    <value>نظرة على الصندوق وموقعه في المنطقة.</value>
   </data>
   <data name="Ampere.Details" xml:space="preserve">
     <value>تفاصيل الجدول</value>
@@ -1543,6 +1543,9 @@
   </data>
   <data name="Areas.ViewSubscribers" xml:space="preserve">
     <value>عرض المشتركين</value>
+  </data>
+  <data name="Areas.ViewBoxes" xml:space="preserve">
+    <value>عرض الصناديق</value>
   </data>
   <data name="Audit.EventTitle" xml:space="preserve">
     <value>حدث التدقيق</value>

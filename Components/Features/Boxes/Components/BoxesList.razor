@@ -3,54 +3,66 @@
 
 @if (IsLoading)
 {
-    <EntityCardGridSkeleton Count="4" />
-}
-else if (Boxes.Count == 0)
-{
-    <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
-        @L["Empty.BoxesNone"]
-    </section>
+    <TableSkeleton Columns="5" Rows="6" MinWidthClass="min-w-[720px]" />
 }
 else
 {
-    <div class="space-y-4">
-        <div class="grid gap-4 xl:grid-cols-2">
-            @foreach (var box in Boxes)
-            {
-                <BoxCard Box="box"
-                         MenuOpen="@(OpenMenuId == box.Id)"
-                         OnToggleMenu="() => OnToggleMenu.InvokeAsync(box.Id)"
-                         OnView="() => OnView.InvokeAsync(box)"
-                         OnEdit="() => OnEdit.InvokeAsync(box)"
-                         OnDelete="() => OnDelete.InvokeAsync(box)" />
-            }
-        </div>
+    <section class="rounded-2xl border border-border bg-card">
+        @if (Boxes.Count == 0)
+        {
+            <div class="px-4 py-10 text-sm text-muted-foreground">@L["Empty.BoxesNone"]</div>
+        }
+        else
+        {
+            <table class="w-full min-w-[720px]">
+                <thead>
+                    <tr class="border-b border-border">
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Name"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Area"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Ampere.Subscribers"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Created"]</th>
+                        <th class="px-4 py-3.5"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var box in Boxes)
+                    {
+                        <BoxCard Box="box"
+                                 MenuOpen="@(OpenMenuId == box.Id)"
+                                 OnToggleMenu="() => OnToggleMenu.InvokeAsync(box.Id)"
+                                 OnView="() => OnView.InvokeAsync(box)"
+                                 OnEdit="() => OnEdit.InvokeAsync(box)"
+                                 OnDelete="() => OnDelete.InvokeAsync(box)" />
+                    }
+                </tbody>
+            </table>
 
-        <div class="flex flex-col gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-            <span>
-                @if (TotalCount == 0)
-                {
-                    @L["Pager.ShowingZero"]
-                }
-                else
-                {
-                    @L["Pager.Showing", (PageNumber - 1) * PageSize + 1, Math.Min(PageNumber * PageSize, TotalCount), TotalCount]
-                }
-            </span>
-            <div class="flex items-center gap-2 self-end md:self-auto">
-                <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm"
-                        value="@PageSize"
-                        @onchange="OnPageSizeChanged">
-                    <option value="10">@L["Pager.PerPage", 10]</option>
-                    <option value="20">@L["Pager.PerPage", 20]</option>
-                    <option value="50">@L["Pager.PerPage", 50]</option>
-                </select>
-                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasPrevious)" @onclick="OnPrevPage">@L["Common.Previous"]</button>
-                <span class="min-w-24 text-center">@L["Pager.PageOf", PageNumber, Math.Max(1, TotalPages)]</span>
-                <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasNext)" @onclick="OnNextPage">@L["Common.Next"]</button>
+            <div class="flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+                <span>
+                    @if (TotalCount == 0)
+                    {
+                        @L["Pager.ShowingZero"]
+                    }
+                    else
+                    {
+                        @L["Pager.Showing", (PageNumber - 1) * PageSize + 1, Math.Min(PageNumber * PageSize, TotalCount), TotalCount]
+                    }
+                </span>
+                <div class="flex items-center gap-2 self-end md:self-auto">
+                    <select class="h-9 w-28 rounded-xl border border-border bg-card px-2 text-sm"
+                            value="@PageSize"
+                            @onchange="OnPageSizeChanged">
+                        <option value="10">@L["Pager.PerPage", 10]</option>
+                        <option value="20">@L["Pager.PerPage", 20]</option>
+                        <option value="50">@L["Pager.PerPage", 50]</option>
+                    </select>
+                    <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasPrevious)" @onclick="OnPrevPage">@L["Common.Previous"]</button>
+                    <span class="min-w-24 text-center">@L["Pager.PageOf", PageNumber, Math.Max(1, TotalPages)]</span>
+                    <button type="button" class="rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-40" disabled="@(!HasNext)" @onclick="OnNextPage">@L["Common.Next"]</button>
+                </div>
             </div>
-        </div>
-    </div>
+        }
+    </section>
 }
 
 @code {

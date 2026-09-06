@@ -1,7 +1,8 @@
 @page "/boxes"
+@page "/boxes/{AreaId:guid}"
 @inject IDistributionBoxService DistributionBoxService
 @inject IAreaService AreaService
-@inject ICustomerService CustomerService
+@inject NavigationManager Navigation
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
 
@@ -34,10 +35,7 @@
 
 <BoxDetailsSheet Open="_showDetails"
                  Box="_selected"
-                 SubscribersPage="_subscribersPage"
-                 SubscribersLoading="_subscribersLoading"
-                 OnClose="CloseDetails"
-                 OnSubscribersPageChanged="LoadSubscribersPageAsync" />
+                 OnClose="CloseDetails" />
 
 <BoxFormSheet Open="_showForm"
               IsEdit="@(_editingId is not null)"
@@ -56,15 +54,19 @@
                  OnConfirm="ConfirmDeleteAsync" />
 
 @code {
+    [Parameter] public Guid? AreaId { get; set; }
+
     private readonly List<DistributionBoxResponse> _items = [];
     private readonly List<AreaResponse> _areas = [];
     private string _searchTerm = "";
     private string _areaFilter = "";
+    private string _syncedRouteArea = "";
     private string _formName = "";
     private Guid _formAreaId;
     private string _formLocationNote = "";
     private string _formNotes = "";
     private bool _loading = true;
+    private bool _ready;
     private bool _saving;
     private bool _showForm;
     private bool _showDetails;
@@ -81,12 +83,57 @@
     private bool _hasPrevious;
     private bool _hasNext;
 
-    private bool _subscribersLoading;
-    private PagedResponse<CustomerSummaryResponse>? _subscribersPage;
-
     protected override async Task OnInitializedAsync()
     {
         await LoadAreasAsync();
+        SeedFiltersFromRoute();
+        await LoadAsync();
+        _ready = true;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!_ready)
+            return;
+
+        var routeArea = AreaId?.ToString() ?? "";
+        if (routeArea == _syncedRouteArea)
+            return;
+
+        SeedFiltersFromRoute();
+        _pageNumber = 1;
+        await LoadAsync();
+    }
+
+    private void SeedFiltersFromRoute()
+    {
+        _areaFilter = AreaId?.ToString() ?? "";
+        _syncedRouteArea = _areaFilter;
+    }
+
+    private string BuildUrlFromFilters() =>
+        Guid.TryParse(_areaFilter, out var areaId)
+            ? $"boxes/{areaId}"
+            : "boxes";
+
+    private string CurrentRelativePath()
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var query = relative.IndexOf('?', StringComparison.Ordinal);
+        if (query >= 0)
+            relative = relative[..query];
+        return relative.Trim('/');
+    }
+
+    private async Task CommitLocationFiltersAsync()
+    {
+        _pageNumber = 1;
+        var url = BuildUrlFromFilters();
+        _syncedRouteArea = Guid.TryParse(_areaFilter, out var areaId) ? areaId.ToString() : "";
+
+        if (!string.Equals(CurrentRelativePath(), url, StringComparison.OrdinalIgnoreCase))
+            Navigation.NavigateTo(url, replace: true);
+
         await LoadAsync();
     }
 
@@ -150,7 +197,7 @@
     private async Task OnAreaFilterChangedAsync(string value)
     {
         _areaFilter = value;
-        await ReloadFromFiltersAsync();
+        await CommitLocationFiltersAsync();
     }
 
     private async Task OnPageSizeChangedAsync(int size)
@@ -177,32 +224,17 @@
     private void ToggleMenu(Guid id) => _menuBoxId = _menuBoxId == id ? null : id;
     private void CloseMenu() => _menuBoxId = null;
 
-    private async Task OpenDetails(DistributionBoxResponse box)
+    private void OpenDetails(DistributionBoxResponse box)
     {
         CloseMenu();
         _selected = box;
         _showDetails = true;
-        await LoadSubscribersPageAsync(1);
     }
 
     private void CloseDetails()
     {
         _showDetails = false;
         _selected = null;
-        _subscribersPage = null;
-    }
-
-    private async Task LoadSubscribersPageAsync(int page)
-    {
-        if (_selected is null || page < 1) return;
-        _subscribersLoading = true;
-        _subscribersPage = await UiActions.RunAsync(
-            Toast,
-            () => CustomerService.GetAllAsync(new CustomerFilterRequest(
-                BoxId: _selected.Id,
-                PageNumber: page,
-                PageSize: 10)));
-        _subscribersLoading = false;
     }
 
     private void OpenCreate()
