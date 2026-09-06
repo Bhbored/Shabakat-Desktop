@@ -283,7 +283,7 @@
         _create.KilowattAmount = null;
         _create.Notes = "";
         _create.FixedMode = "payment";
-        _create.PaymentMethod = "";
+        _create.PaymentMethod = nameof(PaymentMethod.Cash);
     }
 
     private async Task CreateInvoiceAsync()

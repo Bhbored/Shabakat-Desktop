@@ -96,7 +96,6 @@
                 <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Invoices.PaymentMethod"]</label>
                 <select class="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary"
                         @bind="Model.PaymentMethod">
-                    <option value="">@L["Invoices.SelectPaymentMethod"]</option>
                     <option value="@PaymentMethod.Cash">@L["PaymentMethod.Cash"]</option>
                     <option value="@PaymentMethod.Wish">@L["PaymentMethod.Wish"]</option>
                 </select>
@@ -288,7 +287,7 @@
         public string FixedMode { get; set; } = "payment";
         public decimal? PaymentAmount { get; set; }
         public decimal? KilowattAmount { get; set; }
-        public string PaymentMethod { get; set; } = "";
+        public string PaymentMethod { get; set; } = "Cash";
         public string Notes { get; set; } = "";
 
         public static DateOnly EndOfMonth()

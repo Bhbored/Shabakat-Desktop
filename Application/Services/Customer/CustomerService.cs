@@ -292,7 +292,7 @@ public sealed class CustomerService : ICustomerService
         if (initialMeterReading is not > 0)
             return;
 
-        if (customer.Plan != PlanType.Kilowatt)
+        if (customer.Plan is not (PlanType.Kilowatt or PlanType.FixedKilowatt))
             return;
 
         if (await _meterReadingRepository.HasOfficialReadingAsync(customer.Id))
