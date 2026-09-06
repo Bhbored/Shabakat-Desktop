@@ -794,6 +794,12 @@
   <data name="Subscribers.MeterReadings" xml:space="preserve">
     <value>قراءات العداد</value>
   </data>
+  <data name="Subscribers.ReadingHistory" xml:space="preserve">
+    <value>سجل القراءات</value>
+  </data>
+  <data name="Subscribers.ReadingHistoryHint" xml:space="preserve">
+    <value>جميع قراءات العداد المسجّلة لهذا المشترك.</value>
+  </data>
   <data name="Subscribers.AddReading" xml:space="preserve">
     <value>إضافة قراءة</value>
   </data>

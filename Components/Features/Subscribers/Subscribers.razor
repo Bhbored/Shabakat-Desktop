@@ -190,7 +190,7 @@
     private DateTime? _meterDate;
 
     private string _readingToDeleteLabel =>
-        _readingToDelete is null ? "" : L["Subscribers.ReadingValue", FormatHelper.Number(_readingToDelete.ReadingValue)].Value;
+        _readingToDelete is null ? "" : L["Subscribers.ReadingValue", FormatHelper.MeterReading(_readingToDelete.ReadingValue)].Value;
 
     protected override async Task OnInitializedAsync()
     {

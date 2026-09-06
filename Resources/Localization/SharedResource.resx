@@ -794,6 +794,12 @@
   <data name="Subscribers.MeterReadings" xml:space="preserve">
     <value>Meter Readings</value>
   </data>
+  <data name="Subscribers.ReadingHistory" xml:space="preserve">
+    <value>Reading history</value>
+  </data>
+  <data name="Subscribers.ReadingHistoryHint" xml:space="preserve">
+    <value>All meter readings recorded for this subscriber.</value>
+  </data>
   <data name="Subscribers.AddReading" xml:space="preserve">
     <value>Add Reading</value>
   </data>

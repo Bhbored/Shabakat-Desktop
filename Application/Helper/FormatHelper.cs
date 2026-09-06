@@ -11,14 +11,14 @@ public static class FormatHelper
     public static string Currency(decimal value) =>
         value.ToString("C2", UsdCulture);
 
-    public static string CompactCurrency(decimal value) =>
-        value.ToString("C0", UsdCulture);
-
     public static string Number(decimal value) =>
         value.ToString("N2", Culture);
 
     public static string Number(int value) =>
         value.ToString("N0", Culture);
+
+    public static string MeterReading(decimal value) =>
+        value.ToString("0.00", CultureInfo.InvariantCulture);
 
     public static string Date(DateOnly value) =>
         value.ToString("dd MMM yyyy", Culture);
