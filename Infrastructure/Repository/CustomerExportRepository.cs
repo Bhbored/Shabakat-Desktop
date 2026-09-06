@@ -65,6 +65,7 @@ public sealed class CustomerExportRepository : ICustomerExportRepository
         CancellationToken cancellationToken)
     {
         var raws = await query
+            .Where(c => c.CustomerStatus == CustomerStatus.Active)
             .OrderBy(c => c.Name)
             .Select(c => new RawRow
             {

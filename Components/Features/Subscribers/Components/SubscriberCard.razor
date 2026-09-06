@@ -1,7 +1,7 @@
 @namespace Shabakat.Components.Features.Subscribers.Components
 @inject IStringLocalizer<SharedResource> L
 
-<tr class="cursor-pointer border-b border-border transition-colors hover:bg-muted/30 @(MenuOpen ? "relative z-40" : null)"
+<tr class="cursor-pointer border-b border-border transition-colors @RowClass @(MenuOpen ? "relative z-40" : null)"
     @onclick="OnView">
     <td class="px-4 py-3.5">
         <div class="flex items-center gap-3">
@@ -53,6 +53,18 @@
                             @L["Common.Activate"]
                         </button>
                     }
+                    @if (!IsTerminated)
+                    {
+                        <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-500 hover:bg-red-500/10" @onclick="OnTerminate">
+                            <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <line x1="17" y1="8" x2="22" y2="13" />
+                                <line x1="22" y1="8" x2="17" y2="13" />
+                            </svg>
+                            @L["Common.Terminate"]
+                        </button>
+                    }
                     @if (Subscriber.CanBeDeleted)
                     {
                         <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-500 hover:bg-red-500/10" @onclick="OnDelete">
@@ -74,18 +86,30 @@
     [Parameter] public EventCallback OnEdit { get; set; }
     [Parameter] public EventCallback OnSuspend { get; set; }
     [Parameter] public EventCallback OnActivate { get; set; }
+    [Parameter] public EventCallback OnTerminate { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
 
     private bool IsActive =>
         Subscriber.CustomerStatus.Equals(nameof(CustomerStatus.Active), StringComparison.OrdinalIgnoreCase);
+
+    private bool IsSuspended =>
+        Subscriber.CustomerStatus.Equals(nameof(CustomerStatus.Suspended), StringComparison.OrdinalIgnoreCase);
+
+    private bool IsTerminated =>
+        Subscriber.CustomerStatus.Equals(nameof(CustomerStatus.Terminated), StringComparison.OrdinalIgnoreCase);
+
+    private string RowClass => IsTerminated
+        ? "bg-red-500/10 hover:bg-red-500/15"
+        : IsSuspended
+            ? "bg-amber-400/15 hover:bg-amber-400/20"
+            : "hover:bg-muted/30";
 
     private string BillingStatus
     {
         get
         {
             if (Subscriber.AmountDue <= 0) return "paid";
-            if (Subscriber.CustomerStatus.Equals(nameof(CustomerStatus.Suspended), StringComparison.OrdinalIgnoreCase)
-                || Subscriber.CustomerStatus.Equals(nameof(CustomerStatus.Terminated), StringComparison.OrdinalIgnoreCase))
+            if (IsSuspended || IsTerminated)
                 return "overdue";
             return "unpaid";
         }

@@ -28,7 +28,7 @@
                         OnFiltersChanged="ReloadFromFiltersAsync"
                         IsExporting="_exporting"
                         OnCreate="OpenCreate"
-                        OnExport="ExportAsync" />
+                        OnExport="ExportAsync"/>
 
     <SubscribersList Items="_items"
                      IsLoading="_loading"
@@ -44,10 +44,11 @@
                      OnEdit="OpenEdit"
                      OnSuspend="OpenSuspend"
                      OnActivate="OpenActivate"
+                     OnTerminate="OpenTerminate"
                      OnDelete="OpenDelete"
                      PageSizeChanged="OnPageSizeChanged"
                      OnPrevious="PrevPageAsync"
-                     OnNext="NextPageAsync" />
+                     OnNext="NextPageAsync"/>
 </div>
 
 <SubscriberFormSheet Open="_showForm"
@@ -60,7 +61,7 @@
                      OnClose="CloseForm"
                      OnSave="SaveFormAsync"
                      OnPlanChanged="OnPlanChanged"
-                     OnAreaChanged="OnAreaChanged" />
+                     OnAreaChanged="OnAreaChanged"/>
 
 <SubscriberDetailsSheet Open="_showDetails"
                         IsLoading="_detailsLoading"
@@ -68,7 +69,7 @@
                         MeterReadings="_meterReadings"
                         OnClose="CloseDetails"
                         OnAddReading="OpenMeterReading"
-                        OnDeleteReading="OpenDeleteReading" />
+                        OnDeleteReading="OpenDeleteReading"/>
 
 <MeterReadingSheet Open="_showMeterDialog"
                    CustomerName="@(_details?.Name ?? "")"
@@ -76,23 +77,59 @@
                    @bind-MeterValue="_meterValue"
                    @bind-MeterDate="_meterDate"
                    OnClose="CloseMeterReading"
-                   OnSave="SaveMeterReadingAsync" />
+                   OnSave="SaveMeterReadingAsync"/>
 
 <DeleteMeterReadingDialog Open="@(_readingToDelete is not null)"
                           ReadingLabel="@_readingToDeleteLabel"
                           OnClose="CloseDeleteReading"
-                          OnConfirm="ConfirmDeleteReadingAsync" />
+                          OnConfirm="ConfirmDeleteReadingAsync"/>
 
 <DeleteSubscriberDialog Open="@(_confirmDelete is not null)"
                         Subscriber="_confirmDelete"
                         OnClose="CloseDelete"
-                        OnConfirm="ConfirmDeleteAsync" />
+                        OnConfirm="ConfirmDeleteAsync"/>
 
-<SuspendSubscriberDialog Open="@(_confirmStatus is not null)"
-                         Subscriber="_confirmStatus"
-                         IsActivate="_statusActivate"
-                         OnClose="CloseStatus"
-                         OnConfirm="ConfirmStatusAsync" />
+<ConfirmDialog Open="@(_confirmStatus is not null)"
+               Title="@StatusDialogTitle"
+               OnClose="CloseStatus">
+    <ChildContent>
+        @if (_confirmStatus is not null)
+        {
+            <p>@StatusDialogMessage</p>
+        }
+    </ChildContent>
+    <Footer>
+        <button type="button"
+                class="rounded-xl border border-border px-4 py-2.5 text-sm hover:bg-muted"
+                @onclick="CloseStatus">
+            @L["Common.Cancel"]
+        </button>
+        @switch (_confirmStatusTarget)
+        {
+            case CustomerStatus.Active:
+                <button type="button"
+                        class="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                        @onclick="ConfirmStatusAsync">
+                    @L["Common.Activate"]
+                </button>
+                break;
+            case CustomerStatus.Terminated:
+                <button type="button"
+                        class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500/90"
+                        @onclick="ConfirmStatusAsync">
+                    @L["Common.Terminate"]
+                </button>
+                break;
+            default:
+                <button type="button"
+                        class="rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-medium text-white"
+                        @onclick="ConfirmStatusAsync">
+                    @L["Common.Suspend"]
+                </button>
+                break;
+        }
+    </Footer>
+</ConfirmDialog>
 
 @code {
     private readonly List<CustomerSummaryResponse> _items = [];
@@ -115,7 +152,7 @@
     private CustomerResponse? _details;
     private CustomerSummaryResponse? _confirmDelete;
     private CustomerSummaryResponse? _confirmStatus;
-    private bool _statusActivate;
+    private CustomerStatus _confirmStatusTarget;
     private MeterReadingResponse? _readingToDelete;
 
     private string _searchField = "name";
@@ -397,6 +434,7 @@
             Toast.Error(L["Subscribers.NameRequired"].Value);
             return;
         }
+
         if (_form.PlanValue <= 0)
         {
             Toast.Error(L["Subscribers.PlanValueRequired"].Value);
@@ -461,7 +499,7 @@
                 CustomerStatus: _form.CustomerStatus,
                 CustomerRelation: relation,
                 PricingOverride: overrideDto,
-                ClearPricingOverride: _form.HadPricingOverride && !_form.UsePricingOverride,
+                ClearPricingOverride: _form is { HadPricingOverride: true, UsePricingOverride: false },
                 InitialMeterReading: _form.InitialMeterReading);
 
             var updated = await UiActions.RunAsync(Toast, () => CustomerService.UpdateAsync(_editingId.Value, request), L["Subscribers.Updated"].Value);
@@ -560,31 +598,62 @@
     private void OpenSuspend(CustomerSummaryResponse sub)
     {
         CloseMenu();
-        _statusActivate = false;
+        _confirmStatusTarget = CustomerStatus.Suspended;
         _confirmStatus = sub;
     }
 
     private void OpenActivate(CustomerSummaryResponse sub)
     {
         CloseMenu();
-        _statusActivate = true;
+        _confirmStatusTarget = CustomerStatus.Active;
+        _confirmStatus = sub;
+    }
+
+    private void OpenTerminate(CustomerSummaryResponse sub)
+    {
+        CloseMenu();
+        _confirmStatusTarget = CustomerStatus.Terminated;
         _confirmStatus = sub;
     }
 
     private void CloseStatus() => _confirmStatus = null;
+
+    private string StatusDialogTitle => _confirmStatusTarget switch
+    {
+        CustomerStatus.Active => L["Subscribers.ActivateTitle"].Value,
+        CustomerStatus.Terminated => L["Subscribers.TerminateTitle"].Value,
+        _ => L["Subscribers.SuspendTitle"].Value
+    };
+
+    private string StatusDialogMessage => _confirmStatus is null
+        ? string.Empty
+        : _confirmStatusTarget switch
+        {
+            CustomerStatus.Active => L["Subscribers.ActivateConfirm", _confirmStatus.Name].Value,
+            CustomerStatus.Terminated => L["Subscribers.TerminateConfirm", _confirmStatus.Name].Value,
+            _ => L["Subscribers.SuspendConfirm", _confirmStatus.Name].Value
+        };
 
     private async Task ConfirmStatusAsync()
     {
         if (_confirmStatus is null) return;
 
         var id = _confirmStatus.Id;
-        if (_statusActivate)
+        if (_confirmStatusTarget == CustomerStatus.Active)
         {
             var updated = await UiActions.RunAsync(
                 Toast,
                 () => CustomerService.UpdateAsync(id, new UpdateCustomerRequest(CustomerStatus: CustomerStatus.Active)),
                 L["Subscribers.Activated"].Value);
             if (updated is null) return;
+        }
+        else if (_confirmStatusTarget == CustomerStatus.Terminated)
+        {
+            var result = await UiActions.RunAsync(
+                Toast,
+                () => CustomerService.TerminateAsync(new TerminateCustomersRequest([id])));
+            if (result is null) return;
+            Toast.Success(L["Subscribers.Terminated"].Value);
         }
         else
         {
@@ -617,4 +686,5 @@
 
     private static string? NullIfEmpty(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
 }

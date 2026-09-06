@@ -103,3 +103,10 @@ public record SuspendCustomersRequest(
 public record SuspendCustomersResponse(
     int Suspended,
     string Message);
+
+public record TerminateCustomersRequest(
+    [Required][MinLength(1)] IReadOnlyList<Guid> CustomerIds);
+
+public record TerminateCustomersResponse(
+    int Terminated,
+    string Message);

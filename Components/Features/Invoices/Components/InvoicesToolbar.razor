@@ -94,16 +94,62 @@
         </div>
 
         <div class="flex gap-2 xl:ms-auto">
-            <button type="button"
-                    class="inline-flex h-[2.625rem] items-center rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
-                    @onclick="OnExportUnpaid">
-                @L["Invoices.ExportUnpaid"]
-            </button>
-            <button type="button"
-                    class="inline-flex h-[2.625rem] items-center rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
-                    @onclick="OnExportMonth">
-                @L["Invoices.ExportMonth"]
-            </button>
+            <div class="relative shrink-0">
+                <button type="button"
+                        class="inline-flex h-[2.625rem] items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
+                        aria-expanded="@_exportMenuOpen"
+                        aria-haspopup="menu"
+                        @onclick="ToggleExportMenu"
+                        @onclick:stopPropagation="true">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    @L["Invoices.Export"]
+                    <svg class="h-3.5 w-3.5 text-muted-foreground transition-transform @(_exportMenuOpen ? "rotate-180" : null)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6" />
+                    </svg>
+                </button>
+
+                @if (_exportMenuOpen)
+                {
+                    <div class="ui-click-away"
+                         @onclick="CloseExportMenu"
+                         @onclick:stopPropagation="true"></div>
+                    <div class="absolute end-0 z-[70] mt-1 min-w-56 overflow-hidden rounded-xl border border-border bg-popover py-1 text-popover-foreground shadow-[0_16px_40px_rgba(0,0,0,0.12)]"
+                         role="menu"
+                         @onclick:stopPropagation="true">
+                        <button type="button"
+                                role="menuitem"
+                                class="flex w-full items-center gap-2.5 px-3 py-2.5 text-start text-sm text-foreground hover:bg-muted"
+                                @onclick="ExportUnpaidAsync">
+                            <svg class="h-4 w-4 shrink-0 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                <path d="M14 2v6h6" />
+                                <path d="M8 13h2" />
+                                <path d="M8 17h2" />
+                                <path d="M14 13h2" />
+                                <path d="M14 17h2" />
+                            </svg>
+                            @L["Invoices.ExportUnpaid"]
+                        </button>
+                        <button type="button"
+                                role="menuitem"
+                                class="flex w-full items-center gap-2.5 px-3 py-2.5 text-start text-sm text-foreground hover:bg-muted"
+                                @onclick="ExportMonthAsync">
+                            <svg class="h-4 w-4 shrink-0 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                <path d="M14 2v6h6" />
+                                <path d="M10 9H8" />
+                                <path d="M16 13H8" />
+                                <path d="M16 17H8" />
+                            </svg>
+                            @L["Invoices.ExportMonth"]
+                        </button>
+                    </div>
+                }
+            </div>
             <button type="button"
                     class="inline-flex h-[2.625rem] items-center rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
                     @onclick="OnBulkCreate">
@@ -210,6 +256,7 @@
     [Parameter] public EventCallback OnCreate { get; set; }
 
     private bool _filtersOpen;
+    private bool _exportMenuOpen;
     private string _draftStatus = "";
     private string _draftDueTiming = "";
     private DateTime? _draftDateFrom;
@@ -233,10 +280,32 @@
         _draftDueTiming = DueTimingFilter;
         _draftDateFrom = DateFrom;
         _draftDateTo = DateTo;
+        _exportMenuOpen = false;
         _filtersOpen = true;
     }
 
     private void CloseFilters() => _filtersOpen = false;
+
+    private void ToggleExportMenu()
+    {
+        _exportMenuOpen = !_exportMenuOpen;
+        if (_exportMenuOpen)
+            _filtersOpen = false;
+    }
+
+    private void CloseExportMenu() => _exportMenuOpen = false;
+
+    private async Task ExportUnpaidAsync()
+    {
+        CloseExportMenu();
+        await OnExportUnpaid.InvokeAsync();
+    }
+
+    private async Task ExportMonthAsync()
+    {
+        CloseExportMenu();
+        await OnExportMonth.InvokeAsync();
+    }
 
     private void ClearDrafts()
     {

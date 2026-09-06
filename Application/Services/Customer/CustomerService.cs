@@ -235,6 +235,36 @@ public sealed class CustomerService : ICustomerService
             Message: message);
     }
 
+    public async Task<TerminateCustomersResponse> TerminateAsync(TerminateCustomersRequest request)
+    {
+        var ids = request.CustomerIds.Distinct().ToList();
+        var customers = await _customerRepository.GetByIdsAsync(ids);
+
+        if (customers.Count != ids.Count)
+        {
+            var foundIds = customers.Select(c => c.Id).ToHashSet();
+            var missingId = ids.First(id => !foundIds.Contains(id));
+            throw new DomainException("Error.CustomerNotFound");
+        }
+
+        foreach (var customer in customers)
+        {
+            customer.CustomerStatus = CustomerStatus.Terminated;
+            _customerRepository.Update(customer);
+        }
+
+        await _customerRepository.SaveChangesAsync();
+        _logger.LogInformation("Terminated {Count} customer(s)", customers.Count);
+
+        var message = customers.Count == 1
+            ? "1 customer was terminated."
+            : $"{customers.Count} customers were terminated.";
+
+        return new TerminateCustomersResponse(
+            Terminated: customers.Count,
+            Message: message);
+    }
+
     private static void ValidatePricingOverride(CustomerPricingOverrideDto? dto)
     {
         if (dto is null) return;

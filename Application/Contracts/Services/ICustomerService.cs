@@ -12,4 +12,5 @@ public interface ICustomerService
     Task<CustomerResponse> UpdateAsync(Guid id, UpdateCustomerRequest request);
     Task DeleteAsync(Guid id);
     Task<SuspendCustomersResponse> SuspendAsync(SuspendCustomersRequest request);
+    Task<TerminateCustomersResponse> TerminateAsync(TerminateCustomersRequest request);
 }

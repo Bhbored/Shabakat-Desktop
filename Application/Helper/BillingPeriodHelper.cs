@@ -42,17 +42,16 @@ public static class BillingPeriodHelper
     {
         var thisMonthDueDate = ResolveScheduledPaymentDueDate(referenceToday, preferenceDueDate);
 
-        if (referenceToday <= thisMonthDueDate)
+        if (referenceToday.Day <= thisMonthDueDate.Day)
             return thisMonthDueDate;
 
-        var nextMonth = referenceToday.AddMonths(1);
-        return ResolveScheduledPaymentDueDate(nextMonth, preferenceDueDate);
+        return ResolveScheduledPaymentDueDate(referenceToday.AddMonths(1), preferenceDueDate);
     }
 
     public static DateOnly ResolveScheduledPaymentDueDate(DateOnly month, int preferenceDueDate)
     {
-        var safeDay = Math.Clamp(preferenceDueDate, 1, 31);
-        var day = Math.Min(safeDay, DateTime.DaysInMonth(month.Year, month.Month));
+        var daysInMonth = DateTime.DaysInMonth(month.Year, month.Month);
+        var day = Math.Clamp(preferenceDueDate, 1, daysInMonth);
         return new DateOnly(month.Year, month.Month, day);
     }
 

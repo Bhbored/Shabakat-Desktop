@@ -125,6 +125,9 @@
   <data name="Common.Suspend" xml:space="preserve">
     <value>Suspend</value>
   </data>
+  <data name="Common.Terminate" xml:space="preserve">
+    <value>Terminate</value>
+  </data>
   <data name="Common.ViewDetails" xml:space="preserve">
     <value>View details</value>
   </data>
@@ -767,6 +770,9 @@
   <data name="Subscribers.SuspendTitle" xml:space="preserve">
     <value>Suspend Subscriber</value>
   </data>
+  <data name="Subscribers.TerminateTitle" xml:space="preserve">
+    <value>Terminate Subscriber</value>
+  </data>
   <data name="Subscribers.TotalBilled" xml:space="preserve">
     <value>Total Billed</value>
   </data>
@@ -823,6 +829,9 @@
   </data>
   <data name="Invoices.BulkGenerate" xml:space="preserve">
     <value>Bulk Generate</value>
+  </data>
+  <data name="Invoices.Export" xml:space="preserve">
+    <value>Export</value>
   </data>
   <data name="Invoices.ExportMonth" xml:space="preserve">
     <value>Export month PDF</value>
@@ -1610,6 +1619,9 @@
   <data name="Subscribers.SuspendConfirm" xml:space="preserve">
     <value>Suspend {0}? They will no longer be billed as active.</value>
   </data>
+  <data name="Subscribers.TerminateConfirm" xml:space="preserve">
+    <value>Terminate {0}? Their subscription will be ended permanently.</value>
+  </data>
   <data name="Subscribers.ThisReading" xml:space="preserve">
     <value>this reading</value>
   </data>
@@ -2248,6 +2260,9 @@
   </data>
   <data name="Subscribers.Suspended" xml:space="preserve">
     <value>Subscriber suspended.</value>
+  </data>
+  <data name="Subscribers.Terminated" xml:space="preserve">
+    <value>Subscriber terminated.</value>
   </data>
   <data name="Error.Field.ResidentialPricePerAmp" xml:space="preserve">
     <value>Residential price per amp</value>

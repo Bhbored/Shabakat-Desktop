@@ -37,6 +37,7 @@ else
                                         OnEdit="() => OnEdit.InvokeAsync(sub)"
                                         OnSuspend="() => OnSuspend.InvokeAsync(sub)"
                                         OnActivate="() => OnActivate.InvokeAsync(sub)"
+                                        OnTerminate="() => OnTerminate.InvokeAsync(sub)"
                                         OnDelete="() => OnDelete.InvokeAsync(sub)" />
                     }
                 </tbody>
@@ -78,6 +79,7 @@ else
     [Parameter] public EventCallback<CustomerSummaryResponse> OnEdit { get; set; }
     [Parameter] public EventCallback<CustomerSummaryResponse> OnSuspend { get; set; }
     [Parameter] public EventCallback<CustomerSummaryResponse> OnActivate { get; set; }
+    [Parameter] public EventCallback<CustomerSummaryResponse> OnTerminate { get; set; }
     [Parameter] public EventCallback<CustomerSummaryResponse> OnDelete { get; set; }
     [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
     [Parameter] public EventCallback OnPrevious { get; set; }
