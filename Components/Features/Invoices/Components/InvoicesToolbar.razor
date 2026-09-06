@@ -96,6 +96,11 @@
         <div class="flex gap-2 xl:ms-auto">
             <button type="button"
                     class="inline-flex h-[2.625rem] items-center rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
+                    @onclick="OnExportUnpaid">
+                @L["Invoices.ExportUnpaid"]
+            </button>
+            <button type="button"
+                    class="inline-flex h-[2.625rem] items-center rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
                     @onclick="OnExportMonth">
                 @L["Invoices.ExportMonth"]
             </button>
@@ -199,6 +204,7 @@
     [Parameter] public EventCallback<DateTime?> DateToChanged { get; set; }
     [Parameter] public int TotalCount { get; set; }
     [Parameter] public EventCallback OnFiltersChanged { get; set; }
+    [Parameter] public EventCallback OnExportUnpaid { get; set; }
     [Parameter] public EventCallback OnExportMonth { get; set; }
     [Parameter] public EventCallback OnBulkCreate { get; set; }
     [Parameter] public EventCallback OnCreate { get; set; }

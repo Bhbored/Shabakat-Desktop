@@ -247,7 +247,7 @@
             if (file is null)
                 return;
 
-            var saved = await ExcelFileSaver.SaveAsync(file);
+            var saved = await ExcelFileSaver.SaveCustomerExportAsync(file);
             if (saved)
                 Toast.Success(L["Subscribers.ExportSaved"].Value);
         }

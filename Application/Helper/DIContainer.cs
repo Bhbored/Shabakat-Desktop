@@ -56,6 +56,7 @@ public static class DIContainer
         services.AddScoped<IAppPreferencesRepository, AppPreferencesRepository>();
         services.AddScoped<IBackupRepository, BackupRepository>();
         services.AddScoped<ICustomerExportRepository, CustomerExportRepository>();
+        services.AddScoped<IUnpaidInvoiceExportRepository, UnpaidInvoiceExportRepository>();
         services.AddScoped<IDashboardRepository, DashboardRepository>();
 
         return services;
@@ -115,6 +116,8 @@ public static class DIContainer
         services.AddScoped<IMeterReadingService, MeterReadingService>();
         services.AddSingleton<ICustomerExportWorkbookBuilder, ClosedXmlCustomerExportWorkbookBuilder>();
         services.AddScoped<ICustomerExportService, CustomerExportService>();
+        services.AddSingleton<IUnpaidInvoiceExportWorkbookBuilder, ClosedXmlUnpaidInvoiceExportWorkbookBuilder>();
+        services.AddScoped<IUnpaidInvoiceExportService, UnpaidInvoiceExportService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IInvoiceService, InvoiceService>();
         services.AddScoped<IDatabaseSeedService, LebanonDatabaseSeeder>();

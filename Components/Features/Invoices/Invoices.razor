@@ -4,6 +4,7 @@
 @inject IAreaService AreaService
 @inject IDistributionBoxService DistributionBoxService
 @inject IAppPreferencesService PreferencesService
+@inject IUnpaidInvoiceExportService UnpaidInvoiceExportService
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
 
@@ -20,6 +21,7 @@
                      DateFromChanged="OnDateFromChanged"
                      DateToChanged="OnDateToChanged"
                      OnFiltersChanged="ReloadFromFiltersAsync"
+                     OnExportUnpaid="ExportUnpaidInvoicesAsync"
                      OnExportMonth="OpenExportMonth"
                      OnBulkCreate="OpenBulk"
                      OnCreate="OpenCreate" />
@@ -100,6 +102,7 @@
     private bool _loading = true;
     private bool _saving;
     private bool _exporting;
+    private bool _exportingUnpaid;
     private bool _showCreate;
     private bool _showBulk;
     private bool _showExportMonth;
@@ -373,6 +376,34 @@
         _exportAreaId = "";
         _exportBoxId = "";
         _showExportMonth = true;
+    }
+
+    private async Task ExportUnpaidInvoicesAsync()
+    {
+        if (_exportingUnpaid) return;
+        _exportingUnpaid = true;
+
+        try
+        {
+            var file = await UiActions.RunAsync(Toast, () => UnpaidInvoiceExportService.BuildAsync());
+            if (file is null)
+            {
+                Toast.Info(L["Invoices.NoOutstandingInvoices"].Value);
+                return;
+            }
+
+            var saved = await ExcelFileSaver.SaveUnpaidInvoiceExportAsync(file);
+            if (saved)
+                Toast.Success(L["Invoices.ExportUnpaidSaved"].Value);
+        }
+        catch
+        {
+            Toast.Error(L["Invoices.ExportUnpaidFailed"].Value);
+        }
+        finally
+        {
+            _exportingUnpaid = false;
+        }
     }
 
     private void CloseExportMonth()

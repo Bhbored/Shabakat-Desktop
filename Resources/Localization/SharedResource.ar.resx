@@ -2375,4 +2375,8 @@
   <data name="Error.Market.LebanonUnavailable" xml:space="preserve"><value>تعذر جلب أسعار المحروقات في لبنان من IPT. يرجى المحاولة بعد قليل.</value></data>
   <data name="Error.Market.InvalidResponse" xml:space="preserve"><value>أعاد مصدر الأسعار استجابة غير متوقعة.</value></data>
   <data name="Error.Market.Unavailable" xml:space="preserve"><value>بيانات سوق المحروقات غير متوفرة حاليًا.</value></data>
+  <data name="Invoices.ExportUnpaid" xml:space="preserve"><value>تصدير الفواتير غير المسددة</value></data>
+  <data name="Invoices.ExportUnpaidSaved" xml:space="preserve"><value>تم تصدير Excel للفواتير غير المسددة</value></data>
+  <data name="Invoices.ExportUnpaidFailed" xml:space="preserve"><value>تعذر تصدير الفواتير غير المسددة</value></data>
+  <data name="Invoices.NoOutstandingInvoices" xml:space="preserve"><value>لا توجد فواتير مستحقة للتصدير.</value></data>
 </root>

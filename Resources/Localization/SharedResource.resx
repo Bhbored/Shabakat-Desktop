@@ -2375,4 +2375,8 @@
   <data name="Error.Market.LebanonUnavailable" xml:space="preserve"><value>Lebanon fuel prices could not be fetched from IPT. Please try again shortly.</value></data>
   <data name="Error.Market.InvalidResponse" xml:space="preserve"><value>A price source returned an unexpected response.</value></data>
   <data name="Error.Market.Unavailable" xml:space="preserve"><value>Fuel market data is currently unavailable.</value></data>
+  <data name="Invoices.ExportUnpaid" xml:space="preserve"><value>Export unpaid invoices</value></data>
+  <data name="Invoices.ExportUnpaidSaved" xml:space="preserve"><value>Unpaid invoices Excel exported</value></data>
+  <data name="Invoices.ExportUnpaidFailed" xml:space="preserve"><value>Could not export unpaid invoices</value></data>
+  <data name="Invoices.NoOutstandingInvoices" xml:space="preserve"><value>There are no outstanding invoices to export.</value></data>
 </root>
