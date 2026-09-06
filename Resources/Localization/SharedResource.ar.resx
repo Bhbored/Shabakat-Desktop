@@ -1530,7 +1530,19 @@
     <value>تفاصيل المنطقة</value>
   </data>
   <data name="Areas.DetailsHint" xml:space="preserve">
-    <value>نظرة على منطقة الخدمة والمشتركين المعيّنين.</value>
+    <value>نظرة على منطقة الخدمة وصناديق التوزيع.</value>
+  </data>
+  <data name="Areas.AssignedBoxes" xml:space="preserve">
+    <value>صناديق التوزيع</value>
+  </data>
+  <data name="Areas.AssignedBoxesHint" xml:space="preserve">
+    <value>الصناديق الفعلية في منطقة الخدمة هذه.</value>
+  </data>
+  <data name="Areas.NoneAssigned" xml:space="preserve">
+    <value>لا صناديق توزيع في هذه المنطقة بعد.</value>
+  </data>
+  <data name="Areas.ViewSubscribers" xml:space="preserve">
+    <value>عرض المشتركين</value>
   </data>
   <data name="Audit.EventTitle" xml:space="preserve">
     <value>حدث التدقيق</value>

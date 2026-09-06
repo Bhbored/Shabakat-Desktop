@@ -9,5 +9,6 @@ public static class AreaMapper
             Id: a.Id,
             Name: a.Name,
             CustomerCount: a.Customers?.Count ?? 0,
+            BoxCount: a.DistributionBoxes?.Count ?? 0,
             CreatedAt: a.CreatedAt);
 }

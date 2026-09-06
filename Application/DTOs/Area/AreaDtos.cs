@@ -6,6 +6,7 @@ public record AreaResponse(
     Guid Id,
     string Name,
     int CustomerCount,
+    int BoxCount,
     DateTime CreatedAt);
 
 public record CreateAreaRequest(

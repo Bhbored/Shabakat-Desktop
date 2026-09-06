@@ -1,10 +1,13 @@
 @page "/subscribers"
+@page "/subscribers/{AreaId:guid}"
+@page "/subscribers/{AreaId:guid}/{BoxId:guid}"
 @inject ICustomerService CustomerService
 @inject IMeterReadingService MeterReadingService
 @inject IAreaService AreaService
 @inject IAmpereScheduleService AmpereScheduleService
 @inject IAppPreferencesService PreferencesService
 @inject ICustomerExportService ExportService
+@inject NavigationManager Navigation
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
 
@@ -12,6 +15,7 @@
     <SubscribersToolbar SearchField="@_searchField"
                         SearchTerm="@_searchTerm"
                         AreaFilter="@_areaFilter"
+                        BoxFilter="@_boxFilter"
                         PlanFilter="@_planFilter"
                         ScheduleFilter="@_scheduleFilter"
                         RelationFilter="@_relationFilter"
@@ -21,6 +25,7 @@
                         SearchFieldChanged="OnSearchFieldChanged"
                         SearchTermChanged="OnSearchTermChanged"
                         AreaFilterChanged="OnAreaFilterChanged"
+                        BoxFilterChanged="OnBoxFilterChanged"
                         PlanFilterChanged="OnPlanFilterChanged"
                         ScheduleFilterChanged="OnScheduleFilterChanged"
                         RelationFilterChanged="OnRelationFilterChanged"
@@ -132,12 +137,16 @@
 </ConfirmDialog>
 
 @code {
+    [Parameter] public Guid? AreaId { get; set; }
+    [Parameter] public Guid? BoxId { get; set; }
+
     private readonly List<CustomerSummaryResponse> _items = [];
     private readonly List<AreaResponse> _areas = [];
     private readonly List<AmpereScheduleResponse> _schedules = [];
     private readonly List<MeterReadingResponse> _meterReadings = [];
 
     private bool _loading = true;
+    private bool _ready;
     private bool _exporting;
     private bool _saving;
     private bool _savingMeter;
@@ -149,6 +158,8 @@
     private bool _showInitialMeterReading;
     private Guid? _editingId;
     private Guid? _openMenuId;
+    private string _syncedRouteArea = "";
+    private string _syncedRouteBox = "";
     private CustomerResponse? _details;
     private CustomerSummaryResponse? _confirmDelete;
     private CustomerSummaryResponse? _confirmStatus;
@@ -158,6 +169,7 @@
     private string _searchField = "name";
     private string _searchTerm = "";
     private string _areaFilter = "";
+    private string _boxFilter = "";
     private string _planFilter = "";
     private string _scheduleFilter = "";
     private string _relationFilter = "";
@@ -179,6 +191,64 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadLookupsAsync();
+        SeedFiltersFromRoute();
+        await LoadAsync();
+        _ready = true;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!_ready)
+            return;
+
+        var routeArea = AreaId?.ToString() ?? "";
+        var routeBox = BoxId?.ToString() ?? "";
+        if (routeArea == _syncedRouteArea && routeBox == _syncedRouteBox)
+            return;
+
+        SeedFiltersFromRoute();
+        _pageNumber = 1;
+        await LoadAsync();
+    }
+
+    private void SeedFiltersFromRoute()
+    {
+        _areaFilter = AreaId?.ToString() ?? "";
+        _boxFilter = BoxId?.ToString() ?? "";
+        _syncedRouteArea = _areaFilter;
+        _syncedRouteBox = _boxFilter;
+    }
+
+    private string BuildUrlFromFilters()
+    {
+        var hasArea = Guid.TryParse(_areaFilter, out var areaId);
+        var hasBox = Guid.TryParse(_boxFilter, out var boxId);
+        if (hasArea && hasBox)
+            return $"subscribers/{areaId}/{boxId}";
+        if (hasArea)
+            return $"subscribers/{areaId}";
+        return "subscribers";
+    }
+
+    private string CurrentRelativePath()
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var query = relative.IndexOf('?', StringComparison.Ordinal);
+        if (query >= 0)
+            relative = relative[..query];
+        return relative.Trim('/');
+    }
+
+    private async Task CommitLocationFiltersAsync()
+    {
+        _pageNumber = 1;
+        var url = BuildUrlFromFilters();
+        _syncedRouteArea = Guid.TryParse(_areaFilter, out var areaId) ? areaId.ToString() : "";
+        _syncedRouteBox = Guid.TryParse(_boxFilter, out var boxId) ? boxId.ToString() : "";
+
+        if (!string.Equals(CurrentRelativePath(), url, StringComparison.OrdinalIgnoreCase))
+            Navigation.NavigateTo(url, replace: true);
+
         await LoadAsync();
     }
 
@@ -200,6 +270,7 @@
         _openMenuId = null;
 
         Guid? areaId = Guid.TryParse(_areaFilter, out var a) ? a : null;
+        Guid? boxId = Guid.TryParse(_boxFilter, out var b) ? b : null;
         Guid? scheduleId = Guid.TryParse(_scheduleFilter, out var sch) ? sch : null;
         PlanType? plan = Enum.TryParse<PlanType>(_planFilter, out var p) ? p : null;
         CustomerRelation? relation = Enum.TryParse<CustomerRelation>(_relationFilter, out var r) ? r : null;
@@ -212,6 +283,7 @@
             Name: name,
             Phone: phone,
             AreaId: areaId,
+            BoxId: boxId,
             AmpereScheduleId: scheduleId,
             PlanType: plan,
             CustomerRelation: relation,
@@ -262,7 +334,14 @@
     private async Task OnAreaFilterChanged(string value)
     {
         _areaFilter = value;
-        await ReloadFromFiltersAsync();
+        _boxFilter = "";
+        await CommitLocationFiltersAsync();
+    }
+
+    private async Task OnBoxFilterChanged(string value)
+    {
+        _boxFilter = value;
+        await CommitLocationFiltersAsync();
     }
 
     private async Task ExportAsync()

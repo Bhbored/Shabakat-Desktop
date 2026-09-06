@@ -3,27 +3,41 @@
 
 @if (IsLoading)
 {
-    <EntityCardGridSkeleton Count="4" ShowStatBlocks="false" CardClass="rounded-2xl border border-border bg-card/80 p-5" />
-}
-else if (Areas.Count == 0)
-{
-    <section class="rounded-2xl border border-border bg-card px-4 py-10 text-sm text-muted-foreground">
-        @L["Empty.AreasNone"]
-    </section>
+    <TableSkeleton Columns="5" Rows="6" MinWidthClass="min-w-[720px]" ShowPager="false" />
 }
 else
 {
-    <div class="grid gap-4 xl:grid-cols-2">
-        @foreach (var area in Areas)
+    <section class="rounded-2xl border border-border bg-card">
+        @if (Areas.Count == 0)
         {
-            <AreaCard Area="area"
-                      MenuOpen="@(OpenMenuId == area.Id)"
-                      OnToggleMenu="() => OnToggleMenu.InvokeAsync(area.Id)"
-                      OnView="() => OnView.InvokeAsync(area)"
-                      OnEdit="() => OnEdit.InvokeAsync(area)"
-                      OnDelete="() => OnDelete.InvokeAsync(area)" />
+            <div class="px-4 py-10 text-sm text-muted-foreground">@L["Empty.AreasNone"]</div>
         }
-    </div>
+        else
+        {
+            <table class="w-full min-w-[720px]">
+                <thead>
+                    <tr class="border-b border-border">
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Name"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Ampere.Subscribers"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Nav.Boxes"]</th>
+                        <th class="px-4 py-3.5 text-start text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">@L["Common.Created"]</th>
+                        <th class="px-4 py-3.5"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var area in Areas)
+                    {
+                        <AreaCard Area="area"
+                                  MenuOpen="@(OpenMenuId == area.Id)"
+                                  OnToggleMenu="() => OnToggleMenu.InvokeAsync(area.Id)"
+                                  OnView="() => OnView.InvokeAsync(area)"
+                                  OnEdit="() => OnEdit.InvokeAsync(area)"
+                                  OnDelete="() => OnDelete.InvokeAsync(area)" />
+                    }
+                </tbody>
+            </table>
+        }
+    </section>
 }
 
 @code {

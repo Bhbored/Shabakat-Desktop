@@ -31,9 +31,11 @@ public static class AuditLabels
     public static string Summary(AuditLogResponse entry, IStringLocalizer<SharedResource> localizer)
     {
         var name = Detail(entry, "Name");
-        var customerName = Detail(entry, "Customer Name");
-        var invoiceNumber = Detail(entry, "Invoice Number");
+        var customerName = Detail(entry, "Customer Name", "CustomerName");
+        var invoiceNumber = Detail(entry, "Invoice Number", "InvoiceNumber");
         var expenseType = DetailValue(entry, "Expense Type", localizer);
+        if (string.IsNullOrWhiteSpace(expenseType))
+            expenseType = DetailValue(entry, "ExpenseType", localizer);
         var created = Detail(entry, "Created");
         var skipped = Detail(entry, "Skipped");
         var amount = Detail(entry, "Amount");
@@ -61,27 +63,27 @@ public static class AuditLabels
 
     public static string DetailLabel(string label, IStringLocalizer<SharedResource> localizer)
     {
-        var key = label switch
+        var key = NormalizeLabel(label) switch
         {
-            "Name" => "Common.Name",
-            "Plan" => "Common.Plan",
-            "Phone" => "Common.Phone",
-            "Customer Type" => "Field.CustomerType",
-            "Expense Type" => "Field.ExpenseType",
-            "Amount" => "Common.Amount",
-            "Expense Date" => "Table.ExpenseDate",
-            "Label" => "Table.Label",
-            "Invoice Number" => "Table.InvoiceNumber",
-            "Customer Name" => "Common.Customer",
-            "Total Amount" => "Invoices.TotalAmount",
-            "Consumption Start" => "Invoices.ConsumptionStart",
-            "Consumption End" => "Invoices.ConsumptionEnd",
-            "Created" => "Invoices.BulkCreated",
-            "Skipped" => "Invoices.BulkSkipped",
-            "Payment Method" => "Invoices.PaymentMethod",
-            "Paid Amount" => "Invoices.PaidAmount",
-            "Payment Amount" => "Invoices.PaymentAmount",
-            "Billed Consumption" => "Invoices.BilledConsumption",
+            "name" => "Common.Name",
+            "plan" => "Common.Plan",
+            "phone" => "Common.Phone",
+            "customertype" => "Field.CustomerType",
+            "expensetype" => "Field.ExpenseType",
+            "amount" => "Common.Amount",
+            "expensedate" => "Table.ExpenseDate",
+            "label" => "Table.Label",
+            "invoicenumber" => "Table.InvoiceNumber",
+            "customername" or "customer" => "Common.Customer",
+            "totalamount" => "Invoices.TotalAmount",
+            "consumptionstart" => "Invoices.ConsumptionStart",
+            "consumptionend" => "Invoices.ConsumptionEnd",
+            "created" => "Invoices.BulkCreated",
+            "skipped" => "Invoices.BulkSkipped",
+            "paymentmethod" => "Invoices.PaymentMethod",
+            "paidamount" => "Invoices.PaidAmount",
+            "paymentamount" => "Invoices.PaymentAmount",
+            "billedconsumption" => "Invoices.BilledConsumption",
             _ => null
         };
 
@@ -98,25 +100,58 @@ public static class AuditLabels
     public static string DetailValue(string label, string value, IStringLocalizer<SharedResource> localizer)
     {
         if (string.IsNullOrWhiteSpace(value))
-            return value;
+            return localizer["Common.Dash"].Value;
 
-        var key = label switch
+        var resourceKey = NormalizeLabel(label) switch
         {
-            "Plan" => $"PlanType.{value}",
-            "Customer Type" => $"CustomerType.{value}",
-            "Expense Type" => $"ExpenseType.{value}",
-            "Payment Method" => $"PaymentMethod.{value}",
+            "plan" => $"PlanType.{value}",
+            "customertype" => $"CustomerType.{value}",
+            "expensetype" => $"ExpenseType.{value}",
+            "paymentmethod" => $"PaymentMethod.{value}",
             _ => null
         };
 
-        if (key is null)
+        if (resourceKey is null)
+            resourceKey = TryEnumResourceKey(value);
+
+        if (resourceKey is null)
             return value;
 
-        var localized = localizer[key];
+        var localized = localizer[resourceKey];
         return localized.ResourceNotFound ? value : localized.Value;
     }
 
-    private static string Detail(AuditLogResponse entry, string label) =>
-        entry.Details.FirstOrDefault(d => d.Label.Equals(label, StringComparison.OrdinalIgnoreCase))?.Value
-        ?? string.Empty;
+    private static string? TryEnumResourceKey(string value)
+    {
+        if (Enum.TryParse<PlanType>(value, ignoreCase: true, out _))
+            return $"PlanType.{value}";
+        if (Enum.TryParse<CustomerType>(value, ignoreCase: true, out _))
+            return $"CustomerType.{value}";
+        if (Enum.TryParse<ExpenseType>(value, ignoreCase: true, out _))
+            return $"ExpenseType.{value}";
+        if (Enum.TryParse<PaymentMethod>(value, ignoreCase: true, out _))
+            return $"PaymentMethod.{value}";
+        return null;
+    }
+
+    private static string Detail(AuditLogResponse entry, params string[] labels)
+    {
+        foreach (var label in labels)
+        {
+            var match = entry.Details.FirstOrDefault(d =>
+                NormalizeLabel(d.Label) == NormalizeLabel(label));
+            if (match is not null)
+                return match.Value;
+        }
+
+        return string.Empty;
+    }
+
+    private static string NormalizeLabel(string label)
+    {
+        if (string.IsNullOrWhiteSpace(label))
+            return string.Empty;
+
+        return string.Concat(label.Where(char.IsLetterOrDigit)).ToLowerInvariant();
+    }
 }

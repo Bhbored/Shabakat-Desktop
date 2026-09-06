@@ -13,6 +13,7 @@ public sealed class AreaRepository : GenericRepository<Area>, IAreaRepository
     public async Task<IEnumerable<Area>> GetAllWithCustomerCountAsync()
         => await _dbSet
             .Include(a => a.Customers)
+            .Include(a => a.DistributionBoxes)
             .OrderBy(a => a.Name)
             .ToListAsync();
 

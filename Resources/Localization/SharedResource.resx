@@ -1530,7 +1530,19 @@
     <value>Area details</value>
   </data>
   <data name="Areas.DetailsHint" xml:space="preserve">
-    <value>Service area overview and assigned subscribers.</value>
+    <value>Service area overview and distribution boxes.</value>
+  </data>
+  <data name="Areas.AssignedBoxes" xml:space="preserve">
+    <value>Distribution boxes</value>
+  </data>
+  <data name="Areas.AssignedBoxesHint" xml:space="preserve">
+    <value>Physical boxes in this service area.</value>
+  </data>
+  <data name="Areas.NoneAssigned" xml:space="preserve">
+    <value>No distribution boxes in this area yet.</value>
+  </data>
+  <data name="Areas.ViewSubscribers" xml:space="preserve">
+    <value>View subscribers</value>
   </data>
   <data name="Audit.EventTitle" xml:space="preserve">
     <value>Audit Event</value>

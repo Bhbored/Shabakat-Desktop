@@ -1,5 +1,6 @@
 @page "/areas"
 @inject IAreaService AreaService
+@inject IDistributionBoxService BoxService
 @inject IToastService Toast
 @inject IStringLocalizer<SharedResource> L
 
@@ -8,7 +9,7 @@
                   Total="_filtered.Count"
                   Disabled="_loading"
                   SearchChanged="OnSearchChanged"
-                  OnCreate="OpenCreate" />
+                  OnCreate="OpenCreate"/>
 
     <AreasList Areas="_filtered"
                IsLoading="_loading"
@@ -16,23 +17,28 @@
                OnToggleMenu="ToggleMenu"
                OnView="OpenDetails"
                OnEdit="OpenEdit"
-               OnDelete="OpenDelete" />
+               OnDelete="OpenDelete"/>
 </div>
 
-<AreaDetailsSheet Open="_showDetails" Area="_selected" OnClose="CloseDetails" />
+<AreaDetailsSheet Open="_showDetails"
+                  Area="_selected"
+                  BoxesPage="_boxesPage"
+                  BoxesLoading="_boxesLoading"
+                  OnClose="CloseDetails"
+                  OnBoxesPageChanged="LoadBoxesPageAsync"/>
 
 <AreaFormSheet Open="_showForm"
                IsEdit="@(_editingId is not null)"
                InitialName="@_formName"
                Saving="_saving"
                OnClose="CloseForm"
-               OnSave="SaveAsync" />
+               OnSave="SaveAsync"/>
 
 <DeleteAreaDialog Open="_showDelete"
                   Area="_pendingDelete"
                   Saving="_saving"
                   OnClose="CloseDelete"
-                  OnConfirm="ConfirmDeleteAsync" />
+                  OnConfirm="ConfirmDeleteAsync"/>
 
 @code {
     private readonly List<AreaResponse> _items = [];
@@ -48,6 +54,8 @@
     private Guid? _menuAreaId;
     private AreaResponse? _selected;
     private AreaResponse? _pendingDelete;
+    private PagedResponse<DistributionBoxResponse>? _boxesPage;
+    private bool _boxesLoading;
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
@@ -72,24 +80,39 @@
     {
         var term = _searchTerm.Trim();
         _filtered = string.IsNullOrEmpty(term)
-            ? _items.ToList()
-            : _items.Where(a => a.Name.Contains(term, StringComparison.OrdinalIgnoreCase)).ToList();
+            ? [.. _items]
+            : [.. _items.Where(a => a.Name.Contains(term, StringComparison.OrdinalIgnoreCase))];
     }
 
     private void ToggleMenu(Guid id) => _menuAreaId = _menuAreaId == id ? null : id;
     private void CloseMenu() => _menuAreaId = null;
 
-    private void OpenDetails(AreaResponse area)
+    private async Task OpenDetails(AreaResponse area)
     {
         CloseMenu();
         _selected = area;
         _showDetails = true;
+        await LoadBoxesPageAsync(1);
     }
 
     private void CloseDetails()
     {
         _showDetails = false;
         _selected = null;
+        _boxesPage = null;
+    }
+
+    private async Task LoadBoxesPageAsync(int page)
+    {
+        if (_selected is null || page < 1) return;
+        _boxesLoading = true;
+        _boxesPage = await UiActions.RunAsync(
+            Toast,
+            () => BoxService.GetAllAsync(new DistributionBoxFilterRequest(
+                AreaId: _selected.Id,
+                PageNumber: page,
+                PageSize: 10)));
+        _boxesLoading = false;
     }
 
     private void OpenCreate()
@@ -134,7 +157,7 @@
         if (_saving) return;
         _saving = true;
 
-        var ok = false;
+        bool ok;
         if (_editingId is null)
         {
             var created = await UiActions.RunAsync(
@@ -175,4 +198,5 @@
         _pendingDelete = null;
         await LoadAsync();
     }
+
 }
