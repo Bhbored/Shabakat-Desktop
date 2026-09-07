@@ -261,9 +261,8 @@
             _historyPage++;
     }
 
-    private RenderFragment ReadingCard(MeterReadingResponse reading) => __builder =>
-    {
-        <div class="flex items-start justify-between gap-4 rounded-2xl border border-border bg-muted/20 px-4 py-3">
+    private RenderFragment ReadingCard(MeterReadingResponse reading) =>
+        @<div class="flex items-start justify-between gap-4 rounded-2xl border border-border bg-muted/20 px-4 py-3">
             <div class="flex items-start gap-3">
                 <div class="rounded-lg border border-border bg-muted/40 p-2 text-primary">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
@@ -288,6 +287,5 @@
                     </button>
                 }
             </div>
-        </div>
-    };
+        </div>;
 }
