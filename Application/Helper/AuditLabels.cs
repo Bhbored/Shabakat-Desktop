@@ -33,9 +33,10 @@ public static class AuditLabels
         var name = Detail(entry, "Name");
         var customerName = Detail(entry, "Customer Name", "CustomerName");
         var invoiceNumber = Detail(entry, "Invoice Number", "InvoiceNumber");
-        var expenseType = DetailValue(entry, "Expense Type", localizer);
-        if (string.IsNullOrWhiteSpace(expenseType))
-            expenseType = DetailValue(entry, "ExpenseType", localizer);
+        var expenseType = DetailValue(
+            "ExpenseType",
+            Detail(entry, "Expense Type", "ExpenseType"),
+            localizer);
         var created = Detail(entry, "Created");
         var skipped = Detail(entry, "Skipped");
         var amount = Detail(entry, "Amount");
@@ -139,7 +140,19 @@ public static class AuditLabels
         foreach (var label in labels)
         {
             var match = entry.Details.FirstOrDefault(d =>
-                NormalizeLabel(d.Label) == NormalizeLabel(label));
+                d.Label.Equals(label, StringComparison.OrdinalIgnoreCase));
+            if (match is not null)
+                return match.Value;
+        }
+
+        foreach (var label in labels)
+        {
+            var normalized = NormalizeLabel(label);
+            if (normalized.Length == 0)
+                continue;
+
+            var match = entry.Details.FirstOrDefault(d =>
+                NormalizeLabel(d.Label) == normalized);
             if (match is not null)
                 return match.Value;
         }
@@ -147,11 +160,12 @@ public static class AuditLabels
         return string.Empty;
     }
 
+
     private static string NormalizeLabel(string label)
     {
         if (string.IsNullOrWhiteSpace(label))
             return string.Empty;
 
-        return string.Concat(label.Where(char.IsLetterOrDigit)).ToLowerInvariant();
+        return string.Concat(label.Where(c => !char.IsWhiteSpace(c))).ToLowerInvariant();
     }
 }
