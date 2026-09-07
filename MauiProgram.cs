@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.DevFlow.Agent;
+using Microsoft.Maui.DevFlow.Blazor;
 using Shabakat.Application.Contracts.Services;
 using Shabakat.Infrastructure.Persistence;
 
@@ -47,6 +48,7 @@ namespace Shabakat
             builder.Logging.SetMinimumLevel(LogLevel.Debug);
             builder.Logging.AddDebug();
             builder.AddMauiDevFlowAgent();
+            builder.AddMauiBlazorDevFlowTools();
 #endif
 
             var app = builder.Build();
