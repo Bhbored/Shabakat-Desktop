@@ -53,18 +53,16 @@ namespace Shabakat
 
             var app = builder.Build();
 
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                db.Database.Migrate();
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            db.Database.Migrate();
 
-                var prefs = scope.ServiceProvider.GetRequiredService<IAppPreferencesService>()
-                    .GetAsync()
-                    .GetAwaiter()
-                    .GetResult();
-                scope.ServiceProvider.GetRequiredService<ICultureService>()
-                    .Apply(prefs?.Language ?? "en");
-            }
+            var prefs = scope.ServiceProvider.GetRequiredService<IAppPreferencesService>()
+                .GetAsync()
+                .GetAwaiter()
+                .GetResult();
+            scope.ServiceProvider.GetRequiredService<ICultureService>()
+                .Apply(prefs?.Language ?? "en");
 
             return app;
         }

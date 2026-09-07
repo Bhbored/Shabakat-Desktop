@@ -262,7 +262,6 @@ What the product actually runs on and why:
 | **Excel export** | Which subscriber columns to export |
 | **Backup** | Local JSON export / restore (replace-all); optional cloud upload to R2 |
 | **WhatsApp** | Offline / stub messaging settings |
-| **Testing** | Dev helpers (e.g. Lebanon demo seed) |
 | **Theme** | Light / dark UI |
 
 ### Activation & security

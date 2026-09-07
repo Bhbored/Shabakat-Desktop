@@ -476,12 +476,6 @@
   <data name="Page.SettingsTva.Subtitle" xml:space="preserve">
     <value>تعديل قيم الضريبة حسب الشريحة</value>
   </data>
-  <data name="Page.SettingsTesting.Title" xml:space="preserve">
-    <value>الاختبار</value>
-  </data>
-  <data name="Page.SettingsTesting.Subtitle" xml:space="preserve">
-    <value>تعبئة بيانات تجريبية لقاعدة البيانات المحلية</value>
-  </data>
   <data name="Page.NotFound.Title" xml:space="preserve">
     <value>غير موجود</value>
   </data>
@@ -1136,9 +1130,6 @@
   <data name="Settings.CompanyPreferences" xml:space="preserve">
     <value>تفضيلات الشركة</value>
   </data>
-  <data name="Settings.Testing" xml:space="preserve">
-    <value>الاختبار</value>
-  </data>
   <data name="Settings.About" xml:space="preserve">
     <value>حول</value>
   </data>
@@ -1268,53 +1259,11 @@
   <data name="Settings.Backup.CloudUploaded" xml:space="preserve">
     <value>تم رفع النسخة السحابية</value>
   </data>
-  <data name="Settings.SampleData" xml:space="preserve">
-    <value>بيانات تجريبية</value>
-  </data>
-  <data name="Settings.SeedLebanon" xml:space="preserve">
-    <value>تعبئة بيانات لبنان التجريبية</value>
-  </data>
   <data name="Settings.DayOfMonth" xml:space="preserve">
     <value>{0} من كل شهر</value>
   </data>
   <data name="Settings.ExportColumnsSaved" xml:space="preserve">
     <value>تم حفظ أعمدة التصدير.</value>
-  </data>
-  <data name="Settings.Testing.Title" xml:space="preserve">
-    <value>بيانات لبنان التجريبية</value>
-  </data>
-  <data name="Settings.Testing.Hint" xml:space="preserve">
-    <value>تُدرج مناطق وصناديق وزبائن وفواتير ودفعات ومصاريف تجريبية مترابطة.</value>
-  </data>
-  <data name="Settings.Testing.Already" xml:space="preserve">
-    <value>البيانات التجريبية موجودة مسبقاً في هذه القاعدة.</value>
-  </data>
-  <data name="Settings.Testing.Seeding" xml:space="preserve">
-    <value>جارٍ التعبئة...</value>
-  </data>
-  <data name="Settings.Testing.Seed" xml:space="preserve">
-    <value>تعبئة البيانات التجريبية</value>
-  </data>
-  <data name="Settings.Testing.AlreadySeeded" xml:space="preserve">
-    <value>تمّت التعبئة مسبقاً</value>
-  </data>
-  <data name="Settings.Testing.Seeded" xml:space="preserve">
-    <value>تم تعبئة البيانات التجريبية.</value>
-  </data>
-  <data name="Settings.Testing.ResetDb" xml:space="preserve">
-    <value>حذف قاعدة البيانات</value>
-  </data>
-  <data name="Settings.Testing.ResetDbHint" xml:space="preserve">
-    <value>مسح بيانات هذا الجهاز والبدء من جديد</value>
-  </data>
-  <data name="Settings.Testing.ResetDbTitle" xml:space="preserve">
-    <value>حذف قاعدة البيانات؟</value>
-  </data>
-  <data name="Settings.Testing.ResetDbConfirm" xml:space="preserve">
-    <value>سيُحذف نهائياً كل الزبائن والفواتير وبيانات هذا التطبيق والترخيص. ستحتاج إلى التفعيل من جديد. لا يمكن التراجع عن هذا.</value>
-  </data>
-  <data name="Settings.Testing.ResetDbAction" xml:space="preserve">
-    <value>حذف الكل</value>
   </data>
   <data name="Settings.WhatsApp.Unavailable" xml:space="preserve">
     <value>واتساب غير متوفر في هذا الإصدار دون اتصال.</value>
@@ -2224,9 +2173,6 @@
   </data>
   <data name="Error.CloudBackupRateLimited" xml:space="preserve">
     <value>يرجى الانتظار حوالي {0} دقيقة قبل الرفع مجدداً.</value>
-  </data>
-  <data name="Error.DatabaseResetFailed" xml:space="preserve">
-    <value>تعذّر حذف ملف قاعدة البيانات.</value>
   </data>
   <data name="Error.AmpereScheduleRequired" xml:space="preserve">
     <value>جدول الأمبير مطلوب عند تفعيل تسعير الجداول.</value>

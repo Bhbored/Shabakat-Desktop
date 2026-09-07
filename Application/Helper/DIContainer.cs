@@ -28,7 +28,6 @@ using Shabakat.Application.Services.Market;
 using Shabakat.Application.Helper;
 using Shabakat.Infrastructure.Persistence;
 using Shabakat.Infrastructure.Persistence.Interceptors;
-using Shabakat.Infrastructure.Persistence.Seed;
 using Shabakat.Infrastructure.Repository;
 
 public static class DIContainer
@@ -120,8 +119,6 @@ public static class DIContainer
         services.AddScoped<IUnpaidInvoiceExportService, UnpaidInvoiceExportService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IInvoiceService, InvoiceService>();
-        services.AddScoped<IDatabaseSeedService, LebanonDatabaseSeeder>();
-        services.AddScoped<IDatabaseResetService, DatabaseResetService>();
 
         return services;
     }

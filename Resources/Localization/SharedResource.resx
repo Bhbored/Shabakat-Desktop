@@ -476,12 +476,6 @@
   <data name="Page.SettingsTva.Subtitle" xml:space="preserve">
     <value>Edit tax values by tier</value>
   </data>
-  <data name="Page.SettingsTesting.Title" xml:space="preserve">
-    <value>Testing</value>
-  </data>
-  <data name="Page.SettingsTesting.Subtitle" xml:space="preserve">
-    <value>Seed demo data for the local database</value>
-  </data>
   <data name="Page.NotFound.Title" xml:space="preserve">
     <value>Not Found</value>
   </data>
@@ -1136,9 +1130,6 @@
   <data name="Settings.CompanyPreferences" xml:space="preserve">
     <value>Company Preferences</value>
   </data>
-  <data name="Settings.Testing" xml:space="preserve">
-    <value>Testing</value>
-  </data>
   <data name="Settings.About" xml:space="preserve">
     <value>About</value>
   </data>
@@ -1268,53 +1259,11 @@
   <data name="Settings.Backup.CloudUploaded" xml:space="preserve">
     <value>Cloud backup uploaded</value>
   </data>
-  <data name="Settings.SampleData" xml:space="preserve">
-    <value>Sample data</value>
-  </data>
-  <data name="Settings.SeedLebanon" xml:space="preserve">
-    <value>Seed Lebanon demo dataset</value>
-  </data>
   <data name="Settings.DayOfMonth" xml:space="preserve">
     <value>{0} of each month</value>
   </data>
   <data name="Settings.ExportColumnsSaved" xml:space="preserve">
     <value>Export columns saved.</value>
-  </data>
-  <data name="Settings.Testing.Title" xml:space="preserve">
-    <value>Lebanon sample data</value>
-  </data>
-  <data name="Settings.Testing.Hint" xml:space="preserve">
-    <value>Inserts correlated demo areas, boxes, customers, invoices, payments, and expenses.</value>
-  </data>
-  <data name="Settings.Testing.Already" xml:space="preserve">
-    <value>Sample data is already present in this database.</value>
-  </data>
-  <data name="Settings.Testing.Seeding" xml:space="preserve">
-    <value>Seeding...</value>
-  </data>
-  <data name="Settings.Testing.Seed" xml:space="preserve">
-    <value>Seed sample data</value>
-  </data>
-  <data name="Settings.Testing.AlreadySeeded" xml:space="preserve">
-    <value>Already seeded</value>
-  </data>
-  <data name="Settings.Testing.Seeded" xml:space="preserve">
-    <value>Sample data seeded.</value>
-  </data>
-  <data name="Settings.Testing.ResetDb" xml:space="preserve">
-    <value>Delete database</value>
-  </data>
-  <data name="Settings.Testing.ResetDbHint" xml:space="preserve">
-    <value>Erase this computer's data and start over</value>
-  </data>
-  <data name="Settings.Testing.ResetDbTitle" xml:space="preserve">
-    <value>Delete the database?</value>
-  </data>
-  <data name="Settings.Testing.ResetDbConfirm" xml:space="preserve">
-    <value>This permanently deletes all customers, invoices, settings, and the license on this computer. You will need to activate again. This cannot be undone.</value>
-  </data>
-  <data name="Settings.Testing.ResetDbAction" xml:space="preserve">
-    <value>Delete everything</value>
   </data>
   <data name="Settings.WhatsApp.Unavailable" xml:space="preserve">
     <value>WhatsApp is not available in this offline build.</value>
@@ -2224,9 +2173,6 @@
   </data>
   <data name="Error.CloudBackupRateLimited" xml:space="preserve">
     <value>Please wait about {0} minute(s) before uploading again.</value>
-  </data>
-  <data name="Error.DatabaseResetFailed" xml:space="preserve">
-    <value>Could not delete the database file.</value>
   </data>
   <data name="Error.AmpereScheduleRequired" xml:space="preserve">
     <value>An ampere schedule is required when schedule pricing is enabled.</value>
