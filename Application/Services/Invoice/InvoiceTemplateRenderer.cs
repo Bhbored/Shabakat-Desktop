@@ -44,13 +44,8 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
             ? string.Empty
             : $"""<div class="field"><label>{addressLabel}</label><span>{Escape(m.CustomerAddress)}</span></div>""";
 
-        var planUnit = isArabic
-            ? "أمبير"
-            : m.IsFixedKilowattPlan
-                ? "kWh prepaid"
-                : m.IsKilowattPlan
-                    ? "kWh limit"
-                    : "Amperes";
+        var planType = LocalizePlanType(m.PlanType, isArabic);
+        var planUnit = ResolvePlanUnit(m, isArabic);
 
         var showMeterReadings = m.IsKilowattPlan || m.IsFixedKilowattPlan;
 
@@ -60,6 +55,11 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
 
         var consumptionRow = BuildConsumptionRow(m, isArabic);
         var tvaRows = BuildTvaRows(m, isArabic);
+        var isAmperePlan = m is { IsKilowattPlan: false, IsFixedKilowattPlan: false };
+        var stubUnitPriceHtml = isAmperePlan
+            ? BuildStubField(isArabic ? "سعر الوحدة" : "Unit Price", Money(m.UnitPrice))
+            : string.Empty;
+        var cableName = string.IsNullOrWhiteSpace(m.CableName) ? "—" : m.CableName;
 
         return new Dictionary<string, string>
         {
@@ -73,10 +73,12 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
             ["{{CUSTOMER_NAME}}"] = Escape(m.CustomerName),
             ["{{CUSTOMER_PHONE_HTML}}"] = customerPhone,
             ["{{CUSTOMER_ADDRESS_HTML}}"] = customerAddress,
-            ["{{PLAN_TYPE}}"] = Escape(m.PlanType),
+            ["{{CABLE_NAME}}"] = Escape(cableName),
+            ["{{PLAN_TYPE}}"] = Escape(planType),
             ["{{PLAN_VALUE}}"] = FormatDecimal(m.PlanValue),
             ["{{PLAN_UNIT}}"] = planUnit,
             ["{{UNIT_PRICE}}"] = Money(m.UnitPrice),
+            ["{{STUB_UNIT_PRICE_HTML}}"] = stubUnitPriceHtml,
             ["{{READINGS_SECTION}}"] = readingsSection,
             ["{{CONSUMPTION_ROW}}"] = consumptionRow,
             ["{{FIXED_CHARGE}}"] = Money(m.FixedCharge),
@@ -87,6 +89,37 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
         };
     }
 
+    private static string LocalizePlanType(string planType, bool isArabic)
+    {
+        if (!isArabic)
+            return planType;
+
+        return planType switch
+        {
+            "Ampere" => "أمبير",
+            "Kilowatt" => "كيلوواط",
+            "FixedKilowatt" => "كيلوواط ثابت",
+            _ => planType
+        };
+    }
+
+    private static string ResolvePlanUnit(InvoicePrintModel m, bool isArabic)
+    {
+        if (isArabic)
+        {
+            if (m.IsFixedKilowattPlan) return "كيلوواط مسبق الدفع";
+            if (m.IsKilowattPlan) return "حد كيلوواط";
+            return "أمبير";
+        }
+
+        if (m.IsFixedKilowattPlan) return "kWh prepaid";
+        if (m.IsKilowattPlan) return "kWh limit";
+        return "Amperes";
+    }
+
+    private static string BuildStubField(string label, string value)
+        => $"""<div class="stub-field"><label>{Escape(label)}</label><span>{value}</span></div>""";
+
     private static string BuildReadingsSection(InvoicePrintModel m, bool isArabic)
     {
         var title = isArabic ? "قراءات العداد" : "Meter Readings";
@@ -96,26 +129,26 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
         var kwhUnit = isArabic ? "كيلوواط" : "kWh";
 
         return $"""
-               <div class="readings-block">
-               <h2 class="section-title">{title}</h2>
-               <div class="readings">
-                 <div class="reading-card">
-                   <label>{previousLabel}</label>
-                   <div class="value">{FormatReading(m.PreviousReading)}</div>
-                   {(m.PreviousReadingDate is not null ? $"""<div class="date">{Escape(m.PreviousReadingDate)}</div>""" : "")}
-                 </div>
-                 <div class="reading-card">
-                   <label>{currentLabel}</label>
-                   <div class="value">{FormatReading(m.CurrentReading)}</div>
-                   {(m.CurrentReadingDate is not null ? $"""<div class="date">{Escape(m.CurrentReadingDate)}</div>""" : "")}
-                 </div>
-                 <div class="reading-card highlight">
-                   <label>{totalLabel}</label>
-                   <div class="value">{FormatConsumption(m.TotalConsumption, kwhUnit)}</div>
-                 </div>
-               </div>
-               </div>
-               """;
+                <div class="readings-block">
+                <h2 class="section-title">{title}</h2>
+                <div class="readings">
+                  <div class="reading-card">
+                    <label>{previousLabel}</label>
+                    <div class="value">{FormatReading(m.PreviousReading)}</div>
+                    {(m.PreviousReadingDate is not null ? $"""<div class="date">{Escape(m.PreviousReadingDate)}</div>""" : "")}
+                  </div>
+                  <div class="reading-card">
+                    <label>{currentLabel}</label>
+                    <div class="value">{FormatReading(m.CurrentReading)}</div>
+                    {(m.CurrentReadingDate is not null ? $"""<div class="date">{Escape(m.CurrentReadingDate)}</div>""" : "")}
+                  </div>
+                  <div class="reading-card highlight">
+                    <label>{totalLabel}</label>
+                    <div class="value">{FormatConsumption(m.TotalConsumption, kwhUnit)}</div>
+                  </div>
+                </div>
+                </div>
+                """;
     }
 
     private static string BuildConsumptionRow(InvoicePrintModel m, bool isArabic)
@@ -126,11 +159,11 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
             var label = isArabic ? "رصيد الطاقة" : "Energy credit";
             var unit = isArabic ? "كيلوواط" : "kWh";
             return $"""
-               <tr>
-                 <td>{label} ({FormatDecimal(m.TotalConsumption ?? 0m)} {unit} × {Money(m.UnitPrice)}{perUnit})</td>
-                 <td>{Money(m.ConsumptionCost)}</td>
-               </tr>
-               """;
+                    <tr>
+                      <td>{label} ({FormatDecimal(m.TotalConsumption ?? 0m)} {unit} × {Money(m.UnitPrice)}{perUnit})</td>
+                      <td>{Money(m.ConsumptionCost)}</td>
+                    </tr>
+                    """;
         }
 
         if (m.IsKilowattPlan)
@@ -138,21 +171,21 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
             var label = isArabic ? "استهلاك الطاقة" : "Energy consumption";
             var unit = isArabic ? "كيلوواط" : "kWh";
             return $"""
-               <tr>
-                 <td>{label} ({FormatDecimal(m.TotalConsumption ?? 0m)} {unit} × {Money(m.UnitPrice)})</td>
-                 <td>{Money(m.ConsumptionCost)}</td>
-               </tr>
-               """;
+                    <tr>
+                      <td>{label} ({FormatDecimal(m.TotalConsumption ?? 0m)} {unit} × {Money(m.UnitPrice)})</td>
+                      <td>{Money(m.ConsumptionCost)}</td>
+                    </tr>
+                    """;
         }
 
         var ampereUnit = isArabic ? "أمبير" : "Amperes";
         var subscriptionLabel = isArabic ? "الاشتراك" : "Subscription";
         return $"""
-               <tr>
-                 <td>{subscriptionLabel} ({FormatDecimal(m.PlanValue)} {ampereUnit} × {Money(m.UnitPrice)})</td>
-                 <td>{Money(m.ConsumptionCost)}</td>
-               </tr>
-               """;
+                <tr>
+                  <td>{subscriptionLabel} ({FormatDecimal(m.PlanValue)} {ampereUnit} × {Money(m.UnitPrice)})</td>
+                  <td>{Money(m.ConsumptionCost)}</td>
+                </tr>
+                """;
     }
 
     private static string BuildTvaRows(InvoicePrintModel m, bool isArabic)
@@ -164,15 +197,15 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
         var tvaLabel = isArabic ? "ضريبة القيمة المضافة" : "TVA";
 
         return $"""
-               <tr>
-                 <td>{subtotalLabel}</td>
-                 <td>{Money(m.SubtotalBeforeTva)}</td>
-               </tr>
-               <tr>
-                 <td>{tvaLabel} ({FormatDecimal(m.TvaPercent)}%)</td>
-                 <td>{Money(m.TvaAmount)}</td>
-               </tr>
-               """;
+                <tr>
+                  <td>{subtotalLabel}</td>
+                  <td>{Money(m.SubtotalBeforeTva)}</td>
+                </tr>
+                <tr>
+                  <td>{tvaLabel} ({FormatDecimal(m.TvaPercent)}%)</td>
+                  <td>{Money(m.TvaAmount)}</td>
+                </tr>
+                """;
     }
 
     private static string BuildLogoHtml(string companyName, string? logoUrl)
@@ -281,6 +314,7 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
         }
         catch (Exception)
         {
+            // ignored
         }
 
         var candidates = new[]
@@ -290,7 +324,7 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
         };
 
         var path = candidates.FirstOrDefault(File.Exists)
-            ?? throw new FileNotFoundException($"Invoice template not found: {fileName}");
+                   ?? throw new FileNotFoundException($"Invoice template not found: {fileName}");
 
         return File.ReadAllText(path);
     }

@@ -1015,6 +1015,7 @@ public sealed class InvoiceService : IInvoiceService
             CustomerName: customer.Name,
             CustomerPhone: customer.Phone,
             CustomerAddress: customer.Address,
+            CableName: customer.CableName,
             PlanType: customer.Plan.ToString(),
             PlanValue: customer.PlanValue,
             UnitPrice: unitPrice,
