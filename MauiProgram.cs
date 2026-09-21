@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.DevFlow.Agent;
 using Microsoft.Maui.DevFlow.Blazor;
 using Shabakat.Application.Contracts.Services;
+using Shabakat.Application.Services.Backup;
 using Shabakat.Infrastructure.Persistence;
 
 namespace Shabakat
@@ -63,6 +64,11 @@ namespace Shabakat
                 .GetResult();
             scope.ServiceProvider.GetRequiredService<ICultureService>()
                 .Apply(prefs?.Language ?? "en");
+
+            app.Services.GetRequiredService<CloudBackupHostedService>()
+                .StartAsync(CancellationToken.None)
+                .GetAwaiter()
+                .GetResult();
 
             return app;
         }

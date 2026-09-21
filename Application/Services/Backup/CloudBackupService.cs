@@ -57,23 +57,32 @@ public sealed class CloudBackupService : ICloudBackupService
             throw new DomainException("Error.CloudBackupNotConfigured");
 
         var state = await GetOrCreateStateAsync(cancellationToken);
-        if (!state.Enabled)
-            throw new DomainException("Error.CloudBackupDisabled");
-
-        if (state.LastSuccessfulUploadAt is { } lastSuccess)
+        await Gate.WaitAsync(cancellationToken);
+        try
         {
-            var elapsed = DateTime.UtcNow - lastSuccess;
-            if (elapsed < ManualUploadCooldown)
-            {
-                var remaining = ManualUploadCooldown - elapsed;
-                var minutes = Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes));
-                throw DomainException.Format("Error.CloudBackupRateLimited", minutes);
-            }
-        }
+            await _db.Entry(state).ReloadAsync(cancellationToken);
+            if (!state.Enabled)
+                throw new DomainException("Error.CloudBackupDisabled");
 
-        await UploadCoreAsync(state, cancellationToken);
-        if (state.LastError is not null)
-            throw new DomainException("Error.CloudBackupFailed");
+            if (state.LastSuccessfulUploadAt is { } lastSuccess)
+            {
+                var elapsed = DateTime.UtcNow - lastSuccess;
+                if (elapsed < ManualUploadCooldown)
+                {
+                    var remaining = ManualUploadCooldown - elapsed;
+                    var minutes = Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes));
+                    throw DomainException.Format("Error.CloudBackupRateLimited", minutes);
+                }
+            }
+
+            await UploadCoreAsync(state, cancellationToken);
+            if (state.LastError is not null)
+                throw new DomainException("Error.CloudBackupFailed");
+        }
+        finally
+        {
+            Gate.Release();
+        }
     }
 
     public async Task TryScheduledUploadAsync(CancellationToken cancellationToken = default)
@@ -82,19 +91,27 @@ public sealed class CloudBackupService : ICloudBackupService
             return;
 
         var state = await GetOrCreateStateAsync(cancellationToken);
-        if (!state.Enabled)
-            return;
+        await Gate.WaitAsync(cancellationToken);
+        try
+        {
+            await _db.Entry(state).ReloadAsync(cancellationToken);
+            if (!state.Enabled)
+                return;
 
-        if (state.LastSuccessfulUploadAt is { } last
-            && DateTime.UtcNow - last < UploadInterval)
-            return;
+            if (state.LastSuccessfulUploadAt is { } last
+                && DateTime.UtcNow - last < UploadInterval)
+                return;
 
-        await UploadCoreAsync(state, cancellationToken);
+            await UploadCoreAsync(state, cancellationToken);
+        }
+        finally
+        {
+            Gate.Release();
+        }
     }
 
     private async Task UploadCoreAsync(CloudBackupState state, CancellationToken cancellationToken)
     {
-        await Gate.WaitAsync(cancellationToken);
         try
         {
             state.LastAttemptAt = DateTime.UtcNow;
@@ -150,10 +167,6 @@ public sealed class CloudBackupService : ICloudBackupService
             SetError(state, ex.Message);
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogWarning(ex, "Cloud backup upload failed");
-        }
-        finally
-        {
-            Gate.Release();
         }
     }
 

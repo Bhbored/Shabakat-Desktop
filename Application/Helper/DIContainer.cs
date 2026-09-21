@@ -71,19 +71,19 @@ public static class DIContainer
         {
             client.Timeout = TimeSpan.FromMinutes(5);
         });
-        services.AddHostedService<CloudBackupHostedService>();
+        services.AddSingleton<CloudBackupHostedService>();
         services.AddHttpClient("GlobalMarket", client =>
         {
             client.BaseAddress = new Uri(configuration["MarketData:YahooChartBaseUrl"]
                 ?? "https://query1.finance.yahoo.com/");
-            client.Timeout = TimeSpan.FromSeconds(12);
+            client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 Shabakat/1.0");
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
             client.MaxResponseContentBufferSize = 3_000_000;
         });
         services.AddHttpClient("LebanonMarket", client =>
         {
-            client.Timeout = TimeSpan.FromSeconds(12);
+            client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 Shabakat/1.0");
             client.DefaultRequestHeaders.Accept.ParseAdd("text/html");
             client.MaxResponseContentBufferSize = 3_000_000;
