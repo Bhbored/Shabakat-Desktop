@@ -28,13 +28,22 @@ Do **not** use `https://shabakat.<subdomain>.workers.dev` — that is a differen
 | Header | Value |
 |---|---|
 | `Authorization` | `Bearer` + `BACKUP_APP_SECRET` |
-| `X-Install-Id` | GUID (one per desktop install) |
+| `X-User-Id` | Restorable `AppUser.Id` GUID used as the stable backup owner |
+| `X-Business-Name` | Optional percent-encoded business name |
+| `X-Install-Id` | Legacy installation GUID, used only to migrate old folders |
 | `Content-Type` | `application/json` |
 
 Body: UTF-8 JSON (`BackupFile` version 1).
 
-Success: `204` with `X-Object-Key: {installId}/{yyyyMMddTHHmmssZ}.json`.
+Success: `204` with `X-Backup-Folder` and `X-Object-Key` response headers.
 
-Each install keeps the newest **14** objects; older keys under that prefix are deleted.
+Objects are stored as `{userId}-{businessName}/backup-{yyyyMMddTHHmmssfffZ}.json`.
+When no business name is set, the folder is simply `{userId}/`. Unsafe folder-name
+characters are replaced with hyphens. When the business name changes, existing objects
+are moved to the new prefix. Legacy installation-ID folders are migrated on the first upload.
+Older app versions without `X-User-Id` continue writing to their installation folder until
+the app is updated; the first user-based upload then migrates that folder.
+
+Each user keeps the newest **14** objects; older keys under that prefix are deleted.
 
 The Worker does not serve downloads. Get files from the R2 dashboard or `wrangler r2 object get`.

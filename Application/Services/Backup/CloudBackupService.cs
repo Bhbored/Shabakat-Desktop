@@ -64,6 +64,10 @@ public sealed class CloudBackupService : ICloudBackupService
             if (!state.Enabled)
                 throw new DomainException("Error.CloudBackupDisabled");
 
+            var owner = await _db.AppUsers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
+
             if (state.LastSuccessfulUploadAt is { } lastSuccess)
             {
                 var elapsed = DateTime.UtcNow - lastSuccess;
@@ -75,7 +79,7 @@ public sealed class CloudBackupService : ICloudBackupService
                 }
             }
 
-            await UploadCoreAsync(state, cancellationToken);
+            await UploadCoreAsync(state, owner, cancellationToken);
             if (state.LastError is not null)
                 throw new DomainException("Error.CloudBackupFailed");
         }
@@ -98,11 +102,18 @@ public sealed class CloudBackupService : ICloudBackupService
             if (!state.Enabled)
                 return;
 
-            if (state.LastSuccessfulUploadAt is { } last
-                && DateTime.UtcNow - last < UploadInterval)
+            var owner = await _db.AppUsers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
+            if (owner is null || owner.Id == Guid.Empty)
                 return;
 
-            await UploadCoreAsync(state, cancellationToken);
+            if (state.LastSuccessfulUploadAt is { } last
+                && DateTime.UtcNow - last < UploadInterval
+                && LastObjectBelongsTo(state.LastObjectKey, owner.Id))
+                return;
+
+            await UploadCoreAsync(state, owner, cancellationToken);
         }
         finally
         {
@@ -110,13 +121,24 @@ public sealed class CloudBackupService : ICloudBackupService
         }
     }
 
-    private async Task UploadCoreAsync(CloudBackupState state, CancellationToken cancellationToken)
+    private async Task UploadCoreAsync(
+        CloudBackupState state,
+        AppUser? owner,
+        CancellationToken cancellationToken)
     {
         try
         {
             state.LastAttemptAt = DateTime.UtcNow;
             state.LastError = null;
             await _db.SaveChangesAsync(cancellationToken);
+
+            if (owner is null || owner.Id == Guid.Empty)
+            {
+                SetError(state, "Cloud backup owner is not available");
+                await _db.SaveChangesAsync(cancellationToken);
+                _logger.LogWarning("Cloud backup requires an activated app user");
+                return;
+            }
 
             var jsonBytes = await _backupService.ExportJsonBytesAsync(cancellationToken);
             if (!TryBuildUploadUri(_options.Value.WorkerUrl, out var url))
@@ -129,7 +151,14 @@ public sealed class CloudBackupService : ICloudBackupService
 
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.Value.Secret);
+            request.Headers.TryAddWithoutValidation("X-User-Id", owner.Id.ToString("D"));
             request.Headers.TryAddWithoutValidation("X-Install-Id", state.InstallId.ToString("D"));
+            if (!string.IsNullOrWhiteSpace(owner.BusinessName))
+            {
+                request.Headers.TryAddWithoutValidation(
+                    "X-Business-Name",
+                    Uri.EscapeDataString(owner.BusinessName.Trim()));
+            }
             request.Content = new ByteArrayContent(jsonBytes);
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json")
             {
@@ -235,5 +264,15 @@ public sealed class CloudBackupService : ICloudBackupService
     private static void SetError(CloudBackupState state, string message)
     {
         state.LastError = message.Length <= 2000 ? message : message[..2000];
+    }
+
+    private static bool LastObjectBelongsTo(string? objectKey, Guid userId)
+    {
+        if (string.IsNullOrWhiteSpace(objectKey))
+            return false;
+
+        var prefix = userId.ToString("D");
+        return objectKey.StartsWith(prefix + "/", StringComparison.OrdinalIgnoreCase)
+            || objectKey.StartsWith(prefix + "-", StringComparison.OrdinalIgnoreCase);
     }
 }

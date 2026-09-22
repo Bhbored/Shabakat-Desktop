@@ -114,6 +114,10 @@ public sealed class BackupRepository : IBackupRepository
             {
                 await _db.AppUsers.ExecuteDeleteAsync(cancellationToken);
                 await _db.AppUsers.AddAsync(file.AppUser, cancellationToken);
+
+                var cloudBackupState = await _db.CloudBackupStates.FirstOrDefaultAsync(cancellationToken);
+                if (cloudBackupState is not null)
+                    cloudBackupState.LastObjectKey = null;
             }
 
             yield return Progress(++step, ReplaceSteps);

@@ -47,8 +47,20 @@ public sealed class AppUserService : IAppUserService
         if (user is null)
             throw new DomainException("Error.ActivateBeforeProfile");
 
+        var businessNameChanged = !string.Equals(
+            user.BusinessName,
+            businessName,
+            StringComparison.Ordinal);
+
         user.BusinessName = businessName;
         user.LogoUrl = logoUrl;
+
+        if (businessNameChanged)
+        {
+            var cloudBackupState = await _db.CloudBackupStates.FirstOrDefaultAsync();
+            if (cloudBackupState is not null)
+                cloudBackupState.LastObjectKey = null;
+        }
 
         await _db.SaveChangesAsync();
         _logger.LogInformation("Updated company profile {UserId}", user.Id);

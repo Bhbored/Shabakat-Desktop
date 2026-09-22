@@ -1,4 +1,4 @@
-# Release (MSI)
+'# Release (MSI)
 
 Windows installer for Shabakat. It is **per-machine** (needs admin), installs to `C:\Program Files\Shabakat`, and puts a **Shabakat** shortcut on the public desktop.
 
