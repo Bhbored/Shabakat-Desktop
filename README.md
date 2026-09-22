@@ -50,13 +50,7 @@
 - [Documentation](#documentation)
 - [License note](#license-note)
 
----
-
 ## Screenshots
-
-Placeholder PNGs in [`wwwroot/images/screenshots/`](wwwroot/images/screenshots/). Replace each file with a real capture when ready.
-
-Pending captures are tracked with `.png.txt` markers. Add real [`fuel-market-lebanon.png`](wwwroot/images/screenshots/fuel-market-lebanon.png.txt) and [`fuel-market-global.png`](wwwroot/images/screenshots/fuel-market-global.png.txt) captures, then refresh [`dashboard.png`](wwwroot/images/screenshots/dashboard.png.txt) and [`invoices.png`](wwwroot/images/screenshots/invoices.png.txt) for the latest UI.
 
 <table>
   <tr>
@@ -115,6 +109,17 @@ Pending captures are tracked with `.png.txt` markers. Add real [`fuel-market-leb
       <strong>Activation</strong>
     </td>
   </tr>
+  <tr>
+    <td align="center" width="33%">
+      <img src="wwwroot/images/screenshots/fuel-market-lebanon.png" alt="Fuel market — Lebanon" /><br/>
+      <strong>Fuel market — Lebanon</strong>
+    </td>
+    <td align="center" width="33%">
+      <img src="wwwroot/images/screenshots/fuel-market-global.png" alt="Fuel market — Global" /><br/>
+      <strong>Fuel market — Global</strong>
+    </td>
+    <td align="center" width="33%"></td>
+  </tr>
 </table>
 
 ---
@@ -133,39 +138,39 @@ Live fuel-market panels use the internet when available without affecting offlin
 
 What the product actually runs on and why:
 
-| Technology | Role in Shabakat |
-|---|---|
-| **.NET 10** | Single-project Windows desktop runtime (`net10.0-windows10.0.19041.0`) |
-| **.NET MAUI** | Native Windows shell, packaging, fonts, icons, splash, AppData paths |
-| **Blazor Hybrid** (`BlazorWebView`) | All screens are Razor components inside a WebView2 host — not native XAML pages |
-| **Tailwind CSS v4** | Entire UI styling via `Styles/app.css` → `wwwroot/app.css` (no scoped `.razor.css`) |
-| **Entity Framework Core 10** | ORM, migrations, change tracking |
-| **SQLite** | Local offline database (per-install AppData) |
-| **ClosedXML** | Subscriber Excel export |
-| **Microsoft.Extensions.Localization** | `en` / `ar` `.resx` strings |
-| **Microsoft.Extensions.Identity.Core** | PIN hashing for activation |
-| **Microsoft.Extensions.Http** | Cloud backup HTTP client |
-| **Chart.js** | Dashboard revenue and fuel-market charts (`wwwroot/js`) |
-| **HTML invoice templates** | `invoice.html` / `invoice.ar.html` + Noto Sans Arabic fonts |
-| **Microsoft Edge (headless)** | Billing-run multi-page PDF (`--print-to-pdf`) from the same HTML |
-| **WebView2 print** | Single-invoice print dialog (`shabakatPrintHtml`) |
-| **WiX Toolset** | Per-machine MSI installer |
-| **Cloudflare Workers + R2** | Optional upload-only JSON backups |
-| **Wrangler** | Deploy / preview the backup worker |
+| Technology                             | Role in Shabakat                                                                    |
+| -------------------------------------- | ----------------------------------------------------------------------------------- |
+| **.NET 10**                            | Single-project Windows desktop runtime (`net10.0-windows10.0.19041.0`)              |
+| **.NET MAUI**                          | Native Windows shell, packaging, fonts, icons, splash, AppData paths                |
+| **Blazor Hybrid** (`BlazorWebView`)    | All screens are Razor components inside a WebView2 host — not native XAML pages     |
+| **Tailwind CSS v4**                    | Entire UI styling via `Styles/app.css` → `wwwroot/app.css` (no scoped `.razor.css`) |
+| **Entity Framework Core 10**           | ORM, migrations, change tracking                                                    |
+| **SQLite**                             | Local offline database (per-install AppData)                                        |
+| **ClosedXML**                          | Subscriber Excel export                                                             |
+| **Microsoft.Extensions.Localization**  | `en` / `ar` `.resx` strings                                                         |
+| **Microsoft.Extensions.Identity.Core** | PIN hashing for activation                                                          |
+| **Microsoft.Extensions.Http**          | Cloud backup HTTP client                                                            |
+| **Chart.js**                           | Dashboard revenue and fuel-market charts (`wwwroot/js`)                             |
+| **HTML invoice templates**             | `invoice.html` / `invoice.ar.html` + Noto Sans Arabic fonts                         |
+| **Microsoft Edge (headless)**          | Billing-run multi-page PDF (`--print-to-pdf`) from the same HTML                    |
+| **WebView2 print**                     | Single-invoice print dialog (`shabakatPrintHtml`)                                   |
+| **WiX Toolset**                        | Per-machine MSI installer                                                           |
+| **Cloudflare Workers + R2**            | Optional upload-only JSON backups                                                   |
+| **Wrangler**                           | Deploy / preview the backup worker                                                  |
 
 ### NuGet & npm (main)
 
-| Package | Version / note |
-|---|---|
-| `Microsoft.EntityFrameworkCore` (+ Sqlite, Design, Tools) | 10.0.x |
-| `Microsoft.Maui.Controls` | `$(MauiVersion)` |
-| `Microsoft.AspNetCore.Components.WebView.Maui` | Blazor Hybrid host |
-| `ClosedXML` | 0.105.x |
-| `Microsoft.Extensions.Identity.Core` | PIN hashing |
-| `Microsoft.Extensions.Localization` | i18n |
-| `Microsoft.Maui.DevFlow.Agent` / `Blazor` | DEBUG UI inspection (preview) |
-| `tailwindcss` + `@tailwindcss/cli` | v4.3.x (npm) |
-| `wrangler` | Cloudflare worker deploy (npm) |
+| Package                                                   | Version / note                 |
+| --------------------------------------------------------- | ------------------------------ |
+| `Microsoft.EntityFrameworkCore` (+ Sqlite, Design, Tools) | 10.0.x                         |
+| `Microsoft.Maui.Controls`                                 | `$(MauiVersion)`               |
+| `Microsoft.AspNetCore.Components.WebView.Maui`            | Blazor Hybrid host             |
+| `ClosedXML`                                               | 0.105.x                        |
+| `Microsoft.Extensions.Identity.Core`                      | PIN hashing                    |
+| `Microsoft.Extensions.Localization`                       | i18n                           |
+| `Microsoft.Maui.DevFlow.Agent` / `Blazor`                 | DEBUG UI inspection (preview)  |
+| `tailwindcss` + `@tailwindcss/cli`                        | v4.3.x (npm)                   |
+| `wrangler`                                                | Cloudflare worker deploy (npm) |
 
 ### Architecture choices
 
@@ -198,10 +203,10 @@ What the product actually runs on and why:
 
 ### Network topology
 
-| Page | Capabilities |
-|---|---|
-| **Areas** | Create / edit / delete geographic areas; details sheet |
-| **Boxes** | Distribution boxes linked to areas |
+| Page                 | Capabilities                                                         |
+| -------------------- | -------------------------------------------------------------------- |
+| **Areas**            | Create / edit / delete geographic areas; details sheet               |
+| **Boxes**            | Distribution boxes linked to areas                                   |
 | **Ampere schedules** | Hour-tier supply schedules and schedule pricing for Ampere customers |
 
 ### Subscribers
@@ -251,18 +256,18 @@ What the product actually runs on and why:
 
 ### Settings
 
-| Setting | What it controls |
-|---|---|
-| **Language** | `en` / `ar` (RTL); drives UI + invoice templates |
-| **Pricing** | Price per amp, price per kWh, fixed charge, TVA; per customer-type rates |
-| **Due date** | Preferred payment due day shown in invoice lists, details, and printed output |
-| **Ampere schedule pricing** | Enable / disable schedule-based Ampere rates |
-| **Ampere proration** | Bill Ampere by days in month |
-| **Company logo** | Logo on printed invoices |
-| **Excel export** | Which subscriber columns to export |
-| **Backup** | Local JSON export / restore (replace-all); optional cloud upload to R2 |
-| **WhatsApp** | Offline / stub messaging settings |
-| **Theme** | Light / dark UI |
+| Setting                     | What it controls                                                              |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| **Language**                | `en` / `ar` (RTL); drives UI + invoice templates                              |
+| **Pricing**                 | Price per amp, price per kWh, fixed charge, TVA; per customer-type rates      |
+| **Due date**                | Preferred payment due day shown in invoice lists, details, and printed output |
+| **Ampere schedule pricing** | Enable / disable schedule-based Ampere rates                                  |
+| **Ampere proration**        | Bill Ampere by days in month                                                  |
+| **Company logo**            | Logo on printed invoices                                                      |
+| **Excel export**            | Which subscriber columns to export                                            |
+| **Backup**                  | Local JSON export / restore (replace-all); optional cloud upload to R2        |
+| **WhatsApp**                | Offline / stub messaging settings                                             |
+| **Theme**                   | Light / dark UI                                                               |
 
 ### Activation & security
 
@@ -273,31 +278,31 @@ What the product actually runs on and why:
 
 ### Plan types
 
-| Plan | How billing works |
-|---|---|
-| **Ampere** | Amperage subscription; optional schedule pricing and day proration |
-| **Kilowatt** | Metered consumption (current − previous reading); day 1–2 bulk uses previous month |
+| Plan              | How billing works                                                                                    |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| **Ampere**        | Amperage subscription; optional schedule pricing and day proration                                   |
+| **Kilowatt**      | Metered consumption (current − previous reading); day 1–2 bulk uses previous month                   |
 | **FixedKilowatt** | Prepaid-style energy credits from a payment amount; **not** in bulk create or billing-run PDF export |
 
 ---
 
 ## Tech stack
 
-| Layer | Choice |
-|---|---|
-| Runtime | .NET 10 · `net10.0-windows10.0.19041.0` only · Windows App SDK self-contained |
-| App shell | MAUI + Blazor Hybrid (WebView2) |
-| UI | Blazor Razor components · Tailwind CSS v4 · light/dark/system |
-| Data | EF Core 10 · SQLite · code-first migrations |
-| Charts | Chart.js |
-| Invoices | HTML templates → Edge headless PDF / WebView2 print |
-| Excel | ClosedXML |
-| Security | Identity password hasher (PIN) · license gate · Beirut timezone |
-| Installer | WiX MSI (`Installer/`, `pack-msi.ps1`) |
-| Cloud backup | Cloudflare Worker + R2 (`cloudflare/backup-worker/`) |
-| Market data | Yahoo Finance + IPT Group, cached locally in AppData |
-| Localization | `.resx` en + ar · RTL for Arabic |
-| CI | GitHub Actions Windows build (`.github/workflows/`) |
+| Layer        | Choice                                                                        |
+| ------------ | ----------------------------------------------------------------------------- |
+| Runtime      | .NET 10 · `net10.0-windows10.0.19041.0` only · Windows App SDK self-contained |
+| App shell    | MAUI + Blazor Hybrid (WebView2)                                               |
+| UI           | Blazor Razor components · Tailwind CSS v4 · light/dark/system                 |
+| Data         | EF Core 10 · SQLite · code-first migrations                                   |
+| Charts       | Chart.js                                                                      |
+| Invoices     | HTML templates → Edge headless PDF / WebView2 print                           |
+| Excel        | ClosedXML                                                                     |
+| Security     | Identity password hasher (PIN) · license gate · Beirut timezone               |
+| Installer    | WiX MSI (`Installer/`, `pack-msi.ps1`)                                        |
+| Cloud backup | Cloudflare Worker + R2 (`cloudflare/backup-worker/`)                          |
+| Market data  | Yahoo Finance + IPT Group, cached locally in AppData                          |
+| Localization | `.resx` en + ar · RTL for Arabic                                              |
+| CI           | GitHub Actions Windows build (`.github/workflows/`)                           |
 
 ---
 
@@ -324,14 +329,14 @@ Layers: **Domain** ← **Application** ← **Infrastructure** / **Components** (
 
 ## Requirements
 
-| Tool | Purpose |
-|---|---|
-| Windows 10 / 11 | Only supported platform |
-| .NET 10 SDK | Build and run |
-| MAUI workload `maui-windows` | Windows target |
-| Node.js / npm | Tailwind (`npm run tw:build`) |
-| Microsoft Edge | Headless billing-run PDF generation |
-| Internet connection | Optional; needed only for live fuel prices and cloud backup |
+| Tool                         | Purpose                                                     |
+| ---------------------------- | ----------------------------------------------------------- |
+| Windows 10 / 11              | Only supported platform                                     |
+| .NET 10 SDK                  | Build and run                                               |
+| MAUI workload `maui-windows` | Windows target                                              |
+| Node.js / npm                | Tailwind (`npm run tw:build`)                               |
+| Microsoft Edge               | Headless billing-run PDF generation                         |
+| Internet connection          | Optional; needed only for live fuel prices and cloud backup |
 
 ---
 
@@ -366,10 +371,10 @@ Output: `Installer\bin\Release\Shabakat.msi`
 
 Bump these together (details in [`docs/release.md`](docs/release.md)):
 
-| Place | Property |
-|---|---|
-| `Shabakat.csproj` | `ApplicationDisplayVersion`, `ApplicationVersion` |
-| `Installer/Package.wxs` | `Package Version` |
+| Place                   | Property                                          |
+| ----------------------- | ------------------------------------------------- |
+| `Shabakat.csproj`       | `ApplicationDisplayVersion`, `ApplicationVersion` |
+| `Installer/Package.wxs` | `Package Version`                                 |
 
 Installs per-machine to `C:\Program Files\Shabakat`. SQLite, license, and logos live under the user’s AppData.
 
@@ -377,9 +382,9 @@ Installs per-machine to `C:\Program Files\Shabakat`. SQLite, license, and logos 
 
 ## Localization
 
-| Language | Resource file |
-|---|---|
-| English | [`Resources/Localization/SharedResource.resx`](Resources/Localization/SharedResource.resx) |
+| Language     | Resource file                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------ |
+| English      | [`Resources/Localization/SharedResource.resx`](Resources/Localization/SharedResource.resx)       |
 | Arabic (RTL) | [`Resources/Localization/SharedResource.ar.resx`](Resources/Localization/SharedResource.ar.resx) |
 
 Preference `Language` is `en` or `ar`. Invoice print picks `invoice.html` or `invoice.ar.html` accordingly.
@@ -388,13 +393,13 @@ Preference `Language` is `en` or `ar`. Invoice print picks `invoice.html` or `in
 
 ## Documentation
 
-| Doc | Topic |
-|---|---|
-| [`docs/billing-run-invoices.md`](docs/billing-run-invoices.md) | Bulk create + billing-run PDF (incl. SaaS port notes) |
-| [`docs/backup.md`](docs/backup.md) | JSON backup schema, restore, cloud upload |
-| [`docs/market-data.md`](docs/market-data.md) | Fuel-market sources, caching, and connectivity behavior |
-| [`docs/release.md`](docs/release.md) | MSI versioning and packaging |
-| [`cloudflare/backup-worker/README.md`](cloudflare/backup-worker/README.md) | R2 backup worker |
+| Doc                                                                        | Topic                                                   |
+| -------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [`docs/billing-run-invoices.md`](docs/billing-run-invoices.md)             | Bulk create + billing-run PDF (incl. SaaS port notes)   |
+| [`docs/backup.md`](docs/backup.md)                                         | JSON backup schema, restore, cloud upload               |
+| [`docs/market-data.md`](docs/market-data.md)                               | Fuel-market sources, caching, and connectivity behavior |
+| [`docs/release.md`](docs/release.md)                                       | MSI versioning and packaging                            |
+| [`cloudflare/backup-worker/README.md`](cloudflare/backup-worker/README.md) | R2 backup worker                                        |
 
 ---
 
