@@ -155,10 +155,21 @@ public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepo
         if (boxId.HasValue)
             query = query.Where(i => i.Customer != null && i.Customer.BoxId == boxId.Value);
 
-        return await query
-            .OrderBy(i => i.IssueDate)
-            .ThenBy(i => i.InvoiceNumber)
-            .ToListAsync();
+        IOrderedQueryable<Invoice> ordered = !areaId.HasValue
+            ? query
+                .OrderBy(i => i.Customer.AreaId == null)
+                .ThenBy(i => i.Customer.Area!.Name)
+                .ThenBy(i => i.Customer.BoxId == null)
+                .ThenBy(i => i.Customer.DistributionBox!.Name)
+                .ThenBy(i => i.InvoiceNumber)
+            : !boxId.HasValue
+                ? query
+                    .OrderBy(i => i.Customer.BoxId == null)
+                    .ThenBy(i => i.Customer.DistributionBox!.Name)
+                    .ThenBy(i => i.InvoiceNumber)
+                : query.OrderBy(i => i.InvoiceNumber);
+
+        return await ordered.ToListAsync();
     }
 
     public async Task<bool> ExistsForCustomerInPeriodAsync(

@@ -108,17 +108,6 @@
             font-weight: 700;
         }
 
-        .stub-pair {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1mm;
-            margin-bottom: 1mm;
-        }
-
-        .stub-pair .stub-field {
-            margin-bottom: 0;
-        }
-
         .stub-divider {
             border: none;
             border-top: 1px solid var(--border-light);
@@ -221,17 +210,6 @@
         .field span {
             font-weight: 500;
             font-size: 8.5pt;
-        }
-
-        .field-pair {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.6mm 3mm;
-            margin-bottom: 0.6mm;
-        }
-
-        .field-pair .field {
-            margin-bottom: 0;
         }
 
         .billing-section .section-title {
@@ -442,6 +420,7 @@
                                         </thead>
                                         <tbody>
                                             {{CONSUMPTION_ROW}}
+                                            {{FIXED_METER_CHARGE_ROW}}
                                             <tr>
                                                 <td>الرسوم الثابتة (صيانة)</td>
                                                 <td>{{FIXED_CHARGE}}</td>

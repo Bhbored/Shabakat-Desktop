@@ -42,14 +42,16 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
             ? string.Empty
             : $"""<div class="field"><label>{phoneLabel}</label><span>{Escape(m.CustomerPhone)}</span></div>""";
 
-        var customerAreaBox = BuildPair("field-pair", "field", areaLabel, boxLabel, m.AreaName, m.BoxName);
-        var stubAreaBox = BuildPair("stub-pair", "stub-field", areaLabel, boxLabel, m.AreaName, m.BoxName);
+        var customerAreaBox = BuildLocationField("field", areaLabel, boxLabel, m.AreaName, m.BoxName);
+        var stubAreaBox = BuildLocationField("stub-field", areaLabel, boxLabel, m.AreaName, m.BoxName);
 
         var customerAddress = string.IsNullOrWhiteSpace(m.CustomerAddress)
             ? string.Empty
             : $"""<div class="field"><label>{addressLabel}</label><span>{Escape(m.CustomerAddress)}</span></div>""";
 
-        var planType = LocalizePlanType(m.PlanType, isArabic);
+        var planType = m.IsKilowattPlan
+            ? (isArabic ? "أمبير" : "Ampere")
+            : LocalizePlanType(m.PlanType, isArabic);
         var planUnit = ResolvePlanUnit(m, isArabic);
 
         var showMeterReadings = m.IsKilowattPlan || m.IsFixedKilowattPlan;
@@ -59,6 +61,9 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
             : string.Empty;
 
         var consumptionRow = BuildConsumptionRow(m, isArabic);
+        var fixedMeterChargeRow = m.IsKilowattPlan || m.IsFixedKilowattPlan
+            ? BuildFixedMeterChargeRow(m, isArabic)
+            : string.Empty;
         var tvaRows = BuildTvaRows(m, isArabic);
         var isAmperePlan = m is { IsKilowattPlan: false, IsFixedKilowattPlan: false };
         var stubUnitPriceHtml = isAmperePlan
@@ -88,6 +93,7 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
             ["{{STUB_UNIT_PRICE_HTML}}"] = stubUnitPriceHtml,
             ["{{READINGS_SECTION}}"] = readingsSection,
             ["{{CONSUMPTION_ROW}}"] = consumptionRow,
+            ["{{FIXED_METER_CHARGE_ROW}}"] = fixedMeterChargeRow,
             ["{{FIXED_CHARGE}}"] = Money(m.FixedCharge),
             ["{{TVA_ROWS}}"] = tvaRows,
             ["{{TOTAL_AMOUNT}}"] = Money(m.TotalAmount),
@@ -113,39 +119,29 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
     private static string ResolvePlanUnit(InvoicePrintModel m, bool isArabic)
     {
         if (isArabic)
-        {
-            if (m.IsFixedKilowattPlan) return "كيلوواط مسبق الدفع";
-            if (m.IsKilowattPlan) return "حد كيلوواط";
-            return "أمبير";
-        }
+            return m.IsFixedKilowattPlan ? "كيلوواط مسبق الدفع" : "أمبير";
 
-        if (m.IsFixedKilowattPlan) return "kWh prepaid";
-        if (m.IsKilowattPlan) return "kWh limit";
-        return "Amperes";
+        return m.IsFixedKilowattPlan ? "kWh prepaid" : "Amperes";
     }
 
     private static string BuildStubField(string label, string value)
         => $"""<div class="stub-field"><label>{Escape(label)}</label><span>{value}</span></div>""";
 
-    private static string BuildPair(
-        string pairClass,
+    private static string BuildLocationField(
         string fieldClass,
         string areaLabel,
         string boxLabel,
         string? areaName,
         string? boxName)
     {
-        var areaHtml = string.IsNullOrWhiteSpace(areaName)
-            ? string.Empty
-            : $"""<div class="{fieldClass}"><label>{areaLabel}</label><span>{Escape(areaName)}</span></div>""";
-        var boxHtml = string.IsNullOrWhiteSpace(boxName)
-            ? string.Empty
-            : $"""<div class="{fieldClass}"><label>{boxLabel}</label><span>{Escape(boxName)}</span></div>""";
-
-        if (areaHtml.Length == 0 && boxHtml.Length == 0)
+        var hasBox = !string.IsNullOrWhiteSpace(boxName);
+        var hasArea = !string.IsNullOrWhiteSpace(areaName);
+        if (!hasBox && !hasArea)
             return string.Empty;
 
-        return $"""<div class="{pairClass}">{areaHtml}{boxHtml}</div>""";
+        var label = hasBox ? boxLabel : areaLabel;
+        var value = hasBox ? boxName : areaName;
+        return $"""<div class="{fieldClass}"><label>{label}</label><span>{Escape(value)}</span></div>""";
     }
 
     private static string BuildReadingsSection(InvoicePrintModel m, bool isArabic)
@@ -212,6 +208,17 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
                 <tr>
                   <td>{subscriptionLabel} ({FormatDecimal(m.PlanValue)} {ampereUnit} × {Money(m.UnitPrice)})</td>
                   <td>{Money(m.ConsumptionCost)}</td>
+                </tr>
+                """;
+    }
+
+    private static string BuildFixedMeterChargeRow(InvoicePrintModel m, bool isArabic)
+    {
+        var label = isArabic ? "رسوم العداد الثابتة" : "Fixed meter charge";
+        return $"""
+                <tr>
+                  <td>{label}</td>
+                  <td>{Money(m.PlanValue)}</td>
                 </tr>
                 """;
     }
