@@ -11,6 +11,7 @@ public enum InvoiceDueTimingFilter
 
 public record InvoiceFilterRequest(
     Guid? CustomerId = null,
+    PlanType? PlanType = null,
     InvoiceStatus? InvoiceStatus = null,
     DateOnly? ConsumptionStartFrom = null,
     DateOnly? ConsumptionStartTo = null,

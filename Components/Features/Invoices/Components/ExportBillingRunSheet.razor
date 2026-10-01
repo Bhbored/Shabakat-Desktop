@@ -59,31 +59,66 @@
                     <div class="min-h-[26rem] space-y-4">
                         <div>
                             <p class="text-sm font-medium">@L["Invoices.ExportScope"]</p>
-                            <p class="mt-1 text-xs leading-relaxed text-muted-foreground">@L["Invoices.ExportScopeHint"]</p>
+                            <p class="mt-1 text-xs leading-relaxed text-muted-foreground">@ScopeHint</p>
                         </div>
 
                         <div class="rounded-xl border border-border bg-muted/30 px-3 py-2.5 text-sm text-muted-foreground">
                             @SelectedMonthLabel
                         </div>
 
-                        <div>
-                            <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Common.Area"]</label>
-                            <AreaSearchSelect Value="@SelectedAreaId"
-                                              ValueChanged="SelectAreaAsync"
-                                              AllowEmpty="true"
-                                              EmptyLabel="@L["Filter.AllAreas"]" />
+                        <div class="grid grid-cols-2 gap-1 rounded-xl border border-border bg-muted/40 p-1"
+                             role="tablist"
+                             aria-label="@L["Invoices.ExportScope"]">
+                            <button type="button"
+                                    role="tab"
+                                    aria-selected="@(ScopeMode == ExportScopeMode.Area)"
+                                    class="rounded-lg px-3 py-2 text-sm font-medium transition-colors @(ScopeMode == ExportScopeMode.Area ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")"
+                                    @onclick="() => SetScopeModeAsync(ExportScopeMode.Area)">
+                                @L["Invoices.ExportByArea"]
+                            </button>
+                            <button type="button"
+                                    role="tab"
+                                    aria-selected="@(ScopeMode == ExportScopeMode.PlanType)"
+                                    class="rounded-lg px-3 py-2 text-sm font-medium transition-colors @(ScopeMode == ExportScopeMode.PlanType ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")"
+                                    @onclick="() => SetScopeModeAsync(ExportScopeMode.PlanType)">
+                                @L["Invoices.ExportByPlanType"]
+                            </button>
                         </div>
 
-                        @if (!string.IsNullOrWhiteSpace(SelectedAreaId))
+                        @if (ScopeMode == ExportScopeMode.Area)
                         {
                             <div>
-                                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Field.DistributionBox"]</label>
-                                <BoxSearchSelect @key="SelectedAreaId"
-                                                 Value="@SelectedBoxId"
-                                                 ValueChanged="SelectBoxAsync"
-                                                 AreaId="@SelectedAreaId"
-                                                 AllowEmpty="true"
-                                                 EmptyLabel="@L["Filter.AllBoxes"]" />
+                                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Common.Area"]</label>
+                                <AreaSearchSelect Value="@SelectedAreaId"
+                                                  ValueChanged="SelectAreaAsync"
+                                                  AllowEmpty="true"
+                                                  EmptyLabel="@L["Filter.AllAreas"]" />
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(SelectedAreaId))
+                            {
+                                <div>
+                                    <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Field.DistributionBox"]</label>
+                                    <BoxSearchSelect @key="SelectedAreaId"
+                                                     Value="@SelectedBoxId"
+                                                     ValueChanged="SelectBoxAsync"
+                                                     AreaId="@SelectedAreaId"
+                                                     AllowEmpty="true"
+                                                     EmptyLabel="@L["Filter.AllBoxes"]" />
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div>
+                                <label class="mb-1.5 block text-xs font-medium text-muted-foreground">@L["Field.PlanType"]</label>
+                                <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground outline-none focus:border-primary"
+                                        value="@SelectedPlanType"
+                                        @onchange="OnPlanTypeChanged">
+                                    <option value="">@L["Invoices.BulkAllPlans"]</option>
+                                    <option value="@PlanType.Ampere">@L["Invoices.AmpereOnly"]</option>
+                                    <option value="@PlanType.Kilowatt">@L["Invoices.KilowattOnly"]</option>
+                                </select>
                             </div>
                         }
                     </div>
@@ -126,12 +161,20 @@
     [Parameter] public double Progress { get; set; }
     [Parameter] public string SelectedKey { get; set; } = "";
     [Parameter] public EventCallback<string> SelectedKeyChanged { get; set; }
+    [Parameter] public string ScopeMode { get; set; } = ExportScopeMode.Area;
+    [Parameter] public EventCallback<string> ScopeModeChanged { get; set; }
     [Parameter] public string SelectedAreaId { get; set; } = "";
     [Parameter] public EventCallback<string> SelectedAreaIdChanged { get; set; }
     [Parameter] public string SelectedBoxId { get; set; } = "";
     [Parameter] public EventCallback<string> SelectedBoxIdChanged { get; set; }
+    [Parameter] public string SelectedPlanType { get; set; } = "";
+    [Parameter] public EventCallback<string> SelectedPlanTypeChanged { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnExport { get; set; }
+
+    private string ScopeHint => ScopeMode == ExportScopeMode.PlanType
+        ? L["Invoices.ExportScopeHintPlan"].Value
+        : L["Invoices.ExportScopeHint"].Value;
 
     protected override void OnInitialized()
     {
@@ -201,6 +244,37 @@
         return OnExport.InvokeAsync();
     }
 
+    private async Task SetScopeModeAsync(string mode)
+    {
+        if (ScopeMode == mode)
+            return;
+
+        ScopeMode = mode;
+        await ScopeModeChanged.InvokeAsync(mode);
+
+        if (mode == ExportScopeMode.Area)
+        {
+            if (string.IsNullOrWhiteSpace(SelectedPlanType))
+                return;
+
+            SelectedPlanType = "";
+            await SelectedPlanTypeChanged.InvokeAsync(SelectedPlanType);
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(SelectedAreaId))
+        {
+            SelectedAreaId = "";
+            await SelectedAreaIdChanged.InvokeAsync(SelectedAreaId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(SelectedBoxId))
+        {
+            SelectedBoxId = "";
+            await SelectedBoxIdChanged.InvokeAsync(SelectedBoxId);
+        }
+    }
+
     private async Task SelectAreaAsync(string value)
     {
         SelectedAreaId = value;
@@ -219,6 +293,12 @@
         await SelectedBoxIdChanged.InvokeAsync(value);
     }
 
+    private async Task OnPlanTypeChanged(ChangeEventArgs e)
+    {
+        SelectedPlanType = e.Value?.ToString() ?? "";
+        await SelectedPlanTypeChanged.InvokeAsync(SelectedPlanType);
+    }
+
     private void OnCultureChanged() => _ = InvokeAsync(() =>
     {
         RebuildOptions();
@@ -235,5 +315,11 @@
     {
         Month,
         Scope
+    }
+
+    public static class ExportScopeMode
+    {
+        public const string Area = "area";
+        public const string PlanType = "plan";
     }
 }

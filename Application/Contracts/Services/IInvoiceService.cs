@@ -27,5 +27,6 @@ public interface IInvoiceService
         string destinationPath,
         Guid? areaId = null,
         Guid? boxId = null,
+        PlanType? planType = null,
         CancellationToken cancellationToken = default);
 }

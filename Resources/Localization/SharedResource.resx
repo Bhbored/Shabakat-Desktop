@@ -857,6 +857,15 @@
   <data name="Invoices.ExportScopeHint" xml:space="preserve">
     <value>Export every area, or narrow the PDF to one area and one of its boxes.</value>
   </data>
+  <data name="Invoices.ExportScopeHintPlan" xml:space="preserve">
+    <value>Export Ampere and Kilowatt together, or narrow the PDF to one plan type. Fixed Kilowatt stays excluded.</value>
+  </data>
+  <data name="Invoices.ExportByArea" xml:space="preserve">
+    <value>By area</value>
+  </data>
+  <data name="Invoices.ExportByPlanType" xml:space="preserve">
+    <value>By plan type</value>
+  </data>
   <data name="Invoices.ExportContinue" xml:space="preserve">
     <value>Continue</value>
   </data>

@@ -38,6 +38,18 @@
                     </div>
 
                     <label class="block space-y-1.5">
+                        <span class="text-sm font-medium text-foreground">@L["Field.PlanType"]</span>
+                        <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+                                value="@_draftPlan"
+                                @onchange="OnDraftPlanChanged">
+                            <option value="">@L["Filter.AllPlanTypes"]</option>
+                            <option value="@PlanType.Ampere">@L["PlanType.Ampere"]</option>
+                            <option value="@PlanType.Kilowatt">@L["PlanType.Kilowatt"]</option>
+                            <option value="@PlanType.FixedKilowatt">@L["PlanType.FixedKilowatt"]</option>
+                        </select>
+                    </label>
+
+                    <label class="block space-y-1.5">
                         <span class="text-sm font-medium text-foreground">@L["Common.Status"]</span>
                         <select class="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
                                 value="@_draftStatus"
@@ -168,6 +180,20 @@
     {
         <div class="flex flex-wrap items-center gap-2">
             <span class="text-sm text-muted-foreground">@L["Filter.Active"]:</span>
+            @if (!string.IsNullOrWhiteSpace(PlanFilter))
+            {
+                var planChip = $"{L["Field.PlanType"]}: {PlanLabel(PlanFilter)}";
+                <span class="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-sm text-foreground">
+                    @planChip
+                    <button type="button"
+                            class="rounded-full p-0.5 hover:bg-primary/15"
+                            aria-label="@L["Filter.Remove", planChip]"
+                            @onclick="RemovePlanAsync"
+                            @onclick:stopPropagation="true">
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                </span>
+            }
             @if (!string.IsNullOrWhiteSpace(DueTimingFilter))
             {
                 var timingChip = $"{L["Filter.PaymentTiming"]}: {TimingLabel(DueTimingFilter)}";
@@ -240,6 +266,8 @@
 @code {
     [Parameter] public string CustomerFilter { get; set; } = "";
     [Parameter] public EventCallback<string> CustomerFilterChanged { get; set; }
+    [Parameter] public string PlanFilter { get; set; } = "";
+    [Parameter] public EventCallback<string> PlanFilterChanged { get; set; }
     [Parameter] public string StatusFilter { get; set; } = "";
     [Parameter] public EventCallback<string> StatusFilterChanged { get; set; }
     [Parameter] public string DueTimingFilter { get; set; } = "";
@@ -257,13 +285,15 @@
 
     private bool _filtersOpen;
     private bool _exportMenuOpen;
+    private string _draftPlan = "";
     private string _draftStatus = "";
     private string _draftDueTiming = "";
     private DateTime? _draftDateFrom;
     private DateTime? _draftDateTo;
 
     private int ActiveFilterCount =>
-        (string.IsNullOrWhiteSpace(StatusFilter) ? 0 : 1)
+        (string.IsNullOrWhiteSpace(PlanFilter) ? 0 : 1)
+        + (string.IsNullOrWhiteSpace(StatusFilter) ? 0 : 1)
         + (string.IsNullOrWhiteSpace(DueTimingFilter) ? 0 : 1)
         + (DateFrom.HasValue ? 1 : 0)
         + (DateTo.HasValue ? 1 : 0);
@@ -276,6 +306,7 @@
             return;
         }
 
+        _draftPlan = PlanFilter;
         _draftStatus = StatusFilter;
         _draftDueTiming = DueTimingFilter;
         _draftDateFrom = DateFrom;
@@ -309,11 +340,15 @@
 
     private void ClearDrafts()
     {
+        _draftPlan = "";
         _draftStatus = "";
         _draftDueTiming = "";
         _draftDateFrom = null;
         _draftDateTo = null;
     }
+
+    private void OnDraftPlanChanged(ChangeEventArgs e) =>
+        _draftPlan = e.Value?.ToString() ?? "";
 
     private void OnDraftStatusChanged(ChangeEventArgs e)
     {
@@ -338,6 +373,7 @@
 
     private async Task ApplyFiltersAsync()
     {
+        await PlanFilterChanged.InvokeAsync(_draftPlan);
         await StatusFilterChanged.InvokeAsync(_draftStatus);
         await DueTimingFilterChanged.InvokeAsync(_draftDueTiming);
         await DateFromChanged.InvokeAsync(_draftDateFrom);
@@ -349,6 +385,12 @@
     private async Task OnCustomerSelected(string value)
     {
         await CustomerFilterChanged.InvokeAsync(value);
+        await OnFiltersChanged.InvokeAsync();
+    }
+
+    private async Task RemovePlanAsync()
+    {
+        await PlanFilterChanged.InvokeAsync("");
         await OnFiltersChanged.InvokeAsync();
     }
 
@@ -372,6 +414,7 @@
 
     private async Task ClearAppliedAsync()
     {
+        await PlanFilterChanged.InvokeAsync("");
         await StatusFilterChanged.InvokeAsync("");
         await DueTimingFilterChanged.InvokeAsync("");
         await DateFromChanged.InvokeAsync(null);
@@ -384,6 +427,14 @@
         await DueTimingFilterChanged.InvokeAsync("");
         await OnFiltersChanged.InvokeAsync();
     }
+
+    private string PlanLabel(string value) => value switch
+    {
+        nameof(PlanType.Ampere) => L["PlanType.Ampere"].Value,
+        nameof(PlanType.Kilowatt) => L["PlanType.Kilowatt"].Value,
+        nameof(PlanType.FixedKilowatt) => L["PlanType.FixedKilowatt"].Value,
+        _ => value
+    };
 
     private string StatusLabel(string status) => status switch
     {

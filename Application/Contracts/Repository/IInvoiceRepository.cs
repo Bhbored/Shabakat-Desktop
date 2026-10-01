@@ -1,5 +1,6 @@
 using Shabakat.Application.DTOs.Invoices;
 using Shabakat.Domain.Entities;
+using Shabakat.Domain.Enums;
 
 namespace Shabakat.Application.Contracts.Repository;
 
@@ -19,7 +20,8 @@ public interface IInvoiceRepository : IGenericRepository<Invoice>
         DateOnly previousMonthStart,
         DateOnly previousMonthEnd,
         Guid? areaId = null,
-        Guid? boxId = null);
+        Guid? boxId = null,
+        PlanType? planType = null);
     Task<bool> ExistsForCustomerInPeriodAsync(Guid customerId, DateOnly periodStart, DateOnly periodEnd);
     Task<Invoice?> GetByIdForUpdateAsync(Guid id);
 }

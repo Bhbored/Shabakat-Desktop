@@ -35,10 +35,15 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
 
         var phoneLabel = isArabic ? "الهاتف" : "Phone";
         var addressLabel = isArabic ? "العنوان" : "Address";
+        var areaLabel = isArabic ? "المنطقة" : "Area";
+        var boxLabel = isArabic ? "العلبة" : "Box";
 
         var customerPhone = string.IsNullOrWhiteSpace(m.CustomerPhone)
             ? string.Empty
             : $"""<div class="field"><label>{phoneLabel}</label><span>{Escape(m.CustomerPhone)}</span></div>""";
+
+        var customerAreaBox = BuildPair("field-pair", "field", areaLabel, boxLabel, m.AreaName, m.BoxName);
+        var stubAreaBox = BuildPair("stub-pair", "stub-field", areaLabel, boxLabel, m.AreaName, m.BoxName);
 
         var customerAddress = string.IsNullOrWhiteSpace(m.CustomerAddress)
             ? string.Empty
@@ -72,7 +77,9 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
             ["{{CREATED_DATE}}"] = Escape(m.CreatedDate),
             ["{{CUSTOMER_NAME}}"] = Escape(m.CustomerName),
             ["{{CUSTOMER_PHONE_HTML}}"] = customerPhone,
+            ["{{CUSTOMER_AREA_BOX_HTML}}"] = customerAreaBox,
             ["{{CUSTOMER_ADDRESS_HTML}}"] = customerAddress,
+            ["{{STUB_AREA_BOX_HTML}}"] = stubAreaBox,
             ["{{CABLE_NAME}}"] = Escape(cableName),
             ["{{PLAN_TYPE}}"] = Escape(planType),
             ["{{PLAN_VALUE}}"] = FormatDecimal(m.PlanValue),
@@ -119,6 +126,27 @@ public sealed class InvoiceTemplateRenderer : IInvoiceTemplateRenderer
 
     private static string BuildStubField(string label, string value)
         => $"""<div class="stub-field"><label>{Escape(label)}</label><span>{value}</span></div>""";
+
+    private static string BuildPair(
+        string pairClass,
+        string fieldClass,
+        string areaLabel,
+        string boxLabel,
+        string? areaName,
+        string? boxName)
+    {
+        var areaHtml = string.IsNullOrWhiteSpace(areaName)
+            ? string.Empty
+            : $"""<div class="{fieldClass}"><label>{areaLabel}</label><span>{Escape(areaName)}</span></div>""";
+        var boxHtml = string.IsNullOrWhiteSpace(boxName)
+            ? string.Empty
+            : $"""<div class="{fieldClass}"><label>{boxLabel}</label><span>{Escape(boxName)}</span></div>""";
+
+        if (areaHtml.Length == 0 && boxHtml.Length == 0)
+            return string.Empty;
+
+        return $"""<div class="{pairClass}">{areaHtml}{boxHtml}</div>""";
+    }
 
     private static string BuildReadingsSection(InvoicePrintModel m, bool isArabic)
     {

@@ -857,6 +857,15 @@
   <data name="Invoices.ExportScopeHint" xml:space="preserve">
     <value>صدّر كل المناطق، أو حدّد ملف PDF بمنطقة واحدة وأحد صناديقها.</value>
   </data>
+  <data name="Invoices.ExportScopeHintPlan" xml:space="preserve">
+    <value>صدّر الأمبير والكيلوواط معاً، أو حدّد ملف PDF بنوع خطة واحد. كيلوواط ثابت يبقى مستبعداً.</value>
+  </data>
+  <data name="Invoices.ExportByArea" xml:space="preserve">
+    <value>حسب المنطقة</value>
+  </data>
+  <data name="Invoices.ExportByPlanType" xml:space="preserve">
+    <value>حسب نوع الخطة</value>
+  </data>
   <data name="Invoices.ExportContinue" xml:space="preserve">
     <value>متابعة</value>
   </data>

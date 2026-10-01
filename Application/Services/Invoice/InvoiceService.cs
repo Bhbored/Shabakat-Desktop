@@ -876,10 +876,14 @@ public sealed class InvoiceService : IInvoiceService
         string destinationPath,
         Guid? areaId = null,
         Guid? boxId = null,
+        PlanType? planType = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (month is < 1 or > 12)
             throw new DomainException("Error.MonthRange");
+
+        if (planType is PlanType.FixedKilowatt)
+            throw new DomainException("Error.BulkPlanNotSupported");
 
         var selectedStart = new DateOnly(year, month, 1);
         var selectedEnd = selectedStart.AddMonths(1).AddDays(-1);
@@ -887,7 +891,7 @@ public sealed class InvoiceService : IInvoiceService
         var previousEnd = selectedStart.AddDays(-1);
 
         var invoices = await _invoiceRepository.GetForIssueDateRangesAsync(
-            selectedStart, selectedEnd, previousStart, previousEnd, areaId, boxId);
+            selectedStart, selectedEnd, previousStart, previousEnd, areaId, boxId, planType);
         cancellationToken.ThrowIfCancellationRequested();
 
         if (invoices.Count == 0)
@@ -914,12 +918,13 @@ public sealed class InvoiceService : IInvoiceService
         var combinedHtml = InvoicePdfBuilder.CombineHtmlDocuments(htmlPages);
         await InvoicePdfBuilder.WriteHtmlAsPdfAsync(combinedHtml, destinationPath, cancellationToken);
         _logger.LogInformation(
-            "Exported {Count} invoices for billing run {Year}-{Month:00}, area {AreaId}, box {BoxId} to {Path}",
+            "Exported {Count} invoices for billing run {Year}-{Month:00}, area {AreaId}, box {BoxId}, plan {PlanType} to {Path}",
             htmlPages.Count,
             year,
             month,
             areaId,
             boxId,
+            planType,
             destinationPath);
         yield return 1d;
     }
@@ -1015,6 +1020,8 @@ public sealed class InvoiceService : IInvoiceService
             CustomerName: customer.Name,
             CustomerPhone: customer.Phone,
             CustomerAddress: customer.Address,
+            AreaName: customer.Area?.Name,
+            BoxName: customer.DistributionBox?.Name,
             CableName: customer.CableName,
             PlanType: customer.Plan.ToString(),
             PlanValue: customer.PlanValue,

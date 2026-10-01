@@ -7,6 +7,8 @@ public sealed record InvoicePrintModel(
     string CustomerName,
     string? CustomerPhone,
     string? CustomerAddress,
+    string? AreaName,
+    string? BoxName,
     string? CableName,
     string PlanType,
     decimal PlanValue,

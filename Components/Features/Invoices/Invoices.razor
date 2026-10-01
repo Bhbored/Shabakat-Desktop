@@ -10,12 +10,14 @@
 
 <div class="space-y-4" @onclick="CloseMenu">
     <InvoicesToolbar CustomerFilter="@_customerFilter"
+                     PlanFilter="@_planFilter"
                      StatusFilter="@_statusFilter"
                      DueTimingFilter="@_dueTimingFilter"
                      DateFrom="_dateFrom"
                      DateTo="_dateTo"
                      TotalCount="_totalCount"
                      CustomerFilterChanged="OnCustomerFilterChanged"
+                     PlanFilterChanged="OnPlanFilterChanged"
                      StatusFilterChanged="OnStatusFilterChanged"
                      DueTimingFilterChanged="OnDueTimingFilterChanged"
                      DateFromChanged="OnDateFromChanged"
@@ -67,10 +69,14 @@
                        Progress="_exportProgress"
                        SelectedKey="@_exportMonthKey"
                        SelectedKeyChanged="OnExportMonthKeyChanged"
+                       ScopeMode="@_exportScopeMode"
+                       ScopeModeChanged="OnExportScopeModeChanged"
                        SelectedAreaId="@_exportAreaId"
                        SelectedAreaIdChanged="OnExportAreaIdChanged"
                        SelectedBoxId="@_exportBoxId"
                        SelectedBoxIdChanged="OnExportBoxIdChanged"
+                       SelectedPlanType="@_exportPlanType"
+                       SelectedPlanTypeChanged="OnExportPlanTypeChanged"
                        OnClose="CloseExportMonth"
                        OnExport="ExportBillingRunAsync" />
 
@@ -113,10 +119,13 @@
     private Guid? _openMenuId;
     private double _exportProgress;
     private string _exportMonthKey = "";
+    private string _exportScopeMode = ExportBillingRunSheet.ExportScopeMode.Area;
     private string _exportAreaId = "";
     private string _exportBoxId = "";
+    private string _exportPlanType = "";
 
     private string _customerFilter = "";
+    private string _planFilter = "";
     private string _statusFilter = "";
     private string _dueTimingFilter = "";
     private DateTime? _dateFrom;
@@ -150,6 +159,7 @@
         _openMenuId = null;
 
         Guid? customerId = Guid.TryParse(_customerFilter, out var c) ? c : null;
+        PlanType? plan = Enum.TryParse<PlanType>(_planFilter, out var p) ? p : null;
         InvoiceStatus? status = Enum.TryParse<InvoiceStatus>(_statusFilter, out var s) ? s : null;
         InvoiceDueTimingFilter? dueTiming = Enum.TryParse<InvoiceDueTimingFilter>(_dueTimingFilter, out var d) ? d : null;
         DateOnly? from = _dateFrom.HasValue ? DateOnly.FromDateTime(_dateFrom.Value) : null;
@@ -157,6 +167,7 @@
 
         var filter = new InvoiceFilterRequest(
             CustomerId: customerId,
+            PlanType: plan,
             InvoiceStatus: status,
             ConsumptionStartFrom: from,
             ConsumptionStartTo: to,
@@ -189,6 +200,12 @@
     private Task OnCustomerFilterChanged(string value)
     {
         _customerFilter = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnPlanFilterChanged(string value)
+    {
+        _planFilter = value;
         return Task.CompletedTask;
     }
 
@@ -373,8 +390,10 @@
     {
         _openMenuId = null;
         _exportProgress = 0;
+        _exportScopeMode = ExportBillingRunSheet.ExportScopeMode.Area;
         _exportAreaId = "";
         _exportBoxId = "";
+        _exportPlanType = "";
         _showExportMonth = true;
     }
 
@@ -419,6 +438,12 @@
         return Task.CompletedTask;
     }
 
+    private Task OnExportScopeModeChanged(string value)
+    {
+        _exportScopeMode = value;
+        return Task.CompletedTask;
+    }
+
     private Task OnExportAreaIdChanged(string value)
     {
         _exportAreaId = value;
@@ -431,17 +456,31 @@
         return Task.CompletedTask;
     }
 
+    private Task OnExportPlanTypeChanged(string value)
+    {
+        _exportPlanType = value;
+        return Task.CompletedTask;
+    }
+
     private async Task ExportBillingRunAsync()
     {
         if (_exporting || !TryParseMonthKey(_exportMonthKey, out var year, out var month))
             return;
 
-        Guid? areaId = Guid.TryParse(_exportAreaId, out var parsedAreaId) ? parsedAreaId : null;
-        Guid? boxId = Guid.TryParse(_exportBoxId, out var parsedBoxId) ? parsedBoxId : null;
+        var byPlan = _exportScopeMode == ExportBillingRunSheet.ExportScopeMode.PlanType;
+        Guid? areaId = byPlan
+            ? null
+            : Guid.TryParse(_exportAreaId, out var parsedAreaId) ? parsedAreaId : null;
+        Guid? boxId = byPlan
+            ? null
+            : Guid.TryParse(_exportBoxId, out var parsedBoxId) ? parsedBoxId : null;
+        PlanType? planType = byPlan && Enum.TryParse<PlanType>(_exportPlanType, out var parsedPlan)
+            ? parsedPlan
+            : null;
 
         var fileName = await UiActions.RunAsync(
             Toast,
-            () => BuildBillingRunFileNameAsync(year, month, areaId, boxId));
+            () => BuildBillingRunFileNameAsync(year, month, areaId, boxId, planType));
         if (string.IsNullOrWhiteSpace(fileName))
             return;
 
@@ -454,7 +493,7 @@
         try
         {
             await foreach (var value in InvoiceService.ExportBillingRunPdfAsync(
-                               year, month, path, areaId, boxId))
+                               year, month, path, areaId, boxId, planType))
             {
                 _exportProgress = value;
                 await InvokeAsync(StateHasChanged);
@@ -493,7 +532,8 @@
         int year,
         int month,
         Guid? areaId,
-        Guid? boxId)
+        Guid? boxId,
+        PlanType? planType)
     {
         var suffixes = new List<string>();
 
@@ -508,6 +548,9 @@
             var box = await DistributionBoxService.GetByIdAsync(boxId.Value);
             suffixes.Add(FileNamePart(box.Name, "box"));
         }
+
+        if (planType.HasValue)
+            suffixes.Add(FileNamePart(planType.Value.ToString(), "plan"));
 
         var suffix = suffixes.Count == 0 ? "" : $"_{string.Join("_", suffixes)}";
         return $"shabakat-invoices-{year:0000}-{month:00}{suffix}.pdf";

@@ -26,6 +26,10 @@ public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepo
         => await _dbSet
             .Include(i => i.Customer)
                 .ThenInclude(c => c!.AmpereSchedule)
+            .Include(i => i.Customer)
+                .ThenInclude(c => c!.Area)
+            .Include(i => i.Customer)
+                .ThenInclude(c => c!.DistributionBox)
             .FirstOrDefaultAsync(i => i.Id == id);
 
     public async Task<(IEnumerable<Invoice> Items, int TotalCount)> GetAllPagedAsync(
@@ -39,6 +43,9 @@ public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepo
 
         if (filter.CustomerId.HasValue)
             query = query.Where(i => i.CustomerId == filter.CustomerId.Value);
+
+        if (filter.PlanType.HasValue)
+            query = query.Where(i => i.Customer.Plan == filter.PlanType.Value);
 
         if (filter.InvoiceStatus.HasValue)
             query = query.Where(i => i.InvoiceStatus == filter.InvoiceStatus.Value);
@@ -123,16 +130,22 @@ public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepo
         DateOnly previousMonthStart,
         DateOnly previousMonthEnd,
         Guid? areaId = null,
-        Guid? boxId = null)
+        Guid? boxId = null,
+        PlanType? planType = null)
     {
+        var includeAmpere = planType is null or PlanType.Ampere;
+        var includeKilowatt = planType is null or PlanType.Kilowatt;
+
         var query = _dbSet
             .AsNoTracking()
             .Include(i => i.Customer)
             .Where(i =>
-                (i.Customer.Plan == PlanType.Ampere
+                (includeAmpere
+                    && i.Customer.Plan == PlanType.Ampere
                     && i.IssueDate >= selectedMonthStart
                     && i.IssueDate <= selectedMonthEnd)
-                || (i.Customer.Plan == PlanType.Kilowatt
+                || (includeKilowatt
+                    && i.Customer.Plan == PlanType.Kilowatt
                     && i.IssueDate >= previousMonthStart
                     && i.IssueDate <= previousMonthEnd));
 
